@@ -232,25 +232,34 @@ import AddToCollection from "./vue/blob/AddToCollection.vue";
 window.AddToCollection = AddToCollection;
 
 import NodeImage from "./vue/node/NodeImage.vue";
+window.NodeImage = NodeImage;
 
 import NodeImageModal from "./vue/node/NodeImageModal.vue";
+window.NodeImageModal = NodeImageModal;
 
 import NodeQuote from "./vue/node/NodeQuote.vue";
+window.NodeQuote = NodeQuote;
 
 import NodeQuoteModal from "./vue/node/NodeQuoteModal.vue";
+window.NodeQuoteModal = NodeQuoteModal;
 
 import NodeNote from "./vue/node/NodeNote.vue";
+window.NodeNote = NodeNote;
 
 import NodeNoteModal from "./vue/node/NodeNoteModal.vue";
+window.NodeNoteModal = NodeNoteModal;
 
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
+window.NodeTodoList = NodeTodoList;
 
 import NoteModal from "./vue/common/NoteModal.vue";
 window.NoteModal = NoteModal;
 
 import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
+window.CollectionObjectList = CollectionObjectList;
 
 import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
+window.CollectionObjectListModal = CollectionObjectListModal;
 
 import IconButton from "./vue/common/IconButton.vue";
 window.IconButton = IconButton;

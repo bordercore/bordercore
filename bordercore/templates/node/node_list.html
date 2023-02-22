@@ -33,14 +33,14 @@
 
         <div class="me-2">
             <drop-down-menu>
-                <div slot="dropdown">
+                <template #dropdown>
                     <li>
                         <a class="dropdown-item" href="#" @click.prevent="onClickCreate">
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                             <span>Add Node</span>
                         </a>
                     </li>
-                </div>
+                </template>
             </drop-down-menu>
         </div>
 
@@ -91,18 +91,26 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-app",
-            methods: {
-                onClickCreate(evt) {
+        const app = createApp({
+            components: {
+                FontAwesomeIcon,
+                DropDownMenu,
+            },
+            setup() {
+                function onClickCreate(evt) {
                     const modal = new Modal("#modalAdd");
                     modal.show();
                     window.setTimeout(() => {
                         document.getElementById("id_name").focus();
                     }, 500);
-                },
+                };
+
+                return {
+                    onClickCreate,
+                };
             },
         });
+        app.mount("#vue-app");
 
     </script>
 

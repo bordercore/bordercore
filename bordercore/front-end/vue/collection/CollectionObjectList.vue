@@ -12,7 +12,7 @@
                     </div>
                     <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="onAddObject()">
                                         <span>
@@ -41,7 +41,7 @@
                                         Collection
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
                 </div>
@@ -54,46 +54,46 @@
                     <span v-else class="text-muted">No objects</span>
                 </div>
                 <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="objectList" draggable=".draggable" @change="onSort">
-                        <transition-group type="transition" class="w-100">
-                            <li v-for="object in limitedObjectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary draggable pe-0" :data-uuid="object.uuid">
+                    <draggable v-model="limitedObjectList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="uuid" @change="onSort">
+                        <template #item="{element}">
+                            <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable pe-0" :data-uuid="element.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
-                                    <div v-if="object.type === 'blob'" class="pe-2">
-                                        <img :src="object.cover_url" height="75" width="70">
+                                    <div v-if="element.type === 'blob'" class="pe-2">
+                                        <img :src="element.cover_url" height="75" width="70">
                                     </div>
-                                    <div v-else class="pe-2" v-html="object.favicon_url" />
+                                    <div v-else class="pe-2" v-html="element.favicon_url" />
 
                                     <div>
-                                        <a :href="object.url">{{ object.name }}</a>
+                                        <a :href="element.url">{{ element.name }}</a>
                                         <Transition name="fade" mode="out-in" @after-enter="onAfterEnter">
-                                            <div v-if="!object.noteIsEditable" class="node-object-note" @click="editNote(object)" v-html="getNote(object.note)" />
+                                            <div v-if="!element.noteIsEditable" class="node-object-note" @click="editNote(element)" v-html="getNote(element.note)" />
                                             <span v-else>
-                                                <input ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" @blur="updateNote(object, $event.target.value)" @keydown.enter="updateNote(object, $event.target.value)">
+                                                <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" @blur="updateNote(element, $event.target.value)" @keydown.enter="updateNote(element, $event.target.value)">
                                             </span>
                                         </Transition>
                                     </div>
 
                                     <drop-down-menu :show-on-hover="true">
-                                        <div slot="dropdown">
+                                        <template #dropdown>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="removeObject(object.uuid)">
+                                                <a class="dropdown-item" href="#" @click.prevent="removeObject(element.uuid)">
                                                     <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="editNote(object)">
-                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="object.note">Edit</span><span v-else>Add</span> Note
+                                                <a class="dropdown-item" href="#" @click.prevent="editNote(element)">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="element.note">Edit</span><span v-else>Add</span> Note
                                                 </a>
                                             </li>
-                                        </div>
+                                        </template>
                                     </drop-down-menu>
                                 </div>
                             </li>
-                            <div v-if="objectList.length == 0" v-cloak :key="1" class="text-muted">
-                                No objects
-                            </div>
-                        </transition-group>
+                        </template>
                     </draggable>
+                    <div v-if="objectList.length == 0" v-cloak :key="1" class="text-muted">
+                        No objects
+                    </div>
                 </ul>
             </template>
         </card>
@@ -102,9 +102,19 @@
 
 <script>
 
-    export default {
+    import Card from "/front-end/vue/common/Card.vue";
+    import draggable from "vuedraggable";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
+    export default {
         name: "CollectionObjectList",
+        components: {
+            Card,
+            draggable,
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
             nodeUuid: {
                 type: String,
@@ -138,6 +148,10 @@
                 type: String,
                 default: "",
             },
+            deleteCollectionUrl: {
+                type: String,
+                default: "",
+            },
         },
         data() {
             return {
@@ -150,8 +164,15 @@
             };
         },
         computed: {
-            limitedObjectList() {
-                return this.collectionObjectList.limit ? this.objectList.slice(0, this.collectionObjectList.limit) : this.objectList;
+            limitedObjectList: {
+                // We need to define a getter and setter since it needs to be
+                // writable by the draggable component.
+                get() {
+                    return this.collectionObjectList.limit ? this.objectList.slice(0, this.collectionObjectList.limit) : this.objectList;
+                },
+                set(newValue) {
+                    this.objectList = newValue;
+                },
             },
         },
         mounted() {
@@ -222,7 +243,8 @@
                         this.objectList = response.data.object_list;
                         // Let Vue know that each object's "noteIsEditable" property is reactive
                         for (const blob of this.objectList) {
-                            this.$set(blob, "noteIsEditable", false);
+                            blob.noteIsEditable = false;
+                            // this.$set(blob, "noteIsEditable", false);
                         }
                         this.currentObjectIndex = 0;
                         if (this.collectionObjectList.rotate !== null && this.collectionObjectList.rotate !== -1) {
@@ -263,7 +285,19 @@
                 );
             },
             onDeleteCollection() {
-                this.$emit("delete-collection", this.uuid, this.collectionObjectList.collection_type);
+                doPost(
+                    null,
+                    this.deleteCollectionUrl,
+                    {
+                        "node_uuid": this.nodeUuid,
+                        "collection_uuid": this.uuid,
+                        "collection_type": this.collectionObjectList.collection_type,
+                    },
+                    (response) => {
+                        this.$emit("updateLayout", response.data.layout);
+                    },
+                    "Collection deleted",
+                );
             },
             onSort(evt) {
                 const uuid = evt.moved.element.uuid;

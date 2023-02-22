@@ -11,7 +11,7 @@
                     </div>
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onRemoveImage()">
                                         <span>
@@ -20,7 +20,7 @@
                                         Remove image
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
                 </div>
@@ -34,10 +34,21 @@
 
 <script>
 
-    export default {
+    import Card from "/front-end/vue/common/Card.vue";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
-        name: "NodeImage",
+    export default {
+        components: {
+            Card,
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
+            nodeUuid: {
+                type: String,
+                default: "",
+            },
             imageUuid: {
                 type: String,
                 default: "",
@@ -50,14 +61,35 @@
                 type: String,
                 default: "",
             },
+            removeImageUrl: {
+                type: String,
+                default: "",
+            },
         },
-        methods: {
-            onClick() {
-                this.$emit("open-modal-note-image", this.imageUrl);
-            },
-            onRemoveImage() {
-                this.$emit("remove-image", this.imageUuid);
-            },
+        setup(props, ctx) {
+            function onClick() {
+                ctx.emit("open-modal-note-image", props.imageUrl);
+            };
+
+            function onRemoveImage() {
+                doPost(
+                    null,
+                    props.removeImageUrl,
+                    {
+                        "node_uuid": props.nodeUuid,
+                        "image_uuid": props.imageUuid,
+                    },
+                    (response) => {
+                        ctx.emit("updateLayout", response.data.layout);
+                    },
+                    "Image removed",
+                );
+            };
+
+            return {
+                onClick,
+                onRemoveImage,
+            };
         },
     };
 

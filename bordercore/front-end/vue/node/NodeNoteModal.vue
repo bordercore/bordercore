@@ -35,8 +35,6 @@
 <script>
 
     export default {
-
-        name: "NoteModal",
         data() {
             return {
                 action: "Update",

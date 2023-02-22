@@ -9,7 +9,7 @@
                     </div>
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onCreateTodo">
                                         <span>
@@ -26,7 +26,7 @@
                                         Remove Todo List
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
                 </div>
@@ -35,41 +35,41 @@
             <template #content>
                 <hr class="divider">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="todoList" draggable=".draggable" @change="handleSort">
-                        <transition-group type="transition" class="w-100">
-                            <li v-for="todo in todoList" v-cloak :key="todo.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary draggable pe-0" :data-uuid="todo.uuid">
+                    <draggable v-model="todoList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="todo.uuid" @change="handleSort">
+                        <template #item="{element}">
+                            <li v-cloak :key="element.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary draggable pe-0" :data-uuid="element.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div>
-                                        <a :href="todo.url">{{ todo.name }}</a>
-                                        <div v-if="todo.url" class="node-url">
-                                            <a :href="todo.url">Link</a>
+                                        <a :href="element.url">{{ element.name }}</a>
+                                        <div v-if="element.url" class="node-url">
+                                            <a :href="element.url">Link</a>
                                         </div>
-                                        <div v-if="todo.note" class="node-object-note">
-                                            {{ todo.note }}
+                                        <div v-if="element.note" class="node-object-note">
+                                            {{ element.note }}
                                         </div>
                                     </div>
 
                                     <drop-down-menu :show-on-hover="true">
-                                        <div slot="dropdown">
+                                        <template #dropdown>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="onUpdateTodo(todo)">
+                                                <a class="dropdown-item" href="#" @click.prevent="onUpdateTodo(element)">
                                                     <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="removeTodo(todo.uuid)">
+                                                <a class="dropdown-item" href="#" @click.prevent="removeTodo(element.uuid)">
                                                     <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                 </a>
                                             </li>
-                                        </div>
+                                        </template>
                                     </drop-down-menu>
                                 </div>
                             </li>
-                            <div v-if="todoList.length == 0" v-cloak :key="1" class="text-muted">
-                                No tasks
-                            </div>
-                        </transition-group>
+                        </template>
                     </draggable>
+                    <div v-if="todoList.length == 0" v-cloak :key="1" class="text-muted">
+                        No tasks
+                    </div>
                 </ul>
             </template>
         </card>
@@ -78,9 +78,18 @@
 
 <script>
 
-    export default {
+    import Card from "/front-end/vue/common/Card.vue";
+    import draggable from "vuedraggable";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
-        name: "NodeTodoList",
+    export default {
+        components: {
+            Card,
+            draggable,
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
             nodeUuid: {
                 type: String,
@@ -99,6 +108,10 @@
                 default: "",
             },
             sortNodeTodosUrl: {
+                type: String,
+                default: "",
+            },
+            deleteTodoListUrl: {
                 type: String,
                 default: "",
             },
@@ -154,7 +167,17 @@
                 }, 500);
             },
             onDeleteTodoList() {
-                this.$emit("delete-todo-list");
+                doPost(
+                    null,
+                    this.deleteTodoListUrl,
+                    {
+                        "node_uuid": this.nodeUuid,
+                    },
+                    (response) => {
+                        this.$emit("updateLayout", response.data.layout);
+                    },
+                    "Todo list deleted",
+                );
             },
             onUpdateTodo(todoInfo) {
                 this.$parent.$parent.$refs.updateTodo.setAction("Update");

@@ -6,116 +6,111 @@
 
 {% block title %} Node <span class="node-name">{{ node.name }}</span> {% endblock %}
 
-{% block nav %}
+{% block content %}
 
-    <div id="vue-nav" class="d-flex align-items-center mb-3">
-        <div class="flex-grow-1 me-auto align-self-center">
-            <ul class="breadcrumb mb-0 pt-0 pb-0">
-                <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
-                <li class="breadcrumb-item active" v-cloak>[[ $store.state.nodeName ]]</li>
-            </ul>
-        </div>
-        <Transition name="fade" v-cloak>
-            <div v-if="$store.state.editLayout" class="text-primary ms-auto me-5">
-                Edit Layout
-            </div>
-        </Transition>
-        <drop-down-menu
-            ref="dropDownMenu"
-            class="me-3"
-            v-cloak
-        >
-            <div slot="dropdown" class="mt-0">
-                <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onUpdateNode">
-                        <span v-cloak>
-                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Update node
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onAddCollection">
-                        <span v-cloak>
-                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Add collection
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onAddNote">
-                        <span v-cloak>
-                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Add note
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onAddMedia">
-                        <span v-cloak>
-                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Add media
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onAddQuote">
-                        <span v-cloak>
-                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Add quote
-                        </span>
-                    </a>
-                </li>
-                <li v-if="!hasTodoList">
-                    <a class="dropdown-item" href="#" @click.prevent="onAddTodoList">
-                        <span v-cloak>
-                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Add todo list
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onEditMode">
-                        <span v-cloak>
-                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
-                            [[ editLayoutDropDownItemValue ]]
-                        </span>
-                    </a>
-                </li>
-            </div>
-        </drop-down-menu>
+    <div id="vue-app" class="_d-flex align-items-center mb-3">
 
-        <div class="modal fade" id="modalUpdateNode" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">
-                            Update Node
-                        </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
-                            <div class="col-lg-9">
-                                <input type="text" autocomplete="off" maxlength="200" id="id_node_name" :value="$store.state.nodeName" class="form-control">
+        <div class="d-flex mb-3">
+            <div class="flex-grow-1 me-auto align-self-center">
+                <ul class="breadcrumb mb-0 pt-0 pb-0">
+                    <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
+                    <li class="breadcrumb-item active" v-cloak>[[ nodeName ]]</li>
+                </ul>
+            </div>
+            <Transition name="fade" v-cloak>
+                <div v-if="editLayout" class="text-primary ms-auto me-5">
+                    Edit Layout
+                </div>
+            </Transition>
+            <drop-down-menu
+                ref="dropDownMenu"
+                class="me-3"
+                v-cloak
+            >
+                <template #dropdown class="mt-0">
+                    <li>
+                        <a class="dropdown-item" href="#" @click.prevent="onUpdateNode">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Update node
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" @click.prevent="openCollectionModal">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Add collection
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" @click.prevent="openAddNoteModal">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Add note
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" @click.prevent="openSelectImageModal">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Add media
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" @click.prevent="onAddQuote">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Add quote
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="!hasTodoList">
+                        <a class="dropdown-item" href="#" @click.prevent="onAddTodoList">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Add todo list
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" @click.prevent="editLayout = !editLayout">
+                            <span v-cloak>
+                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
+                                [[ editLayoutDropDownItemValue ]]
+                            </span>
+                        </a>
+                    </li>
+                </template>
+            </drop-down-menu>
+
+            <div class="modal fade" id="modalUpdateNode" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">
+                                Update Node
+                            </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
+                                <div class="col-lg-9">
+                                    <input type="text" autocomplete="off" maxlength="200" id="id_node_name" :value="nodeName" class="form-control">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click.prevent="onClickUpdateNode">
+                        <div class="modal-footer">
+                            <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click.prevent="onClickUpdateNode">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-    </div>
-
-{% endblock %}
-
-{% block content %}
-
-    <div id="vue-app">
 
         <create-update-todo
             ref="updateTodo"
@@ -124,99 +119,113 @@
             create-todo-url="{% url 'todo-list' %}"
             tag-search-url="{% url 'tag:search' %}?query="
             @post-todo-add="addNodeTodo"
-            @post-todo-update="refreshNodeTodo"
+            @post-todo-update="todoList[0].getTodoList()"
         >
         </create-update-todo>
 
         <div class="d-flex g-0 h-100 mx-2">
 
-            <div v-for="(column, colIndex) in $store.state.layout" class="node-column">
+            <div v-for="(column, colIndex) in layout" class="node-column">
                 <draggable
                     drag-class="draggable-chosen-class"
                     @change="onLayoutChange"
-                    :list="$store.state.layout[colIndex]"
+                    :list="layout[colIndex]"
                     group="object"
                     :data-col-number="colIndex"
-                    :disabled="!$store.state.editLayout"
+                    :disabled="!editLayout"
                     class="position-relative"
                     :style="'z-index: ' + (2*10 - colIndex)"
+                    :item-key="colIndex.toString()"
                 >
-                    <div v-for="(obj, rowIndex) in column" class="position-relative" :style="'z-index: ' + (2*10 - colIndex - rowIndex)">
-                        <div v-if="obj.type === 'collection'" :key="obj.uuid">
-                            <collection-object-list
-                                node-uuid="{{ object.uuid }}"
-                                :uuid="obj.uuid"
-                                :collection-object-list-initial="obj"
-                                update-collection-url="{% url "node:update_collection" %}"
-                                update-object-note-url="{% url "collection:update_object_note" %}"
-                                :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
-                                remove-object-url="{% url "collection:remove_object" %}"
-                                sort-objects-url="{% url "collection:sort_objects" %}"
-                                @delete-collection="onDeleteCollection"
-                                @open-modal-note-image="openModalNoteImage"
-                                @open-modal-collection-update="openModalCollectionUpdate"
-                            >
-                            </collection-object-list>
+                    <template #item="{element, index}">
+                        <div class="position-relative">
+                            <div v-if="element.type === 'collection'" :key="element.uuid" :style="'z-index: ' + (2*10 - colIndex - {index})">
+                                <collection-object-list
+                                    node-uuid="{{ object.uuid }}"
+                                    :uuid="element.uuid"
+                                    :collection-object-list-initial="element"
+                                    update-collection-url="{% url "node:update_collection" %}"
+                                    update-object-note-url="{% url "collection:update_object_note" %}"
+                                    :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', element.uuid)"
+                                    remove-object-url="{% url "collection:remove_object" %}"
+                                    sort-objects-url="{% url "collection:sort_objects" %}"
+                                    delete-collection-url="{% url "node:delete_collection" %}"
+                                    @open-modal-note-image="openModalNoteImage"
+                                    @open-modal-collection-update="openModalCollectionUpdate"
+                                    @update-layout="onUpdateLayout"
+                                >
+                                </collection-object-list>
+                            </div>
+                            <div v-if="element.type === 'note'" :draggable="editLayout" :key="element.uuid">
+                                <node-note
+                                    node-uuid="{{ object.uuid }}"
+                                    :node-note-initial="element"
+                                    :note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', element.uuid)"
+                                    set-note-color-url="{% url "node:set_note_color" %}"
+                                    delete-note-url="{% url 'node:delete_note' %}"
+                                    @open-note-modal="openModalNoteUpdate"
+                                    @update-layout="onUpdateLayout"
+                                >
+                                </node-note>
+                            </div>
+                            <div v-else-if="element.type === 'todo'" :draggable="editLayout" key="todo">
+                                <node-todo-list
+                                    ref="todoList"
+                                    node-uuid="{{ object.uuid }}"
+                                    get-todo-list-url="{% url "node:get_todo_list" object.uuid %}"
+                                    add-node-todo-url="{% url "node:add_todo" %}"
+                                    remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
+                                    sort-node-todos-url="{% url 'node:sort_todos' %}"
+                                    delete-todo-list-url="{% url "node:delete_todo_list" %}"
+                                    @update-layout="onUpdateLayout"
+                                >
+                                </node-todo-list>
+                            </div>
+                            <div v-else-if="element.type === 'image'" :draggable="editLayout" key="element.uuid">
+                                <node-image
+                                    node-uuid="{{ object.uuid }}"
+                                    :image-uuid="element.uuid"
+                                    :image-title="element.image_title"
+                                    :image-url="element.image_url"
+                                    remove-image-url="{% url 'node:remove_image' %}"
+                                    @open-modal-note-image="openModalNoteImage"
+                                    @update-layout="onUpdateLayout"
+                                >
+                                </node-image>
+                            </div>
+                            <div v-else-if="element.type === 'quote'" :draggable="editLayout" key="quote">
+                                <node-quote
+                                    ref="quote"
+                                    node-uuid="{{ object.uuid }}"
+                                    :node-quote-initial="element"
+                                    get-quote-url="{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}"
+                                    get-and-set-quote-url="{% url 'node:get_quote' %}"
+                                    remove-quote-url="{% url 'node:remove_quote' %}"
+                                    update-quote-url="{% url 'node:update_quote' %}"
+                                    @open-modal-quote-update="openModalQuoteUpdate"
+                                    @update-layout="onUpdateLayout"
+                                >
+                                </node-quote>
+                            </div>
                         </div>
-                        <div v-if="obj.type === 'note'" :draggable="$store.state.editLayout" :key="obj.uuid">
-                            <node-note
-                                node-uuid="{{ object.uuid }}"
-                                :node-note-initial="obj"
-                                :get-node-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
-                                :update-note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
-                                :set-note-color-url="'{% url "node:set_note_color" %}'"
-                                @delete-note="onDeleteNote"
-                                @open-modal-note-update="openModalNoteUpdate"
-                            >
-                            </node-note>
-                        </div>
-                        <div v-else-if="obj.type === 'todo'" :draggable="$store.state.editLayout" key="todo">
-                            <node-todo-list
-                                ref="todoList"
-                                node-uuid="{{ object.uuid }}"
-                                get-todo-list-url="{% url "node:get_todo_list" object.uuid %}"
-                                add-node-todo-url="{% url "node:add_todo" %}"
-                                remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
-                                sort-node-todos-url="{% url 'node:sort_todos' %}"
-                                @delete-todo-list="onDeleteTodoList"
-                            >
-                            </node-todo-list>
-                        </div>
-                        <div v-else-if="obj.type === 'image'" :draggable="$store.state.editLayout" key="obj.uuid">
-                            <node-image
-                                :image-uuid="obj.uuid"
-                                :image-title="obj.image_title"
-                                :image-url="obj.image_url"
-                                @open-modal-note-image="openModalNoteImage"
-                                @remove-image="onRemoveImage"
-                            >
-                            </node-image>
-                        </div>
-                        <div v-else-if="obj.type === 'quote'" :draggable="$store.state.editLayout" key="quote">
-                            <node-quote
-                                ref="quote"
-                                node-uuid="{{ object.uuid }}"
-                                :node-quote-initial="obj"
-                                get-quote-url="{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}"
-                                :get-and-set-quote-url="'{% url "node:get_quote" %}'"
-                                :update-quote-url="'{% url "node:update_quote" %}'"
-                                @remove-quote="onRemoveQuote(obj.node_quote_uuid)"
-                                @open-modal-quote-update="openModalQuoteUpdate"
-                            >
-                            </node-todo>
-                        </div>
-                    </div>
+                    </template>
                 </draggable>
             </div>
 
             <collection-object-list-modal
                 ref="collectionUpdate"
+                node-uuid="{{ object.uuid }}"
                 add-collection-url="{% url 'node:add_collection' %}"
                 search-url="{% url 'collection:search' %}?query="
+                @update-layout="onUpdateLayout"
             >
             </collection-object-list-modal>
 
-            <node-note-modal ref="noteUpdate">
+            <node-note-modal
+                ref="noteUpdate"
+                @open-modal-note-update="openModalNoteUpdate"
+                @update-layout="onUpdateLayout"
+            >
             </node-note-modal>
 
             <node-image-modal ref="noteImage">
@@ -257,95 +266,44 @@
 
     <script type="text/javascript">
 
-        const store = new Vuex.Store({
-            state: {
-                editLayout: false,
-                layout: JSON.parse(document.getElementById("layout").textContent),
-                nodeName: "{{ object.name }}",
-                nodeUuid: "{{ object.uuid }}",
+        const app = createApp({
+            name: "NodeDetail",
+            delimiters: ["[[", "]]"],
+            components: {
+                CollectionObjectList,
+                CollectionObjectListModal,
+                CreateUpdateTodo,
+                FontAwesomeIcon,
+                draggable,
+                DropDownMenu,
+                NodeImage,
+                NodeImageModal,
+                NodeNote,
+                NodeNoteModal,
+                NodeQuote,
+                NodeQuoteModal,
+                NodeTodoList,
+                ObjectSelect,
             },
-            getters: {},
-            mutations: {},
-        });
+            setup() {
+                const editLayout = ref(false);
+                const layout = ref(JSON.parse(document.getElementById("layout").textContent));
+                const nodeName = ref("{{ object.name }}");
+                const nodeUuid = ref("{{ object.uuid }}");
 
-        new Vue({
-            el: "#vue-nav",
-            name: "Nav",
-            store,
-            methods: {
-                onAddCollection() {
-                    EventBus.$emit("open-collection-modal");
-                },
-                onAddMedia() {
-                    EventBus.$emit("object-select-image");
-                },
-                onAddQuote() {
-                    doPost(
-                        this,
-                        "{% url "node:add_quote" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                        },
-                        (response) => {
-                            EventBus.$emit("update-layout", response.data.layout);
-                        },
-                        "Quote added",
-                        ""
-                    );
-                },
-                onAddNote() {
-                    EventBus.$emit("open-note-modal");
-                },
-                onAddTodoList() {
-                    doPost(
-                        this,
-                        "{% url "node:add_todo_list" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                        },
-                        (response) => {
-                            EventBus.$emit("update-layout", response.data.layout);
-                        },
-                        "Todo list added",
-                        ""
-                    );
-                },
-                onClickUpdateNode() {
-                    const name = document.querySelector("#id_node_name").value;
-                    doPut(
-                        this,
-                        "{% url 'node-detail' object.uuid %}",
-                        {
-                            "node_uuid": "{{ object.uuid }}",
-                            "name": name,
-                        },
-                        (response) => {
-                            this.$store.state.nodeName = name;
-                            document.querySelector(".node-name").innerHTML = name;
-                            const modal = Modal.getInstance(document.querySelector("#modalUpdateNode"));
-                            modal.hide();
-                        },
-                        "Node updated",
-                    );
+                const collectionUpdate = ref(null);
+                const noteImage = ref(null);
+                const noteUpdate = ref(null);
+                const quoteUpdate = ref(null);
+                const objectSelectImage = ref(null);
+                const todoList = ref(null);
 
-                },
-                onEditMode() {
-                    this.$store.state.editLayout = !this.$store.state.editLayout;
-                },
-                onUpdateNode() {
-                    const modal = new Modal("#modalUpdateNode");
-                    modal.show();
-                    setTimeout(() => {
-                        document.querySelector("#id_node_name").focus();
-                    }, 500);
-                }
-            },
-            computed: {
-                editLayoutDropDownItemValue: function() {
-                    return this.$store.state.editLayout ? "Disable Edit Layout" : "Enable Edit Layout"
-                },
-                hasTodoList() {
-                    for (const col of this.$store.state.layout) {
+                const editLayoutDropDownItemValue = computed(() => {
+                    return editLayout.value ? "Disable Edit Layout" : "Enable Edit Layout"
+                });
+
+                const hasTodoList = computed(() => {
+                    for (const col of layout.value) {
                         for (const row of col) {
                             if (row.type === "todo") {
                                 return true;
@@ -353,56 +311,138 @@
                         }
                     }
                     return false;
-                },
-            },
-        });
+                });
 
-        new Vue({
-            el: "#vue-app",
-            name: "Node Detail",
-            store,
-            methods: {
-                addNote(note) {
+                function addNodeTodo(payload) {
+                    todoList.value[0].addNodeTodo(payload);
+                };
+
+                function addNote(note) {
                     doPost(
-                        this,
+                        null,
                         "{% url "node:add_note" %}",
                         {
-                            "node_uuid": this.$store.state.nodeUuid,
+                            "node_uuid": nodeUuid.value,
                             "note_name": note.name,
                             "color": note.color,
                         },
                         (response) => {
-                            EventBus.$emit("update-layout", response.data.layout);
+                            layout.value = JSON.parse(response.data.layout);
                         },
                         "Note added",
                         ""
                     );
-                },
-                addNodeTodo(payload) {
-                    this.$refs.todoList[0].addNodeTodo(payload);
-                },
-                refreshNodeTodo(payload) {
-                    this.$refs.todoList[0].getTodoList();
-                },
-                selectObjectImage(object, callback) {
+                };
+
+                function onAddQuote() {
                     doPost(
-                        this,
-                        "{% url "node:add_image" %}",
+                        null,
+                        "{% url "node:add_quote" %}",
                         {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "image_uuid": object.uuid,
+                            "node_uuid": nodeUuid.value,
                         },
                         (response) => {
-                            if (callback) {
-                                callback();
-                            }
-                            EventBus.$emit("update-layout", response.data.layout);
+                            layout.value = JSON.parse(response.data.layout);
                         },
-                        "Image added",
+                        "Quote added",
                         ""
                     );
-                },
-                selectObjectCollection(object, callback, returnArgs) {
+                };
+
+                function onAddTodoList() {
+                    doPost(
+                        null,
+                        "{% url "node:add_todo_list" %}",
+                        {
+                            "node_uuid": nodeUuid.value,
+                        },
+                        (response) => {
+                            layout.value = JSON.parse(response.data.layout);
+                        },
+                        "Todo list added",
+                        ""
+                    );
+                };
+
+                function onClickUpdateNode() {
+                    const name = document.querySelector("#id_node_name").value;
+                    doPut(
+                        null,
+                        "{% url 'node-detail' object.uuid %}",
+                        {
+                            "node_uuid": "{{ object.uuid }}",
+                            "name": name,
+                        },
+                        (response) => {
+                            nodeName.value = name;
+                            document.querySelector(".node-name").innerHTML = name;
+                            const modal = Modal.getInstance(document.querySelector("#modalUpdateNode"));
+                            modal.hide();
+                        },
+                        "Node updated",
+                    );
+                };
+
+                function onLayoutChange(evt) {
+                    doPost(
+                        null,
+                        "{% url "node:change_layout" %}",
+                        {
+                            "node_uuid": nodeUuid.value,
+                            "layout": JSON.stringify(layout.value),
+                        },
+                        (response) => {
+                        },
+                        "",
+                        ""
+                    );
+                };
+
+                function onUpdateLayout(payload) {
+                    layout.value = JSON.parse(payload);
+                };
+
+                function onUpdateNode() {
+                    const modal = new Modal("#modalUpdateNode");
+                    modal.show();
+                    setTimeout(() => {
+                        document.querySelector("#id_node_name").focus();
+                    }, 500);
+                };
+
+                function openCollectionModal() {
+                    collectionUpdate.value.openModal(
+                        "Add",
+                        null,
+                        {"collection_type": "ad-hoc", "display": "list", "rotate": -1, limit: 5, "uuid": ""}
+                    );
+                };
+
+                function openAddNoteModal() {
+                    noteUpdate.value.openModal("Add", addNote, { "color": 1 });
+                };
+
+                function openModalCollectionUpdate(callback, data) {
+                    collectionUpdate.value.openModal("Update", callback, data);
+                };
+
+                function openModalNoteImage(data) {
+                    noteImage.value.openModal(data);
+                };
+
+                function openModalNoteUpdate(callback, data) {
+                    noteUpdate.value.openModal("Update", callback, data);
+                };
+
+                function openModalQuoteUpdate(callback, data) {
+                    quoteUpdate.value.openModal("Update", callback, data);
+                };
+
+                function openSelectImageModal() {
+                    objectSelectImage.value.openModal();
+                };
+
+                function selectObjectCollection(object, callback, returnArgs) {
                     let args = {
                         "collection_uuid": returnArgs.collectionUuid
                     };
@@ -413,7 +453,7 @@
                     }
 
                     doPost(
-                        this,
+                        null,
                         "{% url "collection:add_object" %}",
                         args,
                         (response) => {
@@ -422,140 +462,68 @@
                         "Object added",
                         ""
                     );
-                },
-                onDeleteCollection(collectionUuid, collectionType) {
+                };
+
+                function selectObjectImage(object, callback) {
                     doPost(
-                        this,
-                        "{% url "node:delete_collection" %}",
+                        null,
+                        "{% url "node:add_image" %}",
                         {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "collection_uuid": collectionUuid,
-                            "collection_type": collectionType,
+                            "node_uuid": nodeUuid.value,
+                            "image_uuid": object.uuid,
                         },
                         (response) => {
-                            this.$store.state.layout = JSON.parse(response.data.layout);
+                            if (callback) {
+                                callback();
+                            }
+                            layout.value = JSON.parse(response.data.layout);
                         },
-                        "Collection deleted",
-                    );
-                },
-                onDeleteTodoList() {
-                    doPost(
-                        this,
-                        "{% url 'node:delete_todo_list' %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                        },
-                        (response) => {
-                            this.$store.state.layout = JSON.parse(response.data.layout);
-                        },
-                        "Todo list deleted",
-                    );
-                },
-                onRemoveImage(imageUuid) {
-                    doPost(
-                        this,
-                        "{% url "node:remove_image" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "image_uuid": imageUuid,
-                        },
-                        (response) => {
-                            this.$store.state.layout = JSON.parse(response.data.layout);
-                        },
-                        "Image removed",
-                    );
-                },
-                onRemoveQuote(nodeQuoteUuid) {
-                    doPost(
-                        this,
-                        "{% url "node:remove_quote" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "node_quote_uuid": nodeQuoteUuid,
-                        },
-                        (response) => {
-                            this.$store.state.layout = JSON.parse(response.data.layout);
-                        },
-                        "Quote removed",
-                    );
-                },
-                openModalCollectionUpdate(callback, data) {
-                    this.$refs.collectionUpdate.openModal("Update", callback, data);
-                },
-                openModalNoteUpdate(callback, data) {
-                    this.$refs.noteUpdate.openModal("Update", callback, data);
-                },
-                openModalNoteImage(data) {
-                    this.$refs.noteImage.openModal(data);
-                },
-                openModalQuoteUpdate(callback, data) {
-                    this.$refs.quoteUpdate.openModal("Update", callback, data);
-                },
-                onDeleteNote(noteUuid) {
-                    doPost(
-                        this,
-                        "{% url "node:delete_note" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "note_uuid": noteUuid,
-                        },
-                        (response) => {
-                            this.$store.state.layout = JSON.parse(response.data.layout);
-                        },
-                        "Note deleted",
-                    );
-                },
-                onDragOver(evt, index) {
-                    evt.currentTarget.classList.add("node-drag-over");
-                },
-                onDragLeave(evt) {
-                    evt.currentTarget.classList.remove("node-drag-over");
-                },
-                onLayoutChange(evt) {
-                    doPost(
-                        this,
-                        "{% url "node:change_layout" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "layout": JSON.stringify(this.$store.state.layout),
-                        },
-                        (response) => {
-                        },
-                        "",
+                        "Image added",
                         ""
                     );
-                },
+                };
+
+                return {
+                    addNodeTodo,
+                    addNote,
+                    collectionUpdate,
+                    editLayout,
+                    editLayoutDropDownItemValue,
+                    hasTodoList,
+                    layout,
+                    noteUpdate,
+                    objectSelectImage,
+                    onAddQuote,
+                    onAddTodoList,
+                    onClickUpdateNode,
+                    onLayoutChange,
+                    onUpdateNode,
+                    openAddNoteModal,
+                    openCollectionModal,
+                    openModalCollectionUpdate,
+                    openModalNoteImage,
+                    openModalNoteUpdate,
+                    openModalQuoteUpdate,
+                    openSelectImageModal,
+                    onUpdateLayout,
+                    quoteUpdate,
+                    noteImage,
+                    nodeName,
+                    nodeUuid,
+                    selectObjectCollection,
+                    selectObjectImage,
+                    todoList,
+                };
             },
-            mounted() {
-                EventBus.$on("add-blob", (payload) => {
-                    this.$refs.blobList.addBlob(payload);
-                });
-
-                EventBus.$on("add-bookmark", (payload) => {
-                    this.$refs.bookmarkList.addBookmark(payload);
-                });
-
-                EventBus.$on("open-collection-modal", (payload) => {
-                    this.$refs.collectionUpdate.openModal(
-                        "Add",
-                        null,
-                        {"collection_type": "ad-hoc", "display": "list", "rotate": -1, limit: 5, "uuid": ""}
-                    );
-                });
-
-                EventBus.$on("open-note-modal", (payload) => {
-                    this.$refs.noteUpdate.openModal("Add", this.addNote, {"color": 1});
-                });
-
-                EventBus.$on("object-select-image", (payload) => {
-                    this.$refs.objectSelectImage.openModal();
-                });
-
-                EventBus.$on("update-layout", (payload) => {
-                    this.$store.state.layout = JSON.parse(payload);
-                });
-            }
         });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
     </script>
 

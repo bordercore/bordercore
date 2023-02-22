@@ -15,8 +15,6 @@
 <script>
 
     export default {
-
-        name: "NoteImageModal",
         data() {
             return {
                 modal: null,

@@ -11,7 +11,7 @@
                     </div>
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onUpdateQuote()">
                                         <span>
@@ -28,7 +28,7 @@
                                         Remove quote
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
                 </div>
@@ -52,9 +52,16 @@
 
 <script>
 
-    export default {
+    import Card from "/front-end/vue/common/Card.vue";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
-        name: "NodeQuote",
+    export default {
+        components: {
+            Card,
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
             nodeUuid: {
                 type: String,
@@ -69,6 +76,10 @@
                 default: "",
             },
             getQuoteUrl: {
+                type: String,
+                default: "",
+            },
+            removeQuoteUrl: {
                 type: String,
                 default: "",
             },
@@ -130,7 +141,7 @@
                     this,
                     this.getAndSetQuoteUrl,
                     {
-                        "node_uuid": this.$store.state.nodeUuid,
+                        "node_uuid": this.nodeUuid,
                         "favorites_only": this.nodeQuote.favorites_only,
                     },
                     (response) => {
@@ -141,10 +152,21 @@
                 );
             },
             onRemoveQuote() {
-                this.$emit("remove-quote");
+                doPost(
+                    null,
+                    this.removeQuoteUrl,
+                    {
+                        "node_uuid": this.nodeUuid,
+                        "node_quote_uuid": this.nodeQuote.node_quote_uuid,
+                    },
+                    (response) => {
+                        this.$emit("updateLayout", response.data.layout);
+                    },
+                    "Quote removed",
+                );
             },
             onUpdateQuote() {
-                this.$emit("open-modal-quote-update", this.updateQuote, this.nodeQuote);
+                this.$emit("openModalQuoteUpdate", this.updateQuote, this.nodeQuote);
             },
             setTimer() {
                 if (!this.nodeQuote.rotate || this.nodeQuote.rotate === -1) {
@@ -160,7 +182,7 @@
                     this,
                     this.updateQuoteUrl,
                     {
-                        "node_uuid": this.$store.state.nodeUuid,
+                        "node_uuid": this.nodeUuid,
                         "node_quote_uuid": quote.node_quote_uuid,
                         "color": quote.color,
                         "format": quote.format,

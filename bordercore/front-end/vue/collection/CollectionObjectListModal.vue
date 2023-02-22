@@ -135,14 +135,21 @@
 
 <script>
 
+    import SelectValue from "/front-end/vue/common/SelectValue.vue";
 
     export default {
-
         name: "CollectionObjectListModal",
+        components: {
+            SelectValue,
+        },
         props: {
             addCollectionUrl: {
                 default: "",
                 type: String,
+            },
+            nodeUuid: {
+                type: String,
+                default: "",
             },
             searchUrl: {
                 default: "",
@@ -238,7 +245,7 @@
                             this,
                             this.addCollectionUrl,
                             {
-                                "node_uuid": this.$store.state.nodeUuid,
+                                "node_uuid": this.nodeUuid,
                                 "collection_name": this.collectionObjectList.name,
                                 "collection_uuid": this.collectionObjectList.uuid,
                                 "display": this.collectionObjectList.display,
@@ -247,7 +254,7 @@
                                 "limit": this.collectionObjectList.limit,
                             },
                             (response) => {
-                                EventBus.$emit("update-layout", response.data.layout);
+                                this.$emit("updateLayout", response.data.layout);
                                 this.modal.hide();
                                 this.$nextTick(() => {
                                     this.$refs.selectValue.clearOptions();

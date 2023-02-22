@@ -16,7 +16,7 @@
                     </div>
                     <div v-if="note !== ''" class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onUpdateNoteContents()">
                                         <span>
@@ -26,7 +26,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onEditNote()">
+                                    <a class="dropdown-item" href="#" @click.prevent="onOpenNoteModal()">
                                         <span>
                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
                                         </span>
@@ -41,7 +41,7 @@
                                         Delete note
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
                 </div>
@@ -49,10 +49,10 @@
             <template #content>
                 <hr class="divider">
                 <editable-text-area
-                    ref="note"
+                    ref="editableTextArea"
+                    v-model="note"
                     default-value="No content"
                     class="node-note"
-                    :uuid="nodeUuid"
                     :hide-add-button="true"
                     @update-note="onUpdateNote(nodeNote)"
                 />
@@ -63,9 +63,19 @@
 
 <script>
 
-    export default {
+    import Card from "/front-end/vue/common/Card.vue";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import EditableTextArea from "/front-end/vue/common/EditableTextArea.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
-        name: "Notes",
+    export default {
+        components: {
+            Card,
+            DropDownMenu,
+            EditableTextArea,
+            FontAwesomeIcon,
+        },
+        emits: ["deleteNote", "openNoteModal", "updateLayout"],
         props: {
             nodeUuid: {
                 type: String,
@@ -75,11 +85,11 @@
                 type: Object,
                 default: function() {},
             },
-            getNodeUrl: {
+            deleteNoteUrl: {
                 type: String,
                 default: "",
             },
-            updateNoteUrl: {
+            noteUrl: {
                 type: String,
                 default: "",
             },
@@ -88,90 +98,120 @@
                 default: "",
             },
         },
-        data() {
-            return {
-                isEditingName: false,
-                nodeNote: {},
-                note: null,
+        setup(props, ctx) {
+            let beforeEditCache = null;
+            const isEditingName = ref(false);
+            const nodeNote = ref({});
+            const note = ref("");
+
+            const editableTextArea = ref(null);
+
+            function onUpdateNoteContents() {
+                editableTextArea.value.editNote(!note.value.content);
             };
-        },
-        computed: {
-            cardClass() {
-                return `node-color-${this.nodeNote.color}`;
-            },
-        },
-        mounted() {
-            this.nodeNote = this.nodeNoteInitial;
-            this.getNote();
-        },
-        methods: {
-            onUpdateNoteContents() {
-                this.$refs.note.editNote(!this.note.content);
-            },
-            onEditName() {
-                this.beforeEditCache = this.note.name;
-                this.isEditingName = true;
-            },
-            onEditNote() {
-                this.$emit("open-modal-note-update", this.onUpdateNote, this.nodeNote);
-            },
-            onBlur() {
-                this.isEditingName = false;
+
+            function onEditName() {
+                beforeEditCache = note.value.name;
+                isEditingName.value = true;
+            };
+
+            function onOpenNoteModal() {
+                ctx.emit("openNoteModal", onUpdateNote, nodeNote.value);
+            };
+
+            function onBlur() {
+                isEditingName.value = false;
                 // If the name hasn't changed, abort
-                if (this.beforeEditCache === this.nodeNote.name) {
+                if (beforeEditCache === nodeNote.value.name) {
                     return;
                 }
-                this.onUpdateNote(this.nodeNote);
-            },
-            onDeleteNote() {
-                this.$emit("delete-note", this.note.uuid);
-            },
-            onUpdateNote(note) {
+                onUpdateNote(nodeNote.value);
+            };
+
+            function onDeleteNote() {
                 doPost(
-                    this,
-                    this.setNoteColorUrl,
+                    null,
+                    props.deleteNoteUrl,
                     {
-                        "node_uuid": this.$store.state.nodeUuid,
-                        "note_uuid": this.note.uuid,
+                        "node_uuid": props.nodeUuid,
+                        "note_uuid": note.value.uuid,
+                    },
+                    (response) => {
+                        ctx.emit("updateLayout", response.data.layout);
+                    },
+                    "Note deleted",
+                );
+
+                ctx.emit("deleteNote", note.value.uuid);
+            };
+
+            function onUpdateNote(note) {
+                doPost(
+                    null,
+                    props.setNoteColorUrl,
+                    {
+                        "node_uuid": props.nodeUuid,
+                        "note_uuid": note.uuid,
                         "color": note.color,
                     },
                     (response) => {
-                        this.nodeNote.color = note.color;
+                        nodeNote.value.color = note.color;
                     },
                     "",
                     "",
                 );
-                const noteContent = this.$refs.note.textAreaValue || "";
+                const noteContent = editableTextArea.value.textAreaValue || "";
                 doPut(
-                    this,
-                    this.updateNoteUrl,
+                    null,
+                    props.noteUrl,
                     {
-                        "uuid": this.note.uuid,
-                        "name": this.nodeNote.name,
+                        "uuid": note.uuid,
+                        "name": nodeNote.value.name,
                         "content": noteContent,
                         "is_note": true,
                     },
                     (response) => {
-                        this.note.content = noteContent;
+                        // note.value.content = noteContent;
                     },
                     "",
                 );
-            },
-            getNote() {
+            };
+
+            const cardClass = computed(() => {
+                return `node-color-${nodeNote.value.color}`;
+            });
+
+            onMounted(() => {
+                nodeNote.value = props.nodeNoteInitial;
+                getNote();
+            });
+
+            function getNote() {
                 doGet(
-                    this,
-                    this.getNodeUrl,
+                    null,
+                    props.noteUrl,
                     (response) => {
-                        this.note = response.data;
-                        this.$refs.note.setTextAreaValue(response.data.content);
+                        note.value = response.data;
+                        //editableTextArea.value.setTextAreaValue(response.data.content);
                     },
                     "Error getting note",
                 );
-            },
-            setSelectionRange(input, selectionStart, selectionEnd) {
-                if (input.setSelectionRange) {
-                }
-            },
+            };
+
+            return {
+                cardClass,
+                editableTextArea,
+                isEditingName,
+                getNote,
+                onBlur,
+                onDeleteNote,
+                onEditName,
+                onOpenNoteModal,
+                onUpdateNote,
+                onUpdateNoteContents,
+                nodeNote,
+                note,
+            };
         },
     };
 

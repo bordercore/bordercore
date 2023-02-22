@@ -381,7 +381,7 @@ def remove_quote(request):
 
     response = {
         "status": "OK",
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)

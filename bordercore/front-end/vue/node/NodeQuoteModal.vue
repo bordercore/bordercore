@@ -57,8 +57,6 @@
 <script>
 
     export default {
-
-        name: "QuoteModal",
         data() {
             return {
                 action: "Update",

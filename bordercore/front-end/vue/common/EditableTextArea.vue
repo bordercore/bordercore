@@ -1,10 +1,12 @@
 <template>
     <div>
         <div v-if="textAreaValue || isEditingNote" :class="extraClass" class="editable-textarea position-relative">
+            <!-- <div v-if="modelValue || isEditingNote" :class="extraClass" class="editable-textarea position-relative"> -->
             <slot name="title" />
             <Transition name="fade" mode="out-in" @before-leave="onBeforeLeave" @before-enter="onBeforeEnter" @enter="onEnter">
                 <label v-if="!isEditingNote" class="w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote(false)" v-html="textAreaMarkdown" />
                 <textarea v-else v-model="textAreaValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" />
+                <!-- <textarea v-else v-model="modelValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" /> -->
             </Transition>
         </div>
         <div v-else>
@@ -54,20 +56,23 @@
                 isEditingNote: false,
                 labelOffsetHeight: 0,
                 minNumberRows: 10,
-                textAreaValue: this.modelValue,
+                // textAreaValue: this.modelValue,
             };
         },
         computed: {
             textAreaMarkdown() {
-                if (!this.textAreaValue) {
+//                if (!this.textAreaValue) {
+                if (!this.modelValue) {
                     return "";
                 }
-                return markdown.render(this.textAreaValue);
+//                return markdown.render(this.textAreaValue);
+                return markdown.render(this.modelValue);
             },
         },
         methods: {
             setTextAreaValue(value) {
-                this.textAreaValue = modelValue;
+//                this.textAreaValue = modelValue;
+//                this.textAreaValue = modelValue;
                 this.$nextTick(() => {
                     Prism.highlightAll();
                 });
@@ -118,7 +123,8 @@
                 });
             },
             editNote(focusTextArea=false) {
-                this.beforeEditCache = this.textAreaValue;
+//                this.beforeEditCache = this.textAreaValue;
+                this.beforeEditCache = this.modelValue;
                 this.isEditingNote = true;
                 if (focusTextArea) {
                     // This is typically true when creating a new value,
@@ -133,13 +139,14 @@
             onBlur() {
                 this.isEditingNote = false;
                 // If the note hasn't changed, abort
-                if (this.beforeEditCache == this.textAreaValue) {
+//                if (this.beforeEditCache == this.textAreaValue) {
+                if (this.beforeEditCache == this.modelValue) {
                     return;
                 }
                 this.updateNote();
             },
             updateNote() {
-                this.$emit("update-note");
+                this.$emit("update:modelValue");
             },
             addNote() {
                 this.$nextTick(() => {
@@ -147,7 +154,8 @@
                 });
             },
             deleteNote() {
-                this.textAreaValue = "";
+//                this.textAreaValue = "";
+                this.modelValue = "";
                 this.updateNote();
             },
         },
