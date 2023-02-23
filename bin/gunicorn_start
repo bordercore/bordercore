@@ -32,4 +32,5 @@ exec gunicorn ${DJANGO_WSGI_MODULE}:application \
   --group=$GROUP \
   --bind=$HOST \
   --log-level=info \
-  --log-file=-
+  --log-file=- \
+  --worker-tmp-dir=/dev/shm
