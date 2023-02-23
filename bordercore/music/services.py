@@ -21,6 +21,8 @@ def get_playlist_counts(user):
         user=user
     ).annotate(
         num_songs=Count("playlistitem")
+    ).order_by(
+        "name"
     )
 
 
