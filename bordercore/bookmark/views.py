@@ -279,13 +279,17 @@ def overview(request):
         sort=False
     ).count()
 
-    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("tagbookmark")).order_by("usertag__sort_order")
+    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(
+        bookmark_count=Count("tagbookmark")
+    ).order_by(
+        "usertag__sort_order"
+    ).values()
 
     return render(request, "bookmark/index.html",
                   {
                       "bookmarks": sorted_bookmarks,
                       "untagged_count": bare_count,
-                      "pinned_tags": pinned_tags,
+                      "pinned_tags": [x for x in pinned_tags],
                       "tag": request.GET.get("tag", None)
                   })
 

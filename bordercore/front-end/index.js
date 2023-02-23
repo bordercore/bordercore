@@ -178,6 +178,9 @@ window.SearchNoResult = SearchNoResult;
 import TreeMenu from "./vue/common/TreeMenu.vue";
 window.TreeMenu = TreeMenu;
 
+import PinnedTags from "./vue/bookmark/PinnedTags.vue";
+window.PinnedTags = PinnedTags;
+
 import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
 window.RelatedBookmarksList = RelatedBookmarksList;
 
