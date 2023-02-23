@@ -208,13 +208,6 @@ def test_music_playlist_create(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    # The empty form
-    url = urls.reverse("music:playlist_create")
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-    # The submitted form
     url = urls.reverse("music:playlist_create")
 
     resp = client.post(url, {

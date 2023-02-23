@@ -338,6 +338,9 @@ class Playlist(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse("music:playlist_detail", kwargs={"uuid": self.uuid})
+
     class PlaylistType(models.TextChoices):
         MANUAL = "manual", _("Manually Selected")
         TAG = "tag", _("Tagged")

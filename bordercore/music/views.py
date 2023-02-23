@@ -597,14 +597,12 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
 
     model = Playlist
     form_class = PlaylistForm
-    template_name = "music/index.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
     def form_valid(self, form):
-
         playlist = form.save(commit=False)
         playlist.user = self.request.user
 
@@ -620,11 +618,7 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
         if playlist.type != "manual":
             playlist.populate()
 
-        self.success_url = reverse_lazy("playlist_detail", kwargs={"uuid": playlist.uuid})
         return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse("music:playlist_detail", kwargs={"uuid": self.object.uuid})
 
 
 @method_decorator(login_required, name="dispatch")
@@ -662,6 +656,12 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
             if playlist.type == "tag":
                 parameters["tag"] = playlist.parameters["tag"]
 
+            # We don't allow changing the time period (maybe we should?)
+            #  so it won't be included in the POST args. Add it here.
+            if playlist.type == "time":
+                parameters["start_year"] = playlist.parameters["start_year"]
+                parameters["end_year"] = playlist.parameters["end_year"]
+
             playlist.parameters = parameters
             playlist.save()
 
@@ -673,9 +673,6 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
         )
 
         return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse("music:playlist_detail", kwargs={'uuid': self.object.uuid})
 
 
 @method_decorator(login_required, name="dispatch")

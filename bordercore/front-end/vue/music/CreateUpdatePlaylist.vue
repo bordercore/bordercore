@@ -121,6 +121,7 @@
                             </div>
                         </div>
                     </div>
+                    <input v-else type="hidden" name="type" :value="playlist.type">
 
                     <transition name="fade">
                         <div v-if="smartType !== 'manual'">
