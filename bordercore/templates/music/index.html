@@ -66,12 +66,14 @@
                     <ul class="list-group interior-borders">
                         {% for playlist in playlists %}
                             <li class="list-with-counts d-flex ps-2 py-1 pe-2">
-                                <div>
-                                    <a href="{% url 'music:playlist_detail' playlist.uuid %}">{{ playlist.name }}</a>
-                                </div>
-                                <div class="ms-auto">
-                                    <span class="px-2 badge rounded-pill">{{ playlist.num_songs }}</span>
-                                </div>
+                                    <a href="{% url 'music:playlist_detail' playlist.uuid %}" class="d-flex w-100">
+                                        <div>
+                                            {{ playlist.name }}
+                                        </div>
+                                        <div class="ms-auto">
+                                            <span class="px-2 badge rounded-pill">{{ playlist.num_songs }}</span>
+                                        </div>
+                                    </a>
                             </li>
                         {% endfor %}
                     </ul>
