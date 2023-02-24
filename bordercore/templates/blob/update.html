@@ -655,10 +655,10 @@
                         },
                     }).then((response) => {
                         window.location = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", response.data.uuid);
-                    }).catch(function(error) {
+                    }).catch( (error) => {
                         const errors = [];
-                        for (const i = 0; i < error.response.data.length; i++) {
-                            errors.push(error.response.data[error.response.data[i]][0]);
+                        for (var key in error.response.data) {
+                            errors.push(error.response.data[key][0]);
                         }
                         EventBus.$emit(
                             "toast",

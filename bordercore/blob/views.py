@@ -121,21 +121,6 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
         if "collection_uuid" in self.request.GET:
             context["collection_info"] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
 
-        # In case of a form error, we need to return the user's
-        #  submitted data by populating some of the form fields
-        #  that aren't handled automatically by Django's form object.
-        #  Some fields are also handled in form_invalid().
-        if "metadata" in self.request.POST:
-            context["metadata"] = json.dumps(self.request.POST["metadata"])
-
-        if "tags" in self.request.POST:
-            context["tags"] = [
-                {"text": x}
-                for x in self.request.POST["tags"].split(",")
-            ]
-
-        context["is_book"] = self.request.POST.get("is_book", "") == "on"
-
         context["title"] = "Create Blob"
 
         return context
