@@ -56,7 +56,7 @@ window.Modal = Modal;
 window.Tab = Tab;
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faAws} from "@fortawesome/free-brands-svg-icons";
 import {faPython} from "@fortawesome/free-brands-svg-icons";
@@ -116,6 +116,7 @@ library.add(faThumbtack);
 library.add(faTimes);
 library.add(faTimesCircle);
 library.add(faTrashAlt);
+library.add(faUser);
 window.FontAwesomeIcon = FontAwesomeIcon;
 
 import {format} from "date-fns";

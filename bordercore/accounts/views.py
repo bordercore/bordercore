@@ -247,14 +247,14 @@ def bc_login(request):
 
     message = ""
 
-    if request.POST.get("username"):
+    if "username" in request.POST:
+
         username = request.POST["username"]
         password = request.POST["password"]
 
-        if not User.objects.filter(username=username).count():
+        if not User.objects.filter(username=username).exists():
             message = "Username does not exist"
         else:
-
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
@@ -263,13 +263,10 @@ def bc_login(request):
                     # Remember the username for a month
                     response.set_cookie("bordercore_username", username, max_age=2592000)
                     return response
-                    # Redirect to a success page.
                 else:
                     message = "Disabled account"
-                    # Return a "disabled account" error message
             else:
                 message = "Invalid login"
-                # Return an "invalid login" error message.
 
     return render(request, "login.html", {
         "message": message,

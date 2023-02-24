@@ -963,6 +963,10 @@ textarea.form-control {
   border: 0.12rem solid var(--text1);
   border-radius: 1.5rem;
   opacity: 0.9;
+
+  .input-group-text {
+    background-color: var(--text4);
+  };
 }
 
 // Help
