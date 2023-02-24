@@ -32,10 +32,10 @@ class LoginPage:
 
 class HomePage:
 
-    RECENT_BOOKMARKS = (By.XPATH, "//div[a[normalize-space(text())='Recent Bookmarks']]/following-sibling::ul/li")
+    RECENT_BOOKMARKS = (By.CSS_SELECTOR, "ul#recent_bookmarks li")
     PINNED_BOOKMARKS = (By.CSS_SELECTOR, "li[id='pinned-bookmarks']")
     TITLE = (By.TAG_NAME, "title")
-    TODO = (By.XPATH, "//div[a[normalize-space(text())='Important Tasks']]/following-sibling::ul/li")
+    TODO = (By.CSS_SELECTOR, "ul#important_tasks li")
 
     def __init__(self, browser):
         self.browser = browser

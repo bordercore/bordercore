@@ -17,7 +17,7 @@
                     </div>
                 </template>
                 <template v-slot:content>
-                    <ul class="list-group interior-borders">
+                    <ul id="important_tasks" class="list-group interior-borders">
                         {% for task in tasks %}
                             <li class="list-group-item list-group-item-secondary">{{ task.name }}
                                 <span class="badge bg-info ms-1">{{ task.parent_category }}</span>
@@ -103,7 +103,7 @@
                 </template>
                 <template v-slot:content>
                     {% if bookmarks %}
-                        <ul class="list-group interior-borders scrollable-panel-scrollbar-hover vh-50">
+                        <ul id="recent_bookmarks" class="list-group interior-borders scrollable-panel-scrollbar-hover vh-50">
                             {% for bookmark in bookmarks %}
                                 <li class="list-group-item text-success d-flex">
                                     <div>
