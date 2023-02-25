@@ -7,11 +7,11 @@ except ModuleNotFoundError:
 
 class SearchPage:
 
-    SEARCH_INPUT = (By.CSS_SELECTOR, "#search input[name='search']")
+    SEARCH_INPUT = (By.CSS_SELECTOR, "input#search")
     SUBMIT_BUTTON = (By.CSS_SELECTOR, "input[type='submit']")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "h4[class^='search-result-header'] strong")
     SEARCH_RESULT_NAME = (By.CSS_SELECTOR, "li[class*='search-result'] h4 a")
-    SEARCH_RESULT_TAG = (By.CSS_SELECTOR, "li a[class='tag']")
+    SEARCH_RESULT_TAG = (By.CSS_SELECTOR, "li a.tag")
 
     def __init__(self, browser):
         self.browser = browser
@@ -79,7 +79,7 @@ class TagSearchPage:
 
 class NoteSearchPage:
 
-    SEARCH_INPUT = (By.CSS_SELECTOR, "input[id='top-simple-suggest']")
+    SEARCH_INPUT = (By.CSS_SELECTOR, "#top-search input.multiselect__input")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#left-panel ul[class*='note-search-result'] li")
     TOP_SEARCH_ICON = (By.CSS_SELECTOR, "#top-search-icon")
 

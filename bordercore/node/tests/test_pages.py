@@ -81,7 +81,7 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     modal = page.select_object_modal()
     menu_items = page.recent_items(modal)
-    assert len(menu_items) == 11
+    assert len(menu_items) == 12
 
     search_input = page.search_input(modal)
 
@@ -120,7 +120,7 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
     # Search for the bookmark
     _filtered_search(action, search_input, checkbox, bookmark_1.name[:5])
 
-    time.sleep(1)
+    time.sleep(2)
 
     # With the filter on, there should only be one match
     suggestion_list = page.search_suggestion_list(modal)

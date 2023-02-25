@@ -9,16 +9,16 @@ class NodeListPage:
 
     TITLE = (By.TAG_NAME, "title")
     NODE_DETAIL_LINK = (By.CSS_SELECTOR, "a[data-name='node_0']")
-    COLLECTION_MENU = (By.CSS_SELECTOR, "div[class='hover-reveal-target']")
+    COLLECTION_MENU = (By.CSS_SELECTOR, "div.hover-reveal-target")
     DROPDOWN_MENU_CONTAINER = (By.CSS_SELECTOR, "div[class*='dropdown-menu-container']")
-    MENU_ITEM = (By.CSS_SELECTOR, "li a[class='dropdown-item']")
-    SELECT_OBJECT_MODAL = (By.CSS_SELECTOR, "div[id='modalObjectSelect_objectSelectCollection']")
-    RECENT_ITEMS = (By.CSS_SELECTOR, "li[class='suggest-item']")
-    SEARCH_INPUT = (By.CSS_SELECTOR, "input[id='object-search']")
+    MENU_ITEM = (By.CSS_SELECTOR, "li a.dropdown-item")
+    SELECT_OBJECT_MODAL = (By.CSS_SELECTOR, "div#modalObjectSelect_objectSelectCollection")
+    RECENT_ITEMS = (By.CSS_SELECTOR, "ul.multiselect__content li.multiselect__element")
+    SEARCH_INPUT = (By.CSS_SELECTOR, "input.multiselect__input")
     SEARCH_SUGGESTION_FIRST = (By.CSS_SELECTOR, "div[class*='object-select-suggestion'] div:nth-child(2) div")
     CHECKBOX_BOOKMARKS = (By.CSS_SELECTOR, "label[data-filter-type='bookmarks'] input")
     CHECKBOX_BLOBS = (By.CSS_SELECTOR, "label[data-filter-type='blobs'] input")
-    SEARCH_SUGGESTION_LIST = (By.CSS_SELECTOR, "ul li[class*='suggest-item']")
+    SEARCH_SUGGESTION_LIST = (By.CSS_SELECTOR, "ul div[class*='object-select-suggestion']")
 
     def __init__(self, browser):
         self.browser = browser
