@@ -75,7 +75,6 @@
         "vue-router": "^4.1.6",
         "vue-select": "^4.0.0-beta.6",
         "vue-sidebar-menu": "^5.2.5",
-        "vue-simple-suggest": "file:../../third-party/vue-simple-suggest",
         "vue3-datepicker": "^0.3.4",
         "vuedraggable": "^4.1.0",
         "vuex": "^4.1.0"
