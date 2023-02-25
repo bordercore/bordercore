@@ -19,13 +19,12 @@ class PrefsPage:
     TITLE = (By.TAG_NAME, "title")
     THEME_ID = (By.ID, "id_theme")
     COLLECTION_ID = (By.ID, "id_homepage_default_collection")
-    UPDATE_BUTTON = (By.XPATH, "//input[@value='Update']")
-    THEME_SELECTED = (By.XPATH, "//select[@id='id_theme']/option[@selected]")
-    PINNED_TAGS_INPUT = (By.XPATH, "//div[@id='id_pinned_tags']//ul//input")
-    PREFS_UPDATED_MESSAGE = (By.XPATH, "//div[@class='alert alert-success'][normalize-space(text())='Preferences updated']")
-    DEFAULT_THEME = (By.XPATH, "//select[@id='id_theme']/option[@selected]")
-    DEFAULT_COLLECTION_SELECTED = (By.XPATH, "//select[@id='id_homepage_default_collection']/option[@selected]")
-    PINNED_TAGS = (By.XPATH, "//div[@id='id_pinned_tags']//li[@class='ti-tag ti-valid']")
+    UPDATE_BUTTON = (By.CSS_SELECTOR, "input[value='Update']")
+    THEME_SELECTED = (By.CSS_SELECTOR, "select#id_theme option")
+    PINNED_TAGS_INPUT = (By.CSS_SELECTOR, "div#id_pinned_tags input")
+    PREFS_UPDATED_MESSAGE = (By.CSS_SELECTOR, "div[class='alert alert-success']")
+    DEFAULT_COLLECTION_SELECTED = (By.CSS_SELECTOR, "select#id_homepage_default_collection option")
+    PINNED_TAGS = (By.CSS_SELECTOR, "div#id_pinned_tags span.vs__selected")
 
     def __init__(self, browser):
         self.browser = browser
@@ -57,14 +56,17 @@ class PrefsPage:
     def add_pinned_tags(self, tag_name):
         pinned_tags_input = self.browser.find_element(*self.PINNED_TAGS_INPUT)
         pinned_tags_input.send_keys(tag_name + Keys.ENTER)
+        time.sleep(1)
+        pinned_tags_input.send_keys(Keys.ENTER)
 
     def selected_theme(self):
-        selected_option = self.browser.find_element(*self.THEME_SELECTED).text
-        return selected_option
+        options = self.browser.find_elements(*self.THEME_SELECTED)
+        return [x for x in options if x.is_selected()][0].text
 
     def selected_default_collection(self):
-        selected_option = self.browser.find_element(*self.DEFAULT_COLLECTION_SELECTED).text
-        return selected_option
+        # selected_option = self.browser.find_element(*self.DEFAULT_COLLECTION_SELECTED).text
+        options = self.browser.find_elements(*self.DEFAULT_COLLECTION_SELECTED)
+        return [x for x in options if x.is_selected()][0].text
 
     def update(self):
         """
@@ -78,12 +80,12 @@ class PrefsPage:
 
         update_input.click()
 
-    def prefs_updated_message_count(self):
+    def prefs_updated_message(self):
         """
         Find the success message after updating preference options
         """
-        message = self.browser.find_elements(*self.PREFS_UPDATED_MESSAGE)
-        return len(message)
+        message = self.browser.find_element(*self.PREFS_UPDATED_MESSAGE)
+        return message.text
 
     def pinned_tags(self):
         selected_option = self.browser.find_element(*self.PINNED_TAGS)

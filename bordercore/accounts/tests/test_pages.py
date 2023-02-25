@@ -39,7 +39,7 @@ def test_prefs(collection, login, live_server, browser, settings):
 
     # Test that preferences were successfully updated
     page.update()
-    assert page.prefs_updated_message_count() == 1
+    assert page.prefs_updated_message() == "Preferences updated"
 
     # Test that the theme was switched
     assert page.selected_theme() == THEME_NAME
