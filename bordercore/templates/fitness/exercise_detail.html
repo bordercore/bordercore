@@ -355,7 +355,7 @@
                     payload = {
                         "uuid": "{{ object.uuid }}",
                     };
-                    if (isActiveExercise) {
+                    if (isActiveExercise.value) {
                         payload.remove = true;
                     } else {
                         showHistoryMessage.value = false;
