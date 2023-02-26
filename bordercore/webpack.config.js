@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require("compression-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
+const RemoveEmptyScriptsPlugin = require("webpack-remove-empty-scripts");
 const StylelintPlugin = require("stylelint-webpack-plugin");
 const {VueLoaderPlugin} = require("vue-loader");
 
@@ -54,7 +54,7 @@ module.exports = (env, argv) => {
             }),
 
             // Remove the boilerplate JS files from chunks of CSS only entries
-            new FixStyleOnlyEntriesPlugin(),
+            new RemoveEmptyScriptsPlugin(),
 
             // Extract generated CSS into separate files
             new MiniCssExtractPlugin({
