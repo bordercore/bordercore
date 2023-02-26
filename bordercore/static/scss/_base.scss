@@ -2346,11 +2346,21 @@ tr.hover-target:hover {
 
 // Vue Select
 
-.v-select .vs__deselect {
-  fill: var(--vs-deselect-fill);
+.vs__dropdown-toggle {
+  background-color: var(--form-bg) !important;
 
   &:hover {
-    fill: var(--vs-deselect-hover-fill);
+    border-color: var(--form-border-color-hover);
+  }
+
+  // When the child input element gets focus
+  &:focus-within {
+    border-color: var(--form-border-color-hover) !important;
+    background-color: var(--form-bg-focus) !important;
+    box-shadow: $input-btn-focus-box-shadow !important;
+    color: var(--text4) !important;
+    // This transition mimics Bootstrap behavior
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out !important;
   }
 }
 
