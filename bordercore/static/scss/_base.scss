@@ -2470,13 +2470,13 @@ tr.hover-target:hover {
     }
   }
 
-  .vsm--dropdown .vsm--list {
+  .vsm--dropdown {
     background-color: var(--sidebar-bg) !important;
-    color: var(--sidebar-color) !important;
-  }
 
-  &.vsm_expanded {
-    max-width: 15rem !important;
+    .vsm--list {
+      background-color: var(--sidebar-bg) !important;
+      color: var(--sidebar-color) !important;
+    }
   }
 
   .vsm--header {
@@ -2485,17 +2485,19 @@ tr.hover-target:hover {
 
   .vsm--icon {
     background-color: transparent !important;
-    &:hover {
-      background-color: var(--sidebar-hover-bg) !important;
-    }
   }
 
   .vsm--item {
     background-color: var(--sidebar-bg) !important;
     color: var(--sidebar-color) !important;
   }
-}
 
+  // This eliminates broken ::after icon glyph
+  .vsm--arrow:after, .vsm--toggle-btn:after {
+    content: "";
+    font-family: "FontAwesome";
+  }
+}
 
 // Copy button for code
 .code-input,

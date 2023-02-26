@@ -132,13 +132,14 @@
 
             <div id="sidebar">
                 <sidebar-menu @update:collapsed="onToggleCollapse" @item-click="onItemClick" :menu="menu"
-                    :collapsed="collapsed" />
-                <span slot="toggle-icon">
-                    <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
-                </span>
-                <span slot="dropdown-icon">
-                    <font-awesome-icon icon="angle-right"></font-awesome-icon>
-                </span>
+                    :collapsed="collapsed">
+                    <template #toggle-icon>
+                        <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
+                    </template>
+                    <template #dropdown-icon>
+                        <font-awesome-icon icon="angle-right"></font-awesome-icon>
+                    </template>
+                </sidebar-menu>
             </div>
 
             <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
