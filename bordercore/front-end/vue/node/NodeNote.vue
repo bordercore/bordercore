@@ -8,7 +8,7 @@
                             <font-awesome-icon icon="sticky-note" class="text-primary me-3" />
                         </div>
                         <div class="w-100">
-                            <input v-if="isEditingName" v-model="nodeNote.name" class="form-control w-100" @blur="onBlur()" @keydown.enter="onBlur">
+                            <input v-if="isEditingName" v-model="nodeNote.name" class="form-control w-100" @blur="onUpdateName" @keydown.enter="onUpdateName">
                             <span v-else-if="note" @dblclick="onEditName">
                                 {{ nodeNote.name }}
                             </span>
@@ -18,19 +18,19 @@
                         <drop-down-menu :show-on-hover="true">
                             <template #dropdown>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onUpdateNoteContents()">
-                                        <span>
-                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
-                                        </span>
-                                        Update note contents
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onOpenNoteModal()">
+                                    <a class="dropdown-item" href="#" @click.prevent="onUpdateNote()">
                                         <span>
                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
                                         </span>
                                         Update note
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onOpenNoteMetadataModal()">
+                                        <span>
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                        </span>
+                                        Update note metadata
                                     </a>
                                 </li>
                                 <li>
@@ -50,11 +50,10 @@
                 <hr class="divider">
                 <editable-text-area
                     ref="editableTextArea"
-                    v-model="note"
+                    v-model="noteContents"
                     default-value="No content"
                     class="node-note"
                     :hide-add-button="true"
-                    @update-note="onUpdateNote(nodeNote)"
                 />
             </template>
         </card>
@@ -75,7 +74,7 @@
             EditableTextArea,
             FontAwesomeIcon,
         },
-        emits: ["deleteNote", "openNoteModal", "updateLayout"],
+        emits: ["deleteNote", "openNoteMetadataModal", "updateLayout"],
         props: {
             nodeUuid: {
                 type: String,
@@ -99,33 +98,40 @@
             },
         },
         setup(props, ctx) {
-            let beforeEditCache = null;
+            let nameCache = null;
             const isEditingName = ref(false);
             const nodeNote = ref({});
             const note = ref("");
+            const noteContents = ref("");
 
             const editableTextArea = ref(null);
 
-            function onUpdateNoteContents() {
+            watch(noteContents, (newValue) => {
+                if (newValue) {
+                    updateNoteContents();
+                }
+            });
+
+            function onUpdateNote() {
                 editableTextArea.value.editNote(!note.value.content);
             };
 
             function onEditName() {
-                beforeEditCache = note.value.name;
+                nameCache = note.value.name;
                 isEditingName.value = true;
             };
 
-            function onOpenNoteModal() {
-                ctx.emit("openNoteModal", onUpdateNote, nodeNote.value);
+            function onOpenNoteMetadataModal() {
+                ctx.emit("openNoteMetadataModal", updateNoteMetadata, nodeNote.value);
             };
 
-            function onBlur() {
+            function onUpdateName() {
                 isEditingName.value = false;
                 // If the name hasn't changed, abort
-                if (beforeEditCache === nodeNote.value.name) {
+                if (nameCache === nodeNote.value.name) {
                     return;
                 }
-                onUpdateNote(nodeNote.value);
+                updateNoteMetadata(nodeNote.value);
             };
 
             function onDeleteNote() {
@@ -145,7 +151,7 @@
                 ctx.emit("deleteNote", note.value.uuid);
             };
 
-            function onUpdateNote(note) {
+            function updateNoteMetadata(note) {
                 doPost(
                     null,
                     props.setNoteColorUrl,
@@ -160,19 +166,20 @@
                     "",
                     "",
                 );
-                const noteContent = editableTextArea.value.textAreaValue || "";
+                updateNoteContents();
+            };
+
+            function updateNoteContents() {
                 doPut(
                     null,
                     props.noteUrl,
                     {
-                        "uuid": note.uuid,
+                        "uuid": nodeNote.value.uuid,
                         "name": nodeNote.value.name,
-                        "content": noteContent,
+                        "content": noteContents.value,
                         "is_note": true,
                     },
-                    (response) => {
-                        // note.value.content = noteContent;
-                    },
+                    (response) => {},
                     "",
                 );
             };
@@ -192,7 +199,7 @@
                     props.noteUrl,
                     (response) => {
                         note.value = response.data;
-                        //editableTextArea.value.setTextAreaValue(response.data.content);
+                        noteContents.value = response.data.content;
                     },
                     "Error getting note",
                 );
@@ -203,14 +210,16 @@
                 editableTextArea,
                 isEditingName,
                 getNote,
-                onBlur,
                 onDeleteNote,
                 onEditName,
-                onOpenNoteModal,
+                onOpenNoteMetadataModal,
+                onUpdateName,
                 onUpdateNote,
-                onUpdateNoteContents,
                 nodeNote,
                 note,
+                noteContents,
+                updateNoteContents,
+                updateNoteMetadata,
             };
         },
     };

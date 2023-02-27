@@ -1,12 +1,10 @@
 <template>
     <div>
         <div v-if="textAreaValue || isEditingNote" :class="extraClass" class="editable-textarea position-relative">
-            <!-- <div v-if="modelValue || isEditingNote" :class="extraClass" class="editable-textarea position-relative"> -->
             <slot name="title" />
-            <Transition name="fade" mode="out-in" @before-leave="onBeforeLeave" @before-enter="onBeforeEnter" @enter="onEnter">
-                <label v-if="!isEditingNote" class="w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote(false)" v-html="textAreaMarkdown" />
-                <textarea v-else v-model="textAreaValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" />
-                <!-- <textarea v-else v-model="modelValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" /> -->
+            <Transition name="fade" mode="out-in" @after-enter="onAfterEnterTransition" @enter="onEnterTransition">
+                <label v-if="!isEditingNote" ref="noteLabel" class="w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote(false)" v-html="textAreaMarkdown" />
+                <textarea v-else ref="textarea" v-model="textAreaValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" />
             </Transition>
         </div>
         <div v-else>
@@ -15,7 +13,7 @@
             </div>
             <div v-if="!hideAddButton" class="ms-2" :class="extraClass">
                 <font-awesome-icon icon="plus" />
-                <a href="#" @click="addNote">Add Note</a>
+                <a href="#" @click="onAddNote">Add Note</a>
             </div>
         </div>
     </div>
@@ -23,12 +21,14 @@
 
 <script>
 
+    import {toRefs} from "vue";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
     export default {
         components: {
             FontAwesomeIcon,
         },
+        emits: ["update:modelValue"],
         props: {
             defaultValue: {
                 default: "",
@@ -51,113 +51,130 @@
                 default: false,
             },
         },
-        data() {
-            return {
-                isEditingNote: false,
-                labelOffsetHeight: 0,
-                minNumberRows: 10,
-                // textAreaValue: this.modelValue,
+        setup(props, ctx) {
+            const isEditingNote = ref(false);
+            const textAreaValue = ref(props.modelValue);
+            const textAreaMarkdown = ref("");
+
+            let cache = null;
+            let labelOffsetHeight = 0;
+            let minNumberRows = 10;
+            let stateRef = toRefs(props).modelValue;
+
+            const noteLabel = ref(null);
+            const textarea = ref(null);
+
+            watch(stateRef, (newValue) => {
+                updateValue(newValue);
+            });
+
+            function editNote(focusTextArea=false) {
+                cache = textAreaValue.value;
+
+                // When transitioning from non-editing to editing, ie
+                // from the label to the textarea, save the offset height.
+                // We'll need it in the 'onAfterEnterTransition' handler.
+                if (noteLabel.value) {
+                    labelOffsetHeight = noteLabel.value.offsetHeight;
+                }
+
+                isEditingNote.value = true;
+                if (focusTextArea) {
+                    // This is often set when creating a new value,
+                    //  in which case the usual Vue transitions won't
+                    //  trigger which would ordinarily focus the element.
+                    //  So we need to do that ourselves.
+                    nextTick(() => {
+                        textarea.value.focus();
+                    });
+                }
             };
-        },
-        computed: {
-            textAreaMarkdown() {
-//                if (!this.textAreaValue) {
-                if (!this.modelValue) {
-                    return "";
-                }
-//                return markdown.render(this.textAreaValue);
-                return markdown.render(this.modelValue);
-            },
-        },
-        methods: {
-            setTextAreaValue(value) {
-//                this.textAreaValue = modelValue;
-//                this.textAreaValue = modelValue;
-                this.$nextTick(() => {
-                    Prism.highlightAll();
+
+            function onAddNote() {
+                nextTick(() => {
+                    editNote(false);
                 });
-            },
-            onEnter() {
-                // When transitioning from editing to non-editing,
-                // ie from the textarea to the label, then
-                // tell prism.js to re-highlight any code.
-                if (!this.isEditingNote) {
-                    Prism.highlightAll();
-                }
-            },
-            onBeforeLeave() {
-                // When transitioning from non-editing to editing,
-                // ie from the label to the textarea, then
-                // save the offset height.
-                // We'll need it in the 'onBeforeEnter' handler.
-                if (this.isEditingNote) {
-                    // We want the generated textarea to equal the size
-                    //  of the note itself. To do this, we need to know
-                    //  how many rows to use.
-                    this.labelOffsetHeight = this.$el.querySelector(".editable-textarea label").offsetHeight;
-                }
-            },
-            onBeforeEnter() {
-                this.$nextTick(() => {
-                    const txtarea = this.$el.querySelector(".editable-textarea textarea");
-                    if (txtarea) {
+            };
+
+            function onAfterEnterTransition() {
+                nextTick(() => {
+                    // If textarea is not null, then we have transitioned
+                    //  from label to textarea
+                    if (textarea.value) {
                         // The lineHeight is the height of each row
-                        const lineHeight = getComputedStyle(txtarea).lineHeight;
+                        const lineHeight = getComputedStyle(textarea.value).lineHeight;
+
+                        // We want the textarea to equal the size of the note
+                        //  itself. To do this, we need to know how many rows to use.
 
                         // Divide the note text height by the row height to
                         //  get target number of rows for the textarea
-                        const rows = this.labelOffsetHeight / parseInt(lineHeight, 10);
+                        const rows = labelOffsetHeight / parseInt(lineHeight, 10);
 
-                        if (rows > this.minNumberRows) {
-                            txtarea.setAttribute("rows", rows);
-                        } else {
-                            txtarea.setAttribute("rows", this.minNumberRows);
-                        }
+                        textarea.value.setAttribute(
+                            "rows",
+                            rows > minNumberRows ? rows : minNumberRows,
+                        );
 
                         // Position the cursor at the beginning of the textarea
-                        this.$nextTick(() => {
-                            txtarea.focus();
+                        nextTick(() => {
+                            textarea.value.focus();
                         });
-                        txtarea.setSelectionRange(0, 0);
+                        textarea.value.setSelectionRange(0, 0);
                     }
                 });
-            },
-            editNote(focusTextArea=false) {
-//                this.beforeEditCache = this.textAreaValue;
-                this.beforeEditCache = this.modelValue;
-                this.isEditingNote = true;
-                if (focusTextArea) {
-                    // This is typically true when creating a new value,
-                    //  in which case the usual Vue transitions won't
-                    //  trigger when would ordinarily focus the element.
-                    //  So we need to do that ourselves.
-                    this.$nextTick(() => {
-                        this.$el.querySelector(".editable-textarea textarea").focus();
-                    });
-                }
-            },
-            onBlur() {
-                this.isEditingNote = false;
+            };
+
+            function onBlur() {
+                isEditingNote.value = false;
                 // If the note hasn't changed, abort
-//                if (this.beforeEditCache == this.textAreaValue) {
-                if (this.beforeEditCache == this.modelValue) {
+                if (cache === textAreaValue.value) {
                     return;
                 }
-                this.updateNote();
-            },
-            updateNote() {
-                this.$emit("update:modelValue");
-            },
-            addNote() {
-                this.$nextTick(() => {
-                    this.editNote(false);
-                });
-            },
-            deleteNote() {
-//                this.textAreaValue = "";
-                this.modelValue = "";
-                this.updateNote();
-            },
+                updateNote();
+            };
+
+            function onEnterTransition() {
+                // When transitioning from editing to non-editing,
+                // ie from the textarea to the label, then
+                // tell prism.js to re-highlight any code.
+                if (!isEditingNote.value) {
+                    Prism.highlightAll();
+                }
+            };
+
+            function updateNote() {
+                ctx.emit("update:modelValue", textAreaValue.value);
+            };
+
+            function updateValue(value) {
+                if (value !== null) {
+                    textAreaValue.value = value;
+                    textAreaMarkdown.value = markdown.render(value);
+                    nextTick(() => {
+                        Prism.highlightAll();
+                    });
+                }
+            };
+
+            onMounted(() => {
+                updateValue(props.modelValue);
+            });
+
+            return {
+                editNote,
+                isEditingNote,
+                labelOffsetHeight,
+                minNumberRows,
+                noteLabel,
+                onAddNote,
+                onAfterEnterTransition,
+                onBlur,
+                onEnterTransition,
+                textarea,
+                textAreaMarkdown,
+                textAreaValue,
+            };
         },
     };
 

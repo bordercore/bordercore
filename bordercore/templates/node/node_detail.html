@@ -163,7 +163,7 @@
                                     :note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', element.uuid)"
                                     set-note-color-url="{% url "node:set_note_color" %}"
                                     delete-note-url="{% url 'node:delete_note' %}"
-                                    @open-note-modal="openModalNoteUpdate"
+                                    @open-note-metadata-modal="openModalNoteUpdate"
                                     @update-layout="onUpdateLayout"
                                 >
                                 </node-note>

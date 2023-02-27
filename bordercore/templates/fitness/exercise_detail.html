@@ -153,7 +153,6 @@
                                 v-model="note"
                                 extra-class=""
                                 :hide-add-button="true"
-                                @update-note="onUpdateNote"
                             >
                                 <template v-slot:title>
                                     <div class="card-title text-primary mt-3">
@@ -377,24 +376,21 @@
                 };
 
                 function onUpdateNote() {
-                    const noteValue = editableTextArea.value.textAreaValue;
                     doPost(
                         null,
                         "{% url 'fitness:edit_note' %}",
                         {
                             "uuid": "{{ object.uuid }}",
-                            "note": noteValue,
+                            "note": note.value,
                         },
-                        (response) => {
-                            note.value = noteValue;
-                        },
+                        (response) => {},
                         "",
                         "",
                     );
                 };
 
                 function deleteNote() {
-                    editableTextArea.value.deleteNote();
+                    note.value = "";
                 };
 
                 function onClickSwitchExercise(evt) {
@@ -487,6 +483,12 @@
 
                 const hideLastWorkoutDuration = computed(() => {
                     return {% if latest_duration.0 > 0 %}false{% else %}true{% endif %};
+                });
+
+                watch(note, (newValue) => {
+                    if (newValue !== null) {
+                        onUpdateNote();
+                    }
                 });
 
                 return {
