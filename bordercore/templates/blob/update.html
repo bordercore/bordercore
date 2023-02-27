@@ -221,7 +221,7 @@
 
                                         <div class="col-lg-8">
                                             <div class="input-group">
-                                                <div v-if="dateFormat === 'standard'" id="dateapp">
+                                                <div v-if="dateFormat === 'standard'">
                                                     <Datepicker
                                                         :typeable="true"
                                                         v-model="date"
@@ -439,7 +439,7 @@
                 {% else %}
                 const date = ref(new Date("{{ form.date.value }}"));
                 {% endif %}
-                const dateFormat = ref("{{ date_format }}");
+                const dateFormat = ref("{{ date_format|default:'standard' }}");
                 const dateFormatMenuItems = ref([
                     {
                         id: uuidv4(),
@@ -479,11 +479,8 @@
                 const selectValue = ref(null);
                 const tagsInput = ref(null);
 
-                watch(dateFormat, (newFormat) => {
-                    dateFormatMenuItems.value.forEach(function (item) {
-                        item.icon = item.format === newFormat ? "check" : undefined;
-                    });
-                })
+                // Set the initial date format menu values
+                updateDateFormatMenu(dateFormat.value);
 
                 function addMetadata(payload) {
                     nameEl = document.getElementById("metadata_name");
@@ -544,7 +541,7 @@
 
                 function onClickDateFormatStandard() {
                     dateFormat.value = "standard";
-                    date.value = date.value + "-01-01T00:00";
+                    date.value = new Date(`${date.value}T00:00`)
                 };
 
                 function onClickDateFormatYear() {
@@ -671,6 +668,12 @@
                     });
                 };
 
+                function updateDateFormatMenu(dateFormat) {
+                    dateFormatMenuItems.value.forEach(function (item) {
+                        item.icon = item.format === dateFormat ? "check" : undefined;
+                    });
+                };
+
                 function updateFormValue(property, value) {
                     if (property === "important") {
                         document.getElementById("form-blob").elements[property].value = 10;
@@ -694,6 +697,10 @@
                         coverImage.src = coverImage.src + "?" + new Date().getTime();
                     });
                 };
+
+                watch(dateFormat, (newFormat) => {
+                    updateDateFormatMenu(newFormat);
+                })
 
                 onMounted(() => {
                     // document.getElementById("id_date").addEventListener("paste", onPasteDate);

@@ -210,5 +210,7 @@ def get_javascript_date(date):
     if re.compile(r"^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d").match(date):
         # If the date has a time, remove it. The vuejs-datepicker widget will reject it.
         return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%dT00:00")
-    else:
+    elif re.compile(r"^\d\d\d\d$").match(date):
         return date
+    else:
+        return date + "T00:00"
