@@ -116,6 +116,9 @@
                 // Re-emit this event in case a parent component is interested
                 this.$emit("tags-changed", this.tags.map( (x) => x.label ));
                 this.options = [];
+                this.$nextTick(() => {
+                    this.$refs.tagsInputComponent.$refs.search.focus();
+                });
             },
             fetchOptions(search, loading) {
                 // Set a minimum character count to trigger the ajax call
