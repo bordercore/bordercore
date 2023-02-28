@@ -250,7 +250,9 @@ class SearchListView(ListView):
                         match["source"]["url"] = reverse("music:album_detail", args=[match["source"]["album_uuid"]])
                     else:
                         match["source"]["url"] = reverse("music:artist_detail", args=[match["source"]["artist_uuid"]])
-                match["tags_json"] = json.dumps(match["source"]["tags"])
+                match["tags_json"] = json.dumps(match["source"]["tags"]) \
+                    if "tags" in match["source"] \
+                    else []
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
             page = int(self.request.GET.get("page", 1))
