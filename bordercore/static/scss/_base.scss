@@ -1328,9 +1328,12 @@ blockquote > p {
   }
 
   // Absolutely position a search icon inside a search box.
+  //
+  //  Set the z-index to something above 50 to be visible if using
+  //  with Vue-multiselect, which sets its z-index to this value.
   svg[data-icon="search"] {
     position: absolute;
-    z-index: 2;
+    z-index: 100;
     top: 0.75rem;
     left: 0.75rem;
     display: block;
@@ -1683,6 +1686,7 @@ div #dateapp {
 
 #blob-tag-list {
   line-height: 2;
+  word-break: break-all;
 }
 
 #blob-options {
@@ -2333,7 +2337,7 @@ tr.hover-target:hover {
   }
 
   .multiselect__input, .multiselect__single {
-    padding-top: 0.37rem !important;
+    padding-top: 0.4rem !important;
     padding-left: 0 !important;
     margin-bottom: 0 !important;
     background-color: var(--form-bg) !important;

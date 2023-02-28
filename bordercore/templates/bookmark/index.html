@@ -24,7 +24,7 @@
                 <div id="bookmark-search-form" class="d-flex flex-column me-2 p-3">
 
                     <div class="d-flex">
-                        <form class="form-inline w-25" role="form" method="get" @submit.prevent>
+                        <form class="form-inline" role="form" method="get" @submit.prevent>
                             {% csrf_token %}
                             <input :value="pinnedTags && pinnedTags.selectedTagName" type="hidden" name="tag" />
                             <div class="position-relative" v-cloak>
