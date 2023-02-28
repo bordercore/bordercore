@@ -237,15 +237,8 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
         if "cover_image" in self.request.FILES:
             self.handle_cover_image()
 
-        song = form.instance
-
-        # Delete all existing tags
-        song.tags.clear()
-
-        # Then add the tags specified in the form
-        for tag in form.cleaned_data["tags"]:
-            song.tags.add(tag)
-
+        album = form.instance
+        album.tags.set(form.cleaned_data["tags"])
         self.object = form.save()
 
         messages.add_message(
@@ -310,16 +303,9 @@ class SongUpdateView(FormRequestMixin, UpdateView):
 
     def form_valid(self, form):
 
-        song = form.save(commit=False)
-
-        # Delete all existing tags first
-        song.tags.clear()
-
-        # Then add all tags specified
-        for tag in form.cleaned_data["tags"]:
-            song.tags.add(tag)
-
-        song.save()
+        song = form.instance
+        song.tags.set(form.cleaned_data["tags"])
+        self.object = form.save()
 
         messages.add_message(
             self.request, messages.INFO,

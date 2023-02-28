@@ -178,16 +178,9 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
 
     def form_valid(self, form):
 
-        question = form.save(commit=False)
-
-        # Delete all existing tags first
-        form.instance.tags.clear()
-
-        # Then add all tags specified
-        for tag in form.cleaned_data["tags"]:
-            question.tags.add(tag)
-
-        question.save()
+        question = form.instance
+        question.tags.set(form.cleaned_data["tags"])
+        self.object = form.save()
 
         review_url = urls.reverse("drill:detail", kwargs={"uuid": question.uuid})
         messages.add_message(

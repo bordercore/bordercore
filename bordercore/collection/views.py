@@ -132,17 +132,9 @@ class CollectionUpdateView(FormRequestMixin, UpdateView):
 
     def form_valid(self, form):
 
-        collection = form.save(commit=False)
-        collection.user = self.request.user
-
-        # Delete all existing tags first
-        collection.tags.clear()
-
-        # Then add all tags specified
-        for tag in form.cleaned_data["tags"]:
-            collection.tags.add(tag)
-
-        collection.save()
+        collection = form.instance
+        collection.tags.set(form.cleaned_data["tags"])
+        self.object = form.save()
 
         messages.add_message(
             self.request,
