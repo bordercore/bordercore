@@ -59,7 +59,7 @@
 
                                 <font-awesome-icon icon="search"></font-awesome-icon>
 
-                                <input id="search" name="search" value="{{ request.GET.search|safe|escapejs }}" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control" />
+                                <input id="search" ref="searchInput" name="search" value="{{ request.GET.search|safe|escapejs }}" placeholder="Search" autocomplete="off" autofocus class="default-input form-control" />
 
                             </div>
                         </div>
@@ -331,9 +331,12 @@
             components: {
                 FontAwesomeIcon,
                 Pagination,
+                SearchNoResult,
                 SearchResult,
             },
             setup() {
+                const searchInput = ref(null);
+
                 function onClick(evt) {
                     const selectedDoctype = evt.currentTarget.getAttribute("data-doctype");
                     const urlParams = new URLSearchParams(window.location.search);
@@ -363,9 +366,14 @@
                     window.location=url;
                 };
 
+                onMounted(() => {
+                    searchInput.value.focus();
+                });
+
                 return {
                     getDoctypeClass,
                     onClick,
+                    searchInput,
                     select,
                 };
             },
