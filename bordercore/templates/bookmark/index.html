@@ -107,19 +107,20 @@
                         <div class="col-lg-12">
                             <table class="w-100">
                                 <tbody>
-                                    <draggable id="bookmark-list" v-model="bookmarkList" @change="onSortBookmarks" :component-data="{type:'transition-group'}" item-key="uuid">
+                                    <draggable id="bookmark-list" v-model="bookmarkList" @change="onSortBookmarks"
+                                        :component-data="{type:'transition-group'}" item-key="uuid" handle=".handle">
                                         <template #item="{element}">
                                             <tr :data-uuid="element.uuid" :key="element.uuid" class="dropdown-height hover-target bookmark-list w-100" v-cloak @dragstart="onDragStartBookmark($event, element)" @click="onClickBookmark(element.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
                                                 <td class="date p-2 align-top">
                                                     <span>[[ element.created ]]</span>
                                                 </td>
-                                                <td v-if="viewType !== 'compact'" class="favicon p-2">
+                                                <td v-if="viewType !== 'compact'" class="favicon handle p-2">
                                                     <img width="120" height="67" :src="element.thumbnail_url + '?foo=bar'" />
                                                 </td>
-                                                <td class="favicon p-2 align-top">
+                                                <td class="favicon handle p-2 align-top">
                                                     <span v-html="element.favicon_url"></span>
                                                 </td>
-                                                <td class="link w-100 p-2 align-top position-relative text-break">
+                                                <td class="link handle w-100 p-2 align-top position-relative text-break">
                                                     <a :href="element.url" :id="element.linkId" target="_blank">[[ unescapeHtml(element.name) ]]</a>
                                                     <a v-for="tag in filteredTags(element)" class="tag ms-2 d-inline-block" @click.prevent="searchTag(tag)" href="#">[[ tag ]]</a>
                                                     <div v-if="element.note != null && element.note != ''" class="table-note" v-html="getNote(element.note)">
