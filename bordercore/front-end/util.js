@@ -171,27 +171,6 @@ export function doPut(scope, url, params, callback, successMsg, errorMsg) {
 }
 
 /**
- * Return a Vue Vnode containing a formatted error message
- * @param {string} vue Vue component
- * @param {string} errorMsg the error message to display
- * @return {VNodes} the new Vnode
- */
-function getErrorMessage(vue, errorMsg) {
-    const h = vue.$createElement;
-    const vNodesMsg = [
-        h("font-awesome-icon", {
-            props: {
-                icon: "exclamation-triangle",
-            },
-        }),
-        h("span", {"class": ["ms-2"]}, [errorMsg]),
-    ];
-
-    return vNodesMsg;
-}
-
-
-/**
  * Return a formatted date.
  * @param {string} date The date to format.
  * @param {string} monthFormat The url to request.

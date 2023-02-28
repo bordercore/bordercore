@@ -230,8 +230,6 @@
                     setup() {
 
                         const failed_test_count = ref({{ failed_test_count }});
-                        const right = ref(true);
-                        const show = ref(false);
                         const userMenuItems = ref([
                             {
                                 id: uuidv4(),
@@ -295,8 +293,6 @@
                         return {
                             failed_test_count,
                             collapsed,
-                            right,
-                            show,
                             storeBase,
                             userMenuItems,
                             recentBlobs,

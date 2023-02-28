@@ -2,7 +2,7 @@
     <ul>
         <draggable v-model="localFeedList" animation="500" item-key="id" @change="onChange">
             <template #item="{element}">
-                <li v-for="feed in {element}" v-cloak :key="feed.id" :class="getFeedClass(feed)" class="ps-2">
+                <li v-for="feed in {element}" v-cloak :key="feed.id" :class="{'selected rounded-sm': feed.id === $store.state.currentFeed.id}" class="ps-2">
                     <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">
                         {{ feed.name }}
                     </a>
@@ -41,12 +41,6 @@
         setup(props) {
             const store = useStore();
             const localFeedList = props.feedList.slice();
-
-            function getFeedClass(feed) {
-                if (feed === store.state.currentFeed) {
-                    return "selected rounded-sm";
-                }
-            }
 
             function onChange(evt) {
                 const feedId = evt.moved.element.id;
@@ -99,7 +93,6 @@
             });
 
             return {
-                getFeedClass,
                 localFeedList,
                 onChange,
                 onClick,
