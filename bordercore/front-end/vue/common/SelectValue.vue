@@ -28,7 +28,7 @@
             <div slot="noResult" />
             <template #option="props">
                 <slot name="option" v-bind="props">
-                    <div v-if="boldenOptions" v-html="boldenOption(props.option, props.search)" />
+                    <div v-if="boldenOptions" v-html="boldenOption(props.option.artist, props.search)" />
                 </slot>
             </template>
             <template #afterList="props">
@@ -42,6 +42,7 @@
 <script>
 
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import {boldenOption} from "/front-end/util.js";
     import Multiselect from "vue-multiselect";
     import debounceMixin from "../../debounce.js";
 
@@ -121,10 +122,7 @@
                     return "";
                 }
             },
-            boldenOption(option, search) {
-                const texts = search.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
-                return option[this.label].replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b>$2</b>$3");
-            },
+            boldenOption,
             clearOptions() {
                 this.options = [];
                 this.value = null;

@@ -44,9 +44,7 @@
                                                 <img width="120" height="67" :src="props.option.thumbnail_url">
                                             </div>
                                             <div class="name d-flex flex-column">
-                                                <div class="ms-2">
-                                                    {{ props.option.name }}
-                                                </div>
+                                                <div class="ms-2" v-html="boldenOption(props.option.name, props.search)" />
                                                 <div class="date ms-2">
                                                     {{ props.option.date }}
                                                     <span v-if="props.option.important === 10" class="ms-2">
@@ -87,6 +85,7 @@
 <script>
 
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import {boldenOption} from "/front-end/util.js";
     import SelectValue from "/front-end/vue/common/SelectValue.vue";
     import "vue-multiselect/dist/vue-multiselect.min.css";
 
@@ -143,6 +142,7 @@
             }
         },
         methods: {
+            boldenOption,
             hasMoreThanMax() {
                 console.log("GOT HERE!!!!!!!!!!");
                 /* console.log(this.$refs.selectValue.options.length);
