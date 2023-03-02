@@ -161,6 +161,7 @@
                                             icon="bookmark"
                                             :importance={{ match.source.importance|default:1 }}
                                             title="{{ match.source.name|safe }}"
+                                            url="{{ match.source.url }}"
                                             :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
                                             tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
                                         >
