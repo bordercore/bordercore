@@ -67,11 +67,11 @@
                         <div v-if="hasFilter" class="d-flex mt-2 ms-3">
                             <div>Filter:</div>
                             <div class="d-flex align-items-center ms-2">
-                                <o-switch v-model="toggleBookmarks" data-filter-type="bookmarks" @input="onFilterChange('bookmarks', $event)" />
+                                <o-switch v-model="toggleBookmarks" data-filter-type="bookmarks" @update:modelValue="onToggleBookmarks" />
                                 <label class="ms-2" @click="onFilterLabelClick('bookmarks', $event)">Bookmarks</label>
                             </div>
                             <div class="d-flex align-items-center ms-3">
-                                <o-switch v-model="toggleBlobs" data-filter-type="blobs" @input="onFilterChange('blobs', $event)" />
+                                <o-switch v-model="toggleBlobs" data-filter-type="blobs" @update:modelValue="onToggleBlobs" />
                                 <label class="ms-2" @click="onFilterLabelClick('blobs', $event)">Blobs</label>
                             </div>
                         </div>
@@ -154,18 +154,24 @@
                 input.click();
                 this.onFilterChange(filterType, evt);
             },
-            onFilterChange(filterType, value) {
-                if (value === false) {
-                    // Remove the filter if we're unchecking an option
-                    this.doctypes = ["blob", "book", "bookmark", "document", "note"];
-                } else {
-                    if (filterType === "blobs") {
-                        this.doctypes = ["blob", "book", "document", "note"];
+            onToggleBlobs(value) {
+                if (value) {
+                    if (this.toggleBookmarks) {
                         this.toggleBookmarks = false;
-                    } else {
-                        this.doctypes = ["bookmark"];
+                    }
+                    this.doctypes = ["blob", "book", "document", "note"];
+                } else {
+                    this.doctypes = ["blob", "book", "bookmark", "document", "note"];
+                }
+            },
+            onToggleBookmarks(value) {
+                if (value) {
+                    if (this.toggleBlobs) {
                         this.toggleBlobs = false;
                     }
+                    this.doctypes = ["bookmark"];
+                } else {
+                    this.doctypes = ["blob", "book", "bookmark", "document", "note"];
                 }
             },
             getSearchObjectUrl(query) {
