@@ -35,8 +35,10 @@ def _delete_input(action, search_input):
         send_keys(Keys.BACKSPACE). \
         send_keys(Keys.BACKSPACE). \
         send_keys(Keys.BACKSPACE). \
-        send_keys(Keys.BACKSPACE). \
         perform()
+
+    time.sleep(1)
+    action.send_keys(Keys.BACKSPACE).perform()
 
 
 def _filtered_search(action, search_input, checkbox, name):

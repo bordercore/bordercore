@@ -80,7 +80,7 @@ class TagSearchPage:
 class NoteSearchPage:
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "#top-search input.multiselect__input")
-    SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#left-panel ul[class*='note-search-result'] li")
+    SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#vue-app ul[class*='note-search-result'] li")
     TOP_SEARCH_ICON = (By.CSS_SELECTOR, "#top-search-icon")
 
     def __init__(self, browser):

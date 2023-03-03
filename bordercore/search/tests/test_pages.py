@@ -75,10 +75,10 @@ def test_note_search(blob_note, login, live_server, browser, settings):
     time.sleep(1)
 
     search_input = page.search_input()
-    # Search for the first two words from the note
-    search_input.send_keys(" ".join(blob_note[0].content.split()[:2]))
+    # Search for the first two words from the note's title
+    search_input.send_keys(" ".join(blob_note[0].name.split()[:2]))
 
-    # Specify notes search
+    # Enable note filter
     action = ActionChains(browser)
     action.move_to_element(search_input)
     action.key_down(Keys.ALT).send_keys("n").perform()
