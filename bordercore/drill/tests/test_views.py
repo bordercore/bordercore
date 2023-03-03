@@ -26,12 +26,13 @@ def monkeypatch_drill(monkeypatch):
     monkeypatch.setattr(Question, "delete", mock)
 
 
-def test_drill_list(auto_login_user, question):
+def test_drill_list(auto_login_user, question, django_assert_num_queries):
 
     _, client = auto_login_user()
 
     url = urls.reverse("drill:list")
-    resp = client.get(url)
+    with django_assert_num_queries(25):
+        resp = client.get(url)
 
     assert resp.status_code == 200
 
