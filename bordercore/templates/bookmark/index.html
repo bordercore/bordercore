@@ -362,7 +362,7 @@
                 };
 
                 function getPage(pageNumber) {
-                    clearTimeout(intervalId);
+                    clearTimeout(intervalId.value);
                     getBookmarkList({ pageNumber: pageNumber });
                 };
 
