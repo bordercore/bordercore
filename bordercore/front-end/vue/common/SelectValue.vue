@@ -21,18 +21,20 @@
             :placeholder="placeHolder"
             autocomplete="off"
             @search-change="onSearchChange"
-            @keyup.enter.native="onSubmit"
             @select="select"
             @close="onClose"
         >
             <div slot="noResult" />
             <template #option="props">
                 <slot name="option" v-bind="props">
-                    <div v-if="boldenOptions" v-html="boldenOption(props.option.artist, props.search)" />
+                    <div v-if="boldenOptions" v-html="boldenOption(props.option[label], props.search)" />
                 </slot>
             </template>
             <template #afterList="props">
                 <slot name="afterList" v-bind="props" />
+            </template>
+            <template #noResult>
+                Nothing found
             </template>
         </multiselect>
         <input :id="id" type="hidden" :name="name" :value="getValueComputed">
@@ -105,7 +107,6 @@
         data() {
             return {
                 options: [],
-                searchQuery: "",
                 value: "",
             };
         },
@@ -113,6 +114,14 @@
             getValueComputed() {
                 return this.getValue();
             },
+        },
+        mounted() {
+            // If given an initial value, add it to the options list
+            //  and pre-select it.
+            if (this.initialValue) {
+                this.options = [this.initialValue];
+                this.value = this.initialValue;
+            }
         },
         methods: {
             getValue() {
@@ -130,18 +139,12 @@
             focus() {
                 this.$el.querySelector("input").focus();
             },
-            onSubmit() {
-                const newOption = {
-                    [this.label]: this.searchQuery,
-                };
-                this.options.push(newOption);
-                this.value = newOption;
-                this.searchQuery = "";
-            },
             onSearchChange(query) {
                 this.$emit("search-change", query);
-                this.searchQuery = query;
-                if (this.searchQuery.length <= this.minLength) return;
+                if (this.$refs.multiselect.search.length <= this.minLength) {
+                    this.options = [];
+                    return;
+                }
 
                 try {
                     const url = this.searchUrl;
@@ -156,7 +159,10 @@
                 }
             },
             select(tagInfo) {
+                // Once a value has been selected, emit an event to let the
+                //  parent component handle it
                 this.$emit("select", tagInfo);
+                this.options = [];
             },
             setValue(value) {
                 const newOption = {
@@ -168,14 +174,6 @@
             onClose(evt) {
                 this.$emit("close", evt);
             },
-        },
-        mounted() {
-            // If given an initial value, add it to the options list
-            //  and pre-select it.
-            if (this.initialValue) {
-                this.options = [this.initialValue];
-                this.value = this.initialValue;
-            }
         },
     };
 
