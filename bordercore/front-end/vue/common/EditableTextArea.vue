@@ -28,7 +28,6 @@
         components: {
             FontAwesomeIcon,
         },
-        emits: ["update:modelValue"],
         props: {
             defaultValue: {
                 default: "",
@@ -51,6 +50,7 @@
                 default: false,
             },
         },
+        emits: ["update:modelValue"],
         setup(props, ctx) {
             const isEditingNote = ref(false);
             const textAreaValue = ref(props.modelValue);
@@ -58,8 +58,8 @@
 
             let cache = null;
             let labelOffsetHeight = 0;
-            let minNumberRows = 10;
-            let stateRef = toRefs(props).modelValue;
+            const minNumberRows = 10;
+            const stateRef = toRefs(props).modelValue;
 
             const noteLabel = ref(null);
             const textarea = ref(null);

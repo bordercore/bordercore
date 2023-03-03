@@ -43,7 +43,6 @@
         components: {
             draggable,
         },
-        emits: ["getPage", "searchTag"],
         props: {
             addTagUrl: {
                 type: String,
@@ -58,6 +57,7 @@
                 default: "",
             },
         },
+        emits: ["getPage", "searchTag"],
         setup(props, ctx) {
             const selectedTagName = ref("Untagged");
             const tags = ref([]);
