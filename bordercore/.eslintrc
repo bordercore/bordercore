@@ -34,6 +34,7 @@
       "vue/no-v-html": "off",
       "indent": "off",
       "max-len": "off",
-      "quotes": [2, "double"]
+      "quotes": [2, "double"],
+      "require-jsdoc": "off",
     }
 }
