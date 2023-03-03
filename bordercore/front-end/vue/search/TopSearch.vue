@@ -82,10 +82,12 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
     import SelectValue from "../common/SelectValue.vue";
 
     export default {
         components: {
+            FontAwesomeIcon,
             SelectValue,
         },
         props: {

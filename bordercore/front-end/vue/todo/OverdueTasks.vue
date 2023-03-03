@@ -65,8 +65,12 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+
     export default {
-        name: "OverdueTasks",
+        components: {
+            FontAwesomeIcon,
+        },
         props: {
             taskListProp: {
                 type: Array,
@@ -109,12 +113,12 @@
             },
             deleteTask(uuid) {
                 axios.delete(this.deleteTodoUrl.replace("00000000-0000-0000-0000-000000000000", uuid))
-                    .then((response) => {
-                        this.message = "Task deleted.";
-                        this.removeTaskFromList(uuid);
-                    }, (error) => {
-                        console.log(error);
-                    });
+                     .then((response) => {
+                         this.message = "Task deleted.";
+                         this.removeTaskFromList(uuid);
+                     }, (error) => {
+                         console.log(error);
+                     });
             },
             removeTaskFromList(uuid) {
                 for (let i = 0; i < this.taskList.length; i++) {

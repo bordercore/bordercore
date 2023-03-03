@@ -223,8 +223,10 @@
                     name: "Top Bar",
                     components: {
                         DropDownMenu,
+                        FontAwesomeIcon,
                         OverdueTasks,
                         RecentBlobs,
+                        TopSearch,
                     },
                     delimiters: ["[[", "]]"],
                     setup() {
@@ -307,8 +309,6 @@
                 });
 
                 appTopBar.use(storeBase);
-                appTopBar.component("TopSearch", TopSearch);
-                appTopBar.component("font-awesome-icon", FontAwesomeIcon);
                 appTopBar.mount("#top-bar");
 
                 const appSideBar = createApp({
