@@ -16,7 +16,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check d-flex align-items-center">
-                                    <input id="id_type_new" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="ad-hoc">
+                                    <input id="id_type_new" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="ad-hoc" @change="onChangeCollectionType('ad-hoc')">
                                     <label class="form-check-label ms-2" for="id_type_new">
                                         New
                                     </label>
@@ -26,7 +26,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check d-flex align-items-center">
-                                    <input id="id_type_existing" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="permanent">
+                                    <input id="id_type_existing" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="permanent" @change="onChangeCollectionType('permanent')">
                                     <label class="form-check-label ms-2" for="id_type_existing">
                                         Existing
                                     </label>
@@ -35,6 +35,7 @@
                             <div class="col-lg-8">
                                 <select-value
                                     ref="selectValue"
+                                    :is-disabled-initial="true"
                                     label="name"
                                     place-holder="Search collections"
                                     :search-url="searchUrl"
@@ -210,6 +211,13 @@
             this.modal = new Modal("#modalUpdateCollection");
         },
         methods: {
+            onChangeCollectionType(type) {
+                if (this.$refs.selectValue) {
+                    this.$refs.selectValue.setDisabled(
+                        type === "ad-hoc" ? true : false,
+                    );
+                }
+            },
             openModal(action, callback, collectionObjectList) {
                 this.collectionObjectList = collectionObjectList;
                 this.collectionObjectListInitial = {...collectionObjectList};
