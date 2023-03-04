@@ -6,6 +6,7 @@
         <multiselect
             ref="multiselect"
             v-model="value"
+            :disabled="isDisabled"
             :track-by="label"
             :label="label"
             :options="options"
@@ -75,6 +76,10 @@
                 type: String,
                 default: null,
             },
+            isDisabledInitial: {
+                type: Boolean,
+                default: false,
+            },
             optionsLimit: {
                 default: 20,
                 type: Number,
@@ -106,6 +111,7 @@
         },
         data() {
             return {
+                isDisabled: false,
                 options: [],
                 value: "",
             };
@@ -121,6 +127,9 @@
             if (this.initialValue) {
                 this.options = [this.initialValue];
                 this.value = this.initialValue;
+            }
+            if (this.isDisabledInitial) {
+                this.isDisabled = true;
             }
         },
         methods: {
@@ -163,6 +172,9 @@
                 //  parent component handle it
                 this.$emit("select", tagInfo);
                 this.options = [];
+            },
+            setDisabled(value) {
+                this.isDisabled = value;
             },
             setValue(value) {
                 const newOption = {
