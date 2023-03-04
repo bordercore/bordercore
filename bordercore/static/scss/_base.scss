@@ -1204,6 +1204,7 @@ blockquote > p {
   z-index: 1000;
   top: -1.25rem;
   right: 0.25rem;
+  width: 25rem;
   line-height: 1.5rem;
 }
 
@@ -1212,21 +1213,6 @@ blockquote > p {
   margin: var(--grid-margin) var(--grid-margin) var(--grid-margin) var(--grid-margin);
   background-color: var(--surface1);
   border-radius: 0.4rem;
-}
-
-#top-bar .multiselect__input {
-  width: 25rem !important;
-  border-radius: 10em;
-  cursor: pointer;
-}
-
-#top-bar input:focus {
-  width: 25rem;
-  padding-left: 2rem;
-  border-color: var(--form-border-color-hover);
-  background-color: var(--form-bg);
-  color: var(--text4);
-  cursor: auto;
 }
 
 #top-search-filter {

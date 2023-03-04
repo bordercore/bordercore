@@ -278,9 +278,10 @@
 
                         function openSearchWindow() {
                             topSearch.value.showSearchWindow = true;
+                            topSearch.value.focusSearch();
                             setTimeout(() => {
                                 topSearch.value.focusSearch();
-                            }, 500);
+                            }, 100);
                         }
 
                         onMounted(() => {
