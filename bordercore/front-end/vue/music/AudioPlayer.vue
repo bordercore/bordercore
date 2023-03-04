@@ -79,7 +79,7 @@
                     // If continous play is enabled, find the next song in the list to play
                     const newIndex = getIndex() + 1;
 
-                    if (continuousPlay && newIndex < props.trackList.length) {
+                    if (continuousPlay.value && newIndex < props.trackList.length) {
                         currentSongUuid.value = props.trackList[newIndex].uuid;
                         playTrack(currentSongUuid.value, true);
                     } else {
