@@ -25,12 +25,12 @@
             >
             </related-tags>
 
-            <div v-if="related_questions.length > 0" class="d-flex">
-                <card title="Related Questions" class="backdrop-filter mw-100">
+            <div v-if="relatedQuestions.length > 0" class="d-flex">
+                <card title="Related Questions" class="backdrop-filter w-100">
                     <template v-slot:content>
                         <hr class="divider" />
                         <ul class="list-group interior-borders cursor-pointer">
-                            <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                            <li v-for="question in relatedQuestions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
                                 <div class="d-flex">
                                     <div class="mt-1 me-2">
                                         <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
@@ -48,11 +48,11 @@
                 </card>
             </div>
 
-            <div v-if="related_blobs.length > 0" class="d-flex">
+            <div v-if="relatedBlobs.length > 0" class="d-flex">
                 <card title="Related Blobs" class="backdrop-filter">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
-                            <li v-for="blob in related_blobs" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                            <li v-for="blob in relatedBlobs" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
                                 <div class="d-flex align-items-center">
                                     <div class="mt-1 me-2">
                                         <img :src="blob.cover_url" />
@@ -70,11 +70,11 @@
                 </card>
             </div>
 
-            <div v-if="related_nodes.length > 0" class="d-flex">
+            <div v-if="relatedNodes.length > 0" class="d-flex">
                 <card title="Related Nodes" class="backdrop-filter w-100">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
-                            <li v-for="node in related_nodes" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                            <li v-for="node in relatedNodes" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
                                 <div class="d-flex align-items-center ps-3">
                                     <div class="d-flex w-100">
                                         <a :href="node.url">[[ node.name ]]</a>
@@ -134,7 +134,7 @@
                                     {% elif field.label == "Important" %}
                                         <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
                                     {% elif field.label == "Is pinned" %}
-                                        <o-switch v-model="is_pinned" name="is_pinned" value="{{ field.value }}"></o-switch>
+                                        <o-switch v-model="isPinned" name="is_pinned" value="{{ field.value }}"></o-switch>
                                     {% elif field.label == "Daily" %}
                                         <o-switch v-model="daily" name="daily" value="{{ field.value }}"></o-switch>
                                     {% else %}
@@ -183,13 +183,41 @@
         const app = createApp({
             name: "BookmarkUpdate",
             components: {
+                Card,
                 FontAwesomeIcon,
+                RelatedTags,
+                TagsInput,
             },
             setup() {
+                {% if bookmark.uuid %}
+                const uuid = ref("{{ bookmark.uuid }}");
+                {% endif %}
+                const daily = ref({{ form.daily.value }});
+                const importance = ref({{ form.importance.value|yesno:"true,false" }});
+                const isPinned = ref({{ form.is_pinned.value|yesno:"true,false" }});
+                const relatedQuestions = ref([
+                    {% for question in related_questions %}
+                    {
+                        question: markdown.render("{{ question.question|escapejs }}"),
+                        url: "{% url 'drill:detail' question.uuid %}",
+                        tags: [
+                            {% for tag in question.tags.all %}
+                            {
+                                tag: "{{ tag }}",
+                            },
+                            {% endfor %}
+                        ],
+                    },
+                    {% endfor %}
+                ]);
+                const relatedBlobs = ref(JSON.parse(document.getElementById("related_blobs").textContent));
+                const relatedNodes = ref(JSON.parse(document.getElementById("related_nodes").textContent));
 
-                function onClickDelete(evt) {
+                const relatedTags = ref(null);
+
+                function onClickDelete() {
                     const formEl = document.getElementById("bookmark-form");
-                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
+                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", uuid.value));
                     formEl.submit();
                 }
 
@@ -212,21 +240,18 @@
                     url = encodeURIComponent(url).replace(/%/g, "%25");
 
                     doGet(
-                        this,
+                        null,
                         "{% url "bookmark:get_title_from_url" %}?url=" + url,
                         (response) => {
                             name.value = response.data.title;
                         },
-                        "Error getting title from url"
+                        "Error getting title from url",
                     );
-
                 }
 
                 function onClick(url) {
                     window.location = url;
                 }
-
-                const relatedTags = ref(null);
 
                 function onTagsChanged(tags) {
                     relatedTags.value.setTags(tags);
@@ -239,42 +264,25 @@
                 });
 
                 return {
-                    importance: {{ form.importance.value|yesno:"true,false" }},
-                    daily: {{ form.daily.value }},
-                    is_pinned: {{ form.is_pinned.value|yesno:"true,false" }},
-                    {% if bookmark.uuid %}
-                    uuid: "{{ bookmark.uuid }}",
-                    {% endif %}
-                    related_questions: [
-                        {% for question in related_questions %}
-                        {
-                            question: markdown.render("{{ question.question|escapejs }}"),
-                            url: "{% url 'drill:detail' question.uuid %}",
-                            tags: [
-                                {% for tag in question.tags.all %}
-                                {
-                                    tag: "{{ tag }}",
-                                },
-                                {% endfor %}
-                            ]
-                        },
-                        {% endfor %}
-                    ],
-                    related_blobs: JSON.parse(document.getElementById("related_blobs").textContent),
-                    related_nodes: JSON.parse(document.getElementById("related_nodes").textContent),
+                    daily,
+                    importance,
+                    isPinned,
+                    relatedBlobs,
+                    relatedNodes,
+                    relatedQuestions,
                     relatedTags,
                     onClickDelete,
                     onClickTag,
                     onBlur,
                     onClick,
-                    onTagsChanged
+                    onTagsChanged,
+                    {% if bookmark.uuid %}
+                    uuid,
+                    {% endif %}
                 };
-            }
+            },
         });
 
-        app.component("Card", Card);
-        app.component("RelatedTags", RelatedTags);
-        app.component("TagsInput", TagsInput);
         app.use(Oruga, {
             iconComponent: "font-awesome-icon",
             iconPack: "fa",

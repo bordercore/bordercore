@@ -1306,6 +1306,10 @@ blockquote > p {
 #bookmark-search-form {
   background-color: var(--surface1);
   border-radius: var(--border-radius2);
+
+  form {
+    width: 18.75rem;
+  }
 }
 
 
