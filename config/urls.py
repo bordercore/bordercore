@@ -20,7 +20,7 @@ admin.autodiscover()
 
 urlpatterns = [
 
-    path("admin/", admin.site.urls),
+    path("__admin/", admin.site.urls),
     path(r"books/(\w+)?", BookListView.as_view(), name="book_list"),
 
 ]
