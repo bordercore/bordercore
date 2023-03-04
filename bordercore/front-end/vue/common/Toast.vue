@@ -35,58 +35,69 @@
                 default: "info",
             },
         },
-        data() {
-            return {
-                title: "",
-                additionalTitle: "",
-                body: "Toast Body",
-                variant: "info",
-                delay: 5000,
-                autoHide: true,
-                bsToast: null,
-            };
-        },
-        mounted() {
-            const el = document.querySelector(".toast");
-            this.bsToast = new Toast(el, {autohide: this.autoHide, delay: this.delay});
-            EventBus.$on("toast", (payload) => {
-                this.toast(payload);
-            });
+        setup(props) {
+            const title = ref("");
+            const additionalTitle = ref("");
+            const body = ref("Toast Body");
+            const variant = ref("info");
+            const delay = ref(5000);
+            const autoHide = ref(true);
+            const bsToast = ref(null);
 
-            for (const message of this.initialMessages) {
-                this.toast(message);
-            }
-        },
-        methods: {
-            toast(payload) {
+            function toast(payload) {
                 if (payload.variant !== undefined) {
-                    this.variant = payload.variant;
+                    variant.value = payload.variant;
                 } else {
-                    this.variant = this.defaultVariant;
+                    variant.value = props.defaultVariant;
                 }
                 if (payload.title !== undefined) {
-                    this.title = payload.title;
+                    title.value = payload.title;
                 } else {
-                    this.title = this.variant.charAt(0).toUpperCase() + this.variant.slice(1);
+                    title.value = variant.value.charAt(0).toUpperCase() + variant.value.slice(1);
                 }
-                this.body = payload.body;
+                body.value = payload.body;
                 if (payload.autoHide !== undefined) {
-                    this.bsToast._config.autohide = payload.autoHide;
+                    bsToast.value._config.autohide = payload.autoHide;
                 }
                 if (payload.delay) {
-                    this.bsToast._config.delay = payload.delay;
+                    bsToast.value._config.delay = payload.delay;
                 }
-                this.bsToast.show();
-            },
-            getIcon() {
-                if (this.variant === "danger") {
+                bsToast.value.show();
+            };
+
+            function getIcon() {
+                if (variant.value === "danger") {
                     return "exclamation-triangle";
-                } else if (this.variant === "warning") {
+                } else if (variant.value === "warning") {
                     return "question";
                 } else {
                     return "check";
                 }
-            },
+            };
+
+            onMounted(() => {
+                const el = document.querySelector(".toast");
+                bsToast.value = new Toast(el, {autohide: autoHide.value, delay: delay.value});
+                EventBus.$on("toast", (payload) => {
+                    toast(payload);
+                });
+
+                for (const message of props.initialMessages) {
+                    toast(message);
+                }
+            });
+
+            return {
+                additionalTitle,
+                autoHide,
+                body,
+                bsToast,
+                delay,
+                getIcon,
+                title,
+                toast,
+                variant,
+            };
         },
     };
 
