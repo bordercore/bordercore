@@ -6,20 +6,20 @@
                     <h4 id="myModalLabel" class="modal-title">
                         Add blob to collection
                     </h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal" />
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" />
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
-                        <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="mb-0">
+                        <div v-if="!showAddCollection" id="search-collections" class="mb-0">
                             <select-value
                                 ref="selectValue"
                                 name="search"
                                 place-holder="Search collections"
                                 :search-url="searchUrl"
-                                @select="select"
+                                @select="handleCollectionSelect"
                             >
                                 <template #option="props">
-                                    <div :class="{'multiselect--disabled': props.option.contains_blob}" class="search-suggestion d-flex align-items-center" @click.stop="onClick(props.option)">
+                                    <div :class="{'multiselect--disabled': props.option.contains_blob}" class="search-suggestion d-flex align-items-center" @click.stop="handleCollectionSelect(props.option)">
                                         <div>
                                             <img class="me-2" width="50" height="50" :src="props.option.cover_url">
                                         </div>
@@ -41,9 +41,9 @@
                                 </button>
                             </div>
                         </div>
-                        <div id="add-collection" :class="{'d-none': hideAddCollection}">
-                            <input class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
-                            <button class="btn btn-primary d-flex ms-auto" @click="createNewCollection">
+                        <div v-if="showAddCollection">
+                            <input id="collectionName" class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
+                            <button class="btn btn-primary d-flex ms-auto" @click="handleCollectionCreate">
                                 Create
                             </button>
                         </div>
@@ -59,7 +59,6 @@
     import SelectValue from "../common/SelectValue.vue";
 
     export default {
-
         components: {
             SelectValue,
         },
@@ -81,87 +80,85 @@
                 type: String,
             },
         },
-        data() {
-            return {
-                name: "",
-                collectionList: [],
-                hideAddCollection: true,
-            };
-        },
-        methods: {
-            onClick(suggestion) {
-                if (!suggestion.contains_blob) {
-                    this.select(suggestion);
-                }
-            },
-            select(selection) {
-                // Don't allow selecting a collection the blob is already part of
-                if (selection.contains_blob) {
-                    return;
-                }
-                this.addBlobToCollection(selection.uuid);
-            },
-            addBlobToCollection(collectionUuid) {
+        emits: ["add-to-collection"],
+        setup(props, ctx) {
+            const showAddCollection = ref(false);
+
+            const selectValue = ref();
+
+            function addBlobToCollection(collectionUuid) {
                 doPost(
-                    this,
-                    this.addObjectUrl,
+                    null,
+                    props.addObjectUrl,
                     {
                         "collection_uuid": collectionUuid,
-                        "blob_uuid": this.blobUuid,
+                        "blob_uuid": props.blobUuid,
                     },
                     (response) => {
-                        this.$emit("add-to-collection", collectionUuid);
+                        ctx.emit("add-to-collection", collectionUuid);
 
                         const modal = Modal.getInstance(document.getElementById("modalAddToCollection"));
                         modal.hide();
 
-                        this.$nextTick(() => {
-                            this.$refs.selectValue.select = "";
+                        nextTick(() => {
+                            selectValue.value.clearOptions();
                         });
                     },
                     "",
                     "",
                 );
-            },
-            showCreateNewCollection() {
-                this.hideAddCollection = false;
-                setTimeout( () => {
-                    document.querySelector("#add-collection input").focus();
-                }, 100);
-            },
-            createNewCollection() {
-                const name = document.querySelector("#add-collection input").value;
+            };
+
+            function handleCollectionCreate() {
+                const name = document.querySelector("#collectionName").value;
 
                 doPost(
-                    this,
-                    this.addCollectionUrl,
+                    null,
+                    props.addCollectionUrl,
                     {
                         "name": name,
                     },
                     (response) => {
                         const collectionUuid = response.data.uuid;
 
-                        this.addBlobToCollection(collectionUuid);
+                        addBlobToCollection(collectionUuid);
 
-                        this.$emit("add-to-collection", collectionUuid);
+                        ctx.emit("add-to-collection", collectionUuid);
 
                         const modal = Modal.getInstance(document.getElementById("modalAddToCollection"));
                         modal.hide();
-                        this.hideAddCollection = true;
+                        showAddCollection.value = false;
 
-                        this.$nextTick(() => {
-                            this.$refs.selectValue.value = "";
+                        nextTick(() => {
+                            selectValue.value.select = "";
                         });
                     },
                     "",
                     "",
                 );
-            },
-            closeModal() {
-                this.hideAddCollection = true;
-            },
-        },
+            };
 
+            function handleCollectionSelect(selection) {
+                if (!selection.contains_blob) {
+                    addBlobToCollection(selection.uuid);
+                }
+            };
+
+            function showCreateNewCollection() {
+                showAddCollection.value = true;
+                setTimeout( () => {
+                    document.querySelector("#collectionName").focus();
+                }, 100);
+            };
+
+            return {
+                handleCollectionCreate,
+                handleCollectionSelect,
+                showAddCollection,
+                selectValue,
+                showCreateNewCollection,
+            };
+        },
     };
 
 </script>
