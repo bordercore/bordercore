@@ -28,7 +28,7 @@
                             {% csrf_token %}
                             <input :value="pinnedTags && pinnedTags.selectedTagName" type="hidden" name="tag" />
                             <div class="position-relative" v-cloak>
-                                <div @search-term="onTermSearch" ref="search">
+                                <div ref="search">
                                     <select-value
                                         id="bookmarkSearch"
                                         ref="selectValue"
@@ -36,6 +36,7 @@
                                         place-holder="Search term or tag"
                                         :search-icon="true"
                                         @select="selectTag"
+                                        @search="handleSearch"
                                     >
                                     </select-value>
                                 </div>
@@ -379,6 +380,10 @@
                     }
                 };
 
+                function handleSearch(query) {
+                    getBookmarkList({ searchTermParam: query });
+                };
+
                 function onClickBookmark(uuid) {
                     selectedBookmarkUuid.value = uuid;
                     selectBookmark();
@@ -413,18 +418,6 @@
                     evt.dataTransfer.dropEffect = "move";
                     evt.dataTransfer.effectAllowed = "move";
                     evt.dataTransfer.setData("application/x-moz-node", bookmark.uuid);
-                };
-
-                function onEnter(evt) {
-                    searchTerm.value = evt.srcElement.value;
-
-                    if (searchTerm.value) {
-                        selectValue.value = "";
-                        searchTag(searchTerm.value);
-                    } else {
-                        // If the search box is empty, refresh the list with no filters
-                        searchTag("Untagged");
-                    }
                 };
 
                 function onMouseEnterLeave(evt) {
@@ -465,10 +458,6 @@
                         "Sort error"
                     );
 
-                };
-
-                function onTermSearch(searchTerm) {
-                    getBookmarkList({ searchTerm: searchTerm });
                 };
 
                 function onTogglePinStatus() {
@@ -547,6 +536,7 @@
                     filteredTags,
                     getBookmarkList,
                     getPage,
+                    handleSearch,
                     intervalId,
                     onClickBookmark,
                     onClickDeleteBookmark,
@@ -559,7 +549,6 @@
                     onDragStartBookmark,
                     onMouseEnterLeave,
                     onSortBookmarks,
-                    onTermSearch,
                     onTogglePinStatus,
                     pinnedTags,
                     removeFilter,
