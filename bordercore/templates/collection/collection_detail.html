@@ -17,6 +17,8 @@
 
 {% block content %}
 
+    {% include "common/processing.html" %}
+
     <div class="row g-0 h-100 mx-2" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column flex-grow-last h-100">
@@ -324,19 +326,6 @@
 *Note:* You can drag a file onto the collection list to create a blob and add it to the collection.
         </div>
     {% endblock %}
-
-    <div id="modalProcessing" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-        <div class="modal-processing modal-dialog modal-sm modal-dialog-centered" role="document">
-            <h4 class="modal-content p-3 d-flex flex-row justify-content-center">
-                <div>
-                    Processing...
-                </div>
-                <div class="spinner-border ms-2 text-secondary" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </h4>
-        </div>
-    </div>
 
 {% endblock %}
 

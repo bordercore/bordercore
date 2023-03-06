@@ -25,6 +25,8 @@
 
 {% block content %}
 
+    {% include "common/processing.html" %}
+
     <div id="vue-app" class="scrollable-panel-container row g-0 h-100 mx-2">
 
         <div class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
@@ -620,8 +622,6 @@
                                 }, timeout);
                             }
                         },
-                        "",
-                        "",
                     );
                 };
 
@@ -633,6 +633,10 @@
                 };
 
                 function submitForm() {
+
+                    const modal = new Modal("#modalProcessing");
+                    modal.show();
+
                     // Add the 'name' attribute and contents to the internal
                     // textarea used by v-md-editor, which will then
                     // be submitted with the rest of the form.
@@ -653,6 +657,9 @@
                     }).then((response) => {
                         window.location = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", response.data.uuid);
                     }).catch( (error) => {
+                        setTimeout(() => {
+                            modal.hide();
+                        }, 500);
                         const errors = [];
                         for (var key in error.response.data) {
                             errors.push(error.response.data[key][0]);
