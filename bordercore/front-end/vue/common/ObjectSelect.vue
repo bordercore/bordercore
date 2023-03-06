@@ -54,13 +54,13 @@
                                             </div>
                                         </div>
                                     </template>
-                                    <!-- <template slot="afterList">
-                                         <div v-if="hasMoreThanMax()" slot="misc-item-below" class="object-select-misc-item-below p-2">
-                                         <span>
-                                         <strong>Too many mathces</strong> other matches
-                                         </span>
-                                         </div>
-                                         </template> -->
+                                    <template #afterList="props">
+                                        <div v-if="hasMoreThanMax()" slot="misc-item-below" class="object-select-misc-item-below p-2">
+                                            <span>
+                                                <strong class="me-2">{{ $refs.selectValue.$refs.multiselect.options.length - maxSuggestions }}</strong> other matches
+                                            </span>
+                                        </div>
+                                    </template>
                                 </select-value>
                             </div>
                         </form>
@@ -144,10 +144,12 @@
         methods: {
             boldenOption,
             hasMoreThanMax() {
-                console.log("GOT HERE!!!!!!!!!!");
-                /* console.log(this.$refs.selectValue.options.length);
-                 * console.log(maxSuggestions);
-                 * return this.$refs.selectValue.options.length > maxSuggestions; */
+                if (!this.$refs.selectValue || this.$refs.selectValue.$refs.multiselect.search === "") {
+                    // Wait for the component to appear and be sure the user has
+                    //  actually searched for something.
+                    return false;
+                }
+                return this.$refs.selectValue.$refs.multiselect.options.length > this.maxSuggestions;
             },
             onFilterLabelClick(filterType, evt) {
                 const input = evt.target.parentElement.querySelector("input");
