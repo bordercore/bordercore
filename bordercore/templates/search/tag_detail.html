@@ -360,7 +360,6 @@
 
                 function onClickDoctype(evt) {
                     doPost(
-                        null,
                         "{% url "accounts:store_in_session" %}",
                         {
                             "kb_tag_detail_current_tab": evt.srcElement.parentElement.getAttribute("data-type"),

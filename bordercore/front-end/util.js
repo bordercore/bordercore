@@ -1,21 +1,19 @@
 
 /**
  * Use axios to perform an HTTP GET call.
- * @param {string} scope The Vue scope.
  * @param {string} url The url to request.
  * @param {string} callback An optional callback function.
  * @param {string} errorMsg The message to display on error.
  */
-export function doGet(scope, url, callback, errorMsg) {
+export function doGet(url, callback, errorMsg) {
     axios.get(url)
         .then((response) => {
             if (response.data.status && response.data.status !== "OK") {
-                const vNodesMsg = getErrorMessage(scope, errorMsg);
                 EventBus.$emit(
                     "toast",
                     {
                         title: "Error!",
-                        body: vNodesMsg,
+                        body: errorMsg,
                         variant: "danger",
                         autoHide: false,
                     },
@@ -41,14 +39,13 @@ export function doGet(scope, url, callback, errorMsg) {
 
 /**
  * Use axios to perform an HTTP POST call.
- * @param {string} scope The Vue scope.
  * @param {string} url The url to request.
  * @param {string} params The parameters for the POST body.
  * @param {string} callback An optional callback function.
  * @param {string} successMsg The message to display on success.
  * @param {string} errorMsg The message to display on error.
  */
-export function doPost(scope, url, params, callback, successMsg, errorMsg) {
+export function doPost(url, params, callback, successMsg, errorMsg) {
     const bodyFormData = new URLSearchParams();
 
     for (const [key, value] of Object.entries(params)) {
@@ -112,14 +109,13 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
 
 /**
  * Use axios to perform an HTTP PUT call.
- * @param {string} scope The Vue scope.
  * @param {string} url The url to request.
  * @param {string} params The parameters for the POST body.
  * @param {string} callback An optional callback function.
  * @param {string} successMsg The message to display on success.
  * @param {string} errorMsg The message to display on error.
  */
-export function doPut(scope, url, params, callback, successMsg, errorMsg) {
+export function doPut(url, params, callback, successMsg, errorMsg) {
     const bodyFormData = new URLSearchParams();
 
     for (const [key, value] of Object.entries(params)) {

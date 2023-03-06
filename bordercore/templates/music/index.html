@@ -262,7 +262,6 @@
                         pageNumber = paginator.next_page_number;
                     }
                     doGet(
-                        null,
                         "{% url "music:recent_albums" 666 %}".replace(/666/, pageNumber),
                         (response) => {
                             recentAlbums = response.data.album_list;

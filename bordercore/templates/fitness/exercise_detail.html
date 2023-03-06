@@ -360,7 +360,6 @@
                         showHistoryMessage.value = false;
                     }
                     doPost(
-                        null,
                         url = "{% url "fitness:change_active_status" %}",
                         payload,
                         (response) => {
@@ -377,7 +376,6 @@
 
                 function onUpdateNote() {
                     doPost(
-                        null,
                         "{% url 'fitness:edit_note' %}",
                         {
                             "uuid": "{{ object.uuid }}",
@@ -406,7 +404,6 @@
                 function changeFrequency(evt) {
                     const frequencyNew = document.getElementById("frequency").value;
                     doPost(
-                        null,
                         url = "{% url "fitness:update_frequency" %}",
                         {
                             "uuid": "{{ object.uuid }}",
@@ -433,7 +430,6 @@
                     const uuid = evt.uuid;
                     const name = evt.name;
                     doPost(
-                        null,
                         "{% url "fitness:change_active_status" %}",
                         {
                             "uuid": uuid,
@@ -449,7 +445,6 @@
                             );
 
                             doPost(
-                                null,
                                 "{% url "fitness:change_active_status" %}",
                                 {
                                     "uuid": "{{ object.uuid }}",
@@ -631,7 +626,6 @@
 
                 function onChangeRestPeriod() {
                     doPost(
-                        null,
                         url = "{% url "fitness:update_rest_period" %}",
                         {
                             "uuid": "{{ object.uuid }}",

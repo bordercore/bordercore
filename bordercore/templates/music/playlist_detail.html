@@ -294,7 +294,6 @@
 
                 function getPlaylist() {
                     doGet(
-                        null,
                         "{% url "music:get_playlist" playlist.uuid %}",
                         (response) => {
                             songList.value = response.data.playlistitems;

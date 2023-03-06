@@ -125,7 +125,6 @@
                 if (search.length < 3) return;
 
                 return doGet(
-                    this,
                     this.searchUrl + search,
                     (response) => {
                         this.options = response.data.map((a) => {

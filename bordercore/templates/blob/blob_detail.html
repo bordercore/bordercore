@@ -530,7 +530,6 @@
                     getBlobInfoAttempts.value++;
                     console.log(`Retrieving blob info, attempt #${getBlobInfoAttempts.value}`);
                     doGet(
-                        null,
                         "{% url 'blob:get_elasticsearch_info' blob.uuid %}",
                         (response) => {
                             if (Object.keys(response.data.info).length !== 0) {
@@ -550,7 +549,6 @@
 
                 function getRelatedBlobList() {
                     doGet(
-                        null,
                         "{% url "blob:related_blobs" object.uuid %}",
                         (response) => {
                             relatedBlobList.value = response.data.blob_list;
@@ -574,7 +572,6 @@
                     }
 
                     doPost(
-                        null,
                         "{% url 'blob:update_related_blob_note' %}",
                         {
                             "blob_1_uuid": "{{ blob.uuid }}",
@@ -591,7 +588,6 @@
 
                 function onRemoveLink(uuid) {
                     doPost(
-                        null,
                         "{% url "blob:unlink" %}",
                         {
                             "blob_1_uuid": "{{ object.uuid }}",
@@ -637,7 +633,6 @@
 
                 function selectBlob(blob) {
                     doPost(
-                        null,
                         "{% url "blob:link" %}",
                         {
                             "blob_1_uuid": "{{ object.uuid }}",
@@ -653,7 +648,6 @@
 
                 function getCollectionList() {
                     doGet(
-                        null,
                         "{% url "collection:search" %}?blob_uuid={{ blob.uuid }}",
                         (response) => {
                             collectionList.value = response.data;
@@ -670,7 +664,6 @@
                         payload.remove = true;
                     }
                     doPost(
-                        null,
                         url = "{% url "accounts:pin_note" %}",
                         payload,
                         (response) => {

@@ -324,7 +324,6 @@
                         return;
                     }
                     doGet(
-                        null,
                         "{% url 'music:dupe_song_checker' %}?artist=" + artist + "&title=" + title,
                         (response) => {
                             let dupes = response.data.dupes;

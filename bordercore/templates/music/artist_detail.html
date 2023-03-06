@@ -382,7 +382,6 @@
                     }
                     animateCSS(evt.currentTarget, "heartBeat");
                     doPost(
-                        null,
                         "{% url 'music:set_song_rating' %}",
                         {
                             "song_uuid": row.uuid,

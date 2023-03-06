@@ -607,7 +607,6 @@
                     const pageNumber = document.getElementById("id_page_number").value;
 
                     doPost(
-                        null,
                         "{% url 'blob:update_page_number' %}",
                         {
                             "blob_uuid": "{{ object.uuid }}",

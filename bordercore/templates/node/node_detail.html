@@ -319,7 +319,6 @@
 
                 function addNote(note) {
                     doPost(
-                        null,
                         "{% url "node:add_note" %}",
                         {
                             "node_uuid": nodeUuid.value,
@@ -336,7 +335,6 @@
 
                 function onAddQuote() {
                     doPost(
-                        null,
                         "{% url "node:add_quote" %}",
                         {
                             "node_uuid": nodeUuid.value,
@@ -351,7 +349,6 @@
 
                 function onAddTodoList() {
                     doPost(
-                        null,
                         "{% url "node:add_todo_list" %}",
                         {
                             "node_uuid": nodeUuid.value,
@@ -367,7 +364,6 @@
                 function onClickUpdateNode() {
                     const name = document.querySelector("#id_node_name").value;
                     doPut(
-                        null,
                         "{% url 'node-detail' object.uuid %}",
                         {
                             "node_uuid": "{{ object.uuid }}",
@@ -385,7 +381,6 @@
 
                 function onLayoutChange(evt) {
                     doPost(
-                        null,
                         "{% url "node:change_layout" %}",
                         {
                             "node_uuid": nodeUuid.value,
@@ -453,7 +448,6 @@
                     }
 
                     doPost(
-                        null,
                         "{% url "collection:add_object" %}",
                         args,
                         (response) => {
@@ -466,7 +460,6 @@
 
                 function selectObjectImage(object, callback) {
                     doPost(
-                        null,
                         "{% url "node:add_image" %}",
                         {
                             "node_uuid": nodeUuid.value,

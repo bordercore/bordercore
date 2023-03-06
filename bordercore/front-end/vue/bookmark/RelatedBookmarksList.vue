@@ -166,7 +166,6 @@
         methods: {
             getBookmarkList() {
                 doGet(
-                    this,
                     this.getBookmarkListUrl.replace(/00000000-0000-0000-0000-000000000000/, this.objectUuid),
                     (response) => {
                         this.bookmarkList = response.data.bookmark_list;
@@ -182,7 +181,6 @@
                 }
 
                 doPost(
-                    this,
                     this.removeBookmarkUrl,
                     {
                         "object_uuid": this.objectUuid,
@@ -213,7 +211,6 @@
                 }
 
                 doPost(
-                    this,
                     url,
                     {
                         "object_uuid": this.objectUuid,
@@ -239,7 +236,6 @@
                 }
 
                 doPost(
-                    this,
                     this.sortBookmarkListUrl,
                     {
                         "object_uuid": this.objectUuid,
@@ -291,7 +287,6 @@
                             bookmark.noteIsEditable = false;
                         } else {
                             doPost(
-                                this,
                                 this.editBookmarkNoteUrl,
                                 {
                                     "object_uuid": this.objectUuid,

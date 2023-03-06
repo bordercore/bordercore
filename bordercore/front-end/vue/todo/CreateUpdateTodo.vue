@@ -125,7 +125,6 @@
                 const dueDate = document.getElementsByName("due_date")[0].value;
                 if (action.value === "Update") {
                     doPut(
-                        null,
                         props.updateTodoUrl.replace(/00000000-0000-0000-0000-000000000000/, todoInfo.value.uuid),
                         {
                             "todo_uuid": todoInfo.value.uuid,
@@ -145,7 +144,6 @@
                     );
                 } else {
                     doPost(
-                        null,
                         props.createTodoUrl,
                         {
                             "name": todoInfo.value.name,

@@ -201,7 +201,6 @@
 
                 function getTodoList() {
                     doGet(
-                        null,
                         "{% url 'todo:get_tasks' %}" +
                         `?tag=${filterTag.value}` +
                         `&priority=${filterPriority.value}` +

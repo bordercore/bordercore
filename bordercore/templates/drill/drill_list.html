@@ -355,7 +355,6 @@
 
                 function getTagList() {
                     doGet(
-                        null,
                         "{% url "drill:get_pinned_tags" %}",
                         (response) => {
                             tagList.value = response.data.tag_list;
@@ -370,7 +369,6 @@
 
                 function addTag(tag) {
                     doPost(
-                        null,
                         "{% url "drill:pin_tag" %}",
                         {
                             "tag": tag,
@@ -385,7 +383,6 @@
 
                  function onClickDelete(tagName) {
                     doPost(
-                        null,
                         url = "{% url "drill:unpin_tag" %}",
                         {
                             "tag": tagName,
@@ -430,7 +427,6 @@
                     const newPosition = evt.moved.newIndex + 1;
 
                     doPost(
-                        null,
                         "{% url "drill:sort_pinned_tags" %}",
                         {
                             "tag_name": tagName,

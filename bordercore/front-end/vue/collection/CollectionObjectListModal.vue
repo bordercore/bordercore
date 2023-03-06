@@ -250,7 +250,6 @@
                         this.modal.hide();
                     } else {
                         doPost(
-                            this,
                             this.addCollectionUrl,
                             {
                                 "node_uuid": this.nodeUuid,

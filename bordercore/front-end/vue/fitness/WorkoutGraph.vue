@@ -106,7 +106,6 @@
                     paginator.value.next_page_number;
 
                 doGet(
-                    null,
                     props.getWorkoutDataUrl + pageNumber,
                     (response) => {
                         plotdata.value = JSON.parse(response.data.workout_data.plotdata);

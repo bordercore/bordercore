@@ -221,7 +221,6 @@
                 }
 
                 doPost(
-                    this,
                     this.updateObjectNoteUrl,
                     {
                         "collection_uuid": this.uuid,
@@ -237,7 +236,6 @@
             },
             getObjectList() {
                 doGet(
-                    this,
                     `${this.getObjectListUrl}?random_order=${this.collectionObjectList.random_order}`,
                     (response) => {
                         this.objectList = response.data.object_list;
@@ -265,7 +263,6 @@
             },
             onUpdateCollection(collectionObjectList) {
                 doPost(
-                    this,
                     this.updateCollectionUrl,
                     {
                         "collection_uuid": this.uuid,
@@ -286,7 +283,6 @@
             },
             onDeleteCollection() {
                 doPost(
-                    null,
                     this.deleteCollectionUrl,
                     {
                         "node_uuid": this.nodeUuid,
@@ -307,7 +303,6 @@
                 const newPosition = evt.moved.newIndex + 1;
 
                 doPost(
-                    this,
                     this.sortObjectsUrl,
                     {
                         "collection_uuid": this.uuid,
@@ -320,7 +315,6 @@
             },
             removeObject(objectUuid) {
                 doPost(
-                    this,
                     this.removeObjectUrl,
                     {
                         "collection_uuid": this.uuid,

@@ -566,7 +566,6 @@
                     const newPosition = evt.moved.newIndex + 1;
 
                     doPost(
-                        null,
                         "{% url "collection:sort_objects" %}",
                         {
                             "collection_uuid": "{{ collection.uuid }}",
@@ -585,7 +584,6 @@
 
                 function removeBlob(uuid) {
                     doPost(
-                        null,
                         "{% url "collection:remove_object" %}",
                         {
                             "collection_uuid": "{{ collection.uuid }}",
@@ -607,7 +605,6 @@
                     }
 
                     doGet(
-                        null,
                         url,
                         (response) => {
                             blobList.value = response.data.object_list;

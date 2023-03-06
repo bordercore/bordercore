@@ -97,7 +97,6 @@
         methods: {
             rescheduleTask(uuid) {
                 doPost(
-                    this,
                     this.rescheduleTaskUrl,
                     {
                         "todo_uuid": uuid,

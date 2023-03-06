@@ -136,7 +136,6 @@
 
             function onDeleteNote() {
                 doPost(
-                    null,
                     props.deleteNoteUrl,
                     {
                         "node_uuid": props.nodeUuid,
@@ -153,7 +152,6 @@
 
             function updateNoteMetadata(note) {
                 doPost(
-                    null,
                     props.setNoteColorUrl,
                     {
                         "node_uuid": props.nodeUuid,
@@ -195,7 +193,6 @@
 
             function getNote() {
                 doGet(
-                    null,
                     props.noteUrl,
                     (response) => {
                         note.value = response.data;

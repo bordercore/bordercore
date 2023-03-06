@@ -213,7 +213,6 @@
 
                 function getTagAliasList() {
                     doGet(
-                        null,
                         "{% url 'tagalias-list' %}",
                         (response) => {
                             items.value = response.data.results;
@@ -228,7 +227,6 @@
                         url = url + `?tag_name=${tagName}`;
                     }
                     doGet(
-                        null,
                         url,
                         (response) => {
                             tagInfo.value = response.data.info;
@@ -289,7 +287,6 @@
 
                 function addAlias() {
                     doPost(
-                        null,
                         "{% url 'tag:add_alias' %}",
                         {
                             "tag_name": modalSelectValue.value.getValue(),

@@ -240,7 +240,6 @@
                     url = encodeURIComponent(url).replace(/%/g, "%25");
 
                     doGet(
-                        null,
                         "{% url "bookmark:get_title_from_url" %}?url=" + url,
                         (response) => {
                             name.value = response.data.title;

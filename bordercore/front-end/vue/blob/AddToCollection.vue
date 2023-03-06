@@ -88,7 +88,6 @@
 
             function addBlobToCollection(collectionUuid) {
                 doPost(
-                    null,
                     props.addObjectUrl,
                     {
                         "collection_uuid": collectionUuid,
@@ -113,7 +112,6 @@
                 const name = document.querySelector("#collectionName").value;
 
                 doPost(
-                    null,
                     props.addCollectionUrl,
                     {
                         "name": name,

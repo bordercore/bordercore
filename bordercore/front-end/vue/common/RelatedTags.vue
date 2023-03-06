@@ -68,7 +68,6 @@
                 this.info = [];
                 for (const tag of tags) {
                     doGet(
-                        this,
                         `${this.relatedTagsUrl}?tag_name=${tag}&doc_type=${this.docType}`,
                         (response) => {
                             if (response.data.info.length > 0) {

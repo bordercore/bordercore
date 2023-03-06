@@ -446,7 +446,6 @@
                     const newPosition = evt.moved.newIndex + 1;
 
                     doPost(
-                        null,
                         "{% url "bookmark:sort" %}",
                         {
                             "tag": pinnedTags.value.selectedTagName,
@@ -505,7 +504,6 @@
                 function switchViewType(type) {
                     viewType.value = type;
                     doPost(
-                        null,
                         "{% url "accounts:store_in_session" %}",
                         {
                             "bookmark_view_type": type

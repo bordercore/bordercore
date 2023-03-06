@@ -73,7 +73,6 @@
 
             function onRemoveImage() {
                 doPost(
-                    null,
                     props.removeImageUrl,
                     {
                         "node_uuid": props.nodeUuid,

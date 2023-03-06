@@ -128,7 +128,6 @@
         methods: {
             addNodeTodo(todoUuid) {
                 doPost(
-                    this,
                     this.addNodeTodoUrl,
                     {
                         "node_uuid": this.nodeUuid,
@@ -168,7 +167,6 @@
             },
             onDeleteTodoList() {
                 doPost(
-                    null,
                     this.deleteTodoListUrl,
                     {
                         "node_uuid": this.nodeUuid,
@@ -197,7 +195,6 @@
             },
             getTodoList() {
                 doGet(
-                    this,
                     this.getTodoListUrl,
                     (response) => {
                         this.todoList = response.data.todo_list;
@@ -213,7 +210,6 @@
                 const newPosition = evt.moved.newIndex + 1;
 
                 doPost(
-                    this,
                     this.sortNodeTodosUrl,
                     {
                         "node_uuid": this.$store.state.nodeUuid,

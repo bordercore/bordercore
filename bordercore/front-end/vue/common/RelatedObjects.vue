@@ -141,7 +141,6 @@
         methods: {
             getRelatedObjects() {
                 doGet(
-                    this,
                     this.relatedObjectsUrl.replace(/00000000-0000-0000-0000-000000000000/, this.objectUuid),
                     (response) => {
                         this.objectList = response.data.related_objects;
@@ -162,7 +161,6 @@
                 }
 
                 doPost(
-                    this,
                     this.removeObjectUrl,
                     {
                         "question_uuid": this.objectUuid,
@@ -187,7 +185,6 @@
                 }
 
                 doPost(
-                    this,
                     this.addObjectUrl,
                     {
                         "question_uuid": this.objectUuid,
@@ -225,7 +222,6 @@
                     bcObject.noteIsEditable = false;
                 } else {
                     doPost(
-                        this,
                         this.editObjectNoteUrl,
                         {
                             "bc_object_uuid": bcObject.bc_object_uuid,

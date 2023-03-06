@@ -232,7 +232,6 @@
 
             function saveSearchFilter(searchFilter) {
                 doPost(
-                    null,
                     props.storeInSessionUrl,
                     {
                         "top_search_filter": searchFilter.value,

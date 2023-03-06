@@ -128,7 +128,6 @@
         methods: {
             getQuote() {
                 doGet(
-                    this,
                     this.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", this.nodeQuote.uuid),
                     (response) => {
                         this.quote = response.data;
@@ -138,7 +137,6 @@
             },
             getRandomQuote() {
                 doPost(
-                    this,
                     this.getAndSetQuoteUrl,
                     {
                         "node_uuid": this.nodeUuid,
@@ -153,7 +151,6 @@
             },
             onRemoveQuote() {
                 doPost(
-                    null,
                     this.removeQuoteUrl,
                     {
                         "node_uuid": this.nodeUuid,
@@ -179,7 +176,6 @@
             },
             updateQuote(quote) {
                 doPost(
-                    this,
                     this.updateQuoteUrl,
                     {
                         "node_uuid": this.nodeUuid,

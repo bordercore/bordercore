@@ -63,7 +63,6 @@
                 EventBus.$emit("showFeed", feed);
 
                 doPost(
-                    null,
                     props.storeInSessionUrl,
                     {
                         "current_feed": feed.id,

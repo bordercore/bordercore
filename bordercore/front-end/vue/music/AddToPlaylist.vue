@@ -61,7 +61,6 @@
 
             function onClickAdd(datum) {
                 doPost(
-                    null,
                     props.addToPlaylistUrl,
                     {
                         "playlist_uuid": selectedPlaylist.value,
@@ -81,7 +80,6 @@
 
             onMounted(() => {
                 doGet(
-                    null,
                     props.getPlaylistsUrl,
                     (response) => {
                         playLists.value = response.data.results.filter(isManualPlaylist);

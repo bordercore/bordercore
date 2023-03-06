@@ -110,7 +110,6 @@
                     // We're moving a bookmark from a tagged category to the 'Untagged' category,
                     //  which means we need to remove that tag from the bookmark.
                     doPost(
-                        null,
                         props.removeTagUrl,
                         {
                             "tag_name": selectedTagName.value,
@@ -124,7 +123,6 @@
                     );
                 } else {
                     doPost(
-                        null,
                         props.addTagUrl,
                         {
                             "tag_id": tag.id,
@@ -146,7 +144,6 @@
                 const tagId = evt.moved.element.id;
 
                 doPost(
-                    null,
                     props.sortTagsUrl,
                     {
                         "tag_id": tagId,

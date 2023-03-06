@@ -222,7 +222,6 @@
                         animateCSS(evt.currentTarget, "heartBeat");
                     });
                     doPost(
-                        null,
                         "{% url "drill:is_favorite_mutate" %}",
                         {
                             "question_uuid": "{{ question.uuid }}",

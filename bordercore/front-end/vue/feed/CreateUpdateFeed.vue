@@ -134,7 +134,6 @@
                     );
                 } else {
                     doPost(
-                        null,
                         props.createFeedUrl,
                         {
                             "homepage": feedInfo.homepage,
@@ -170,7 +169,6 @@
                 feedUrl = encodeURIComponent(feedUrl).replace(/%/g, "%25");
 
                 doGet(
-                    null,
                     props.feedCheckUrl.replace(/666/, feedUrl),
                     (response) => {
                         checkingStatus.value = false;
