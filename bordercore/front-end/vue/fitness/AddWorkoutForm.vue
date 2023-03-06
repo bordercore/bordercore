@@ -134,9 +134,6 @@
             const selectedCell = ref("");
             const setCount = ref(0);
 
-            const csrfToken = props.csrfToken;
-            const addWorkoutUrl = props.addWorkoutUrl;
-
             const workoutDataJson = computed(() => {
                 return JSON.stringify(items.value);
             });
@@ -157,10 +154,10 @@
                 setCount.value += 1;
                 items.value.push(
                     {
-                        "index": setCount,
-                        "weight": weight,
-                        "duration": duration,
-                        "reps": reps,
+                        "index": setCount.value,
+                        "weight": weight.value,
+                        "duration": duration.value,
+                        "reps": reps.value,
                     },
                 );
             };
