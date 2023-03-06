@@ -13,8 +13,9 @@
                             :search-url="suggestSearchUrl"
                             @close="onClose"
                             @keydown="onKeyDown"
+                            @search="handleSearch"
                             @search-change="onSearchChange"
-                            @select="select"
+                            @select="handleSelectOption"
                         >
                             <template #option="props">
                                 <!-- @click.stop="" handlers are needed to prevent the splitter from being selected -->
@@ -243,7 +244,11 @@
                 );
             }
 
-            function select(selection) {
+            function handleSelectOption(selection) {
+                window.location = selection.link;
+            };
+
+            function handleSearch(selection) {
                 const form = document.querySelector("#top-search form");
                 if (searchFilter.value === "note") {
                     document.getElementById("topSearchValue").value = selectValue.value.$refs.multiselect.search;
@@ -297,13 +302,14 @@
                 getFilterName,
                 handleFilter,
                 handleRecentSearch,
+                handleSearch,
+                handleSelectOption,
                 onClose,
                 onKeyDown,
                 onSearchChange,
                 removeFilter,
                 saveSearchFilter,
                 searchFilterTypes,
-                select,
                 selectValue,
                 showFilter,
                 showSearchWindow,
