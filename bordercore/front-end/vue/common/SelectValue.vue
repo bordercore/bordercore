@@ -28,7 +28,10 @@
             <div slot="noResult" />
             <template #option="props">
                 <slot name="option" v-bind="props">
-                    <div v-if="boldenOptions" v-html="boldenOption(props.option[label], props.search)" />
+                    <div v-if="props.option[label] !== emptyLabel">
+                        <div v-if="boldenOptions" v-html="boldenOption(props.option[label], props.search)" />
+                    </div>
+                    <div v-else class="d-none" />
                 </slot>
             </template>
             <template #afterList="props">
@@ -111,6 +114,7 @@
         },
         data() {
             return {
+                emptyLabel: "____",
                 isDisabled: false,
                 options: [],
                 value: "",
@@ -159,18 +163,29 @@
                     const url = this.searchUrl;
                     this.debounce(() => {
                         return axios.get(url + query)
-                                    .then((response) => {
-                                        this.options = response.data;
-                                    });
+                            .then((response) => {
+                                this.options = response.data;
+                                if (response.data.length > 0) {
+                                    this.options.unshift({"label": this.emptyLabel, "name": ""});
+                                }
+                            });
                     });
                 } catch (error) {
                     console.log(`Error: ${error}`);
                 }
             },
-            select(tagInfo) {
+            select(option) {
                 // Once a value has been selected, emit an event to let the
-                //  parent component handle it
-                this.$emit("select", tagInfo);
+                //  parent component handle it.
+                // If the first option is highlighted, which is always the special
+                //  empty label, assume the user hit "Enter" and wants to do a
+                //  term search rather than select an option.
+                if (option.label === this.emptyLabel) {
+                    this.$emit("search", this.$refs.multiselect.search);
+                    this.clearOptions();
+                } else {
+                    this.$emit("select", option);
+                }
                 this.options = [];
             },
             setDisabled(value) {

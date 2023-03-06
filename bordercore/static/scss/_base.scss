@@ -2299,6 +2299,10 @@ tr.hover-target:hover {
   pointer-events: auto !important;
 }
 
+.multiselect__element#null-0 {
+  display: none;
+}
+
 .multiselect__placeholder, .multiselect__input::placeholder {
   display: inline-block !important;
   padding-top: 0 !important;
