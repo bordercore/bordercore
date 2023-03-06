@@ -62,7 +62,7 @@
                         </div>
                     </form>
 
-                    <div class="card-title ms-3 me-auto">
+                    <div class="card-title ms-3 me-auto" v-cloak>
                         [[ title ]]
                     </div>
 
@@ -152,8 +152,8 @@
             update-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
             create-todo-url="{% url 'todo-list' %}"
             tag-search-url="{% url 'tag:search' %}?query="
-            @post-todo-add="getTodoList()"
-            @post-todo-update="getTodoList()"
+            @add="getTodoList()"
+            @update="getTodoList()"
         >
         </create-update-todo>
 
@@ -369,6 +369,9 @@
                 };
 
                 function onClickUpdate(todoInfo) {
+                    if (todoInfo.due_date !== null) {
+                        todoInfo.due_date = new Date(todoInfo.due_date);
+                    }
                     updateTodo.value.setAction("Update");
                     updateTodo.value.todoInfo = todoInfo;
                     EventBus.$emit("addTags", todoInfo.tags);

@@ -40,7 +40,7 @@
                                         <tags-input
                                             :search-url="tagSearchUrl"
                                             get-tags-from-event
-                                            @tags-changed="onTagsChanged"
+                                            @tags-changed="handleTagsChanged"
                                         />
                                     </div>
                                 </div>
@@ -56,7 +56,7 @@
                                         <Datepicker
                                             id="id_due_date"
                                             v-model="todoInfo.due_date"
-                                            :format="customFormatter"
+                                            input-format="yyyy-MM-dd"
                                             :typeable="true"
                                             name="due_date"
                                             class="form-control"
@@ -71,7 +71,7 @@
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-lg-12 offset-lg-3">
-                                        <input class="btn btn-primary" type="button" :value="action" @click.prevent="onAction">
+                                        <input class="btn btn-primary" type="button" :value="action" @click.prevent="handleSubmit">
                                     </div>
                                 </div>
                             </div>
@@ -113,43 +113,31 @@
                 type: String,
             },
         },
-        data() {
-            return {
-                action: "Update",
-                todoInfo: {
-                    priority: 2,
-                    tags: [],
-                },
-                lastResponseCode: null,
-            };
-        },
-        methods: {
-            customFormatter(date) {
-                return format(new Date(date), "YYYY-MM-DD");
-            },
-            setAction(action) {
-                this.action = action;
-            },
-            onTagsChanged(newTags) {
-                this.todoInfo.tags = newTags;
-            },
-            onAction() {
+        emits: ["add", "update"],
+        setup(props, ctx) {
+            const action = ref("Update");
+            const todoInfo = ref({
+                priority: 2,
+                tags: [],
+            });
+
+            function handleSubmit() {
                 const dueDate = document.getElementsByName("due_date")[0].value;
-                if (this.action === "Update") {
+                if (action.value === "Update") {
                     doPut(
-                        this,
-                        this.updateTodoUrl.replace(/00000000-0000-0000-0000-000000000000/, this.todoInfo.uuid),
+                        null,
+                        props.updateTodoUrl.replace(/00000000-0000-0000-0000-000000000000/, todoInfo.value.uuid),
                         {
-                            "todo_uuid": this.todoInfo.uuid,
-                            "name": this.todoInfo.name,
-                            "priority": this.todoInfo.priority,
-                            "note": this.todoInfo.note,
-                            "tags": this.todoInfo.tags,
-                            "url": this.todoInfo.url || "",
+                            "todo_uuid": todoInfo.value.uuid,
+                            "name": todoInfo.value.name,
+                            "priority": todoInfo.value.priority,
+                            "note": todoInfo.value.note,
+                            "tags": todoInfo.value.tags,
+                            "url": todoInfo.value.url || "",
                             "due_date": dueDate,
                         },
                         (response) => {
-                            this.$emit("post-todo-update", response.data.uuid);
+                            ctx.emit("update", response.data.uuid);
                             const modal = Modal.getInstance(document.getElementById("modalUpdateTodo"));
                             modal.hide();
                         },
@@ -157,27 +145,42 @@
                     );
                 } else {
                     doPost(
-                        this,
-                        this.createTodoUrl,
+                        null,
+                        props.createTodoUrl,
                         {
-                            "name": this.todoInfo.name,
-                            "priority": this.todoInfo.priority,
-                            "note": this.todoInfo.note || "",
-                            "tags": this.todoInfo.tags,
-                            "url": this.todoInfo.url || "",
+                            "name": todoInfo.value.name,
+                            "priority": todoInfo.value.priority,
+                            "note": todoInfo.value.note || "",
+                            "tags": todoInfo.value.tags,
+                            "url": todoInfo.value.url || "",
                             "due_date": dueDate,
                         },
                         (response) => {
-                            this.$emit("post-todo-add", response.data.uuid);
+                            ctx.emit("add", response.data.uuid);
                             const modal = Modal.getInstance(document.getElementById("modalUpdateTodo"));
                             modal.hide();
                         },
                         "Todo task created.",
                     );
                 }
-            },
-        },
+            };
 
+            function handleTagsChanged(newTags) {
+                todoInfo.value.tags = newTags;
+            };
+
+            function setAction(actionParam) {
+                action.value = actionParam;
+            };
+
+            return {
+                action,
+                handleTagsChanged,
+                handleSubmit,
+                setAction,
+                todoInfo,
+            };
+        },
     };
 
 </script>
