@@ -70,6 +70,7 @@
                 related-objects-url="{% url 'drill:related_objects' object.uuid %}"
                 add-object-url="{% url 'drill:add_object' %}"
                 remove-object-url="{% url 'drill:remove_object' %}" edit-object-note-url="{% url 'drill:edit_related_object_note' %}"
+                @open-object-select-modal="openObjectSelectModal"
             >
             </related-objects>
 
@@ -274,8 +275,9 @@
                 const intervals = ref({{ intervals|safe }});
                 const mode = ref("question");
 
+                const objectSelect = ref(null);
                 const pythonConsole = ref(null);
-                    const relatedObjectsList = ref(null);
+                const relatedObjectsList = ref(null);
 
                 function onMouseOutResponse(response) {
                     intervalString.value = "";
@@ -283,6 +285,10 @@
 
                 function onMouseOverResponse(response) {
                     intervalString.value = intervals.value[response]["description"];
+                };
+
+                function openObjectSelectModal() {
+                    objectSelect.value.openModal();
                 };
 
                 function setMode(modeParam) {
@@ -365,8 +371,10 @@
                     intervalString,
                     intervals,
                     mode,
+                    objectSelect,
                     onMouseOutResponse,
                     onMouseOverResponse,
+                    openObjectSelectModal,
                     pythonConsole,
                     relatedObjectsList,
                     selectObject,

@@ -12,7 +12,7 @@
                             <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                                 <template #dropdown>
                                     <li>
-                                        <a class="dropdown-item" href="#" @click.prevent="openModal">
+                                        <a class="dropdown-item" href="#" @click.prevent="openObjectSelectModal">
                                             <span>
                                                 <font-awesome-icon icon="plus" class="text-primary me-3" />
                                             </span>
@@ -28,7 +28,7 @@
                 <template #content>
                     <hr class="divider">
                     <ul class="list-group list-group-flush interior-borders">
-                        <li v-for="object in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary px-0" :data-uuid="object.uuid">
+                        <li v-for="(object, index) in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary px-0" :data-uuid="object.uuid">
                             <div class="dropdown-height d-flex align-items-start">
                                 <div v-if="object.type === 'bookmark'" class="pe-2" v-html="object.favicon_url" />
                                 <div v-else-if="object.type === 'blob'" class="pe-2">
@@ -37,23 +37,23 @@
                                 <div>
                                     <a :href="object.url">{{ object.name }}</a>
 
-                                    <div v-show="!object.noteIsEditable" v-if="object.note" class="node-object-note" @click="onSetNoteIsEditable(object)">
+                                    <div v-show="!object.noteIsEditable" v-if="object.note" class="node-object-note" @click="handleSetNoteIsEditable(object, index)">
                                         {{ object.note }}
                                     </div>
                                     <span v-show="object.noteIsEditable">
-                                        <input id="add-object-input" ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" autocomplete="off" @blur="onEditNote(object, $event.target.value)" @keydown.enter="onEditNote(object, $event.target.value)">
+                                        <input ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" autocomplete="off" @blur="handleEditNote(object, $event.target.value)" @keydown.enter="handleEditNote(object, $event.target.value)">
                                     </span>
                                 </div>
                                 <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
                                     <template #dropdown>
                                         <li>
-                                            <a class="dropdown-item" href="#" @click.prevent="onRemoveObject(object.bc_object_uuid, object.uuid)">
+                                            <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(object.bc_object_uuid, object.uuid)">
                                                 <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                             </a>
                                             <a class="dropdown-item" :href="object.edit_url">
                                                 <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit <span>{{ object.type }}</span>
                                             </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="onSetNoteIsEditable(object)">
+                                            <a class="dropdown-item" href="#" @click.prevent="handleSetNoteIsEditable(object, index)">
                                                 <font-awesome-icon :icon="object.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ object.note ? 'Edit' : 'Add' }} note
                                             </a>
                                         </li>
@@ -85,10 +85,6 @@
         },
         props: {
             objectUuid: {
-                default: "",
-                type: String,
-            },
-            baseModelName: {
                 default: "",
                 type: String,
             },
@@ -125,117 +121,122 @@
                 type: Boolean,
             },
         },
-        data() {
-            return {
-                mode: "search",
-                name: "",
-                bookmarkList: [],
-                objectList: [],
-            };
-        },
-        mounted() {
-            if (!this.newQuestion) {
-                this.getRelatedObjects();
-            }
-        },
-        methods: {
-            getRelatedObjects() {
-                doGet(
-                    this.relatedObjectsUrl.replace(/00000000-0000-0000-0000-000000000000/, this.objectUuid),
-                    (response) => {
-                        this.objectList = response.data.related_objects;
+        emits: ["open-object-select-modal"],
+        setup(props, ctx) {
+            const input = ref(null);
+            const objectList = ref([]);
 
-                        // Let Vue know that each objects's "noteIsEditable" property is reactive
-                        /* for (const object of this.objectList) {
-                         *     this.$set(object, "noteIsEditable", false);
-                         * } */
-                    },
-                    "Error getting object list",
-                );
-            },
-            onRemoveObject(bcObjectUuid, uuid) {
-                if (this.newQuestion) {
-                    const newObjectList = this.objectList.filter((x) => x.uuid !== uuid);
-                    this.objectList = newObjectList;
+            let isEditingNote = false;
+
+            function addObject(bcObject) {
+                if (props.newQuestion) {
+                    objectList.value.push(bcObject);
                     return;
                 }
 
                 doPost(
-                    this.removeObjectUrl,
+                    props.addObjectUrl,
                     {
-                        "question_uuid": this.objectUuid,
-                        "bc_object_uuid": bcObjectUuid,
-                    },
-                    (response) => {
-                        this.getRelatedObjects();
-                    },
-                    "Object removed",
-                    "",
-                );
-            },
-            openModal() {
-                this.$parent.$refs.objectSelect.openModal();
-            },
-            addObject(bcObject) {
-                if (this.newQuestion) {
-                    this.objectList.push(bcObject);
-                    // Let Vue know that the object's "noteIsEditable" property is reactive
-                    this.$set(bcObject, "noteIsEditable", false);
-                    return;
-                }
-
-                doPost(
-                    this.addObjectUrl,
-                    {
-                        "question_uuid": this.objectUuid,
+                        "question_uuid": props.objectUuid,
                         "object_uuid": bcObject.uuid,
                     },
                     (response) => {
-                        this.getRelatedObjects();
+                        getRelatedObjects();
                     },
                     "Object added",
                     "",
                 );
-            },
-            onSetNoteIsEditable(bcObject) {
-                bcObject.noteIsEditable = true;
+            };
 
-                this.$nextTick(() => {
-                    this.$refs.input[0].focus();
-                });
-            },
-            onEditNote(bcObject, note) {
-                if (this.editingNote) {
+            function getRelatedObjects() {
+                doGet(
+                    props.relatedObjectsUrl.replace(/00000000-0000-0000-0000-000000000000/, props.objectUuid),
+                    (response) => {
+                        objectList.value = response.data.related_objects;
+                    },
+                    "Error getting object list",
+                );
+            };
+
+            function handleEditNote(bcObject, note) {
+                if (isEditingNote) {
                     return;
                 }
-                this.editingNote = true;
+                isEditingNote = true;
 
                 // If the note hasn't changed, abort
                 if (note == bcObject.note) {
-                    bcObject.noteIsEditable = false;
-                    this.editingNote = false;
+                    isEditingNote = false;
                     return;
                 }
 
-                if (this.newQuestion) {
+                if (props.newQuestion) {
                     bcObject.note = note;
-                    bcObject.noteIsEditable = false;
                 } else {
                     doPost(
-                        this.editObjectNoteUrl,
+                        props.editObjectNoteUrl,
                         {
                             "bc_object_uuid": bcObject.bc_object_uuid,
                             "note": note,
                         },
                         (response) => {
-                            this.getRelatedObjects();
+                            getRelatedObjects();
                         },
                         "",
                         "",
                     );
                 }
-                this.editingNote = false;
-            },
+                isEditingNote = false;
+            };
+
+            function handleRemoveObject(bcObjectUuid, uuid) {
+                if (props.newQuestion) {
+                    const newObjectList = objectList.value.filter((x) => x.uuid !== uuid);
+                    objectList.value = newObjectList;
+                    return;
+                }
+
+                doPost(
+                    props.removeObjectUrl,
+                    {
+                        "question_uuid": props.objectUuid,
+                        "bc_object_uuid": bcObjectUuid,
+                    },
+                    (response) => {
+                        getRelatedObjects();
+                    },
+                    "Object removed",
+                    "",
+                );
+            };
+
+            function handleSetNoteIsEditable(bcObject, index) {
+                bcObject.noteIsEditable = true;
+
+                nextTick(() => {
+                    input.value[index].focus();
+                });
+            };
+
+            function openObjectSelectModal() {
+                ctx.emit("open-object-select-modal");
+            };
+
+            onMounted(() => {
+                if (!props.newQuestion) {
+                    getRelatedObjects();
+                }
+            });
+
+            return {
+                addObject,
+                input,
+                objectList,
+                handleEditNote,
+                handleRemoveObject,
+                handleSetNoteIsEditable,
+                openObjectSelectModal,
+            };
         },
     };
 

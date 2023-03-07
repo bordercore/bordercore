@@ -27,6 +27,7 @@
                 remove-object-url="{% url 'drill:remove_object' %}"
                 edit-object-note-url="{% url 'drill:edit_related_object_note' %}"
                 :new-question="true"
+                @open-object-select-modal="openObjectSelectModal"
             >
             </related-objects>
 
@@ -154,11 +155,16 @@
 
                 const mdEditorAnswer = ref(null);
                 const mdEditorQuestion = ref(null);
+                const objectSelect = ref(null);
                 const relatedObjectsList = ref(null);
                 const tagsInput = ref(null);
 
-                    function onKeyUp(evt) {
-                        if (evt.key !== "Tab") {
+                function openObjectSelectModal() {
+                    objectSelect.value.openModal();
+                };
+
+                function onKeyUp(evt) {
+                    if (evt.key !== "Tab") {
                         return;
                     }
                     if (evt.srcElement == mdEditorQuestion.$el.querySelector("textarea")) {
@@ -234,6 +240,8 @@
                     mdEditorAnswer,
                     mdEditorQuestion,
                     newQuestion,
+                    objectSelect,
+                    openObjectSelectModal,
                     {% if object.uuid %}
                     onClickDelete,
                     {% endif %}
