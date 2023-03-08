@@ -7,7 +7,7 @@ from drill.models import Question
 faker = FakerFactory.create()
 
 
-class QuestionFactory(factory.DjangoModelFactory):
+class QuestionFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Question

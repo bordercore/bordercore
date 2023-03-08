@@ -7,7 +7,7 @@ from node.models import Node
 faker = FakerFactory.create()
 
 
-class NodeFactory(factory.DjangoModelFactory):
+class NodeFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Node

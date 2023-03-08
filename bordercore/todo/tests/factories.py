@@ -7,7 +7,7 @@ from todo.models import Todo
 
 
 @factory.django.mute_signals(signals.post_save)
-class TodoFactory(factory.DjangoModelFactory):
+class TodoFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Todo

@@ -8,7 +8,7 @@ from music.models import Album, Artist, Playlist, Song, SongSource
 faker = FakerFactory.create()
 
 
-class ArtistFactory(factory.DjangoModelFactory):
+class ArtistFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Artist
@@ -17,7 +17,7 @@ class ArtistFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
 
-class AlbumFactory(factory.DjangoModelFactory):
+class AlbumFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Album
@@ -28,7 +28,7 @@ class AlbumFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
 
-class SongSourceFactory(factory.DjangoModelFactory):
+class SongSourceFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = SongSource
@@ -37,7 +37,7 @@ class SongSourceFactory(factory.DjangoModelFactory):
     description = faker.text()
 
 
-class SongFactory(factory.DjangoModelFactory):
+class SongFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Song
@@ -52,7 +52,7 @@ class SongFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
 
-class PlaylistFactory(factory.DjangoModelFactory):
+class PlaylistFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Playlist

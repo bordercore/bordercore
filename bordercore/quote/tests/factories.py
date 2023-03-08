@@ -7,7 +7,7 @@ from quote.models import Quote
 faker = FakerFactory.create()
 
 
-class QuoteFactory(factory.DjangoModelFactory):
+class QuoteFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Quote

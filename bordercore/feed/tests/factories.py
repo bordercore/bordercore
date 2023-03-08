@@ -10,7 +10,7 @@ faker = FakerFactory.create()
 
 
 @factory.django.mute_signals(signals.post_save)
-class FeedItemFactory(factory.DjangoModelFactory):
+class FeedItemFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = FeedItem
@@ -20,7 +20,7 @@ class FeedItemFactory(factory.DjangoModelFactory):
 
 
 @factory.django.mute_signals(signals.post_save)
-class FeedFactory(factory.DjangoModelFactory):
+class FeedFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Feed

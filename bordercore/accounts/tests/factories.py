@@ -14,7 +14,7 @@ TEST_PASSWORD = "testpassword"
 
 
 @factory.django.mute_signals(signals.post_save)
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = User

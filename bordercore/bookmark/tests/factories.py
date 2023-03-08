@@ -4,7 +4,7 @@ from accounts.tests.factories import UserFactory
 from bookmark.models import Bookmark
 
 
-class BookmarkFactory(factory.DjangoModelFactory):
+class BookmarkFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Bookmark

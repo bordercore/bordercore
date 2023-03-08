@@ -10,9 +10,9 @@ from pathlib import Path
 
 import boto3
 import botocore
-import factory
 import fitz
 import pytest
+from faker import Factory as FakerFactory
 from PIL import Image
 
 import django
@@ -73,6 +73,7 @@ GECKO_DRIVER_LOGFILE = f"/tmp/geckodriver-{getpass.getuser()}.log"
 #  from interfering with functional and views tests
 os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 
+faker = FakerFactory.create()
 
 @pytest.fixture()
 def temp_blob_directory():
@@ -210,7 +211,7 @@ def _create_blob(file_contents=None, **file_info):
         user=blob.user,
         blob=blob,
         name="Author",
-        value=factory.Faker("text", max_nb_chars=40).generate(),
+        value=faker.text(max_nb_chars=40),
     )
 
     if not file_contents:
@@ -220,7 +221,7 @@ def _create_blob(file_contents=None, **file_info):
         file_contents = bytes(f"mybinarydata{blob.uuid}", "utf-8")
 
     blob_file = BytesIO(file_contents)
-    blob_file.name = factory.Faker("file_name", **file_info).generate()
+    blob_file.name = faker.file_name(**file_info)
     blob.file_modified = 1638644921
     blob.file.save(blob_file.name, blob_file)
     blob.sha1sum = hashlib.sha1(file_contents).hexdigest()
@@ -249,7 +250,7 @@ def blob_text_factory(db, s3_resource, s3_bucket):
             user=blob.user,
             blob=blob,
             name="Author",
-            value=factory.Faker("text", max_nb_chars=40).generate(),
+            value=faker.text(max_nb_chars=40),
         )
 
         BlobFactory.index_blob(blob)

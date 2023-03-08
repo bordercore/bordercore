@@ -7,7 +7,7 @@ from collection.models import Collection
 
 
 @factory.django.mute_signals(signals.post_save)
-class CollectionFactory(factory.DjangoModelFactory):
+class CollectionFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Collection

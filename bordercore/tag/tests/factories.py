@@ -7,7 +7,7 @@ from tag.models import Tag
 
 
 @factory.django.mute_signals(signals.post_save)
-class TagFactory(factory.DjangoModelFactory):
+class TagFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Tag

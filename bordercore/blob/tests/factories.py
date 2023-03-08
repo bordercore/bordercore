@@ -12,13 +12,13 @@ from tag.tests.factories import TagFactory
 
 
 @factory.django.mute_signals(signals.post_save)
-class MetaDataFactory(factory.DjangoModelFactory):
+class MetaDataFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = MetaData
 
 
-class BlobFactory(factory.DjangoModelFactory):
+class BlobFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Blob
