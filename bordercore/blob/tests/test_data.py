@@ -315,7 +315,7 @@ def test_books_with_contents(es):
 def test_tags_all_lowercase():
     "Assert that all tags are lowercase"
     t = Tag.objects.filter(name__regex=r"[[:upper:]]+")
-    assert len(t) == 0, "{} tags fail this test".format(len(t))
+    assert len(t) == 0, f"{len(t)} tags are not lowercase, tag={t[0]}"
 
 
 def test_blobs_in_db_exist_in_elasticsearch(es):
