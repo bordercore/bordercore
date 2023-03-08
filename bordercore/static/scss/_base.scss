@@ -1206,6 +1206,15 @@ blockquote > p {
   right: 0.25rem;
   width: 25rem;
   line-height: 1.5rem;
+
+  @extend .multiselect__tags;
+  .multiselect__tags {
+    background-color: var(--surface2) !important;
+
+    .multiselect__input, .multiselect__single {
+      background-color: var(--surface2) !important;
+    }
+  }
 }
 
 #top-bar {
@@ -2266,6 +2275,7 @@ tr.hover-target:hover {
 
 .multiselect__content-wrapper {
   border: 0 !important;
+  overflow-x: hidden !important;
 }
 
 // This class is added on focus
@@ -2305,7 +2315,7 @@ tr.hover-target:hover {
 
 .multiselect__placeholder, .multiselect__input::placeholder {
   display: inline-block !important;
-  padding-top: 0 !important;
+  padding-top: 0.25rem !important;
   margin-bottom: 0 !important;
   margin-left: 0 !important;
   color: var(--text2);

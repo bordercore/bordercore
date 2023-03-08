@@ -166,8 +166,6 @@
             };
 
             function handleFilter(filter) {
-                console.log("handleFilter");
-                // showSearchWindow.value = true;
                 searchFilter.value = searchFilter.value === filter ? "" : filter;
                 saveSearchFilter(searchFilter);
             }
