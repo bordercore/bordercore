@@ -25,7 +25,6 @@
             @select="select"
             @close="onClose"
         >
-            <div slot="noResult" />
             <template #option="props">
                 <slot name="option" v-bind="props">
                     <div v-if="props.option[label] !== emptyLabel">
@@ -38,7 +37,9 @@
                 <slot name="afterList" v-bind="props" />
             </template>
             <template #noResult>
-                Nothing found
+                <div v-show="showNoResult">
+                    Nothing found
+                </div>
             </template>
         </multiselect>
         <input :id="id" type="hidden" :name="name" :value="getValueComputed">
@@ -117,6 +118,7 @@
                 emptyLabel: "____",
                 isDisabled: false,
                 options: [],
+                showNoResult: false,
                 value: "",
             };
         },
@@ -160,13 +162,15 @@
                 }
 
                 try {
-                    const url = this.searchUrl;
                     this.debounce(() => {
-                        return axios.get(url + query)
+                        return axios.get(this.searchUrl + query)
                             .then((response) => {
                                 this.options = response.data;
                                 if (response.data.length > 0) {
+                                    this.showNoResult = false;
                                     this.options.unshift({"label": this.emptyLabel, "name": ""});
+                                } else {
+                                    this.showNoResult = true;
                                 }
                             });
                     });
