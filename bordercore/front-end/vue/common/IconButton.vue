@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column align-items-center w-25">
-        <div class="option-icon" :class="{'enabled': enabled}" @click="onClick">
+        <div class="option-icon" :class="{'enabled': enabled}" @click="handleEnable">
             <font-awesome-icon :icon="icon" class="text-primary" />
         </div>
         <div>
@@ -35,21 +35,22 @@
                 default: "form-name",
             },
         },
-        data() {
+        emits: ["enable-option"],
+        setup(props, ctx) {
+            const enabled = ref(false);
+
+            enabled.value = props.initialEnabled;
+
+            function handleEnable() {
+                enabled.value = !enabled.value;
+                ctx.emit("enable-option", props.formName, enabled.value);
+            };
+
             return {
-                enabled: false,
+                enabled,
+                handleEnable,
             };
         },
-        mounted() {
-            this.enabled = this.initialEnabled;
-        },
-        methods: {
-            onClick() {
-                this.enabled = !this.enabled;
-                this.$emit("enable-option", this.formName, this.enabled);
-            },
-        },
-
     };
 
 </script>
