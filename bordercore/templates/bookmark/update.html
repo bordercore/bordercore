@@ -188,6 +188,7 @@
                 RelatedTags,
                 TagsInput,
             },
+            delimiters: ["[[", "]]"],
             setup() {
                 {% if bookmark.uuid %}
                 const uuid = ref("{{ bookmark.uuid }}");
@@ -196,7 +197,7 @@
                 const importance = ref({{ form.importance.value|yesno:"true,false" }});
                 const isPinned = ref({{ form.is_pinned.value|yesno:"true,false" }});
                 const relatedQuestions = ref([
-                    {% for question in related_questions %}
+                    {% for question in related_questions.bc_objects.all %}
                     {
                         question: markdown.render("{{ question.question|escapejs }}"),
                         url: "{% url 'drill:detail' question.uuid %}",

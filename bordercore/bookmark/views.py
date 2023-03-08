@@ -89,7 +89,7 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["tags"] = [x.name for x in self.object.tags.all()]
-        context["related_questions"] = self.object.bcobject_set.all()
+        context["related_questions"] = self.object.bcobject_set.all().first()
         context["related_blobs"] = [
             {
                 "uuid": b.uuid,
