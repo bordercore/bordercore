@@ -12,7 +12,7 @@
                             <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                                 <template #dropdown>
                                     <li>
-                                        <a class="dropdown-item" href="#" @click.prevent="openModal">
+                                        <a class="dropdown-item" href="#" @click.prevent="openObjectSelectModal">
                                             <span>
                                                 <font-awesome-icon icon="plus" class="text-primary me-3" />
                                             </span>
@@ -31,7 +31,7 @@
                         <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-muted">
                             No bookmarks
                         </div>
-                        <draggable v-model="bookmarkList" draggable=".draggable" item-key="uuid" :component-data="{type:'transition-group'}" @change="onSort">
+                        <draggable v-model="bookmarkList" draggable=".draggable" item-key="uuid" :component-data="{type:'transition-group'}" @change="handleSort">
                             <template #item="{element, index}">
                                 <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable px-0" :data-uuid="element.uuid">
                                     <div class="dropdown-height d-flex align-items-start">
@@ -39,27 +39,24 @@
                                         <div>
                                             <a :href="element.url">{{ element.name }}</a>
 
-                                            <div v-show="!element.noteIsEditable" v-if="element.note" class="node-object-note" @click="activateInEditMode(element, {index})">
+                                            <div v-show="!element.noteIsEditable" v-if="element.note" class="node-object-note" @click="handleSetNoteIsEditable(element, {index})">
                                                 {{ element.note }}
                                             </div>
                                             <span v-show="element.noteIsEditable">
-                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" autocomplete="off" @blur="editNote(element.uuid, $event.target.value)" @keydown.enter="editNote(element.uuid, $event.target.value)">
+                                                <input :id="`related_bookmark_${index}`" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" autocomplete="off" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
                                             </span>
                                         </div>
                                         <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
                                             <template #dropdown>
                                                 <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="removeBookmark(element.uuid)">
+                                                    <a class="dropdown-item" href="#" @click.prevent="handleRemove(element.uuid)">
                                                         <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                     </a>
                                                     <a class="dropdown-item" :href="element.edit_url">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit Bookmark
                                                     </a>
-                                                    <a v-if="element.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(element, index)">
-                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit note
-                                                    </a>
-                                                    <a v-else class="dropdown-item" href="#" @click.prevent="addNote(element.uuid)">
-                                                        <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
+                                                    <a class="dropdown-item" href="#" @click.prevent="handleSetNoteIsEditable(element, index)">
+                                                        <font-awesome-icon :icon="element.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ element.note ? 'Edit' : 'Add' }} note
                                                     </a>
                                                 </li>
                                             </template>
@@ -98,10 +95,6 @@
                 default: "",
                 type: String,
             },
-            blobUuid: {
-                default: "",
-                type: String,
-            },
             title: {
                 default: "Bookmarks",
                 type: String,
@@ -130,14 +123,6 @@
                 default: "url",
                 type: String,
             },
-            showAddButton: {
-                default: true,
-                type: Boolean,
-            },
-            extraClass: {
-                default: "",
-                type: String,
-            },
             transitionName: {
                 default: "fade",
                 type: String,
@@ -146,165 +131,156 @@
                 default: true,
                 type: Boolean,
             },
-            newQuestion: {
+            newBookmark: {
                 default: false,
                 type: Boolean,
             },
         },
-        data() {
-            return {
-                mode: "search",
-                name: "",
-                bookmarkList: [],
-            };
-        },
-        mounted() {
-            if (!this.newQuestion) {
-                this.getBookmarkList();
-            }
-        },
-        methods: {
-            getBookmarkList() {
-                doGet(
-                    this.getBookmarkListUrl.replace(/00000000-0000-0000-0000-000000000000/, this.objectUuid),
-                    (response) => {
-                        this.bookmarkList = response.data.bookmark_list;
-                    },
-                    "Error getting bookmark list",
-                );
-            },
-            removeBookmark(bookmarkUuid) {
-                if (this.newQuestion) {
-                    const newBookmarkList = this.bookmarkList.filter((x) => x.uuid !== bookmarkUuid);
-                    this.bookmarkList = newBookmarkList;
-                    return;
-                }
+        emits: ["open-object-select-modal"],
+        setup(props, ctx) {
+            const bookmarkList = ref([]);
 
-                doPost(
-                    this.removeBookmarkUrl,
-                    {
-                        "object_uuid": this.objectUuid,
-                        "model_name": this.modelName,
-                        "bookmark_uuid": bookmarkUuid,
-                    },
-                    (response) => {
-                        this.getBookmarkList();
-                    },
-                    "Bookmark removed",
-                    "",
-                );
-            },
-            openModal() {
-                this.$parent.$refs.objectSelectBookmark.openModal(["bookmark"]);
-            },
-            selectBookmark(bookmark) {
-                let url = this.addBookmarkUrl;
+            let isEditingNote = false;
 
-                if (this.newQuestion) {
+            function addBookmark(bookmark) {
+                let url = props.addBookmarkUrl;
+
+                if (props.newBookmark) {
                     bookmark.noteIsEditable = false;
-                    this.bookmarkList.push(bookmark);
+                    bookmarkList.value.push(bookmark);
                     return;
                 }
 
-                if (this.updateModified) {
+                if (props.updateModified) {
                     url = url + "?update_modified=true";
                 }
 
                 doPost(
                     url,
                     {
-                        "object_uuid": this.objectUuid,
-                        "model_name": this.modelName,
+                        "object_uuid": props.objectUuid,
+                        "model_name": props.modelName,
                         "bookmark_uuid": bookmark.uuid,
                     },
                     (response) => {
-                        this.getBookmarkList();
+                        getBookmarkList();
                     },
                     "Bookmark added",
-                    "",
                 );
-            },
-            onSort(evt) {
+            };
+
+            function getBookmarkList() {
+                doGet(
+                    props.getBookmarkListUrl.replace(/00000000-0000-0000-0000-000000000000/, props.objectUuid),
+                    (response) => {
+                        bookmarkList.value = response.data.bookmark_list;
+                    },
+                    "Error getting bookmark list",
+                );
+            };
+
+            function handleEditNote(bookmark, note) {
+                if (isEditingNote) {
+                    return;
+                }
+                isEditingNote = true;
+
+                if (note === bookmark.note) {
+                    // If the note hasn't changed, abort
+                    isEditingNote = false;
+                    return;
+                }
+
+                if (props.newBookmark) {
+                    bookmark.note = note;
+                } else {
+                    doPost(
+                        props.editBookmarkNoteUrl,
+                        {
+                            "object_uuid": props.objectUuid,
+                            "model_name": props.modelName,
+                            "bookmark_uuid": bookmark.uuid,
+                            "note": note,
+                        },
+                        (response) => {
+                            getBookmarkList();
+                        },
+                    );
+                }
+                isEditingNote = false;
+            };
+
+            function handleRemove(bookmarkUuid) {
+                if (props.newBookmark) {
+                    const newBookmarkList = bookmarkList.value.filter((x) => x.uuid !== bookmarkUuid);
+                    bookmarkList.value = newBookmarkList;
+                    return;
+                }
+
+                doPost(
+                    props.removeBookmarkUrl,
+                    {
+                        "object_uuid": props.objectUuid,
+                        "model_name": props.modelName,
+                        "bookmark_uuid": bookmarkUuid,
+                    },
+                    (response) => {
+                        getBookmarkList();
+                    },
+                    "Bookmark removed",
+                );
+            };
+
+            function handleSetNoteIsEditable(bookmark, index) {
+                bookmark.noteIsEditable = true;
+
+                nextTick(() => {
+                    document.getElementById(`related_bookmark_${index}`).focus();
+                });
+            };
+
+            function handleSort(evt) {
                 const bookmarkUuid = evt.moved.element.uuid;
 
                 // The backend expects the ordering to begin
                 // with 1, not 0, so add 1.
                 const newPosition = evt.moved.newIndex + 1;
 
-                if (this.newQuestion) {
+                if (props.newBookmark) {
                     return;
                 }
 
                 doPost(
-                    this.sortBookmarkListUrl,
+                    props.sortBookmarkListUrl,
                     {
-                        "object_uuid": this.objectUuid,
-                        "model_name": this.modelName,
+                        "object_uuid": props.objectUuid,
+                        "model_name": props.modelName,
                         "bookmark_uuid": bookmarkUuid,
                         "new_position": newPosition,
                     },
                     () => {},
-                    "",
-                    "",
                 );
-            },
-            activateInEditMode(bookmark, index) {
-                this.bookmarkList[index["index"]].noteIsEditable = true;
+            };
 
-                self = this;
-                setTimeout( () => {
-                    self.$refs.input[index["index"]].focus();
-                }, 100);
-            },
-            addNote(bookmarkUuid) {
-                for (const bookmark of this.bookmarkList) {
-                    if (bookmark.uuid == bookmarkUuid) {
-                        bookmark.noteIsEditable = true;
-                    }
+            function openObjectSelectModal() {
+                ctx.emit("open-object-select-modal", ["bookmark"]);
+            };
+
+            onMounted(() => {
+                if (!props.newBookmark) {
+                    getBookmarkList();
                 }
+            });
 
-                this.$nextTick(() => {
-                    this.$refs.input[0].focus();
-                });
-            },
-            editNote(bookmarkUuid, note) {
-                if (this.editingNote) {
-                    return;
-                }
-                this.editingNote = true;
-
-                for (const bookmark of this.bookmarkList) {
-                    if (bookmark.uuid == bookmarkUuid) {
-                        // If the note hasn't changed, abort
-                        if (note == bookmark.note) {
-                            bookmark.noteIsEditable = false;
-                            this.editingNote = false;
-                            return;
-                        }
-
-                        if (this.newQuestion) {
-                            bookmark.note = note;
-                            bookmark.noteIsEditable = false;
-                        } else {
-                            doPost(
-                                this.editBookmarkNoteUrl,
-                                {
-                                    "object_uuid": this.objectUuid,
-                                    "model_name": this.modelName,
-                                    "bookmark_uuid": bookmark.uuid,
-                                    "note": note,
-                                },
-                                (response) => {
-                                    this.getBookmarkList();
-                                },
-                                "",
-                                "",
-                            );
-                        }
-                        this.editingNote = false;
-                    }
-                }
-            },
+            return {
+                addBookmark,
+                bookmarkList,
+                handleEditNote,
+                handleRemove,
+                handleSetNoteIsEditable,
+                handleSort,
+                openObjectSelectModal,
+            };
         },
     };
 

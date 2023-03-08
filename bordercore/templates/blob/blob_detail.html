@@ -22,7 +22,7 @@
                 :initial-doctypes="['bookmark']"
                 search-object-url="{% url 'search:search_names' %}"
                 title="Select Bookmark"
-                @select-object="selectBookmark"
+                @select-object="addBookmark"
             >
             </object-select>
 
@@ -204,13 +204,19 @@
                     </template>
                 </card>
 
-            <related-bookmarks-list ref="relatedBookmarksList" object-uuid="{{ object.uuid }}" model-name="blob.Blob"
-                get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
-                add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
-                remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
-                sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}" :show-add-button="false"
-                :show-empty-list="false">
+                <related-bookmarks-list
+                    ref="relatedBookmarksList"
+                    object-uuid="{{ object.uuid }}"
+                    model-name="blob.Blob"
+                    get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
+                    add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                    remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                    sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                    edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
+                    :show-add-button="false"
+                    :show-empty-list="false"
+                    @open-object-select-modal="openObjectSelectModal"
+            >
             </related-bookmarks-list>
 
             <card v-if="relatedBlobList.length > 0" title="Related Blobs" class="backdrop-filter">
@@ -510,6 +516,7 @@
 
                 const addToCollection = ref(null);
                 const blobSelect = ref(null);
+                const objectSelectBookmark = ref(null);
                 const relatedBookmarksList = ref(null);
 
                 function getNote() {
@@ -601,8 +608,8 @@
                     );
                 };
 
-                function selectBookmark(bookmarkInfo) {
-                    relatedBookmarksList.value.selectBookmark(bookmarkInfo);
+                function addBookmark(bookmarkInfo) {
+                    relatedBookmarksList.value.addBookmark(bookmarkInfo);
                 };
 
                 function handleCopySha1sum(sha1sum) {
@@ -674,6 +681,10 @@
                     );
                 };
 
+                function openObjectSelectModal() {
+                    objectSelectBookmark.value.openModal();
+                };
+
                 function onClickDelete() {
                     axios.delete("{% url 'blob-detail' blob.uuid %}")
                          .then((response) => {
@@ -713,7 +724,7 @@
                     });
 
                     EventBus.$on("open-bookmarks-modal", () => {
-                        relatedBookmarksList.value.openModal();
+                        relatedBookmarksList.value.openObjectSelectModal();
                     });
 
                     hotkeys("alt+c", function(event, handler) {
@@ -726,6 +737,7 @@
                 });
 
                 return {
+                    addBookmark,
                     addToCollection,
                     blobSelect,
                     collectionList,
@@ -744,18 +756,19 @@
                     handleLinkToBookmark,
                     isPinnedNote,
                     metadata_misc,
+                    objectSelectBookmark,
                     onAfterEnter,
                     onClick,
                     onClickPinnedNote,
                     onClickDelete,
                     onUpdateNote,
                     onRemoveLink,
+                    openObjectSelectModal,
                     pinnedButtonValue,
                     relatedBlobList,
                     relatedBookmarksList,
                     relatedQuestions,
                     selectBlob,
-                    selectBookmark,
                     tree,
                 };
             },
