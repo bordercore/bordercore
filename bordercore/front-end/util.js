@@ -5,7 +5,7 @@
  * @param {string} callback An optional callback function.
  * @param {string} errorMsg The message to display on error.
  */
-export function doGet(url, callback, errorMsg) {
+export function doGet(url, callback, errorMsg = "") {
     axios.get(url)
         .then((response) => {
             if (response.data.status && response.data.status !== "OK") {
@@ -45,7 +45,7 @@ export function doGet(url, callback, errorMsg) {
  * @param {string} successMsg The message to display on success.
  * @param {string} errorMsg The message to display on error.
  */
-export function doPost(url, params, callback, successMsg, errorMsg) {
+export function doPost(url, params, callback, successMsg = "", errorMsg = "") {
     const bodyFormData = new URLSearchParams();
 
     for (const [key, value] of Object.entries(params)) {
@@ -115,7 +115,7 @@ export function doPost(url, params, callback, successMsg, errorMsg) {
  * @param {string} successMsg The message to display on success.
  * @param {string} errorMsg The message to display on error.
  */
-export function doPut(url, params, callback, successMsg, errorMsg) {
+export function doPut(url, params, callback, successMsg = "", errorMsg = "") {
     const bodyFormData = new URLSearchParams();
 
     for (const [key, value] of Object.entries(params)) {
