@@ -283,6 +283,7 @@
                                     search-url="{% url 'tag:search' %}?doctype=drill&query="
                                     id="tag-name"
                                     place-holder="Tag name"
+                                    :disabled="studyMethod !== 'tag-needing-review'"
                                 ></tags-input>
                             </label>
                         </div>
