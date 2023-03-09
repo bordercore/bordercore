@@ -1297,6 +1297,14 @@ blockquote > p {
   }
 }
 
+.bookmark-related-question {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  color: var(--text7);
+  -webkit-line-clamp: 4;
+  text-overflow: ellipsis;
+}
 
 #bookmark-search-form {
   background-color: var(--surface1);

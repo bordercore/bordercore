@@ -30,14 +30,14 @@
                     <template v-slot:content>
                         <hr class="divider" />
                         <ul class="list-group interior-borders cursor-pointer">
-                            <li v-for="question in relatedQuestions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                            <li v-for="question in relatedQuestions" class="hoverable px-0 py-3 list-group-item list-group-item-secondary text-primary">
                                 <div class="d-flex">
                                     <div class="mt-1 me-2">
                                         <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
                                     </div>
-                                    <div class="overflow-scroll">
-                                        <div v-html="question.question" @click="onClick(question.url)"></div>
-                                        <div>
+                                    <div>
+                                        <div class="bookmark-related-question " v-html="question.question" @click="onClick(question.url)"></div>
+                                        <div class="pt-2">
                                             <span v-for="tag in question.tags" class="tag me-2">[[ tag.tag ]]</span>
                                         </div>
                                     </div>
