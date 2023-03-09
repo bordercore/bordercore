@@ -1,5 +1,5 @@
 <template>
-    <div class="hover-reveal-target" @mouseover="hover = true" @mouseleave="hover = false">
+    <div class="hover-reveal-target" @mouseover="isHovered = true" @mouseleave="isHovered = false">
         <card title="" class="backdrop-filter node-color-1 position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
@@ -8,13 +8,13 @@
                         {{ collectionObjectList.name }}
                     </div>
                     <div class="text-secondary text-small text-nowrap ms-3">
-                        {{ collectionObjectList.count }} <span>{{ getPluralized(collectionObjectList.count) }}</span>
+                        {{ objectList.length }} <span>{{ getPluralized(objectList.length) }}</span>
                     </div>
                     <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <template #dropdown>
                                 <li>
-                                    <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="onAddObject()">
+                                    <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="openObjectSelectModal">
                                         <span>
                                             <font-awesome-icon icon="plus" class="text-primary me-3" />
                                         </span>
@@ -22,15 +22,15 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleUpdateCollectionModal()">
                                         <span>
                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
                                         </span>
-                                        Edit Collection
+                                        Update Collection
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onDeleteCollection()">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleDeleteCollection()">
                                         <span>
                                             <font-awesome-icon icon="times" class="text-primary me-3" />
                                         </span>
@@ -50,11 +50,11 @@
             <template #content>
                 <hr class="divider">
                 <div v-if="collectionObjectList.display === 'individual'">
-                    <img v-if="currentObjectIndex !== null && objectList.length > 0" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="onClick()">
+                    <img v-if="currentObjectIndex !== null && objectList.length > 0" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="handleObjectClick()">
                     <span v-else class="text-muted">No objects</span>
                 </div>
-                <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="limitedObjectList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="uuid" @change="onSort">
+                <ul v-else class="list-group list-group-flush interior-borders">
+                    <draggable v-model="limitedObjectList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="uuid" @change="handleSort">
                         <template #item="{element}">
                             <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable pe-0" :data-uuid="element.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
@@ -65,10 +65,10 @@
 
                                     <div>
                                         <a :href="element.url">{{ element.name }}</a>
-                                        <Transition name="fade" mode="out-in" @after-enter="onAfterEnter">
-                                            <div v-if="!element.noteIsEditable" class="node-object-note" @click="editNote(element)" v-html="getNote(element.note)" />
+                                        <Transition name="fade" mode="out-in" @after-enter="handleAfterEnterTransition">
+                                            <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true" v-html="getNote(element.note)" />
                                             <span v-else>
-                                                <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" @blur="updateNote(element, $event.target.value)" @keydown.enter="updateNote(element, $event.target.value)">
+                                                <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
                                             </span>
                                         </Transition>
                                     </div>
@@ -76,12 +76,12 @@
                                     <drop-down-menu :show-on-hover="true">
                                         <template #dropdown>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="removeObject(element.uuid)">
+                                                <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element.uuid)">
                                                     <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="editNote(element)">
+                                                <a class="dropdown-item" href="#" @click.prevent="element.noteIsEditable = true">
                                                     <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="element.note">Edit</span><span v-else>Add</span> Note
                                                 </a>
                                             </li>
@@ -153,149 +153,129 @@
                 default: "",
             },
         },
-        data() {
-            return {
-                collectionObjectList: {},
-                currentObjectIndex: null,
-                hover: false,
-                objectList: [],
-                rotateInterval: null,
-                show: false,
-            };
-        },
-        computed: {
-            limitedObjectList: {
-                // We need to define a getter and setter since it needs to be
-                // writable by the draggable component.
-                get() {
-                    return this.collectionObjectList.limit ? this.objectList.slice(0, this.collectionObjectList.limit) : this.objectList;
-                },
-                set(newValue) {
-                    this.objectList = newValue;
-                },
-            },
-        },
-        mounted() {
-            this.collectionObjectList = this.collectionObjectListInitial;
-            this.getObjectList();
+        emits: [
+            "open-collection-update-modal",
+            "open-note-image-modal",
+            "open-object-select-modal",
+            "update-layout",
+        ],
+        setup(props, ctx) {
+            const collectionObjectList = ref({});
+            const currentObjectIndex = ref();
+            const objectList = ref([]);
 
-            const self = this;
+            const isHovered = ref(false);
+            let rotateInterval = null;
 
-            hotkeys("left,right", function(event, handler) {
-                if (!self.hover) {
-                    return;
-                }
-                switch (handler.key) {
-                    case "left":
-                        self.showPreviousObject();
-                        break;
-                    case "right":
-                        self.showNextObject();
-                        break;
-                }
-            });
-        },
-        methods: {
-            editNote(object) {
-                object.noteIsEditable = true;
-            },
-            getNote(note) {
-                if (note) {
-                    return markdown.render(note);
-                }
-            },
-            onAfterEnter(evt) {
-                const input = evt.querySelector("input");
-                if (input) {
-                    input.focus();
-                }
-            },
-            onClick() {
-                this.$emit("open-modal-note-image", this.objectList[this.currentObjectIndex].cover_url_large);
-            },
-            updateNote(object, note) {
+            function handleEditNote(object, note) {
                 // If the note hasn't changed, abort
-                if (object.note === note) {
+                if (note === object.note) {
                     object.noteIsEditable = false;
                     return;
                 }
 
                 doPost(
-                    this.updateObjectNoteUrl,
+                    props.updateObjectNoteUrl,
                     {
-                        "collection_uuid": this.uuid,
+                        "collection_uuid": props.uuid,
                         "object_uuid": object.uuid,
                         "note": note,
                     },
                     (response) => {
-                        this.getObjectList();
+                        getObjectList();
                     },
-                    "",
-                    "",
                 );
-            },
-            getObjectList() {
+            };
+
+            function getObjectList() {
                 doGet(
-                    `${this.getObjectListUrl}?random_order=${this.collectionObjectList.random_order}`,
+                    `${props.getObjectListUrl}?random_order=${collectionObjectList.value.random_order}`,
                     (response) => {
-                        this.objectList = response.data.object_list;
-                        // Let Vue know that each object's "noteIsEditable" property is reactive
-                        for (const blob of this.objectList) {
-                            blob.noteIsEditable = false;
-                            // this.$set(blob, "noteIsEditable", false);
-                        }
-                        this.currentObjectIndex = 0;
-                        if (this.collectionObjectList.rotate !== null && this.collectionObjectList.rotate !== -1) {
-                            this.setTimer();
+                        objectList.value = response.data.object_list;
+                        currentObjectIndex.value = 0;
+                        if (collectionObjectList.value.rotate !== null && collectionObjectList.value.rotate !== -1) {
+                            setTimer();
                         }
                     },
                     "Error getting object list",
                 );
-            },
-            getPluralized: function(count) {
+            };
+
+            function getNote(note) {
+                if (note) {
+                    return markdown.render(note);
+                }
+            };
+
+            function getPluralized(count) {
                 return pluralize("object", count);
-            },
-            onAddObject() {
-                this.$parent.$parent.$refs.objectSelectCollection.openModal(this.getObjectList, {"collectionUuid": this.uuid});
-            },
-            onEditCollection() {
-                this.$emit("open-modal-collection-update", this.onUpdateCollection, this.collectionObjectList);
-            },
-            onUpdateCollection(collectionObjectList) {
+            };
+
+            function handleDeleteCollection() {
                 doPost(
-                    this.updateCollectionUrl,
+                    props.deleteCollectionUrl,
                     {
-                        "collection_uuid": this.uuid,
-                        "node_uuid": this.nodeUuid,
-                        "name": collectionObjectList.name,
-                        "display": collectionObjectList.display,
-                        "random_order": collectionObjectList.random_order,
-                        "rotate": collectionObjectList.rotate,
-                        "limit": collectionObjectList.limit,
+                        "node_uuid": props.nodeUuid,
+                        "collection_uuid": props.uuid,
+                        "collection_type": collectionObjectList.value.collection_type,
                     },
                     (response) => {
-                        this.collectionObjectList.name = collectionObjectList.name;
-                        this.collectionObjectList.display = collectionObjectList.display;
-                        this.setTimer();
-                    },
-                    "Collection updated",
-                );
-            },
-            onDeleteCollection() {
-                doPost(
-                    this.deleteCollectionUrl,
-                    {
-                        "node_uuid": this.nodeUuid,
-                        "collection_uuid": this.uuid,
-                        "collection_type": this.collectionObjectList.collection_type,
-                    },
-                    (response) => {
-                        this.$emit("updateLayout", response.data.layout);
+                        ctx.emit("update-layout", response.data.layout);
                     },
                     "Collection deleted",
                 );
-            },
-            onSort(evt) {
+            };
+
+            function handleAfterEnterTransition(evt) {
+                const input = evt.querySelector("input");
+                if (input) {
+                    input.focus();
+                }
+            };
+
+            function handleRemoveObject(objectUuid) {
+                doPost(
+                    props.removeObjectUrl,
+                    {
+                        "collection_uuid": props.uuid,
+                        "object_uuid": objectUuid,
+                    },
+                    (response) => {
+                        getObjectList();
+                    },
+                    "Object removed",
+                );
+            };
+
+            function handleUpdateCollection(collectionObjectListParam) {
+                doPost(
+                    props.updateCollectionUrl,
+                    {
+                        "collection_uuid": props.uuid,
+                        "node_uuid": props.nodeUuid,
+                        "name": collectionObjectListParam.name,
+                        "display": collectionObjectListParam.display,
+                        "random_order": collectionObjectListParam.random_order,
+                        "rotate": collectionObjectListParam.rotate,
+                        "limit": collectionObjectListParam.limit,
+                    },
+                    (response) => {
+                        collectionObjectList.value.name = collectionObjectListParam.name;
+                        collectionObjectList.value.display = collectionObjectListParam.display;
+                        setTimer();
+                    },
+                    "Collection updated",
+                );
+            };
+
+            function handleObjectClick() {
+                ctx.emit(
+                    "open-note-image-modal",
+                    objectList.value[currentObjectIndex.value].cover_url_large,
+                );
+            };
+
+            function handleSort(evt) {
                 const uuid = evt.moved.element.uuid;
 
                 // The backend expects the ordering to begin
@@ -303,53 +283,106 @@
                 const newPosition = evt.moved.newIndex + 1;
 
                 doPost(
-                    this.sortObjectsUrl,
+                    props.sortObjectsUrl,
                     {
-                        "collection_uuid": this.uuid,
+                        "collection_uuid": props.uuid,
                         "object_uuid": uuid,
                         "new_position": newPosition,
                     },
                     () => {},
-                    "",
                 );
-            },
-            removeObject(objectUuid) {
-                doPost(
-                    this.removeObjectUrl,
-                    {
-                        "collection_uuid": this.uuid,
-                        "object_uuid": objectUuid,
-                    },
-                    (response) => {
-                        this.getObjectList();
-                    },
-                    "Object removed",
-                    "",
+            };
+
+            function handleUpdateCollectionModal() {
+                ctx.emit(
+                    "open-collection-update-modal",
+                    handleUpdateCollection,
+                    collectionObjectList.value,
                 );
-            },
-            setTimer() {
-                if (!this.collectionObjectList.rotate || this.collectionObjectList.rotate === -1) {
+            };
+
+            function openObjectSelectModal() {
+                ctx.emit(
+                    "open-object-select-modal",
+                    getObjectList,
+                    {"collectionUuid": props.uuid},
+                );
+            };
+
+            function showNextObject() {
+                if (currentObjectIndex.value === objectList.value.length - 1) {
+                    currentObjectIndex.value = 0;
+                } else {
+                    currentObjectIndex.value++;
+                }
+            };
+
+            function showPreviousObject() {
+                if (currentObjectIndex.value === 0) {
+                    currentObjectIndex.value = objectList.value.length - 1;
+                } else {
+                    currentObjectIndex.value--;
+                }
+            };
+
+            function setTimer() {
+                if (!collectionObjectList.value.rotate || collectionObjectList.value.rotate == -1) {
                     return;
                 }
-                clearInterval(this.rotateInterval);
-                this.rotateInterval = setInterval( () => {
-                    this.showNextObject();
-                }, this.collectionObjectList.rotate * 1000 * 60);
-            },
-            showNextObject() {
-                if (this.currentObjectIndex === this.objectList.length - 1) {
-                    this.currentObjectIndex = 0;
-                } else {
-                    this.currentObjectIndex++;
-                }
-            },
-            showPreviousObject() {
-                if (this.currentObjectIndex === 0) {
-                    this.currentObjectIndex = this.objectList.length - 1;
-                } else {
-                    this.currentObjectIndex--;
-                }
-            },
+                clearInterval(rotateInterval);
+                rotateInterval = setInterval( () => {
+                    showNextObject();
+                }, collectionObjectList.value.rotate * 1000 * 60);
+            };
+
+            const limitedObjectList = computed({
+                // We need to define a getter and setter since it needs to be
+                // writable by the draggable component.
+                get() {
+                    return collectionObjectList.value.limit ? objectList.value.slice(0, collectionObjectList.value.limit) : objectList.value;
+                },
+                set(newValue) {
+                    objectList.value = newValue;
+                },
+            });
+
+            onMounted(() => {
+                collectionObjectList.value = props.collectionObjectListInitial;
+                getObjectList();
+
+                hotkeys("left,right", function(event, handler) {
+                    if (!isHovered.value) {
+                        return;
+                    }
+                    switch (handler.key) {
+                    case "left":
+                        showPreviousObject();
+                        break;
+                    case "right":
+                        showNextObject();
+                        break;
+                    }
+                });
+            });
+
+            return {
+                collectionObjectList,
+                currentObjectIndex,
+                getNote,
+                getPluralized,
+                isHovered,
+                limitedObjectList,
+                handleAfterEnterTransition,
+                handleDeleteCollection,
+                handleEditNote,
+                handleObjectClick,
+                handleRemoveObject,
+                handleUpdateCollection,
+                handleUpdateCollectionModal,
+                handleSort,
+                objectList,
+                openObjectSelectModal,
+            };
         },
     };
 

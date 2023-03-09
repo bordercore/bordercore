@@ -150,8 +150,9 @@
                                     remove-object-url="{% url "collection:remove_object" %}"
                                     sort-objects-url="{% url "collection:sort_objects" %}"
                                     delete-collection-url="{% url "node:delete_collection" %}"
-                                    @open-modal-note-image="openModalNoteImage"
-                                    @open-modal-collection-update="openModalCollectionUpdate"
+                                    @open-note-image-modal="openModalNoteImage"
+                                    @open-collection-update-modal="openModalCollectionUpdate"
+                                    @open-object-select-modal="openObjectSelectModal"
                                     @update-layout="onUpdateLayout"
                                 >
                                 </collection-object-list>
@@ -295,6 +296,7 @@
                 const noteImage = ref(null);
                 const noteUpdate = ref(null);
                 const quoteUpdate = ref(null);
+                const objectSelectCollection = ref(null);
                 const objectSelectImage = ref(null);
                 const todoList = ref(null);
 
@@ -433,6 +435,10 @@
                     quoteUpdate.value.openModal("Update", callback, data);
                 };
 
+                function openObjectSelectModal(callback, returnArgs) {
+                    objectSelectCollection.value.openModal(callback, returnArgs);
+                };
+
                 function openSelectImageModal() {
                     objectSelectImage.value.openModal();
                 };
@@ -485,6 +491,7 @@
                     hasTodoList,
                     layout,
                     noteUpdate,
+                    objectSelectCollection,
                     objectSelectImage,
                     onAddQuote,
                     onAddTodoList,
@@ -497,6 +504,7 @@
                     openModalNoteImage,
                     openModalNoteUpdate,
                     openModalQuoteUpdate,
+                    openObjectSelectModal,
                     openSelectImageModal,
                     onUpdateLayout,
                     quoteUpdate,
