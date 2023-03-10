@@ -1224,8 +1224,11 @@ blockquote > p {
   border-radius: 0.4rem;
 }
 
+//  Set the z-index to something above 50 to be visible if using
+//  with Vue-multiselect, which sets its z-index to this value.
 #top-search-filter {
   position: absolute;
+  z-index: 100;
   top: 0.33rem;
   right: 0.5rem;
   text-align: center;
@@ -1466,6 +1469,7 @@ blockquote > p {
 .search-suggestion {
   overflow: hidden;
   width: 100%;
+  max-width: 23rem;
   padding: 0.6rem;
   border-radius: var(--border-radius1);
   text-overflow: ellipsis;

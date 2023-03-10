@@ -11,7 +11,6 @@
                             label="name"
                             place-holder="Search"
                             :search-url="suggestSearchUrl"
-                            @close="onClose"
                             @keydown="onKeyDown"
                             @search="handleSearch"
                             @search-change="onSearchChange"
@@ -174,30 +173,6 @@
                 window.location=props.querySearchUrl + "?search=" + searchTerm.search_text;
             };
 
-            function onClose(evt) {
-                showSearchWindow.value = false;
-            };
-
-            /* function onEnter(evt) {
-             *     console.log("onEnter");
-             *     const inputValue = document.getElementById("top-simple-suggest").value;
-             *     if (inputValue === "") {
-             *         return;
-             *     }
-             *     const form = document.querySelector("#top-search form");
-             *     if (searchFilter.value === "note") {
-             *         form.action = props.noteQuerySearchUrl;
-             *     } else if (searchFilter.value === "bookmark") {
-             *         form.action = props.bookmarkQuerySearchUrl;
-             *     } else if (searchFilter.value === "drill") {
-             *         form.action = props.drillQuerySearchUrl;
-             *     } else {
-             *         form.action = props.querySearchUrl;
-             *     }
-
-             *     form.submit();
-             * }; */
-
             function onKeyDown(evt) {
                 if (evt.code === "KeyN" && evt.altKey) {
                     handleFilter("note");
@@ -236,13 +211,13 @@
                     }
                     ,
                     (response) => {},
-                    "",
-                    "",
                 );
             }
 
             function handleSelectOption(selection) {
-                window.location = selection.link;
+                if (selection.link) {
+                    window.location = selection.link;
+                }
             };
 
             function handleSearch(selection) {
@@ -269,28 +244,22 @@
                 } );
 
                 // If a click was detected outside this component, *and*
-                //  the click wasn't on the "Search icon", then hide the
-                //  component.
-                /* document.addEventListener("click", function(event) {
-                 *     console.log(`click: ${event}`);
-                 *     const specifiedElement = document.getElementById("top-search");
-                 *     if (!specifiedElement) {
-                 *         return;
-                 *     }
-                 *     const isClickInside = specifiedElement.contains(event.target) || specifiedElement.contains(event.target.parentElement);
-                 *     // We check for the search icon by looking for a click on the
-                 *     //  font-awesome 'svg' element, which has a custom 'top-search-target'
-                 *     //  class on it, or the containing 'path' element by looking for a 'svg'
-                 *     //  parent element with the same class.
-                 *     if (!isClickInside &&
-                 *         !event.target.classList.contains("top-search-target") &&
-                 *         !event.target.parentElement.classList.contains("top-search-target") &&
-                 *         !event.target.classList.contains("fa-times") &&
-                 *         !event.target.parentElement.classList.contains("fa-times")
-                 *     ) {
-                 *         self.showSearchWindow = false;
-                 *     }
-                 * }); */
+                //  the click wasn't on the "Search icon", *and* the click
+                //  wasn't on the filter close button, then hide the component.
+                document.addEventListener("click", function(event) {
+                    const specifiedElement = document.getElementById("top-search");
+                    if (!specifiedElement) {
+                        return;
+                    }
+                    const isClickInside = specifiedElement.contains(event.target) || specifiedElement.contains(event.target.parentElement);
+                    if (!isClickInside &&
+                        !event.target.classList.contains("fa-search") &&
+                        !event.target.classList.contains("fa-times") &&
+                        !event.target.parentElement.classList.contains("fa-search")
+                    ) {
+                        showSearchWindow.value = false;
+                    }
+                });
             });
 
             return {
@@ -301,7 +270,6 @@
                 handleRecentSearch,
                 handleSearch,
                 handleSelectOption,
-                onClose,
                 onKeyDown,
                 onSearchChange,
                 removeFilter,
