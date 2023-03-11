@@ -53,12 +53,6 @@
                 type: String,
             },
         },
-        computed: {
-            getDomain() {
-                const {hostname} = new URL(this.bookmark.url);
-                return hostname;
-            },
-        },
     };
 
 </script>

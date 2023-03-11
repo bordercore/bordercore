@@ -256,9 +256,6 @@ window.NodeNoteModal = NodeNoteModal;
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
 window.NodeTodoList = NodeTodoList;
 
-import NoteModal from "./vue/common/NoteModal.vue";
-window.NoteModal = NoteModal;
-
 import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
 window.CollectionObjectList = CollectionObjectList;
 
