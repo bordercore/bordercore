@@ -102,6 +102,7 @@
                 </template>
             </card>
 
+            {% if request.session.drill_study_session.tag %}
             <related-tags
                 class="mx-2"
                 related-tags-url="{% url 'tag:get_related_tags' %}"
@@ -109,6 +110,7 @@
                 :initial-tags="['{{ request.session.drill_study_session.tag }}']"
             >
             </related-tags>
+            {% endif %}
 
         </div>
 

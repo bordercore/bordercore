@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <card v-if="info.length > 0" class="backdrop-filter">
+        <card v-if="tagList.length > 0" class="backdrop-filter">
             <template #title-slot>
                 <div class="d-flex">
                     <div class="card-title d-flex">
@@ -10,13 +10,13 @@
             </template>
 
             <template #content>
-                <div v-for="tagInfo in info" :key="tagInfo.name">
+                <div v-for="tagInfo in tagList" :key="tagInfo.name">
                     <hr class="divider">
                     <h5 class="text-success">
                         {{ tagInfo.name }}
                     </h5>
                     <ul class="related-tags list-unstyled text-truncate ms-2 pb-1">
-                        <li v-for="tag in tagInfo.related" :key="tag.name" class="mt-3" @click="onClickTag(tag.tag_name)">
+                        <li v-for="tag in tagInfo.related" :key="tag.name" class="mt-3" @click="handleTagClick(tag.tag_name)">
                             <span class="tag">{{ tag.tag_name }}</span>
                             <span class="count text-white ms-1">
                                 {{ tag.count }}
@@ -53,39 +53,50 @@
                 default: () => [],
             },
         },
-        data() {
-            return {
-                info: [],
-            };
-        },
-        mounted() {
-            if (this.initialTags) {
-                this.getTagInfo(this.initialTags);
-            }
-        },
-        methods: {
-            getTagInfo(tags) {
-                this.info = [];
+        emits: ["click-tag"],
+        setup(props, ctx) {
+            const tagList = ref([]);
+
+            function getTagInfo(tags) {
+                tagList.value = [];
                 for (const tag of tags) {
                     doGet(
-                        `${this.relatedTagsUrl}?tag_name=${tag}&doc_type=${this.docType}`,
+                        `${props.relatedTagsUrl}?tag_name=${tag}&doc_type=${props.docType}`,
                         (response) => {
                             if (response.data.info.length > 0) {
-                                this.info.push({"name": tag, "related": response.data.info});
+                                tagList.value.push(
+                                    {
+                                        "name": tag,
+                                        "related": response.data.info,
+                                    },
+                                );
                             }
                         },
                         "Error getting related tags",
                     );
                 }
-            },
-            onClickTag(tag) {
-                this.$emit("click-tag", tag);
-            },
-            setTags(tags) {
-                this.getTagInfo(tags);
-            },
-        },
+            };
 
+            function handleTagClick(tag) {
+                ctx.emit("click-tag", tag);
+            };
+
+            function setTags(tags) {
+                getTagInfo(tags);
+            };
+
+            onMounted(() => {
+                if (props.initialTags) {
+                    getTagInfo(props.initialTags);
+                }
+            });
+
+            return {
+                handleTagClick,
+                tagList,
+                setTags,
+            };
+        },
     };
 
 </script>

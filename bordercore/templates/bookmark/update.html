@@ -215,6 +215,7 @@
                 const relatedNodes = ref(JSON.parse(document.getElementById("related_nodes").textContent));
 
                 const relatedTags = ref(null);
+                const tagsInput = ref(null);
 
                 function onClickDelete() {
                     const formEl = document.getElementById("bookmark-form");
@@ -259,7 +260,7 @@
 
                 onMounted(() => {
                     EventBus.$on("add-tag", (payload) => {
-                        relatedTags.value.tagsInput.addTag(payload);
+                        tagsInput.value.addTag(payload);
                     });
                 });
 
@@ -276,6 +277,7 @@
                     onBlur,
                     onClick,
                     onTagsChanged,
+                    tagsInput,
                     {% if bookmark.uuid %}
                     uuid,
                     {% endif %}
