@@ -2384,6 +2384,11 @@ tr.hover-target:hover {
   }
 }
 
+// The dropdown caret
+.vs__open-indicator {
+  color: var(--text1);
+}
+
 // vuejs-datepicker
 .calendar {
   color: $black;

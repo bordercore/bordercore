@@ -23,6 +23,11 @@
                     No tags found!
                 </div>
             </template>
+            <template #open-indicator="{ attributes }">
+                <div class="vs__open-indicator me-2">
+                    <font-awesome-icon icon="angle-down" class="align-middle" />
+                </div>
+            </template>
         </v-select>
         <input type="hidden" :name="name" :value="tagsCommaSeparated">
     </div>
@@ -30,11 +35,13 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
     import vSelect from "vue-select";
 
     export default {
 
         components: {
+            FontAwesomeIcon,
             vSelect,
         },
         props: {
@@ -71,77 +78,99 @@
                 type: Number,
             },
         },
-        data() {
-            return {
-                tags: [],
-                options: [],
-                notFound: false,
+        emits: [
+            "blur",
+            "focus",
+            "option:created",
+            "tags-changed",
+        ],
+        setup(props, ctx) {
+            const notFound = ref(false);
+            const options = ref([]);
+            const tags = ref([]);
+
+            const tagsInputComponent = ref(null);
+
+            function addTag(tagName) {
+                tags.value.push({"label": tagName});
             };
-        },
-        computed: {
-            tagsCommaSeparated: function() {
-                return this.tags.map((x) => x.label).join(",");
-            },
-        },
-        mounted() {
-            // The initial set of tags can either be passed in via an event
-            //  or read from the DOM, depending on the value of the prop
-            //  "getTagsFromEvent".
 
-            if (this.getTagsFromEvent) {
-                EventBus.$on("addTags", (payload) => {
-                    this.tags = payload.map( (x) => ({label: x}) );
-                });
-            } else {
-                const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-                if (initialTags) {
-                    this.tags = initialTags.map( (x) => ({label: x}) );
-                }
-            }
-
-            if (this.autofocus) {
-                this.$refs.tagsInputComponent.$refs.search.focus();
-            }
-        },
-        methods: {
-            addTag(tagName) {
-                this.tags.push({"label": tagName});
-            },
-            createTag(tagName, foo) {
+            function createTag(tagName, foo) {
                 const newTag = {label: tagName};
-                this.$emit("option:created", newTag);
+                ctx.emit("option:created", newTag);
                 return newTag;
-            },
-            tagsChanged() {
-                // Re-emit this event in case a parent component is interested
-                this.$emit("tags-changed", this.tags.map( (x) => x.label ));
-                this.options = [];
-                this.$nextTick(() => {
-                    this.$refs.tagsInputComponent.$refs.search.focus();
-                });
-            },
-            fetchOptions(search, loading) {
+            };
+
+            function fetchOptions(search, loading) {
                 // Set a minimum character count to trigger the ajax call
                 if (search.length < 3) return;
 
                 return doGet(
-                    this.searchUrl + search,
+                    props.searchUrl + search,
                     (response) => {
-                        this.options = response.data.map((a) => {
+                        options.value = response.data.map((a) => {
                             return {label: a.label};
                         });
                     },
-                    "",
                 );
-            },
-            onBlur(evt) {
-                this.$emit("blur", evt);
-            },
-            onFocus(evt) {
-                this.$emit("focus", evt);
-            },
-        },
+            };
 
+            function onBlur(evt) {
+                ctx.emit("blur", evt);
+            };
+
+            function onFocus(evt) {
+                ctx.emit("focus", evt);
+            };
+
+            function tagsChanged() {
+                // Re-emit this event in case a parent component is interested
+                ctx.emit("tags-changed", tags.value.map( (x) => x.label ));
+                options.value = [];
+                nextTick(() => {
+                    tagsInputComponent.value.$refs.search.focus();
+                });
+            };
+
+            const tagsCommaSeparated = computed(() => {
+                return tags.value.map((x) => x.label).join(",");
+            });
+
+            onMounted(() => {
+                // The initial set of tags can either be passed in via an event
+                //  or read from the DOM, depending on the value of the prop
+                //  "getTagsFromEvent".
+
+                if (props.getTagsFromEvent) {
+                    EventBus.$on("addTags", (payload) => {
+                        tags.value = payload.map( (x) => ({label: x}) );
+                    });
+                } else {
+                    const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                    if (initialTags) {
+                        tags.value = initialTags.map( (x) => ({label: x}) );
+                    }
+                }
+
+                if (props.autofocus) {
+                    tagsInputComponent.value.$refs.search.focus();
+                }
+            });
+
+            return {
+                addTag,
+                createTag,
+                fetchOptions,
+                onBlur,
+                onFocus,
+                options,
+                notFound,
+                tags,
+                tagsChanged,
+                tagsCommaSeparated,
+                tagsInputComponent,
+            };
+        },
     };
 
 </script>
