@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Count, Q
+from django.db.models.functions import Lower
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -31,6 +32,10 @@ class Tag(models.Model):
             models.CheckConstraint(
                 name="check_no_commas",
                 check=~Q(name__contains=",")
+            ),
+            models.CheckConstraint(
+                name="check_name_is_lowercase",
+                check=Q(name=Lower("name"))
             )
         ]
 

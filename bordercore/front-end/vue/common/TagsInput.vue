@@ -124,7 +124,13 @@
             };
 
             function tagsChanged() {
-                // Re-emit this event in case a parent component is interested
+                // Enforce lowercase for all tag names
+                tags.value.forEach(function(element, index, tagList) {
+                    tagList[index] = {
+                        "label": element.label.toLowerCase(),
+                    };
+                });
+
                 ctx.emit("tags-changed", tags.value.map( (x) => x.label ));
                 options.value = [];
                 nextTick(() => {
