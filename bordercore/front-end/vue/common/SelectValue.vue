@@ -33,6 +33,11 @@
                     <div v-else class="d-none" />
                 </slot>
             </template>
+            <template #caret>
+                <div class="multiselect__select d-flex align-items-center">
+                    <font-awesome-icon icon="angle-down" class="ms-2" />
+                </div>
+            </template>
             <template #afterList="props">
                 <slot name="afterList" v-bind="props" />
             </template>
