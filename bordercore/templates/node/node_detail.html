@@ -203,7 +203,7 @@
                                     get-and-set-quote-url="{% url 'node:get_quote' %}"
                                     remove-quote-url="{% url 'node:remove_quote' %}"
                                     update-quote-url="{% url 'node:update_quote' %}"
-                                    @open-modal-quote-update="openModalQuoteUpdate"
+                                    @open-quote-update-modal="openQuoteUpdateModal"
                                     @update-layout="onUpdateLayout"
                                 >
                                 </node-quote>
@@ -431,7 +431,7 @@
                     noteUpdate.value.openModal("Update", callback, data);
                 };
 
-                function openModalQuoteUpdate(callback, data) {
+                function openQuoteUpdateModal(callback, data) {
                     quoteUpdate.value.openModal("Update", callback, data);
                 };
 
@@ -503,7 +503,7 @@
                     openModalCollectionUpdate,
                     openModalNoteImage,
                     openModalNoteUpdate,
-                    openModalQuoteUpdate,
+                    openQuoteUpdateModal,
                     openObjectSelectModal,
                     openSelectImageModal,
                     onUpdateLayout,

@@ -21,7 +21,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onRemoveQuote">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleQuoteRemove">
                                         <span>
                                             <font-awesome-icon icon="plus" class="text-primary me-3" />
                                         </span>
@@ -31,10 +31,10 @@
                             </template>
                         </drop-down-menu>
                     </div>
+                    <hr class="divider">
                 </div>
             </template>
             <template #content>
-                <hr class="divider">
                 <Transition enter-active-class="animate__animated animate__zoomIn">
                     <div v-if="quote" :key="quote.uuid">
                         <div>
@@ -88,97 +88,57 @@
                 default: "",
             },
         },
-        data() {
-            return {
-                hover: false,
-                rotateInterval: null,
-                nodeQuote: {},
-                quote: {},
-            };
-        },
-        computed: {
-            cardClass() {
-                return `node-color-${this.nodeQuote.color}`;
-            },
-        },
-        mounted() {
-            this.nodeQuote = this.nodeQuoteInitial;
+        emits: ["open-quote-update-modal", "update-layout"],
+        setup(props, ctx) {
+            const hover = ref(false);
+            const quote = ref(null);
 
-            this.getQuote();
+            const nodeQuote = ref({});
+            let rotateInterval = null;
 
-            if (this.nodeQuote.rotate !== null && this.nodeQuote.rotate !== -1) {
-                this.setTimer();
-            }
-
-            const self = this;
-
-            hotkeys("right,u", function(event, handler) {
-                switch (handler.key) {
-                    case "right":
-                        if (self.hover) {
-                            self.getRandomQuote();
-                        }
-                        break;
-                    case "u":
-                        self.onUpdateQuote();
-                        break;
-                }
-            });
-        },
-        methods: {
-            getQuote() {
+            function getQuote() {
                 doGet(
-                    this.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", this.nodeQuote.uuid),
+                    props.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", nodeQuote.value.uuid),
                     (response) => {
-                        this.quote = response.data;
+                        quote.value = response.data;
                     },
                     "Error getting quote",
                 );
-            },
-            getRandomQuote() {
+            };
+
+
+            function getRandomQuote() {
                 doPost(
-                    this.getAndSetQuoteUrl,
+                    props.getAndSetQuoteUrl,
                     {
-                        "node_uuid": this.nodeUuid,
-                        "favorites_only": this.nodeQuote.favorites_only,
+                        "node_uuid": props.nodeUuid,
+                        "favorites_only": nodeQuote.value.favorites_only,
                     },
                     (response) => {
-                        this.quote = response.data.quote;
+                        quote.value = response.data.quote;
                     },
-                    "",
-                    "",
                 );
-            },
-            onRemoveQuote() {
+            };
+
+            function handleQuoteRemove() {
                 doPost(
-                    this.removeQuoteUrl,
+                    props.removeQuoteUrl,
                     {
-                        "node_uuid": this.nodeUuid,
-                        "node_quote_uuid": this.nodeQuote.node_quote_uuid,
+                        "node_uuid": props.nodeUuid,
+                        "node_quote_uuid": nodeQuote.value.node_quote_uuid,
                     },
                     (response) => {
-                        this.$emit("updateLayout", response.data.layout);
+                        ctx.emit("update-layout", response.data.layout);
                     },
                     "Quote removed",
                 );
-            },
-            onUpdateQuote() {
-                this.$emit("openModalQuoteUpdate", this.updateQuote, this.nodeQuote);
-            },
-            setTimer() {
-                if (!this.nodeQuote.rotate || this.nodeQuote.rotate === -1) {
-                    return;
-                }
-                clearInterval(this.rotateInterval);
-                this.rotateInterval = setInterval( () => {
-                    this.getRandomQuote();
-                }, this.nodeQuote.rotate * 1000 * 60);
-            },
-            updateQuote(quote) {
+            };
+
+            function updateQuote(quote) {
                 doPost(
-                    this.updateQuoteUrl,
+                    props.updateQuoteUrl,
                     {
-                        "node_uuid": this.nodeUuid,
+                        "node_uuid": props.nodeUuid,
                         "node_quote_uuid": quote.node_quote_uuid,
                         "color": quote.color,
                         "format": quote.format,
@@ -186,14 +146,61 @@
                         "favorites_only": quote.favorites_only,
                     },
                     (response) => {
-                        this.nodeQuote.color = quote.color;
-                        this.nodeQuote.rotate = quote.rotate;
-                        this.setTimer();
+                        nodeQuote.value.color = quote.color;
+                        nodeQuote.value.rotate = quote.rotate;
+                        setTimer();
                     },
-                    "",
-                    "",
                 );
-            },
+            };
+
+            function onUpdateQuote() {
+                ctx.emit("open-quote-update-modal", updateQuote, nodeQuote.value);
+            };
+
+            function setTimer() {
+                if (!nodeQuote.value.rotate || nodeQuote.value.rotate === -1) {
+                    return;
+                }
+                clearInterval(rotateInterval);
+                rotateInterval = setInterval( () => {
+                    getRandomQuote();
+                }, nodeQuote.value.rotate * 1000 * 60);
+            };
+
+            onMounted(() => {
+                nodeQuote.value = props.nodeQuoteInitial;
+
+                getQuote();
+
+                if (nodeQuote.value.rotate !== null && nodeQuote.value.rotate !== -1) {
+                    setTimer();
+                }
+
+                hotkeys("right,u", function(event, handler) {
+                    switch (handler.key) {
+                    case "right":
+                        if (hover.value) {
+                            getRandomQuote();
+                        }
+                        break;
+                    case "u":
+                        onUpdateQuote();
+                        break;
+                    }
+                });
+            });
+
+            const cardClass = computed(() => {
+                return `node-color-${nodeQuote.value.color}`;
+            });
+
+            return {
+                cardClass,
+                handleQuoteRemove,
+                onUpdateQuote,
+                hover,
+                quote,
+            };
         },
     };
 
