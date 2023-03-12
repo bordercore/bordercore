@@ -15,22 +15,24 @@
 <script>
 
     export default {
-        data() {
+        setup() {
+            const imageUrl = ref();
+            let modal = null;
+
+            function openModal(data) {
+                imageUrl.value = data;
+                modal.show();
+            };
+
+            onMounted(() => {
+                modal = new Modal("#nodeImageModal");
+            });
+
             return {
-                modal: null,
-                imageUrl: null,
+                imageUrl,
+                openModal,
             };
         },
-        mounted() {
-            this.modal = new Modal("#nodeImageModal");
-        },
-        methods: {
-            openModal(data) {
-                this.imageUrl = data;
-                this.modal.show();
-            },
-        },
-
     };
 
 </script>
