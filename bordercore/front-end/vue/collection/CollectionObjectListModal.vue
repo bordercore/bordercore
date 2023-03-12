@@ -16,7 +16,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check d-flex align-items-center">
-                                    <input id="id_type_new" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="ad-hoc" @change="onChangeCollectionType('ad-hoc')">
+                                    <input id="id_type_new" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="ad-hoc" @change="handleCollectionTypeChange('ad-hoc')">
                                     <label class="form-check-label ms-2" for="id_type_new">
                                         New
                                     </label>
@@ -26,7 +26,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check d-flex align-items-center">
-                                    <input id="id_type_existing" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="permanent" @change="onChangeCollectionType('permanent')">
+                                    <input id="id_type_existing" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="permanent" @change="handleCollectionTypeChange('permanent')">
                                     <label class="form-check-label ms-2" for="id_type_existing">
                                         Existing
                                     </label>
@@ -39,7 +39,7 @@
                                     label="name"
                                     place-holder="Search collections"
                                     :search-url="searchUrl"
-                                    @select="onSelectCollection"
+                                    @select="handleCollectionSelect"
                                 >
                                     <template #option="props">
                                         <div :class="{'suggestion-item-disabled': props.option_blob}" class="search-suggestion d-flex align-items-center">
@@ -73,7 +73,7 @@
                                 Name
                             </label>
                             <div class="col-lg-8">
-                                <input v-model="collectionObjectList.name" type="text" class="form-control" autocomplete="off" maxlength="200" placeholder="Name" @keyup.enter="onUpdateCollection">
+                                <input v-model="collectionObjectList.name" type="text" class="form-control" autocomplete="off" maxlength="200" placeholder="Name" @keyup.enter="handleCollectionUpdate">
                             </div>
                         </div>
                     </Transition>
@@ -112,7 +112,7 @@
                             <label class="col-lg-4 col-form-label" for="inputTitle">Limit</label>
                             <div class="col-lg-8">
                                 <div>
-                                    <input v-model="collectionObjectList.limit" type="number" class="form-control" autocomplete="off" maxlength="10" placeholder="Limit" @keyup.enter="onUpdateCollection">
+                                    <input v-model="collectionObjectList.limit" type="number" class="form-control" autocomplete="off" maxlength="10" placeholder="Limit" @keyup.enter="handleCollectionUpdate">
                                 </div>
                             </div>
                         </div>
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input id="btn-action" class="btn btn-primary" type="button" :value="action" @click="onUpdateCollection">
+                        <input class="btn btn-primary" type="button" :value="action" @click="handleCollectionUpdate">
                     </div>
                 </div>
             </div>
@@ -157,124 +157,128 @@
                 type: String,
             },
         },
-        data() {
-            return {
-                action: "Update",
-                callback: null,
-                collectionObjectList: {},
-                collectionObjectListInitial: {},
-                modal: null,
-                displayOptions: [
-                    {
-                        value: "list",
-                        display: "List",
-                    },
-                    {
-                        value: "individual",
-                        display: "Individual",
-                    },
-                ],
-                rotateOptions: [
-                    {
-                        value: -1,
-                        display: "Never",
-                        default: true,
-                    },
-                    {
-                        value: 1,
-                        display: "Every Minute",
-                    },
-                    {
-                        value: 5,
-                        display: "Every 5 Minutes",
-                    },
-                    {
-                        value: 10,
-                        display: "Every 10 Minutes",
-                    },
-                    {
-                        value: 30,
-                        display: "Every 30 Minutes",
-                    },
-                    {
-                        value: 60,
-                        display: "Every Hour",
-                    },
-                    {
-                        value: 1440,
-                        display: "Every Day",
-                    },
-                ],
-            };
-        },
-        mounted() {
-            this.modal = new Modal("#modalUpdateCollection");
-        },
-        methods: {
-            onChangeCollectionType(type) {
-                if (this.$refs.selectValue) {
-                    this.$refs.selectValue.setDisabled(
+        emits: ["update-layout"],
+        setup(props, ctx) {
+            const action = ref("Update");
+            const collectionObjectList = ref({});
+
+            let callback = null;
+            let collectionObjectListInitial = {};
+            const displayOptions = [
+                {
+                    value: "list",
+                    display: "List",
+                },
+                {
+                    value: "individual",
+                    display: "Individual",
+                },
+            ];
+            const rotateOptions = [
+                {
+                    value: -1,
+                    display: "Never",
+                    default: true,
+                },
+                {
+                    value: 1,
+                    display: "Every Minute",
+                },
+                {
+                    value: 5,
+                    display: "Every 5 Minutes",
+                },
+                {
+                    value: 10,
+                    display: "Every 10 Minutes",
+                },
+                {
+                    value: 30,
+                    display: "Every 30 Minutes",
+                },
+                {
+                    value: 60,
+                    display: "Every Hour",
+                },
+                {
+                    value: 1440,
+                    display: "Every Day",
+                },
+            ];
+            let modal = null;
+
+            const selectValue = ref(null);
+
+            function handleCollectionTypeChange(type) {
+                if (selectValue.value) {
+                    selectValue.value.setDisabled(
                         type === "ad-hoc" ? true : false,
                     );
                 }
-            },
-            openModal(action, callback, collectionObjectList) {
-                this.collectionObjectList = collectionObjectList;
-                this.collectionObjectListInitial = {...collectionObjectList};
-                this.action = action;
-                this.callback = callback;
-                this.modal.show();
+            };
+
+            function openModal(actionParam, callbackParam, collectionObjectListParam) {
+                collectionObjectList.value = collectionObjectListParam;
+                collectionObjectListInitial = {...collectionObjectList};
+                action.value = actionParam;
+                callback = callbackParam;
+                modal.show();
                 setTimeout( () => {
                     document.querySelector("#modalUpdateCollection input").focus();
                 }, 500);
-            },
-            onSelectCollection(collection) {
-                this.collectionObjectList.uuid = collection.uuid;
-            },
-            search(query) {
-                try {
-                    const url = this.searchUrl;
-                    return axios.get(url + query)
-                                .then((response) => {
-                                    return response.data;
-                                });
-                } catch (error) {
-                    console.log(`Error: ${error}`);
-                }
-            },
-            onUpdateCollection() {
+            };
+
+            function handleCollectionSelect(collection) {
+                collectionObjectList.value.uuid = collection.uuid;
+            };
+
+            function handleCollectionUpdate() {
                 // If any of the properties have changed, update the collection
-                if (this.collectionObjectList !== this.collectionObjectListInitial) {
-                    if (this.action === "Update") {
-                        this.callback(this.collectionObjectList);
-                        this.modal.hide();
+                if (collectionObjectList.value !== collectionObjectListInitial) {
+                    if (action.value === "Update") {
+                        callback(collectionObjectList.value);
+                        modal.hide();
                     } else {
                         doPost(
-                            this.addCollectionUrl,
+                            props.addCollectionUrl,
                             {
-                                "node_uuid": this.nodeUuid,
-                                "collection_name": this.collectionObjectList.name,
-                                "collection_uuid": this.collectionObjectList.uuid,
-                                "display": this.collectionObjectList.display,
-                                "random_order": this.collectionObjectList.random_order,
-                                "rotate": this.collectionObjectList.rotate,
-                                "limit": this.collectionObjectList.limit,
+                                "node_uuid": props.nodeUuid,
+                                "collection_name": collectionObjectList.value.name,
+                                "collection_uuid": collectionObjectList.value.uuid,
+                                "display": collectionObjectList.value.display,
+                                "random_order": collectionObjectList.value.random_order,
+                                "rotate": collectionObjectList.value.rotate,
+                                "limit": collectionObjectList.value.limit,
                             },
                             (response) => {
-                                this.$emit("updateLayout", response.data.layout);
-                                this.modal.hide();
-                                this.$nextTick(() => {
-                                    this.$refs.selectValue.clearOptions();
+                                ctx.emit("update-layout", response.data.layout);
+                                modal.hide();
+                                nextTick(() => {
+                                    selectValue.value.clearOptions();
                                 });
                             },
                             "Collection added",
-                            "",
                         );
                     }
                 }
-            },
-        },
+            };
 
+            onMounted(() => {
+                modal = new Modal("#modalUpdateCollection");
+            });
+
+            return {
+                action,
+                collectionObjectList,
+                displayOptions,
+                handleCollectionTypeChange,
+                handleCollectionSelect,
+                handleCollectionUpdate,
+                openModal,
+                rotateOptions,
+                selectValue,
+            };
+        },
     };
 
 </script>
