@@ -12,20 +12,20 @@
                     <div class="row mb-3">
                         <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
                         <div class="col-lg-9">
-                            <input id="id_name_note" v-model="nodeNote.name" type="text" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateNote">
+                            <input id="id_name_note" v-model="nodeNote.name" type="text" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="handleNoteUpdate">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <label class="col-lg-3 col-form-label" for="inputTitle">Color</label>
                         <div class="col-lg-9">
                             <div class="d-flex">
-                                <div v-for="color in colors" :key="color" class="node-color flex-grow-1 mx-2" :class="getClass(color)" @click="onSelectColor(color)" />
+                                <div v-for="color in colors" :key="color" class="node-color flex-grow-1 mx-2" :class="getClass(color)" @click="handleColorSelect(color)" />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input id="btn-action" class="btn btn-primary" type="button" :value="action" @click="onUpdateNote">
+                    <input id="btn-action" class="btn btn-primary" type="button" :value="action" @click="handleNoteUpdate">
                 </div>
             </div>
         </div>
@@ -35,46 +35,60 @@
 <script>
 
     export default {
-        data() {
-            return {
-                action: "Update",
-                callback: null,
-                modal: null,
-                nodeNote: {},
-                nodeNoteInitial: {},
-                colors: [1, 2, 3, 4],
-            };
-        },
-        mounted() {
-            this.modal = new Modal("#modalUpdateNote");
-        },
-        methods: {
-            getClass(color) {
-                const selectedColor = color === (this.nodeNote && this.nodeNote.color) ? "selected-color" : "";
+        setup() {
+            const action = ref("Update");
+            const colors = [1, 2, 3, 4];
+
+            let callback = null;
+            let modal = null;
+            const nodeNote = ref({});
+            let nodeNoteInitial = {};
+
+            function getClass(color) {
+                const selectedColor = color === (nodeNote.value && nodeNote.value.color) ? "selected-color" : "";
                 return `node-color-${color} ${selectedColor}`;
-            },
-            openModal(action, callback, nodeNote) {
-                this.nodeNote = nodeNote;
-                this.nodeNoteInitial = {...nodeNote};
-                this.action = action;
-                this.callback = callback;
-                this.modal.show();
+            };
+
+            function handleColorSelect(color) {
+                nodeNote.value.color = color;
+            };
+
+            function handleNoteUpdate() {
+                // If any of the properties have changed, trigger the callback
+                if (nodeNote.value !== nodeNoteInitial) {
+                    callback(nodeNote.value);
+                }
+                modal.hide();
+            };
+
+            function openModal(actionParam, callbackParam, nodeNoteParam) {
+                nodeNote.value = nodeNoteParam;
+                nodeNoteInitial = {...nodeNoteParam};
+                action.value = actionParam;
+                callback = callbackParam;
+                modal.show();
                 setTimeout( () => {
                     document.querySelector("#modalUpdateNote input").focus();
                 }, 500);
-            },
-            onSelectColor(color) {
-                this.nodeNote.color = color;
-            },
-            onUpdateNote() {
-                // If any of the properties have changed, trigger the callback
-                if (this.nodeNote !== this.nodeNoteInitial) {
-                    this.callback(this.nodeNote);
-                }
-                this.modal.hide();
-            },
-        },
+            };
 
+            onMounted(() => {
+                modal = new Modal("#modalUpdateNote");
+            });
+
+            return {
+                action,
+                callback,
+                colors,
+                getClass,
+                modal,
+                nodeNote,
+                nodeNoteInitial: {},
+                handleColorSelect,
+                handleNoteUpdate,
+                openModal,
+            };
+        },
     };
 
 </script>
