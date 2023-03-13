@@ -8,7 +8,7 @@
                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px">{{ getProgress() }}%</text>
             </svg>
         </div>
-        <span class="text-primary mt-2">{{ count }} {{ getPluralized }}</span>
+        <span class="text-primary mt-2">{{ count }} {{ getPluralized() }}</span>
     </div>
 </template>
 
