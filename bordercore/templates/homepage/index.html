@@ -132,7 +132,7 @@
                     </template>
                     <template v-slot:content>
                         <ul class="list-group list-group-horizontal text-center list-unstyled justify-content-center">
-                            <li class="mx-3" v-for="blob in blob_list" :key="blob.id">
+                            <li class="mx-3" v-for="blob in blobList" :key="blob.id">
                                 <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
                             </li>
                         </ul>
@@ -171,7 +171,7 @@
                 <template v-slot:content>
                     <ul class="list-group interior-borders">
                         <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary text-success">
-                            [[ msg ]]
+                            [[ message ]]
                         </li>
                         <li v-for="event in events" :key="event.count" class="list-group-item list-group-item-secondary">
                             [[ event.start_pretty ]]: <strong class="item-value text-emphasis">[[ event.summary ]]</strong>
@@ -222,48 +222,56 @@
     <script type="text/javascript">
 
         const app = createApp({
+            delimiters: ["[[", "]]"],
             components: {
                 Card,
                 DrillTagProgress,
             },
-            delimiters: ["[[", "]]"],
-            data() {
-                return {
-                    errorClass: "",
-                    events: [],
-                    msg: "Retrieving...",
-                    waiting: true,
-                    blob_list: [
-                        {% for blob in default_collection.blob_list %}
-                        {
-                            id: {{ blob.id }},
-                            cover_url: "{{ blob.cover_url}}",
-                            uuid: "{{ blob.uuid }}",
-                            name: "{{ blob.name|safe }}",
-                            collection_note: "{{ blob.collection_note }}",
-                            url: "{% url 'blob:detail' blob.uuid %}",
-                            cover_url: "{{ blob.cover_url }}"
-                        },
-                        {% endfor %}
-                    ]
-                }
-            },
-            mounted() {
-                axios.get("{% url 'homepage:get_calendar_events' %}")
-                     .then(response => {
-                         this.events = response.data;
+            setup() {
+                const errorClass = ref("");
+                const events = ref([]);
+                const message = ref("Retrieving...");
+                const waiting = ref(true);
 
-                         if (response.data.length == 0) {
-                             this.msg = "Your calendar is empty";
-                         } else {
-                             this.waiting = false;
-                             this.msg = "";
-                         };
-                     }).catch(error => {
-                         this.msg = error;
-                         this.errorClass = "alert alert-danger";
-                     })
-            }
+                const blobList = [
+                    {% for blob in default_collection.blob_list %}
+                    {
+                        id: {{ blob.id }},
+                        cover_url: "{{ blob.cover_url}}",
+                        uuid: "{{ blob.uuid }}",
+                        name: "{{ blob.name|safe }}",
+                        collection_note: "{{ blob.collection_note }}",
+                        url: "{% url 'blob:detail' blob.uuid %}",
+                        cover_url: "{{ blob.cover_url }}",
+                    },
+                    {% endfor %}
+                ];
+
+                onMounted(() => {
+                    axios.get("{% url 'homepage:get_calendar_events' %}")
+                         .then((response) => {
+                             events.value = response.data;
+
+                             if (response.data.length == 0) {
+                                 message.value = "Your calendar is empty";
+                             } else {
+                                 waiting.value = false;
+                                 message.value = "";
+                             };
+                         }).catch((error) => {
+                             message.value = error;
+                             errorClass.value = "alert alert-danger";
+                         });
+                });
+
+                return {
+                    blobList,
+                    errorClass,
+                    events,
+                    message,
+                    waiting,
+                };
+            },
         });
         app.mount("#vue-app");
 
