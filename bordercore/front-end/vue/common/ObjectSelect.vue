@@ -20,7 +20,7 @@
                                     place-holder="Search"
                                     :search-url="getSearchObjectUrl()"
                                     :bolden-option="true"
-                                    @select="select"
+                                    @select="handleObjectSelect"
                                 >
                                     <template #option="props">
                                         <!-- @click.stop="" handler is needed to prevent the splitter from being selected -->
@@ -45,7 +45,7 @@
                                             </div>
                                             <div class="name d-flex flex-column">
                                                 <div class="ms-2" v-html="boldenOption(props.option.name, props.search)" />
-                                                <div class="date ms-2">
+                                                <div class="date ms-2 my-2">
                                                     {{ props.option.date }}
                                                     <span v-if="props.option.important === 10" class="ms-2">
                                                         <font-awesome-icon icon="heart" class="text-danger" />
@@ -67,12 +67,12 @@
                         <div v-if="hasFilter" class="d-flex mt-2 ms-3">
                             <div>Filter:</div>
                             <div class="d-flex align-items-center ms-2">
-                                <o-switch v-model="toggleBookmarks" data-filter-type="bookmarks" @update:modelValue="onToggleBookmarks" />
-                                <label class="ms-2" @click="onFilterLabelClick('bookmarks', $event)">Bookmarks</label>
+                                <o-switch v-model="toggleBookmarks" data-filter-type="bookmarks" @update:modelValue="handleBookmarksToggle" />
+                                <label class="ms-2">Bookmarks</label>
                             </div>
                             <div class="d-flex align-items-center ms-3">
-                                <o-switch v-model="toggleBlobs" data-filter-type="blobs" @update:modelValue="onToggleBlobs" />
-                                <label class="ms-2" @click="onFilterLabelClick('blobs', $event)">Blobs</label>
+                                <o-switch v-model="toggleBlobs" data-filter-type="blobs" @update:modelValue="handleBlobsToggle" />
+                                <label class="ms-2">Blobs</label>
                             </div>
                         </div>
                     </div>
@@ -120,81 +120,81 @@
                 type: String,
             },
         },
-        data() {
-            return {
-                name: "",
-                doctypes: ["blob", "book", "bookmark", "document", "note"],
-                callback: null,
-                returnArgs: null,
-                query: "",
-                suggestionsFound: 0,
-                toggleBookmarks: false,
-                toggleBlobs: false,
-                // This is populated in the base template
-                recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
-                recentBookmarks: JSON.parse(document.getElementById("recent_bookmarks").textContent),
-                recentMedia: JSON.parse(document.getElementById("recent_media").textContent),
+        emits: ["select-object"],
+        setup(props, ctx) {
+            const selectValue = ref(null);
+            const toggleBlobs = ref(false);
+            const toggleBookmarks = ref(false);
+
+            let callback = null;
+            let doctypes = ["blob", "book", "bookmark", "document", "note"];
+            const recentBlobs = JSON.parse(document.getElementById("recent_blobs").textContent);
+            const recentBookmarks = JSON.parse(document.getElementById("recent_bookmarks").textContent);
+            const recentMedia = JSON.parse(document.getElementById("recent_media").textContent);
+            let returnArgs = null;
+
+            function handleBlobsToggle(value) {
+                if (value) {
+                    if (toggleBookmarks.value) {
+                        toggleBookmarks.value = false;
+                    }
+                    doctypes = ["blob", "book", "document", "note"];
+                } else {
+                    doctypes = ["blob", "book", "bookmark", "document", "note"];
+                }
             };
-        },
-        mounted() {
-            if (this.initialDoctypes.length > 0) {
-                this.doctypes = this.initialDoctypes;
-            }
-        },
-        methods: {
-            boldenOption,
-            hasMoreThanMax() {
-                if (!this.$refs.selectValue || this.$refs.selectValue.$refs.multiselect.search === "") {
+
+            function handleBookmarksToggle(value) {
+                if (value) {
+                    if (toggleBlobs.value) {
+                        toggleBlobs.value = false;
+                    }
+                    doctypes = ["bookmark"];
+                } else {
+                    doctypes = ["blob", "book", "bookmark", "document", "note"];
+                }
+            };
+
+            function handleObjectSelect(selection) {
+                ctx.emit("select-object", selection, callback, returnArgs);
+
+                const modal = Modal.getInstance(document.getElementById(`modalObjectSelect${props.label}`));
+                modal.hide();
+
+                nextTick(() => {
+                    selectValue.value.$refs.multiselect.$el.querySelector("input").blur();
+                    selectValue.value.clearOptions();
+                });
+            };
+
+            function hasMoreThanMax() {
+                if (!selectValue.value || selectValue.value.$refs.multiselect.search === "") {
                     // Wait for the component to appear and be sure the user has
                     //  actually searched for something.
                     return false;
                 }
-                return this.$refs.selectValue.$refs.multiselect.options.length > this.maxSuggestions;
-            },
-            onFilterLabelClick(filterType, evt) {
-                const input = evt.target.parentElement.querySelector("input");
-                input.click();
-                this.onFilterChange(filterType, evt);
-            },
-            onToggleBlobs(value) {
-                if (value) {
-                    if (this.toggleBookmarks) {
-                        this.toggleBookmarks = false;
-                    }
-                    this.doctypes = ["blob", "book", "document", "note"];
-                } else {
-                    this.doctypes = ["blob", "book", "bookmark", "document", "note"];
-                }
-            },
-            onToggleBookmarks(value) {
-                if (value) {
-                    if (this.toggleBlobs) {
-                        this.toggleBlobs = false;
-                    }
-                    this.doctypes = ["bookmark"];
-                } else {
-                    this.doctypes = ["blob", "book", "bookmark", "document", "note"];
-                }
-            },
-            getSearchObjectUrl(query) {
-                let url = this.searchObjectUrl;
-                url += "?doc_type=" + this.doctypes.join(",");
+                return selectValue.value.$refs.multiselect.options.length > props.maxSuggestions;
+            };
+
+            function getSearchObjectUrl(query) {
+                let url = props.searchObjectUrl;
+                url += "?doc_type=" + doctypes.join(",");
                 url += "&term=";
                 return url;
-            },
-            openModal(callback, returnArgs) {
-                this.callback = callback;
-                this.returnArgs = returnArgs;
-                const modal = new Modal(`#modalObjectSelect${this.label}`);
+            };
+
+            function openModal(callbackParam, returnArgsParam) {
+                callback = callbackParam;
+                returnArgs = returnArgsParam;
+                const modal = new Modal(`#modalObjectSelect${props.label}`);
                 modal.show();
                 setTimeout( () => {
-                    this.$refs.selectValue.$el.querySelector("input").focus();
+                    selectValue.value.focus();
                 }, 500);
-                const suggest = this.$refs.selectValue;
 
-                if (suggest.$refs.multiselect.options.length === 0) {
-                    if (this.initialDoctypes.includes("media")) {
-                        suggest.$refs.multiselect.options.push(
+                if (selectValue.value.$refs.multiselect.options.length === 0) {
+                    if (props.initialDoctypes.includes("media")) {
+                        selectValue.value.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Media",
                                 name: "Recent Media",
@@ -202,9 +202,9 @@
                                 value: "",
                             },
                         );
-                        suggest.$refs.multiselect.options.push(...this.recentMedia.mediaList.slice(0, 10));
-                    } else if (this.initialDoctypes.includes("bookmark")) {
-                        suggest.$refs.multiselect.options.push(
+                        selectValue.value.$refs.multiselect.options.push(...recentMedia.mediaList.slice(0, 10));
+                    } else if (props.initialDoctypes.includes("bookmark")) {
+                        selectValue.value.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Bookmarks",
                                 name: "Recent Bookmarks",
@@ -212,9 +212,9 @@
                                 value: "",
                             },
                         );
-                        suggest.$refs.multiselect.options.push(...this.recentBookmarks.bookmarkList.slice(0, 10));
+                        selectValue.value.$refs.multiselect.options.push(...recentBookmarks.bookmarkList.slice(0, 10));
                     } else {
-                        suggest.$refs.multiselect.options.push(
+                        selectValue.value.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Blobs",
                                 name: "Recent Blobs",
@@ -222,8 +222,8 @@
                                 value: "",
                             },
                         );
-                        suggest.$refs.multiselect.options.push(...this.recentBlobs.blobList.slice(0, 5));
-                        suggest.$refs.multiselect.options.push(
+                        selectValue.value.$refs.multiselect.options.push(...recentBlobs.blobList.slice(0, 5));
+                        selectValue.value.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Bookmarks",
                                 name: "Recent Bookmarks",
@@ -231,25 +231,33 @@
                                 value: "",
                             },
                         );
-                        suggest.$refs.multiselect.options.push(...this.recentBookmarks.bookmarkList.slice(0, 5));
+                        selectValue.value.$refs.multiselect.options.push(...recentBookmarks.bookmarkList.slice(0, 5));
                     }
                 }
-                suggest.listShown = true;
-            },
-            select(selection) {
-                // The parent component receives the selected object info
-                this.$emit("select-object", selection, this.callback, this.returnArgs);
+            };
 
-                const modal = Modal.getInstance(document.getElementById(`modalObjectSelect${this.label}`));
-                modal.hide();
+            onMounted(() => {
+                if (props.initialDoctypes.length > 0) {
+                    doctypes = props.initialDoctypes;
+                }
+            });
 
-                this.$nextTick(() => {
-                    this.$refs.selectValue.$refs.multiselect.$el.querySelector("input").blur();
-                    this.$refs.selectValue.value = "";
-                });
-            },
+            return {
+                boldenOption,
+                callback,
+                doctypes,
+                getSearchObjectUrl,
+                handleBlobsToggle,
+                handleBookmarksToggle,
+                hasMoreThanMax,
+                handleObjectSelect,
+                openModal,
+                returnArgs,
+                selectValue,
+                toggleBookmarks,
+                toggleBlobs,
+            };
         },
-
     };
 
 </script>
