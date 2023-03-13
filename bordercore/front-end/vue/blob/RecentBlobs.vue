@@ -55,22 +55,22 @@
                 type: String,
             },
         },
-        computed: {
-            menuItems: function() {
-                const self = this;
-                const items = this.blobListInfo.blobList.map( function(item) {
+        setup(props) {
+            const menuItems = computed(() => {
+                const items = props.blobListInfo.blobList.map( function(item) {
                     return {
                         id: uuidv4(),
                         title: item.name,
-                        url: self.blobDetailUrl.replace(/00000000-0000-0000-0000-000000000000/, item.uuid),
+                        url: props.blobDetailUrl.replace(/00000000-0000-0000-0000-000000000000/, item.uuid),
                     };
                 });
 
                 return items;
-            },
-        },
-        methods: {
-            getCoverImage() {},
+            });
+
+            return {
+                menuItems,
+            };
         },
     };
 
