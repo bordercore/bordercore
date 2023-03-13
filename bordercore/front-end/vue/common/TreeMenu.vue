@@ -6,7 +6,7 @@
              @click="toggle"
              @dblclick="makeFolder"
         >
-            <a :href="getId(item.id)">{{ item.label }}</a>
+            <a :href="'#section_' + item.id">{{ item.label }}</a>
             <!-- <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span> -->
         </div>
         <ul v-show="isOpen" v-if="isFolder" class="mb-0 ms-2">
@@ -42,31 +42,33 @@
                 type: Boolean,
             },
         },
-        data: function() {
-            return {
-                isOpen: this.initialOpen,
+        emits: ["make-folder"],
+        setup(props, ctx) {
+            const isOpen = ref(props.initialOpen);
+
+            function makeFolder() {
+                if (!isFolder) {
+                    ctx.emit("make-folder", props.item);
+                    isOpen.value = true;
+                }
             };
-        },
-        computed: {
-            isFolder: function() {
-                return this.item.nodes && this.item.nodes.length;
-            },
-        },
-        methods: {
-            getId(id) {
-                return "#section_" + id;
-            },
-            toggle: function() {
-                if (this.isFolder) {
-                    this.isOpen = !this.isOpen;
+
+            function toggle() {
+                if (isFolder) {
+                    isOpen.value = !isOpen.value;
                 }
-            },
-            makeFolder: function() {
-                if (!this.isFolder) {
-                    this.$emit("make-folder", this.item);
-                    this.isOpen = true;
-                }
-            },
+            };
+
+            const isFolder = computed(() => {
+                return props.item.nodes && props.item.nodes.length;
+            });
+
+            return {
+                isFolder,
+                isOpen,
+                makeFolder,
+                toggle,
+            };
         },
     };
 
