@@ -21,9 +21,10 @@
             :options-limit="optionsLimit"
             :placeholder="placeHolder"
             autocomplete="off"
-            @search-change="onSearchChange"
+            @search-change="handleSearchChange"
             @select="select"
-            @close="onClose"
+            @close="handleClose"
+            @keyup.enter="handleEnter"
         >
             <template #option="props">
                 <slot name="option" v-bind="props">
@@ -56,14 +57,13 @@
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
     import {boldenOption} from "/front-end/util.js";
     import Multiselect from "vue-multiselect";
-    import debounceMixin from "../../debounce.js";
+    import debouncer from "../../debounce.js";
 
     export default {
         components: {
             FontAwesomeIcon,
             Multiselect,
         },
-        mixins: [debounceMixin],
         props: {
             label: {
                 type: String,
@@ -118,98 +118,132 @@
                 default: "",
             },
         },
-        data() {
-            return {
-                emptyLabel: "____",
-                isDisabled: false,
-                options: [],
-                showNoResult: false,
-                value: "",
+        emits: ["close", "search", "search-change", "select"],
+        setup(props, ctx) {
+            const options = ref([]);
+            const showNoResult = ref(false);
+            const value = ref("");
+
+            const emptyLabel = "____";
+            let isDisabled = false;
+
+            const multiselect = ref(null);
+
+            const {debounce} = debouncer();
+
+            function clearOptions() {
+                options.value = [];
+                value.value = null;
             };
-        },
-        computed: {
-            getValueComputed() {
-                return this.getValue();
-            },
-        },
-        mounted() {
-            // If given an initial value, add it to the options list
-            //  and pre-select it.
-            if (this.initialValue) {
-                this.options = [this.initialValue];
-                this.value = this.initialValue;
-            }
-            if (this.isDisabledInitial) {
-                this.isDisabled = true;
-            }
-        },
-        methods: {
-            getValue() {
-                if (typeof this.value === "object" && this.value !== null) {
-                    return this.value[this.label];
+
+            function focus() {
+                multiselect.value.$el.querySelector("input").focus();
+            };
+
+            function getValue() {
+                if (typeof value.value === "object" && value.value !== null) {
+                    return value.value[props.label];
                 } else {
                     return "";
                 }
-            },
-            boldenOption,
-            clearOptions() {
-                this.options = [];
-                this.value = null;
-            },
-            focus() {
-                this.$el.querySelector("input").focus();
-            },
-            onSearchChange(query) {
-                this.$emit("search-change", query);
-                if (this.$refs.multiselect.search.length <= this.minLength) {
-                    this.options = [];
+            };
+
+            function handleClose(evt) {
+                ctx.emit("close", evt);
+            };
+
+            function handleEnter(event) {
+                setValue(multiselect.value.search);
+                multiselect.value.$refs.search.blur();
+            };
+
+            function handleSearchChange(query) {
+                ctx.emit("search-change", query);
+                if (multiselect.value.search.length <= props.minLength) {
+                    options.value = [];
                     return;
                 }
 
                 try {
-                    this.debounce(() => {
-                        return axios.get(this.searchUrl + query)
+                    debounce(() => {
+                        return axios.get(props.searchUrl + query)
                             .then((response) => {
-                                this.options = response.data;
+                                options.value = response.data;
                                 if (response.data.length > 0) {
-                                    this.showNoResult = false;
-                                    this.options.unshift({"label": this.emptyLabel, "name": ""});
+                                    showNoResult.value = false;
+                                    options.value.unshift({"label": emptyLabel, "name": ""});
                                 } else {
-                                    this.showNoResult = true;
+                                    showNoResult.value = true;
                                 }
                             });
                     });
                 } catch (error) {
                     console.log(`Error: ${error}`);
                 }
-            },
-            select(option) {
+            };
+
+            function select(option) {
                 // Once a value has been selected, emit an event to let the
                 //  parent component handle it.
                 // If the first option is highlighted, which is always the special
                 //  empty label, assume the user hit "Enter" and wants to do a
                 //  term search rather than select an option.
-                if (option.label === this.emptyLabel) {
-                    this.$emit("search", this.$refs.multiselect.search);
-                    this.clearOptions();
+                if (option.label === emptyLabel) {
+                    ctx.emit("search", multiselect.value.search);
+                    clearOptions();
                 } else {
-                    this.$emit("select", option);
+                    ctx.emit("select", option);
                 }
-                this.options = [];
-            },
-            setDisabled(value) {
-                this.isDisabled = value;
-            },
-            setValue(value) {
+                options.value = [];
+            };
+
+            function setDisabled(value) {
+                isDisabled = value;
+            };
+
+            function setValue(newValue) {
                 const newOption = {
-                    [this.label]: value,
+                    [props.label]: newValue,
                 };
-                this.options.push(newOption);
-                this.value = newOption;
-            },
-            onClose(evt) {
-                this.$emit("close", evt);
-            },
+                options.value.push(newOption);
+                value.value = newOption;
+            };
+
+            const getValueComputed = computed(() => {
+                return getValue();
+            });
+
+            onMounted(() => {
+                // If given an initial value, add it to the options list
+                //  and pre-select it.
+                if (props.initialValue) {
+                    options.value = [props.initialValue];
+                    value.value = props.initialValue;
+                }
+                if (props.isDisabledInitial) {
+                    isDisabled = true;
+                }
+            });
+
+            return {
+                boldenOption,
+                clearOptions,
+                emptyLabel,
+                focus,
+                handleClose,
+                handleEnter,
+                handleSearchChange,
+                isDisabled,
+                getValue,
+                getValueComputed,
+                multiselect,
+                options,
+                showNoResult,
+                select,
+                setDisabled,
+                setValue,
+                value,
+            };
         },
     };
 

@@ -1,19 +1,23 @@
-// This debounce method is meant to be used as a mixin for Vue components
+// This debounce method is meant to be used as a composable for Vue components
 
 const delay = 300; // default debounce delay in milliseconds
 
-export default {
-    methods: {
-        debounce(method, timer = delay) {
-            if (this.$_debounceTimer !== null) {
-                clearTimeout(this.$_debounceTimer);
-            }
-            this.$_debounceTimer = setTimeout(() => {
-                method();
-            }, timer);
-        },
-    },
-    created() {
-        this.$_debounceTimer = null;
-    },
+export default function() {
+    let debounceTimer = null;
+
+    function debounce(method, timer = delay) {
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(method, timer);
+    };
+
+    function created() {
+        debounceTimer = null;
+    };
+
+    return {
+        created,
+        debounce,
+    };
 };

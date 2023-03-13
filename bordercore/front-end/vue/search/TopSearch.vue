@@ -223,14 +223,14 @@
             function handleSearch(selection) {
                 const form = document.querySelector("#top-search form");
                 if (searchFilter.value === "note") {
-                    document.getElementById("topSearchValue").value = selectValue.value.$refs.multiselect.search;
+                    document.getElementById("topSearchValue").value = selectValue.value.multiselect.search;
                     form.action = props.noteQuerySearchUrl;
                 } else if (searchFilter.value === "bookmark") {
                     form.action = props.bookmarkQuerySearchUrl;
                 } else if (searchFilter.value === "drill") {
                     form.action = props.drillQuerySearchUrl;
                 } else {
-                    document.getElementById("topSearchValue").value = selectValue.value.$refs.multiselect.search;
+                    document.getElementById("topSearchValue").value = selectValue.value.multiselect.search;
                     form.action = props.querySearchUrl;
                 }
                 form.submit();

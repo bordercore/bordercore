@@ -57,7 +57,7 @@
                                     <template #afterList="props">
                                         <div v-if="hasMoreThanMax()" slot="misc-item-below" class="object-select-misc-item-below p-2">
                                             <span>
-                                                <strong class="me-2">{{ $refs.selectValue.$refs.multiselect.options.length - maxSuggestions }}</strong> other matches
+                                                <strong class="me-2">{{ selectValue.multiselect.options.length - maxSuggestions }}</strong> other matches
                                             </span>
                                         </div>
                                     </template>
@@ -162,18 +162,18 @@
                 modal.hide();
 
                 nextTick(() => {
-                    selectValue.value.$refs.multiselect.$el.querySelector("input").blur();
+                    selectValue.value.multiselect.$el.querySelector("input").blur();
                     selectValue.value.clearOptions();
                 });
             };
 
             function hasMoreThanMax() {
-                if (!selectValue.value || selectValue.value.$refs.multiselect.search === "") {
+                if (!selectValue.value || selectValue.value.multiselect.search === "") {
                     // Wait for the component to appear and be sure the user has
                     //  actually searched for something.
                     return false;
                 }
-                return selectValue.value.$refs.multiselect.options.length > props.maxSuggestions;
+                return selectValue.value.multiselect.options.length > props.maxSuggestions;
             };
 
             function getSearchObjectUrl(query) {
@@ -192,9 +192,9 @@
                     selectValue.value.focus();
                 }, 500);
 
-                if (selectValue.value.$refs.multiselect.options.length === 0) {
+                if (selectValue.value.multiselect.options.length === 0) {
                     if (props.initialDoctypes.includes("media")) {
-                        selectValue.value.$refs.multiselect.options.push(
+                        selectValue.value.multiselect.options.push(
                             {
                                 uuid: "__Recent_Media",
                                 name: "Recent Media",
@@ -202,9 +202,9 @@
                                 value: "",
                             },
                         );
-                        selectValue.value.$refs.multiselect.options.push(...recentMedia.mediaList.slice(0, 10));
+                        selectValue.value.multiselect.options.push(...recentMedia.mediaList.slice(0, 10));
                     } else if (props.initialDoctypes.includes("bookmark")) {
-                        selectValue.value.$refs.multiselect.options.push(
+                        selectValue.value.multiselect.options.push(
                             {
                                 uuid: "__Recent_Bookmarks",
                                 name: "Recent Bookmarks",
@@ -212,9 +212,9 @@
                                 value: "",
                             },
                         );
-                        selectValue.value.$refs.multiselect.options.push(...recentBookmarks.bookmarkList.slice(0, 10));
+                        selectValue.value.multiselect.options.push(...recentBookmarks.bookmarkList.slice(0, 10));
                     } else {
-                        selectValue.value.$refs.multiselect.options.push(
+                        selectValue.value.multiselect.options.push(
                             {
                                 uuid: "__Recent_Blobs",
                                 name: "Recent Blobs",
@@ -222,8 +222,8 @@
                                 value: "",
                             },
                         );
-                        selectValue.value.$refs.multiselect.options.push(...recentBlobs.blobList.slice(0, 5));
-                        selectValue.value.$refs.multiselect.options.push(
+                        selectValue.value.multiselect.options.push(...recentBlobs.blobList.slice(0, 5));
+                        selectValue.value.multiselect.options.push(
                             {
                                 uuid: "__Recent_Bookmarks",
                                 name: "Recent Bookmarks",
@@ -231,7 +231,7 @@
                                 value: "",
                             },
                         );
-                        selectValue.value.$refs.multiselect.options.push(...recentBookmarks.bookmarkList.slice(0, 5));
+                        selectValue.value.multiselect.options.push(...recentBookmarks.bookmarkList.slice(0, 5));
                     }
                 }
             };
