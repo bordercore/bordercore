@@ -187,9 +187,8 @@
                 FontAwesomeIcon,
                 SearchNoResult,
             },
-            data() {
-                return {
-                    javascript_sample: `
+            setup() {
+                const javascriptSample = `
 \`\`\`python
 class TagBookmark(SortOrderMixin):
 
@@ -208,23 +207,27 @@ class TagBookmark(SortOrderMixin):
     def remove_bookmark(sender, instance, **kwargs):
         instance.handle_delete()
 \`\`\`
-                    `,
-                };
-            },
-            methods: {
-                getContent() {
-                    return markdown.render(this.javascript_sample);
-                },
-                createToast(level) {
+                `;
+
+                function createToast(level) {
                     EventBus.$emit(
                         "toast",
                         {
                             "body": "This is a sample toast",
-                            "variant": "info",
+                            "variant": level,
                             "autoHide": false,
                         },
                     );
-                },
+                };
+
+                function getContent() {
+                    return markdown.render(javascriptSample);
+                };
+
+                return {
+                    createToast,
+                    getContent,
+                };
             },
         });
         app.mount("#gallery");
