@@ -49,14 +49,8 @@
                 default: 0,
             },
         },
-        computed: {
-            pageRange() {
-                return this.paginator.range;
-                return this.paginator.range.filter((page) => page != this.paginator.previous_page_number);
-            },
-        },
-        methods: {
-            getSearchArgs() {
+        setup(props) {
+            function getSearchArgs() {
                 const urlSearchParams = new URLSearchParams(window.location.search);
 
                 // The Pagination Vue component will add the "page" searcharg, so we
@@ -64,24 +58,43 @@
                 urlSearchParams.delete("page");
 
                 return "&" + urlSearchParams;
-            },
-            hasNext() {
-                return this.paginator.has_next;
-            },
-            hasPrevious() {
-                return this.paginator.has_previous;
-            },
-            pageLink(pageNumber) {
-                return "?page=" + pageNumber + this.getSearchArgs();
-            },
-            nextPage() {
-                return "?page=" + this.paginator.next_page_number + this.getSearchArgs();
-            },
-            previousPage() {
-                return "?page=" + this.paginator.previous_page_number + this.getSearchArgs();
-            },
-        },
+            };
 
+            function hasNext() {
+                return props.paginator.has_next;
+            };
+
+            function hasPrevious() {
+                return props.paginator.has_previous;
+            };
+
+            function pageLink(pageNumber) {
+                return "?page=" + pageNumber + getSearchArgs();
+            };
+
+            function nextPage() {
+                return "?page=" + props.paginator.next_page_number + getSearchArgs();
+            };
+
+            function previousPage() {
+                return "?page=" + props.paginator.previous_page_number + getSearchArgs();
+            };
+
+            const pageRange = computed(() => {
+                return props.paginator.range.filter(
+                    (page) => page !== props.paginator.previous_page_number
+                );
+            });
+
+            return {
+                hasNext,
+                hasPrevious,
+                nextPage,
+                pageLink,
+                pageRange,
+                previousPage,
+            };
+        },
     };
 
 </script>
