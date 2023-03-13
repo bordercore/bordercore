@@ -105,7 +105,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click.prevent="onClickUpdateNode">
+                            <input class="btn btn-primary" type="button" value="Update" @click.prevent="onClickUpdateNode">
                         </div>
                     </div>
                 </div>
@@ -118,8 +118,8 @@
             update-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
             create-todo-url="{% url 'todo-list' %}"
             tag-search-url="{% url 'tag:search' %}?query="
-            @post-todo-add="addNodeTodo"
-            @post-todo-update="todoList[0].getTodoList()"
+            @add="addNodeTodo"
+            @update="handleTodoUpdate"
         >
         </create-update-todo>
 
@@ -178,6 +178,7 @@
                                     remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
                                     sort-node-todos-url="{% url 'node:sort_todos' %}"
                                     delete-todo-list-url="{% url "node:delete_todo_list" %}"
+                                    @open-create-update-todo-modal="openCreateUpdateTodoModal"
                                     @update-layout="onUpdateLayout"
                                 >
                                 </node-todo-list>
@@ -299,6 +300,7 @@
                 const objectSelectCollection = ref(null);
                 const objectSelectImage = ref(null);
                 const todoList = ref(null);
+                const updateTodo = ref(null);
 
                 const editLayoutDropDownItemValue = computed(() => {
                     return editLayout.value ? "Disable Edit Layout" : "Enable Edit Layout"
@@ -333,6 +335,10 @@
                         "Note added",
                         ""
                     );
+                };
+
+                function handleTodoUpdate() {
+                    todoList.value[0].getTodoList();
                 };
 
                 function onAddQuote() {
@@ -417,6 +423,9 @@
 
                 function openAddNoteModal() {
                     noteUpdate.value.openModal("Add", addNote, { "color": 1 });
+
+                function openCreateUpdateTodoModal(action, data) {
+                    updateTodo.value.openModal(action, data);
                 };
 
                 function openModalCollectionUpdate(callback, data) {
@@ -488,6 +497,7 @@
                     collectionUpdate,
                     editLayout,
                     editLayoutDropDownItemValue,
+                    handleTodoUpdate,
                     hasTodoList,
                     layout,
                     noteUpdate,
@@ -500,6 +510,7 @@
                     onUpdateNode,
                     openAddNoteModal,
                     openCollectionModal,
+                    openCreateUpdateTodoModal,
                     openModalCollectionUpdate,
                     openModalNoteImage,
                     openModalNoteUpdate,
@@ -514,6 +525,7 @@
                     selectObjectCollection,
                     selectObjectImage,
                     todoList,
+                    updateTodo,
                 };
             },
         });

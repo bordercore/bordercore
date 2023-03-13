@@ -11,7 +11,7 @@
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <template #dropdown>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onCreateTodo">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleTodoCreate">
                                         <span>
                                             <font-awesome-icon icon="plus" class="text-primary me-3" />
                                         </span>
@@ -35,7 +35,7 @@
             <template #content>
                 <hr class="divider">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="todoList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="todo.uuid" @change="handleSort">
+                    <draggable v-model="todoList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="todo.uuid" @change="handleTodoSort">
                         <template #item="{element}">
                             <li v-cloak :key="element.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary draggable pe-0" :data-uuid="element.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
@@ -52,12 +52,12 @@
                                     <drop-down-menu :show-on-hover="true">
                                         <template #dropdown>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="onUpdateTodo(element)">
+                                                <a class="dropdown-item" href="#" @click.prevent="handleTodoUpdate(element)">
                                                     <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
                                                 </a>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="removeTodo(element.uuid)">
+                                                <a class="dropdown-item" href="#" @click.prevent="handleTodoRemove(element.uuid)">
                                                     <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                 </a>
                                             </li>
@@ -116,34 +116,58 @@
                 default: "",
             },
         },
-        data() {
-            return {
-                todoList: [],
-                show: false,
-            };
-        },
-        mounted() {
-            this.getTodoList();
-        },
-        methods: {
-            addNodeTodo(todoUuid) {
+        emits: ["open-create-update-todo-modal", "update-layout"],
+        setup(props, ctx) {
+            const todoList = ref([]);
+
+            function addNodeTodo(todoUuid) {
                 doPost(
-                    this.addNodeTodoUrl,
+                    props.addNodeTodoUrl,
                     {
-                        "node_uuid": this.nodeUuid,
+                        "node_uuid": props.nodeUuid,
                         "todo_uuid": todoUuid,
                     },
                     () => {
-                        this.getTodoList();
+                        getTodoList();
                     },
-                    "",
                 );
-            },
-            removeTodo(todoUuid) {
+            };
+
+            function getTodoList() {
+                doGet(
+                    props.getTodoListUrl,
+                    (response) => {
+                        todoList.value = response.data.todo_list;
+                    },
+                    "Error getting todo list",
+                );
+            };
+
+            function handleTodoCreate() {
+                ctx.emit("open-create-update-todo-modal", "Create");
+            };
+
+            function handleTodoUpdate(todoInfo) {
+                ctx.emit("open-create-update-todo-modal", "Update", todoInfo);
+            };
+
+            function onDeleteTodoList() {
+                doPost(
+                    props.deleteTodoListUrl,
+                    {
+                        "node_uuid": props.nodeUuid,
+                    },
+                    (response) => {
+                        ctx.emit("update-layout", response.data.layout);
+                    },
+                    "Todo list deleted",
+                );
+            };
+
+            function handleTodoRemove(todoUuid) {
                 // Delete the todo item, and the NodeTodo object
                 //  will automatically be deleted as well
-                const self = this;
-                axios.delete(this.removeNodeTodoUrl.replace("00000000-0000-0000-0000-000000000000", todoUuid))
+                axios.delete(props.removeNodeTodoUrl.replace("00000000-0000-0000-0000-000000000000", todoUuid))
                     .then((response) => {
                         EventBus.$emit(
                             "toast",
@@ -152,57 +176,13 @@
                                 "variant": "info",
                             },
                         );
-                        self.getTodoList();
+                        getTodoList();
                     }, (error) => {
                         console.log(error);
                     });
-            },
-            onCreateTodo() {
-                this.$parent.$parent.$refs.updateTodo.setAction("Create");
-                const modal = new Modal("#modalUpdateTodo");
-                modal.show();
-                setTimeout( () => {
-                    document.getElementById("id_name").focus();
-                }, 500);
-            },
-            onDeleteTodoList() {
-                doPost(
-                    this.deleteTodoListUrl,
-                    {
-                        "node_uuid": this.nodeUuid,
-                    },
-                    (response) => {
-                        this.$emit("updateLayout", response.data.layout);
-                    },
-                    "Todo list deleted",
-                );
-            },
-            onUpdateTodo(todoInfo) {
-                this.$parent.$parent.$refs.updateTodo.setAction("Update");
-                this.$parent.$parent.$refs.updateTodo.todoInfo = {
-                    uuid: todoInfo.uuid,
-                    name: todoInfo.name,
-                    note: todoInfo.note,
-                    url: todoInfo.url,
-                    priority: 2,
-                    tags: [],
-                };
-                const modal = new Modal("#modalUpdateTodo");
-                modal.show();
-                setTimeout( () => {
-                    document.getElementById("id_name").focus();
-                }, 500);
-            },
-            getTodoList() {
-                doGet(
-                    this.getTodoListUrl,
-                    (response) => {
-                        this.todoList = response.data.todo_list;
-                    },
-                    "Error getting note",
-                );
-            },
-            handleSort(evt) {
+            };
+
+            function handleTodoSort(evt) {
                 const todoUuid = evt.moved.element.uuid;
 
                 // The backend expects the ordering to begin
@@ -210,16 +190,30 @@
                 const newPosition = evt.moved.newIndex + 1;
 
                 doPost(
-                    this.sortNodeTodosUrl,
+                    props.sortNodeTodosUrl,
                     {
-                        "node_uuid": this.$store.state.nodeUuid,
+                        "node_uuid": props.nodeUuid,
                         "todo_uuid": todoUuid,
                         "new_position": newPosition,
                     },
                     () => {},
-                    "",
                 );
-            },
+            };
+
+            onMounted(() => {
+                getTodoList();
+            });
+
+            return {
+                addNodeTodo,
+                getTodoList,
+                handleTodoSort,
+                handleTodoCreate,
+                handleTodoRemove,
+                onDeleteTodoList,
+                handleTodoUpdate,
+                todoList,
+            };
         },
     };
 

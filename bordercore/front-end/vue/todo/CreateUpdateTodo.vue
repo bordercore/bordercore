@@ -121,6 +121,8 @@
                 tags: [],
             });
 
+            let modal = null;
+
             function handleSubmit() {
                 const dueDate = document.getElementsByName("due_date")[0].value;
                 if (action.value === "Update") {
@@ -167,14 +169,30 @@
                 todoInfo.value.tags = newTags;
             };
 
+            function openModal(actionParam, nodeTodoParam) {
+                action.value = actionParam;
+                if (nodeTodoParam) {
+                    todoInfo.value = nodeTodoParam;
+                }
+                modal.show();
+                setTimeout( () => {
+                    document.querySelector("#modalUpdateTodo input").focus();
+                }, 500);
+            };
+
             function setAction(actionParam) {
                 action.value = actionParam;
             };
+
+            onMounted(() => {
+                modal = new Modal("#modalUpdateTodo");
+            });
 
             return {
                 action,
                 handleTagsChanged,
                 handleSubmit,
+                openModal,
                 setAction,
                 todoInfo,
             };
