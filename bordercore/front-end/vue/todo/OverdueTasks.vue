@@ -26,7 +26,7 @@
                                 <a class="glow" href="#" @click.prevent="rescheduleTask(task.uuid)">
                                     <font-awesome-icon icon="calendar-alt" class="text-secondary me-3" data-bs-toggle="tooltip" title="Reschedule Task" />
                                 </a>
-                                <a class="glow" href="#" @click.prevent="deleteTask(task.uuid)">
+                                <a class="glow" href="#" @click.prevent="handleTaskDelete(task.uuid)">
                                     <font-awesome-icon icon="trash-alt" class="text-secondary ms-3" data-bs-toggle="tooltip" title="Delete Task" />
                                 </a>
                             </div>
@@ -72,7 +72,7 @@
             FontAwesomeIcon,
         },
         props: {
-            taskListProp: {
+            taskListInitial: {
                 type: Array,
                 default: () => [],
             },
@@ -85,49 +85,53 @@
                 default: "",
             },
         },
-        data() {
-            return {
-                taskList: [],
-                message: "",
+        setup(props) {
+            const message = ref("");
+            const taskList = ref([]);
+
+            function handleTaskDelete(uuid) {
+                axios.delete(props.deleteTodoUrl.replace("00000000-0000-0000-0000-000000000000", uuid))
+                    .then((response) => {
+                        message.value = "Task deleted.";
+                        removeTaskFromList(uuid);
+                    }, (error) => {
+                        console.log(error);
+                    });
             };
-        },
-        mounted() {
-            this.taskList = this.taskListProp;
-        },
-        methods: {
-            rescheduleTask(uuid) {
+
+            function removeTaskFromList(uuid) {
+                for (let i = 0; i < taskList.value.length; i++) {
+                    if (taskList.value[i].uuid == uuid) {
+                        taskList.value.splice(i, 1);
+                    }
+                }
+            };
+
+            function rescheduleTask(uuid) {
                 doPost(
-                    this.rescheduleTaskUrl,
+                    props.rescheduleTaskUrl,
                     {
                         "todo_uuid": uuid,
                     }
                     ,
                     (response) => {
-                        this.message = "Task rescheduled.";
-                        this.removeTaskFromList(uuid);
+                        message.value = "Task rescheduled.";
+                        removeTaskFromList(uuid);
                     },
-                    "",
-                    "",
                 );
-            },
-            deleteTask(uuid) {
-                axios.delete(this.deleteTodoUrl.replace("00000000-0000-0000-0000-000000000000", uuid))
-                     .then((response) => {
-                         this.message = "Task deleted.";
-                         this.removeTaskFromList(uuid);
-                     }, (error) => {
-                         console.log(error);
-                     });
-            },
-            removeTaskFromList(uuid) {
-                for (let i = 0; i < this.taskList.length; i++) {
-                    if (this.taskList[i].uuid == uuid) {
-                        this.taskList.splice(i, 1);
-                    }
-                }
-            },
+            };
+
+            onMounted(() => {
+                taskList.value = props.taskListInitial;
+            });
+
+            return {
+                handleTaskDelete,
+                message,
+                rescheduleTask,
+                taskList,
+            };
         },
     };
-
 
 </script>
