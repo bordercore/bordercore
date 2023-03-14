@@ -133,6 +133,10 @@ div.drag-target {
   background-color: var(--surface5);
 }
 
+.node-draggable {
+  background-color: var(--node-color-1) !important;
+}
+
 // Drag and drop not controlled by Sortable uses
 //  this class (eg Buefy tables)
 .dragging {
@@ -1591,6 +1595,10 @@ blockquote > p {
     color: var(--text2);
     font-size: 1rem;
   }
+}
+
+.related-draggable {
+  background-color: var(--surface6) !important;
 }
 
 .slide-show {

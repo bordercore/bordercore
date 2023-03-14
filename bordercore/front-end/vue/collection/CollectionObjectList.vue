@@ -54,9 +54,9 @@
                     <span v-else class="text-muted">No objects</span>
                 </div>
                 <ul v-else class="list-group list-group-flush interior-borders">
-                    <draggable v-model="limitedObjectList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="uuid" @change="handleSort">
+                    <draggable v-model="limitedObjectList" :component-data="{type:'transition-group'}" item-key="uuid" chosen-class="node-draggable" ghost-class="node-draggable" drag-class="node-draggable" @change="handleSort">
                         <template #item="{element}">
-                            <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable pe-0" :data-uuid="element.uuid">
+                            <li v-cloak :key="element.uuid" class="hover-target list-group-item pe-0" :data-uuid="element.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div v-if="element.type === 'blob'" class="pe-2">
                                         <img :src="element.cover_url" height="75" width="70">

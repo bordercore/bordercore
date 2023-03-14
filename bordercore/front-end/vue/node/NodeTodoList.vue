@@ -35,9 +35,9 @@
             <template #content>
                 <hr class="divider">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="todoList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="todo.uuid" @change="handleTodoSort">
+                    <draggable v-model="todoList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="todo.uuid" chosen-class="node-draggable" ghost-class="node-draggable" drag-class="node-draggable" @change="handleTodoSort">
                         <template #item="{element}">
-                            <li v-cloak :key="element.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary draggable pe-0" :data-uuid="element.uuid">
+                            <li v-cloak :key="element.uuid" class="hover-target draggable list-group-item pe-0" :data-uuid="element.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div>
                                         <a :href="element.url">{{ element.name }}</a>
