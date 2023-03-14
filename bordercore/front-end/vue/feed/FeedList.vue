@@ -1,12 +1,12 @@
 <template>
     <ul>
-        <draggable v-model="localFeedList" animation="500" item-key="id" @change="onChange">
+        <draggable v-model="localFeedList" animation="500" item-key="id" draggable=".draggable" chosen-class="feed-draggable" ghost-class="feed-draggable" drag-class="feed-draggable" @change="handleSort">
             <template #item="{element}">
-                <li v-for="feed in {element}" v-cloak :key="feed.id" :class="{'selected rounded-sm': feed.id === $store.state.currentFeed.id}" class="ps-2">
-                    <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">
-                        {{ feed.name }}
+                <li v-cloak :key="element.id" :class="{'selected rounded-sm': element.id === $store.state.currentFeed.id}" class="draggable ps-2">
+                    <a href="#" :data-id="element.id" @click.prevent="onClick(element)">
+                        {{ element.name }}
                     </a>
-                    <small v-if="feed.lastResponse !== 'OK'" class="text-danger">{{ feed.lastResponse }}</small>
+                    <small v-if="element.lastResponse !== 'OK'" class="text-danger">{{ element.lastResponse }}</small>
                 </li>
             </template>
         </draggable>
@@ -40,23 +40,23 @@
         },
         setup(props) {
             const store = useStore();
-            const localFeedList = props.feedList.slice();
+            const localFeedList = ref(props.feedList.slice());
 
-            function onChange(evt) {
+            function handleSort(evt) {
                 const feedId = evt.moved.element.id;
 
                 // The backend expects the ordering to begin
                 // with 1, not 0, so add 1.
-                newPosition = evt.moved.newIndex + 1;
+                const newPosition = evt.moved.newIndex + 1;
 
-                const bodyFormData = new URLSearchParams();
-                bodyFormData.append("feed_id", feedId);
-                bodyFormData.append("position", newPosition);
-
-                axios(props.feedSortUrl, {
-                    method: "POST",
-                    data: bodyFormData,
-                });
+                doPost(
+                    props.feedSortUrl,
+                    {
+                        "feed_id": feedId,
+                        "position": newPosition,
+                    },
+                    () => {},
+                );
             }
 
             function onClick(feed) {
@@ -92,8 +92,8 @@
             });
 
             return {
+                handleSort,
                 localFeedList,
-                onChange,
                 onClick,
             };
         },
