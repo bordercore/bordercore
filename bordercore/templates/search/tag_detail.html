@@ -19,15 +19,16 @@
                     <form id="tag-filter-form" class="form-inline align-items-start" action="{% url 'search:kb_search_tag_detail' tag %}" method="get" autocomplete="off">
                         <div class="row">
 
-                            <search-tags-input
+                            <tags-input
                                 name="tag-search"
                                 class-list="col-lg-6"
                                 :autofocus=true
                                 place-holder="Tag"
                                 search-url="{% url 'tag:search' %}?query="
                                 tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                @tags-changed="handleTagSearch"
                             >
-                            </search-tags-input>
+                            </tags-input>
 
                            {% if tag_counts %}
                                <div class="col-lg-3">
@@ -350,9 +351,14 @@
         const app = createApp({
             components: {
                 FontAwesomeIcon,
-                SearchTagsInput,
+                TagsInput,
             },
             setup() {
+                function handleTagSearch(tagList) {
+                    const tagsChangedUrl = "{% url 'search:kb_search_tag_detail' 666 %}";
+                    window.location = tagsChangedUrl.replace("666", tagList.join(","));
+                };
+
                 function onChange(evt) {
                     const tagList = getTagListString() + "," + evt.srcElement.value;
                     window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace("666", tagList);
@@ -405,6 +411,7 @@
                 });
 
                 return {
+                    handleTagSearch,
                     onChange,
                     onClickDoctype,
                     onClickMetaTag,

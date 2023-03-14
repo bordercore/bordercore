@@ -164,9 +164,6 @@ import "vue-select/dist/vue-select.css";
 import TagsInput from "./vue/common/TagsInput.vue";
 window.TagsInput = TagsInput;
 
-import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
-window.SearchTagsInput = SearchTagsInput;
-
 import RelatedTags from "./vue/common/RelatedTags.vue";
 window.RelatedTags = RelatedTags;
 
