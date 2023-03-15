@@ -92,11 +92,11 @@
             const tagsInputComponent = ref(null);
 
             function addTag(tagName) {
-                tags.value.push({"label": tagName});
+                tags.value.push({"label": tagName, "value": tagName});
             };
 
-            function createTag(tagName, foo) {
-                const newTag = {label: tagName};
+            function createTag(tagName) {
+                const newTag = {"label": tagName, "value": tagName};
                 ctx.emit("option:created", newTag);
                 return newTag;
             };
@@ -109,7 +109,10 @@
                     props.searchUrl + search,
                     (response) => {
                         options.value = response.data.map((a) => {
-                            return {label: a.label};
+                            return {
+                                "label": a.label,
+                                "value": a.value ? a.value : a.label,
+                            };
                         });
                     },
                 );
@@ -128,10 +131,11 @@
                 tags.value.forEach(function(element, index, tagList) {
                     tagList[index] = {
                         "label": element.label.toLowerCase(),
+                        "value": element.value.toLowerCase(),
                     };
                 });
 
-                ctx.emit("tags-changed", tags.value.map( (x) => x.label ));
+                ctx.emit("tags-changed", tags.value.map( (x) => x.value ));
                 options.value = [];
                 nextTick(() => {
                     tagsInputComponent.value.$refs.search.focus();
@@ -139,7 +143,7 @@
             };
 
             const tagsCommaSeparated = computed(() => {
-                return tags.value.map((x) => x.label).join(",");
+                return tags.value.map((x) => x.value).join(",");
             });
 
             onMounted(() => {
@@ -149,12 +153,13 @@
 
                 if (props.getTagsFromEvent) {
                     EventBus.$on("addTags", (payload) => {
-                        tags.value = payload.map( (x) => ({label: x}) );
+                        console.log(payload);
+                        tags.value = payload.map( (x) => ({"label": x, "value": x}) );
                     });
                 } else {
                     const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
                     if (initialTags) {
-                        tags.value = initialTags.map( (x) => ({label: x}) );
+                        tags.value = initialTags.map( (x) => ({"label": x, "value": x}) );
                     }
                 }
 

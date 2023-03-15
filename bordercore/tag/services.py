@@ -48,10 +48,9 @@ def get_tag_aliases(user, name, doc_types=[]):
     return [
         {
             "doctype": "Tag",
-            "text": x.tag.name,
+            "value": x.tag.name,
             "id": f"{x.name} -> {x.tag}",
-            "display": f"{x.name} -> {x.tag}",
-            "name": f"{x.name} -> {x.tag}",
+            "label": f"{x.name} -> {x.tag}",
             "link": get_tag_link(x.tag.name, doc_types),
             **get_additional_info(doc_types, user, x.tag.name)
         }
