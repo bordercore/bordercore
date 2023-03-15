@@ -33,7 +33,7 @@ class FeedListView(ListView):
                 "name": feed.name,
                 "lastCheck": feed.last_check.strftime("%b %d, %Y, %I:%M %p")
  if feed.last_check else "N/A",
-                "lastResponse": http.client.responses[feed.last_response_code] if feed.last_response_code else None,
+                "lastResponse": http.client.responses.get(feed.last_response_code, feed.last_response_code) if feed.last_response_code else None,
                 "homepage": feed.homepage,
                 "url": feed.url,
                 "feedItems": [

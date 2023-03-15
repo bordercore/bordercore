@@ -6,7 +6,7 @@
                     <a href="#" :data-id="element.id" @click.prevent="onClick(element)">
                         {{ element.name }}
                     </a>
-                    <small v-if="element.lastResponse !== 'OK'" class="text-danger">{{ element.lastResponse }}</small>
+                    <small v-if="element.lastResponse !== 'OK'" class="text-danger ms-2">{{ element.lastResponse }}</small>
                 </li>
             </template>
         </draggable>
