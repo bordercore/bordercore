@@ -3,6 +3,7 @@ import uuid
 from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
@@ -38,6 +39,12 @@ class Tag(models.Model):
                 check=Q(name=Lower("name"))
             )
         ]
+
+    def save(self, *args, **kwargs):
+
+        if TagAlias.objects.filter(name=self.name).exists():
+            raise ValidationError(f"An alias with this same name already exists: {self}")
+        super().save(*args, **kwargs)
 
     def get_todo_counts(self):
 

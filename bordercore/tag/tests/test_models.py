@@ -1,16 +1,22 @@
 import pytest
+from faker import Factory as FakerFactory
 
 import django
+from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+
+from tag.tests.factories import TagFactory
 
 django.setup()
 
-from tag.models import TagBookmark, Tag  # isort:skip
+from tag.models import TagBookmark, Tag, TagAlias  # isort:skip
 
 pytestmark = pytest.mark.django_db
 
+faker = FakerFactory.create()
 
-def test_tag_check_no_commas_constraint(auto_login_user, tag):
+
+def test_tag_check_no_commas_constraint(auto_login_user):
     """
     Test the constraint that prohibits tags with commas in their name
     """
@@ -19,6 +25,30 @@ def test_tag_check_no_commas_constraint(auto_login_user, tag):
 
     with pytest.raises(IntegrityError):
         Tag.objects.create(user=user, name="tag,name")
+
+
+def test_tag_check_name_is_lowercase(auto_login_user):
+    """
+    Test the constraint that prohibits tags with uppercase characters
+    """
+
+    user, _ = auto_login_user()
+    with pytest.raises(IntegrityError):
+        Tag.objects.create(user=user, name="Tagname")
+
+
+def test_tag_check_tag_alias(auto_login_user):
+    """
+    Test that there exists no tag with the same name as a tag alias
+    """
+
+    user, _ = auto_login_user()
+
+    tag_1 = TagFactory(user=user, name=faker.text(max_nb_chars=16).lower())
+    alias = TagAlias.objects.create(user=user, tag=tag_1, name=faker.text(max_nb_chars=16).lower())
+
+    with pytest.raises(ValidationError):
+        TagFactory(user=user, name=alias.name)
 
 
 def test_reorder(bookmark, tag):
