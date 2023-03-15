@@ -333,7 +333,6 @@
                             layout.value = JSON.parse(response.data.layout);
                         },
                         "Note added",
-                        ""
                     );
                 };
 
@@ -351,7 +350,6 @@
                             layout.value = JSON.parse(response.data.layout);
                         },
                         "Quote added",
-                        ""
                     );
                 };
 
@@ -365,7 +363,6 @@
                             layout.value = JSON.parse(response.data.layout);
                         },
                         "Todo list added",
-                        ""
                     );
                 };
 
@@ -396,8 +393,6 @@
                         },
                         (response) => {
                         },
-                        "",
-                        ""
                     );
                 };
 
@@ -417,12 +412,20 @@
                     collectionUpdate.value.openModal(
                         "Add",
                         null,
-                        {"collection_type": "ad-hoc", "display": "list", "rotate": -1, limit: 5, "uuid": ""}
+                        {
+                            "collection_type": "ad-hoc",
+                            "name": "New Collection",
+                            "display": "list",
+                            "rotate": -1,
+                            limit: 5,
+                            "uuid": ""
+                        }
                     );
                 };
 
                 function openAddNoteModal() {
                     noteUpdate.value.openModal("Add", addNote, { "color": 1 });
+                };
 
                 function openCreateUpdateTodoModal(action, data) {
                     updateTodo.value.openModal(action, data);
@@ -469,7 +472,6 @@
                             callback();
                         },
                         "Object added",
-                        ""
                     );
                 };
 
@@ -487,7 +489,6 @@
                             layout.value = JSON.parse(response.data.layout);
                         },
                         "Image added",
-                        ""
                     );
                 };
 
