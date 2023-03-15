@@ -6,8 +6,8 @@
 
     {% include "common/processing.html" %}
 
-    <div class="row g-0 h-100">
-        <div id="vue-song-info" class="col-lg-3 d-flex flex-column">
+    <div id="vue-app" class="row g-0 h-100">
+        <div class="col-lg-3 d-flex flex-column">
 
             <div class="w-100" v-cloak>
 
@@ -52,7 +52,7 @@
                         <hr class="divider" />
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
-                                <li class="list-with-counts ps-2 py-1 pe-2 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
+                                <li class="list-with-counts ps-2 py-1 pe-2 d-flex" @click.prevent="handleTagClick('{{ tag.name }}')">
                                     <div class="text-truncate">
                                         {{ tag.name }}
                                     </div>
@@ -85,7 +85,7 @@
 
         <div class="col-lg-8 h-100">
 
-            <div id="vue-app">
+            <div>
                 {% if request.POST.Go and not form.errors %}
                     <div class="alert alert-success offset-lg-3">Post {{ action }}ed</div>
                 {% endif %}
@@ -122,7 +122,7 @@
 
                                 <span class="input-group-append">
                                     <label class="btn btn-primary">Choose song
-                                        <input type="file" id="id_file" name="song" hidden accept="audio/*" @change="onChange" @blur="onDupeCheck()" />
+                                        <input type="file" id="id_file" name="song" hidden accept="audio/*" @change="handleSongChange" @blur="handleSongDupeCheck()" />
                                     </label>
                                 </span>
 
@@ -180,7 +180,7 @@
                                     name="artist"
                                     search-url="{% url 'music:search_artists' %}?term="
                                     place-holder=""
-                                    @select="onDupeCheck()"
+                                    @select="handleSongDupeCheck()"
                                     :bolden-options="true"
                                 >
                                 </select-value>
@@ -236,7 +236,7 @@
                     <div class="col-lg-9 offset-lg-3">
                         <input class="btn btn-primary ms-2" type="submit" name="Go" value="{{ action }}">
                         {% if form.instance.id %}
-                            <input class="btn btn-secondary ms-2" type="submit" name="Go" value="Delete" @click="onClickDelete">
+                            <input class="btn btn-secondary ms-2" type="submit" name="Go" value="Delete" @click="handleSongDelete">
                         {% endif %}
                         <a class="ms-3" {% if request.GET.return_url %}href="{{ request.GET.return_url }}" {% else %}href="{% url 'music:list' %}"{% endif %}>Cancel</a>
                     </div>
@@ -277,38 +277,20 @@
             },
         });
 
-        const songInfoApp = createApp({
-            name: "SongInfo",
-            components: {
-                Card,
-                FontAwesomeIcon,
-            },
-            delimiters: ["[[", "]]"],
-            setup() {
-                function onClickTag(tagName) {
-                    EventBus.$emit("add-tag", tagName);
-                }
-
-                return {
-                    onClickTag,
-                }
-            }
-        });
-        songInfoApp.use(store);
-        songInfoApp.mount("#vue-song-info");
-
         const app = createApp({
             name: "SongForm",
             components: {
+                Card,
                 FontAwesomeIcon,
                 SelectValue,
                 TagsInput,
             },
+            delimiters: ["[[", "]]"],
             setup() {
                 const filename = ref("");
                 const rating = ref({{ form.rating.value|default:""}});
                 const isCompilation = ref(false);
-                const uuid = ref("{{ song.uuid }}");
+                const uuid = "{{ song.uuid }}";
 
                 const selectValue = ref(null);
                 const tagsInput = ref(null);
@@ -317,7 +299,16 @@
                     return store.state.songLength;
                 });
 
-                function onDupeCheck() {
+                function handleTagClick(tagName) {
+                    let tagList = document.getElementsByName("tags")[0].value.split(",");
+                    // Ignore if we've already added this tag
+                    if (tagList.includes(tagName)) {
+                        return;
+                    }
+                    tagsInput.value.addTag(tagName);
+                }
+
+                function handleSongDupeCheck() {
                     const artist = document.getElementById("id_artist").value;
                     const title = document.getElementById("id_title").value;
                     if (!artist || !title) {
@@ -337,7 +328,7 @@
                     );
                 }
 
-                function onChange(evt) {
+                function handleSongChange(evt) {
                     filename.value = evt.target.files[0].name;
 
                     const song = document.getElementById("id_file").files[0];
@@ -376,7 +367,7 @@
                             modal.hide();
                         }, 500);
 
-                        onDupeCheck();
+                        handleSongDupeCheck();
                     });
                 }
 
@@ -427,9 +418,9 @@
                     });
                 }
 
-                function onClickDelete(evt) {
+                function handleSongDelete(evt) {
                     const formEl = document.getElementById("song-form");
-                    formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", this.uuid));
+                    formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", uuid));
                     formEl.submit();
                 }
 
@@ -441,32 +432,23 @@
                     // The title input is automatically generated by Django,
                     //  so use JavaScript to add an event handler after the fact.
                     const title = document.getElementById("id_title");
-                    title.addEventListener("blur", this.onDupeCheck);
-
-                    EventBus.$on("add-tag", (tagName) => {
-                        let tagList = document.getElementsByName("tags")[0].value.split(",");
-                        // Ignore if we've already added this tag
-                        if (tagList.includes(tagName)) {
-                            return;
-                        }
-                        tagsInput.value.addTag(tagName);
-                    });
+                    title.addEventListener("blur", handleSongDupeCheck);
                 })
 
                 return {
                     filename,
                     rating,
+                    handleSongChange,
+                    handleSongDelete,
+                    handleSongDupeCheck,
+                    handleTagClick,
                     isCompilation,
-                    onDupeCheck,
-                    onChange,
-                    onClickDelete,
                     onMouseLeaveRatingContainer,
                     onMouseOverRating,
                     selectValue,
                     setRating,
                     songLength,
                     tagsInput,
-                    uuid,
                 }
             }
         });
@@ -477,8 +459,9 @@
                 sortIcon: "caret-up",
             },
         });
+        app.use(store);
         app.mount("#vue-app");
 
-    </script>
+</script>
 
 {% endblock %}
