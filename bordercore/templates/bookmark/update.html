@@ -224,7 +224,7 @@
                 }
 
                 function onClickTag(tag) {
-                    EventBus.$emit("add-tag", tag);
+                    tagsInput.value.addTag(tag);
                 }
 
                 function onBlur(evt) {
@@ -257,12 +257,6 @@
                 function onTagsChanged(tags) {
                     relatedTags.value.setTags(tags);
                 }
-
-                onMounted(() => {
-                    EventBus.$on("add-tag", (payload) => {
-                        tagsInput.value.addTag(payload);
-                    });
-                });
 
                 return {
                     daily,

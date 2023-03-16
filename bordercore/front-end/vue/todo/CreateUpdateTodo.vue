@@ -38,8 +38,8 @@
                                     <label class="fw-bold col-lg-3 col-form-label text-end" for="inputTags">Tags</label>
                                     <div class="col-lg-9">
                                         <tags-input
+                                            ref="tagsInput"
                                             :search-url="tagSearchUrl"
-                                            get-tags-from-event
                                             @tags-changed="handleTagsChanged"
                                         />
                                     </div>
@@ -123,6 +123,8 @@
 
             let modal = null;
 
+            const tagsInput = ref(null);
+
             function handleSubmit() {
                 const dueDate = document.getElementsByName("due_date")[0].value;
                 if (action.value === "Update") {
@@ -184,6 +186,10 @@
                 action.value = actionParam;
             };
 
+            function setTags(tagList) {
+                tagsInput.value.setTags(tagList);
+            };
+
             onMounted(() => {
                 modal = new Modal("#modalUpdateTodo");
             });
@@ -194,6 +200,8 @@
                 handleSubmit,
                 openModal,
                 setAction,
+                setTags,
+                tagsInput,
                 todoInfo,
             };
         },

@@ -237,7 +237,7 @@
 
                 function showPythonConsole() {
                     drillStore.commit("updateShowPythonConsole", true);
-                    EventBus.$emit("show-python-console");
+                    pythonConsole.value.initialize();
                 };
 
                 const favoriteClass = computed(() => {
@@ -360,10 +360,6 @@
                                 }
                                 break;
                         }
-                    });
-
-                    EventBus.$on("show-python-console", () => {
-                        pythonConsole.value.initialize();
                     });
                 });
 

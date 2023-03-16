@@ -91,8 +91,8 @@
                             {% if field.label == 'Tags' %}
 
                                 <tags-input
+                                    ref="tagsInput"
                                     search-url="{% url 'tag:search' %}?query="
-                                    :get-tags-from-event="true"
                                 >
                                 </tags-input>
 
@@ -149,6 +149,8 @@
                 const items = JSON.parse(document.getElementById("collection_list").textContent);
                 const showFilterInput = ref(false);
 
+                const tagsInput = ref(null);
+
                 function getCollectionList() {
                     if (filter.value) {
                         const regex = new RegExp(`.*${filter.value}.*`, "i");
@@ -165,7 +167,7 @@
                 function onClickCreate(evt) {
                     document.getElementById("id_name").value = "";
                     document.getElementById("id_description").value = "";
-                    EventBus.$emit("addTags", []);
+                    tagsInput.value.setTags([]);
                     document.getElementById("btn-action").value = "Create";
                     document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:create' %}");
                     const modal = new Modal("#modalAdd");
@@ -213,6 +215,7 @@
                     onFilterClick,
                     onFilterEnter,
                     showFilterInput,
+                    tagsInput,
                 };
             },
             methods: {

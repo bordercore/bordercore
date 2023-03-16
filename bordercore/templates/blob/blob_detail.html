@@ -635,7 +635,7 @@
                 };
 
                 function handleLinkToBookmark() {
-                    EventBus.$emit("open-bookmarks-modal");
+                    relatedBookmarksList.value.openObjectSelectModal();
                 };
 
                 function selectBlob(blob) {
@@ -646,7 +646,7 @@
                             "blob_2_uuid": blob.uuid,
                         },
                         (response) => {
-                            EventBus.$emit("get-related-blob-list");
+                            getRelatedBlobList();
                         },
                         "The two blobs are now linked",
                         "",
@@ -718,14 +718,6 @@
                     }, getBlobInfoAttemptIntervals.value[getBlobInfoAttempts.value]);
                     {% endif %}
                     getRelatedBlobList();
-
-                    EventBus.$on("get-related-blob-list", () => {
-                        getRelatedBlobList();
-                    });
-
-                    EventBus.$on("open-bookmarks-modal", () => {
-                        relatedBookmarksList.value.openObjectSelectModal();
-                    });
 
                     hotkeys("alt+c", function(event, handler) {
                         switch (handler.key) {

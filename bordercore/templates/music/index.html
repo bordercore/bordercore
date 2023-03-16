@@ -276,7 +276,6 @@
                         "{% url "music:recent_songs" %}",
                         (response) => {
                             songList.value = response.data.song_list;
-                            console.log(response.data.song_list);
                         },
                         "Error getting recent songs",
                     );

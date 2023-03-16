@@ -44,15 +44,16 @@
         },
         emits: ["current-song"],
         setup(props, ctx) {
+            let currentSongUuid = "";
+
             const continuousPlay = ref(false);
-            const currentSongUuid = ref("");
 
             function getIndex() {
-                return props.trackList.findIndex((x) => x.uuid === currentSongUuid.value);
+                return props.trackList.findIndex((x) => x.uuid === currentSongUuid);
             }
 
             function playTrack(songUuid, selectRow=false) {
-                currentSongUuid.value = songUuid;
+                currentSongUuid = songUuid;
 
                 const el = document.getElementById("player");
                 el.src = props.songUrl + songUuid;
@@ -64,35 +65,35 @@
                 setTimeout(markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
             }
 
+            function playNextTrack() {
+                // If continous play is enabled, find the next song in the list to play
+                const newIndex = getIndex() + 1;
+
+                if (continuousPlay.value && newIndex < props.trackList.length) {
+                    currentSongUuid = props.trackList[newIndex].uuid;
+                    playTrack(currentSongUuid, true);
+                } else {
+                    // Let the parent know that the last song has played by
+                    //  passing in a row index of -1
+                    ctx.emit("current-song", -1);
+                }
+            };
+
             function markSongAsListenedTo() {
-                const url = props.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, currentSongUuid.value);
-                axios.get(url)
-                    .then((response) => {});
-            }
+                doGet(
+                    props.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, currentSongUuid),
+                    () => {},
+                );
+            };
 
             onMounted(() => {
                 document.getElementById("player").onended = function(evt) {
-                    EventBus.$emit("onEnded");
+                    playNextTrack();
                 };
-
-                EventBus.$on("onEnded", (payload) => {
-                    // If continous play is enabled, find the next song in the list to play
-                    const newIndex = getIndex() + 1;
-
-                    if (continuousPlay.value && newIndex < props.trackList.length) {
-                        currentSongUuid.value = props.trackList[newIndex].uuid;
-                        playTrack(currentSongUuid.value, true);
-                    } else {
-                        // Let the parent know that the last song has played by
-                        //  passing in a row index of -1
-                        ctx.emit("current-song", -1);
-                    }
-                });
             });
 
             return {
                 continuousPlay,
-                currentSongUuid,
                 playTrack,
             };
         },

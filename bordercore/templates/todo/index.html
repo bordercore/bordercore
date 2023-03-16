@@ -371,7 +371,7 @@
                     }
                     updateTodo.value.setAction("Update");
                     updateTodo.value.todoInfo = todoInfo;
-                    EventBus.$emit("addTags", todoInfo.tags);
+                    updateTodo.value.setTags(todoInfo.tags);
                     const modal = new Modal("#modalUpdateTodo");
                     modal.show();
                     setTimeout(() => {
@@ -390,9 +390,7 @@
                         tags: initialTagList,
                     };
                     if (filterTag.value) {
-                        EventBus.$emit(
-                            "addTags", initialTagList,
-                        );
+                        updateTodo.value.setTags(initialTagList);
                     }
                     const modal = new Modal("#modalUpdateTodo");
                     modal.show();
