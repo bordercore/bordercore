@@ -1210,16 +1210,6 @@ blockquote > p {
   right: 0.25rem;
   width: 25rem;
   background-color: var(--surface2) !important;
-  line-height: 1.5rem;
-
-  @extend .multiselect__tags;
-  .multiselect__tags {
-    background-color: var(--surface2) !important;
-
-    .multiselect__input, .multiselect__single {
-      background-color: var(--surface2) !important;
-    }
-  }
 }
 
 #top-bar {
@@ -1234,7 +1224,7 @@ blockquote > p {
 #top-search-filter {
   position: absolute;
   z-index: 100;
-  top: 0.33rem;
+  top: 0.325rem;
   right: 0.5rem;
   text-align: center;
 
@@ -2358,7 +2348,7 @@ tr.hover-target:hover {
 }
 
 .multiselect:focus {
-  background-color: var(--surface2) !important;
+  background-color: var(--form-bg-focus) !important;
 }
 
 .multiselect__tags {
@@ -2372,7 +2362,7 @@ tr.hover-target:hover {
   color: var(--form-color) !important;
 
   &:focus {
-    background-color: var(--surface2) !important;
+    background-color: var(--form-bg-focus) !important;
   }
 
   .multiselect__input, .multiselect__single {

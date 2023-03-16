@@ -255,6 +255,7 @@
                     if (!isClickInside &&
                         !event.target.classList.contains("fa-search") &&
                         !event.target.classList.contains("fa-times") &&
+                        !event.target.parentElement.classList.contains("fa-times") &&
                         !event.target.parentElement.classList.contains("fa-search")
                     ) {
                         showSearchWindow.value = false;
