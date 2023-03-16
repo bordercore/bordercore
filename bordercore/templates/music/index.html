@@ -272,11 +272,14 @@
                 }
 
                 onMounted(() => {
-                    const promise = axios.get("{% url "music:recent_songs" %}");
-
-                    return promise.then(data => {
-                        songList.value = data.data.song_list;
-                    })
+                    doGet(
+                        "{% url "music:recent_songs" %}",
+                        (response) => {
+                            songList.value = response.data.song_list;
+                            console.log(response.data.song_list);
+                        },
+                        "Error getting recent songs",
+                    );
                 });
 
                 return {
