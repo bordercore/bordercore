@@ -48,16 +48,11 @@
             ];
 
             function handleUpdateFeed(evt, action = "Update") {
-                // this.$parent.$refs.updateFeed.setAction(action);
                 if (action === "Update") {
                     ctx.emit("open-modal", action, store.state.currentFeed);
-                    // this.$parent.$refs.updateFeed.feedInfo = this.$store.state.currentFeed;
                 } else {
                     ctx.emit("open-modal", action, {});
-                    // this.$parent.$refs.updateFeed.feedInfo = {};
                 }
-                /* const modal = new Modal("#modalUpdateFeed");
-                 * modal.show(); */
             }
 
             function handleDeleteFeed() {
@@ -65,20 +60,15 @@
                 modal.show();
             }
 
-            onMounted(() => {
-                EventBus.$on("showFeed", (feed) => {
-                    store.state.currentFeed = feed;
-                });
-
-                EventBus.$on("createFeed", () => {
-                    handleUpdateFeed(null, "Create");
-                });
-            });
+            function showFeed(feed) {
+                store.state.currentFeed = feed;
+            };
 
             return {
                 feedDetailMenuItems,
                 handleUpdateFeed,
                 handleDeleteFeed,
+                showFeed,
             };
         },
     };

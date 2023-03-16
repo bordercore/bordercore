@@ -40,7 +40,8 @@
                 type: String,
             },
         },
-        setup() {
+        emits: ["create-feed"],
+        setup(props, ctx) {
             const status = computed(() => {
                 if (store.state.currentFeed.lastResponse === "OK") {
                     return {
@@ -56,19 +57,18 @@
             });
 
             function onCreateFeed() {
-                EventBus.$emit("createFeed");
+                ctx.emit("create-feed");
             }
 
-            onMounted(() => {
-                EventBus.$on("showFeed", (feed) => {
-                    store.commit("updateCurrentFeed", feed);
-                });
-            });
+            function showFeed(feed) {
+                store.commit("updateCurrentFeed", feed);
+            };
 
             return {
+                onCreateFeed,
+                showFeed,
                 status,
                 store,
-                onCreateFeed,
             };
         },
     };

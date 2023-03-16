@@ -83,7 +83,8 @@
                 type: String,
             },
         },
-        setup(props) {
+        emits: ["add-feed"],
+        setup(props, ctx) {
             const action = ref("Action");
             const checkingStatus = ref(false);
             const feedInfo = ref({});
@@ -118,13 +119,12 @@
             function onAction() {
                 if (action === "Update") {
                     doPut(
-                        null,
-                        props.updateFeedUrl.replace(/00000000-0000-0000-0000-000000000000/, feedInfo.uuid),
+                        props.updateFeedUrl.replace(/00000000-0000-0000-0000-000000000000/, feedInfo.value.uuid),
                         {
-                            "feed_uuid": feedInfo.uuid,
-                            "homepage": feedInfo.homepage,
-                            "name": feedInfo.name,
-                            "url": feedInfo.url,
+                            "feed_uuid": feedInfo.value.uuid,
+                            "homepage": feedInfo.value.homepage,
+                            "name": feedInfo.value.name,
+                            "url": feedInfo.value.url,
                         },
                         () => {
                             const modal = Modal.getInstance(document.getElementById("modalUpdateFeed"));
@@ -136,12 +136,12 @@
                     doPost(
                         props.createFeedUrl,
                         {
-                            "homepage": feedInfo.homepage,
-                            "name": feedInfo.name,
-                            "url": feedInfo.url,
+                            "homepage": feedInfo.value.homepage,
+                            "name": feedInfo.value.name,
+                            "url": feedInfo.value.url,
                         },
                         (response) => {
-                            EventBus.$emit("addFeed", response.data.feed_info);
+                            ctx.emit("add-feed", response.data.feed_info);
                             const modal = Modal.getInstance(document.getElementById("modalUpdateFeed"));
                             modal.hide();
                         },
@@ -162,7 +162,7 @@
                 if ( !homepage ) {
                     const baseUrl = document.getElementById("id_url").value.match(/^(https?:\/\/.*?)\//);
                     if (baseUrl) {
-                        feedInfo.homepage = baseUrl[1];
+                        feedInfo.value.homepage = baseUrl[1];
                     }
                 }
 
@@ -181,7 +181,7 @@
                             status.value = "Feed <strong>OK</strong>. Found <strong>" + response.data.entry_count + "</strong> feed items.";
                         }
                     },
-                    "Error getting quote",
+                    "Error getting feed info",
                 );
             }
 

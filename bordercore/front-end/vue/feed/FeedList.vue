@@ -38,9 +38,26 @@
                 type: String,
             },
         },
-        setup(props) {
+        emits: ["show-feed"],
+        setup(props, ctx) {
             const store = useStore();
             const localFeedList = ref(props.feedList.slice());
+
+            function deleteFeed(feedUuid) {
+                for (const i = 0; i < localFeedList.value.length; i++) {
+                    if (localFeedList.value[i].uuid == feedUuid) {
+                        localFeedList.value.splice(i, 1);
+                    }
+                }
+
+                // Now that the current feed is deleted, we need to select a
+                //  different current feed. Select the first in the list.
+                store.commit("updateCurrentFeed", localFeedList.value[0]);
+            };
+
+            function addFeed(feedInfo) {
+                localFeedList.value.unshift(feedInfo);
+            };
 
             function handleSort(evt) {
                 const feedId = evt.moved.element.id;
@@ -60,7 +77,7 @@
             }
 
             function onClick(feed) {
-                EventBus.$emit("showFeed", feed);
+                ctx.emit("show-feed", feed);
 
                 doPost(
                     props.storeInSessionUrl,
@@ -68,30 +85,12 @@
                         "current_feed": feed.id,
                     },
                     (response) => {},
-                    "",
-                    "",
                 );
             }
 
-            onMounted(() => {
-                EventBus.$on("deleteFeed", (feedUuid) => {
-                    for (i = 0; i < feedList.length; i++) {
-                        if (feedList[i].uuid == feedUuid) {
-                            feedList.splice(i, 1);
-                        }
-                    }
-
-                    // Now that the current feed is deleted, we need to select a
-                    //  different current feed. Select the first in the list.
-                    store.commit("updateCurrentFeed", feedList[0]);
-                });
-
-                EventBus.$on("addFeed", (feedInfo) => {
-                    feedList.unshift(feedInfo);
-                });
-            });
-
             return {
+                addFeed,
+                deleteFeed,
                 handleSort,
                 localFeedList,
                 onClick,

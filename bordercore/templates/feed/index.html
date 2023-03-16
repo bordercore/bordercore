@@ -9,7 +9,10 @@
         <div class="row g-0 mx-2">
 
             <div class="col-lg-3 d-flex flex-column flex-grow-last">
-                <feed-info></feed-info>
+                <feed-info
+                    ref="feedInfo"
+                    @create-feed="handleFeedCreate"
+                ></feed-info>
             </div>
 
             <div class="col-lg-3 d-flex flex-column">
@@ -19,9 +22,11 @@
                     </div>
                     <hr />
                     <feed-list
+                        ref="feedListRef"
                         :feed-list="feedList"
                         feed-sort-url="{% url 'feed:sort' %}"
                         store-in-session-url="{% url 'accounts:store_in_session' %}"
+                        @show-feed="showFeed"
                     >
                     </feed-list>
                 </div>
@@ -29,6 +34,7 @@
 
             <div class="col-lg-6 d-flex flex-column flex-grow-last">
                 <feed-item-list
+                    ref="feedItemList"
                     @open-modal="openModal"
                 >
                 </feed-item-list>
@@ -65,6 +71,7 @@
                 update-feed-url="{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}"
                 create-feed-url="{% url 'feed-list' %}"
                 feed-check-url="{% url 'feed:check_url' 666 %}"
+                @add-feed="handleFeedAdd"
             >
             </create-update-feed>
 
@@ -94,31 +101,13 @@
             setup() {
                 const feedList = JSON.parse(document.getElementById("feed_list").textContent);
 
+                const feedInfo = ref(null);
+                const feedItemList = ref(null);
+                const feedListRef = ref(null);
                 const updateFeed = ref(null);
 
-                function openModal(action, feedInfo) {
-                    updateFeed.value.updateModal(action, feedInfo);
-                    const modal = new Modal("#modalUpdateFeed");
-                    modal.show();
-                }
-
-                onMounted(() => {
-                    const currentFeed = JSON.parse(document.getElementById("current_feed").textContent);
-                    feedStore.commit("updateCurrentFeed", currentFeed);
-                    nextTick(() => {
-                        EventBus.$emit("showFeed", currentFeed);
-                    });
-                });
-
-                return {
-                    feedList,
-                    openModal,
-                    updateFeed,
-                };
-            },
-            methods: {
-                handleDeleteFeedConfirmation() {
-                    axios.delete("{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", this.$store.state.currentFeed.uuid))
+                function handleDeleteFeedConfirmation() {
+                    axios.delete("{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", feedStore.state.currentFeed.uuid))
                         .then((response) => {
                             EventBus.$emit(
                                 "toast",
@@ -126,13 +115,53 @@
                                     "body": "Feed deleted",
                                 },
                             );
-                            EventBus.$emit("deleteFeed", this.$store.state.currentFeed.uuid);
+                            feedListRef.value.deleteFeed(feedStore.state.currentFeed.uuid);
                             const modal = Modal.getInstance(document.getElementById("modalDeleteFeed"));
                             modal.hide();
                         }, (error) => {
                             console.log(error);
                         });
-                },
+                };
+
+                function handleFeedAdd(feedInfo) {
+                    feedListRef.value.addFeed(feedInfo);
+                };
+
+                function handleFeedCreate() {
+                    feedItemList.value.handleUpdateFeed(null, "Create");
+                };
+
+                function openModal(action, feedInfo) {
+                    updateFeed.value.updateModal(action, feedInfo);
+                    const modal = new Modal("#modalUpdateFeed");
+                    modal.show();
+                }
+
+                function showFeed(feed) {
+                    feedInfo.value.showFeed(feed);
+                    feedItemList.value.showFeed(feed);
+                };
+
+                onMounted(() => {
+                    const currentFeed = JSON.parse(document.getElementById("current_feed").textContent);
+                    feedStore.commit("updateCurrentFeed", currentFeed);
+                    nextTick(() => {
+                        showFeed(currentFeed);
+                    });
+                });
+
+                return {
+                    handleDeleteFeedConfirmation,
+                    handleFeedAdd,
+                    handleFeedCreate,
+                    feedInfo,
+                    feedItemList,
+                    feedList,
+                    feedListRef,
+                    openModal,
+                    showFeed,
+                    updateFeed,
+                };
             },
         });
         app.use(feedStore);
