@@ -208,7 +208,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Manage Tags</h4>
+                            <h4 class="modal-title" id="myModalLabel">Pinned Tags</h4>
                             <button type="button" class="close-button btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
@@ -365,7 +365,11 @@
                 };
 
                 function chooseTag() {
-                    EventBus.$emit("open-manage-tags-modal");
+                    const modal = new Modal("#modalAddTag");
+                    modal.show();
+                    setTimeout(() => {
+                        selectValuePinnedTag.value.focus();
+                    }, 500);
                 };
 
                 function addTag(tag) {
@@ -377,8 +381,6 @@
                         (response) => {
                             getTagList();
                         },
-                        "",
-                        "",
                     );
                 };
 
@@ -389,10 +391,8 @@
                             "tag": tagName,
                         },
                         (response) => {
-                            EventBus.$emit("get-tag-list");
+                            getTagList();
                         },
-                        "",
-                        "",
                     );
                  };
 
@@ -434,8 +434,6 @@
                             "new_position": newPosition,
                         },
                         () => {},
-                        "",
-                        "",
                     );
                 };
 
@@ -447,9 +445,9 @@
                 };
 
                 function selectPinnedTag(selection) {
-                    EventBus.$emit("add-tag", selection.label);
+                    addTag(payload);
 
-                     nextTick(() => {
+                    nextTick(() => {
                          selectValuePinnedTag.value.clearOptions();
                      });
                 };
@@ -460,22 +458,6 @@
                 };
 
                 onMounted(() => {
-                    EventBus.$on("open-manage-tags-modal", (payload) => {
-                        const modal = new Modal("#modalAddTag");
-                        modal.show();
-                            setTimeout(() => {
-                                selectValuePinnedTag.value.focus();
-                            }, 500);
-                    });
-
-                    EventBus.$on("add-tag", (payload) => {
-                        addTag(payload);
-                    });
-
-                    EventBus.$on("get-tag-list", () => {
-                        getTagList();
-                    });
-
                     getTagList();
                 });
 
