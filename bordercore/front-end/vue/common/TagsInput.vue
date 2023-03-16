@@ -57,10 +57,6 @@
                 default: "search-url",
                 type: String,
             },
-            getTagsFromEvent: {
-                default: false,
-                type: Boolean,
-            },
             name: {
                 default: "tags",
                 type: String,
@@ -151,18 +147,11 @@
             });
 
             onMounted(() => {
-                // The initial set of tags can either be passed in via an event
-                //  or read from the DOM, depending on the value of the prop
-                //  "getTagsFromEvent".
-
-                if (props.getTagsFromEvent) {
-                    EventBus.$on("addTags", (payload) => {
-                        tags.value = payload.map( (x) => ({"label": x, "value": x}) );
-                    });
-                } else {
-                    const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-                    if (initialTags) {
-                        tags.value = initialTags.map( (x) => ({"label": x, "value": x}) );
+                const initialTags = document.getElementById("initial-tags");
+                if (initialTags) {
+                    const tagsJson = JSON.parse(initialTags.textContent);
+                    if (Array.isArray(tagsJson)) {
+                        tags.value = tagsJson.map( (x) => ({"label": x, "value": x}) );
                     }
                 }
 
