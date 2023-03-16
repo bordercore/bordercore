@@ -241,11 +241,11 @@
             delimiters: ["[[", "]]"],
             setup() {
                 const paginator = ref({{ paginator_info| safe }});
-                const recentAlbums = JSON.parse(document.getElementById("recent_albums").textContent);
+                let recentAlbums = ref(JSON.parse(document.getElementById("recent_albums").textContent));
                 const songList = ref([]);
 
                 function needsPagination() {
-                    return paginator.has_previous || paginator.has_next;
+                    return paginator.value.has_previous || paginator.value.has_next;
                 }
 
                 function onClickCreate(evt) {
@@ -257,15 +257,15 @@
                 function paginate(direction) {
                     let pageNumber;
                     if (direction === "prev") {
-                        pageNumber = paginator.previous_page_number;
+                        pageNumber = paginator.value.previous_page_number;
                     } else {
-                        pageNumber = paginator.next_page_number;
+                        pageNumber = paginator.value.next_page_number;
                     }
                     doGet(
                         "{% url "music:recent_albums" 666 %}".replace(/666/, pageNumber),
                         (response) => {
-                            recentAlbums = response.data.album_list;
-                            paginator = response.data.paginator;
+                            recentAlbums.value = response.data.album_list;
+                            paginator.value = response.data.paginator;
                         },
                         "Error getting recent albums",
                     );
