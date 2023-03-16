@@ -126,6 +126,10 @@
                 ctx.emit("focus", evt);
             };
 
+            function setTags(tagList) {
+                tags.value = tagList.map( (x) => ({"label": x, "value": x}) );
+            };
+
             function tagsChanged() {
                 // Enforce lowercase for all tag names
                 tags.value.forEach(function(element, index, tagList) {
@@ -153,7 +157,6 @@
 
                 if (props.getTagsFromEvent) {
                     EventBus.$on("addTags", (payload) => {
-                        console.log(payload);
                         tags.value = payload.map( (x) => ({"label": x, "value": x}) );
                     });
                 } else {
@@ -176,6 +179,7 @@
                 onFocus,
                 options,
                 notFound,
+                setTags,
                 tags,
                 tagsChanged,
                 tagsCommaSeparated,
