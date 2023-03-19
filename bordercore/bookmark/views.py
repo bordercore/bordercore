@@ -6,7 +6,6 @@ from urllib.parse import unquote
 import lxml.html as lh
 import pytz
 
-from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -16,8 +15,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
-from django.utils import timezone
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from django.views.generic.edit import ModelFormMixin
@@ -89,16 +87,6 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["tags"] = [x.name for x in self.object.tags.all()]
-        context["related_questions"] = self.object.bcobject_set.all().first()
-        context["related_blobs"] = [
-            {
-                "uuid": b.uuid,
-                "name": b.name,
-                "url": reverse("blob:detail", kwargs={"uuid": b.uuid}),
-                "cover_url": b.get_cover_url_small(),
-                "tags": [x.name for x in b.tags.all()]
-            } for b in self.object.blob_set.all().prefetch_related("tags")
-        ]
         context["related_nodes"] = self.object.related_nodes()
 
         return context
@@ -309,9 +297,8 @@ class BookmarkListView(ListView):
         else:
             query = query.filter(
                 tags__isnull=True,
-                bcobject__isnull=True,
+                blobtoobject__isnull=True,
                 collectionobject__isnull=True,
-                sortorderblobbookmark__isnull=True
             )
 
         query = query.prefetch_related("tags")
@@ -518,172 +505,6 @@ def get_title_from_url(request):
             "title": title[1]
         }
     )
-
-
-def get_query_info(params):
-
-    object_uuid = params["object_uuid"]
-    app_name, model_name = params["model_name"].split(".")
-
-    SortOrderModel = apps.get_model(app_name, f"SortOrder{model_name}Bookmark")
-    ObjectModel = apps.get_model(app_name, model_name)
-    object = ObjectModel.objects.get(uuid=object_uuid)
-    field_name = SortOrderModel.field_name
-
-    return SortOrderModel, {field_name: object}, model_name
-
-
-@login_required
-def get_related_bookmark_list(request, uuid):
-
-    params = {
-        "object_uuid": uuid,
-        "model_name": request.GET["model_name"]
-    }
-
-    sort_order_model, kwargs, model_name = get_query_info(params)
-
-    app_name, model_name = request.GET["model_name"].split(".")
-    ObjectModel = apps.get_model(app_name, model_name)
-    object = ObjectModel.objects.get(uuid=uuid, user=request.user)
-    order_by = f"sortorder{model_name}bookmark__sort_order".lower()
-
-    bookmark_list = list(object.bookmarks.all().only(
-        "name",
-        "id"
-    ).order_by(
-        order_by
-    ))
-
-    response = {
-        "status": "OK",
-        "bookmark_list": [
-            {
-                "name": x.name,
-                "url": x.url,
-                "uuid": x.uuid,
-                "favicon_url": x.get_favicon_url(size=16),
-                "note": getattr(x, f"sortorder{model_name}bookmark_set".lower()).get(**kwargs).note,
-                "edit_url": reverse("bookmark:update", kwargs={"uuid": x.uuid})
-            }
-            for x
-            in bookmark_list]
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def add_related_bookmark(request):
-
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.GET.get("update_modified", False)
-    bookmark = Bookmark.objects.get(uuid=bookmark_uuid, user=request.user)
-
-    sort_order_model, kwargs, model_name = get_query_info(request.POST)
-    so = sort_order_model(
-        **kwargs,
-        bookmark=bookmark
-    )
-    so.save()
-
-    if update_modified:
-        object = getattr(so, model_name.lower())
-        object.modified = timezone.now()
-        object.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_related_bookmark(request):
-
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.GET.get("update_modified", False)
-
-    sort_order_model, kwargs, model_name = get_query_info(request.POST)
-    so = sort_order_model.objects.get(
-        **kwargs,
-        bookmark__uuid=bookmark_uuid
-    )
-
-    so.delete()
-
-    if update_modified:
-        object = getattr(so, model_name.lower())
-        object.modified = timezone.now()
-        object.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def sort_related_bookmarks(request):
-    """
-    Move a given bookmark to a new position in a sorted list
-    """
-
-    # 'app_name' must match field_name in the 'SortOrder__Bookmark' class
-    # Sample 'model_name' parameter: 'node.Node'
-
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.GET.get("update_modified", False)
-    new_position = int(request.POST["new_position"])
-
-    sort_order_model, kwargs, model_name = get_query_info(request.POST)
-    so = sort_order_model.objects.get(
-        **kwargs,
-        bookmark__uuid=bookmark_uuid
-    )
-
-    sort_order_model.reorder(so, new_position)
-
-    if update_modified:
-        object = getattr(so, model_name.lower())
-        object.modified = timezone.now()
-        object.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def edit_related_bookmark_note(request):
-
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.GET.get("update_modified", False)
-    note = request.POST["note"]
-
-    sort_order_model, kwargs, model_name = get_query_info(request.POST)
-    so = sort_order_model.objects.get(
-        **kwargs,
-        bookmark__uuid=bookmark_uuid
-    )
-
-    so.note = note
-    so.save()
-
-    if update_modified:
-        object = getattr(so, model_name.lower())
-        object.modified = timezone.now()
-        object.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
 
 
 @login_required

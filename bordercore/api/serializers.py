@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from feed.models import Feed, FeedItem
 from rest_framework import serializers
 
 from accounts.models import User
@@ -7,7 +8,6 @@ from blob.models import Blob, MetaData
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
-from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
 from node.models import Node
 from quote.models import Quote
@@ -91,7 +91,7 @@ class BlobSha1sumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blob
-        fields = ["created", "content", "date", "blobs", "file", "id", "importance",
+        fields = ["created", "content", "date", "file", "id", "importance",
                   "is_note", "metadata", "modified",
                   "name", "note", "sha1sum", "tags", "user", "uuid"]
 

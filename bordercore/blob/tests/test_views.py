@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
-from blob.models import Blob, BlobBlob
+from blob.models import Blob, BlobToObject
 from blob.tests.factories import BlobFactory
 from blob.views import handle_linked_collection, handle_metadata
 from collection.models import Collection
@@ -98,7 +98,7 @@ def test_blob_create(monkeypatch_blob, auto_login_user, blob_text_factory):
     assert resp.status_code == 200
 
     new_blob = Blob.objects.all().order_by("-created")[0]
-    assert new_blob.blobs.first().uuid == blob_text_factory[0].uuid
+    assert BlobToObject.objects.get(node=blob_text_factory[0], blob=new_blob).blob.uuid == new_blob.uuid
 
     # A new blob with a file
     file_path = Path(__file__).parent / "resources/test_blob.jpg"
@@ -406,16 +406,24 @@ def test_get_elasticsearch_info(auto_login_user):
     assert resp_json["info"]["doctype"] == "document"
 
 
-def test_get_related_blobs(auto_login_user):
+def test_related_objects(auto_login_user):
+
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "blob.BlobToObject"
+        }
+    ]
 
     user, client = auto_login_user()
 
     blob_1 = BlobFactory.create(user=user)
     blob_2 = BlobFactory.create(user=user)
 
-    blob_1.blobs.add(blob_2)
+    BlobToObject.objects.create(node=blob_1, blob=blob_2)
 
-    url = urls.reverse("blob:related_blobs", kwargs={"uuid": str(blob_1.uuid)})
+    url = urls.reverse("blob:related_objects", kwargs={"uuid": str(blob_1.uuid)})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -424,18 +432,6 @@ def test_get_related_blobs(auto_login_user):
     assert payload["status"] == "OK"
     assert len(payload["blob_list"]) == 1
     assert payload["blob_list"][0]["uuid"] == str(blob_2.uuid)
-
-
-def test_related_objects(auto_login_user, question):
-
-    user, _ = auto_login_user()
-
-    blob = BlobFactory.create(user=user)
-    question[0].add_related_object(blob.uuid)
-    related_objects = Blob.related_objects(question[0])
-
-    assert len(related_objects) == 3
-    assert blob.uuid in [x["uuid"] for x in related_objects]
 
 
 def test_blob_link(auto_login_user):
@@ -447,15 +443,15 @@ def test_blob_link(auto_login_user):
 
     url = urls.reverse("blob:link")
     resp = client.post(url, {
-        "blob_1_uuid": blob_1.uuid,
-        "blob_2_uuid": blob_2.uuid,
+        "node_uuid": blob_1.uuid,
+        "object_uuid": blob_2.uuid,
     })
 
     assert resp.status_code == 200
 
-    linked_blob = Blob.objects.get(uuid=blob_1.uuid)
-    assert linked_blob.blobs.count() == 1
-    assert linked_blob.blobs.first() == blob_2
+    related_blobs = BlobToObject.objects.filter(node=blob_1)
+    assert related_blobs.count() == 1
+    assert related_blobs.first().blob == blob_2
 
 
 def test_blob_unlink(auto_login_user):
@@ -465,18 +461,18 @@ def test_blob_unlink(auto_login_user):
     blob_1 = BlobFactory.create(user=user)
     blob_2 = BlobFactory.create(user=user)
 
-    blob_1.blobs.add(blob_2)
+    BlobToObject.objects.create(node=blob_1, blob=blob_2)
 
     url = urls.reverse("blob:unlink")
     resp = client.post(url, {
-        "blob_1_uuid": blob_1.uuid,
-        "blob_2_uuid": blob_2.uuid,
+        "node_uuid": blob_1.uuid,
+        "object_uuid": blob_2.uuid,
     })
 
     assert resp.status_code == 200
 
-    linked_blob = Blob.objects.get(uuid=blob_1.uuid)
-    assert linked_blob.blobs.count() == 0
+    related_blobs = BlobToObject.objects.filter(node=blob_1)
+    assert related_blobs.count() == 0
 
 
 def test_blob_update_page_number(auto_login_user):
@@ -503,25 +499,25 @@ def test_blob_update_page_number(auto_login_user):
     assert blob_updated.data == {"pdf_page_number": page_number}
 
 
-def test_blob_update_related_blob_note(auto_login_user):
+def test_blob_update_related_object_note(auto_login_user):
 
     user, client = auto_login_user()
 
     blob_1 = BlobFactory.create(user=user)
     blob_2 = BlobFactory.create(user=user)
 
-    blob_1.blobs.add(blob_2)
+    BlobToObject.objects.create(node=blob_1, blob=blob_2)
 
     note = faker.text()
 
-    url = urls.reverse("blob:update_related_blob_note")
+    url = urls.reverse("blob:update_related_object_note")
     resp = client.post(url, {
-        "blob_1_uuid": blob_1.uuid,
-        "blob_2_uuid": blob_2.uuid,
+        "node_uuid": blob_1.uuid,
+        "object_uuid": blob_2.uuid,
         "note": note
     })
 
     assert resp.status_code == 200
 
-    linked_blob = BlobBlob.objects.get(blob_1=blob_1, blob_2=blob_2)
-    assert linked_blob.note == note
+    related_object = BlobToObject.objects.get(node=blob_1, blob=blob_2)
+    assert related_object.note == note

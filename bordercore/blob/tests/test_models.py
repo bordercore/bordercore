@@ -13,7 +13,7 @@ from collection.models import Collection
 
 django.setup()
 
-from blob.models import Blob  # isort:skip
+from blob.models import Blob, BlobToObject  # isort:skip
 from blob.tests.factories import BlobFactory
 
 faker = FakerFactory.create()
@@ -80,22 +80,22 @@ def test_has_been_modified(auto_login_user, blob_image_factory):
     assert blob.has_been_modified() is True
 
 
-def test_get_related_blobs(auto_login_user):
+def test_related_blobs(auto_login_user):
 
     user, _ = auto_login_user()
 
     blob_1 = BlobFactory.create(user=user)
     blob_2 = BlobFactory.create(user=user)
 
-    blob_1.blobs.add(blob_2)
+    BlobToObject.objects.create(node=blob_1, blob=blob_2)
 
-    related_blobs = blob_1.get_related_blobs()
+    related_blobs = Blob.related_objects(blob_1)
     assert len(related_blobs) == 1
     assert related_blobs[0]["uuid"] == blob_2.uuid
 
-    related_blobs = blob_2.get_related_blobs()
+    related_blobs = BlobToObject.objects.filter(blob=blob_2)
     assert len(related_blobs) == 1
-    assert related_blobs[0]["uuid"] == blob_1.uuid
+    assert related_blobs[0].node.uuid == blob_1.uuid
 
 
 def test_get_content_type():

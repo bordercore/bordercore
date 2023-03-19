@@ -20,13 +20,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models, transaction
-from django.db.models import F, JSONField, Q
+from django.db.models import F, JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
 
-from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
@@ -90,6 +89,7 @@ class Blob(TimeStampedModel):
     data = JSONField(null=True, blank=True)
     blobs = models.ManyToManyField("blob.Blob", through="BlobBlob")
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderBlobBookmark")
+    bc_objects = models.ManyToManyField("blob.BCObject", through="blob.BlobToObject", through_fields=("node", "bc_object"))
 
     class Meta:
         unique_together = (
@@ -345,36 +345,12 @@ class Blob(TimeStampedModel):
         """
         return self.modified - self.created > timedelta(seconds=1)
 
-    def get_related_blobs(self):
-
-        related_blobs = []
-
-        for related in BlobBlob.objects.filter(
-                Q(blob_1=self) | Q(blob_2=self)
-        ).order_by(
-            "-created"
-        ).select_related(
-            "blob_1", "blob_2"
-        ):
-            other_blob = related.blob_2 if related.blob_1 == self else related.blob_1
-            related_blobs.append(
-                {
-                    "uuid": other_blob.uuid,
-                    "name": other_blob.name,
-                    "note": related.note,
-                    "url": reverse("blob:detail", kwargs={"uuid": str(other_blob.uuid)}),
-                    "cover_url": other_blob.get_cover_url_small()
-                }
-            )
-
-        return related_blobs
-
     @staticmethod
     def related_objects(base_object):
 
         related_objects = []
 
-        for related_object in base_object.bc_objects.all().order_by("-created").select_related("bookmark").select_related("blob"):
+        for related_object in BlobToObject.objects.filter(node=base_object).select_related("bookmark").select_related("blob"):
             if related_object.blob:
                 related_objects.append(
                     {
@@ -400,6 +376,7 @@ class Blob(TimeStampedModel):
                         "uuid": related_object.bookmark.uuid,
                         "name": related_object.bookmark.name,
                         "url": related_object.bookmark.url,
+                        "cover_url": related_object.bookmark.thumbnail_url,
                         "favicon_url": related_object.bookmark.get_favicon_url(size=16),
                         "note": related_object.note,
                         "edit_url": reverse("bookmark:update", kwargs={"uuid": related_object.bookmark.uuid})
@@ -795,43 +772,6 @@ class MetaData(TimeStampedModel):
         unique_together = ("name", "value", "blob")
 
 
-class SortOrderBlobBookmark(SortOrderMixin):
-
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
-    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
-
-    field_name = "blob"
-
-    def __str__(self):
-        return f"SortOrder: {self.blob}, {self.bookmark}"
-
-    class Meta:
-        ordering = ("sort_order",)
-        unique_together = (
-            ("blob", "bookmark")
-        )
-
-
-class BlobBlob(TimeStampedModel):
-
-    blob_1 = models.ForeignKey(Blob, related_name="blob_1", on_delete=models.CASCADE)
-    blob_2 = models.ForeignKey(Blob, related_name="blob_2", on_delete=models.CASCADE)
-    note = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Blob to Blob Relationship: {self.blob_1}, {self.blob_2}"
-
-    class Meta:
-        unique_together = (
-            ("blob_1", "blob_2")
-        )
-
-
-@receiver(pre_delete, sender=SortOrderBlobBookmark)
-def remove_bookmark(sender, instance, **kwargs):
-    instance.handle_delete()
-
-
 class RecentlyViewedBlob(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
@@ -906,7 +846,7 @@ def remove_recently_viewed_blob(sender, instance, **kwargs):
         )
 
 
-class BCObject(TimeStampedModel):
+class BCQuestionObject(TimeStampedModel):
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
@@ -922,3 +862,40 @@ class BCObject(TimeStampedModel):
             return f"Question: {self.question}"
         else:
             return "Empty object"
+
+
+class BlobToObject(SortOrderMixin):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    node = models.ForeignKey("blob.Blob", null=False, on_delete=models.CASCADE, related_name="nodes")
+    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.CASCADE)
+    question = models.ForeignKey("drill.Question", null=True, on_delete=models.CASCADE)
+    bc_object = models.ForeignKey("blob.BCObject", on_delete=models.CASCADE, null=True)
+    note = models.TextField(blank=True, null=True)
+
+    field_name = "node"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("node", "blob", "bookmark", "question")
+        )
+
+    def __str__(self):
+        if self.blob:
+            return f"{self.node} -> {self.blob}"
+        elif self.bookmark:
+            return f"{self.node} -> {self.bookmark}"
+        else:
+            return f"{self.node} -> {self.question}"
+
+
+class BCObject(TimeStampedModel):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
+
+@receiver(pre_delete, sender=BlobToObject)
+def remove_relationship(sender, instance, **kwargs):
+    instance.handle_delete()

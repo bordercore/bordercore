@@ -11,7 +11,7 @@ from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import timezone
 
-from blob.models import BCObject, Blob
+from blob.models import BCQuestionObject, Blob
 from bookmark.models import Bookmark
 from lib.mixins import TimeStampedModel
 from lib.util import get_elasticsearch_connection
@@ -38,7 +38,7 @@ class Question(TimeStampedModel):
     interval_index = models.IntegerField(default=0, null=False)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bc_objects = models.ManyToManyField("blob.BCObject", blank=True, related_name="bc_objects")
+    bc_objects = models.ManyToManyField("blob.BCQuestionObject", blank=True, related_name="bc_objects")
 
     objects = DrillManager()
 
@@ -183,16 +183,16 @@ class Question(TimeStampedModel):
         bookmark = Bookmark.objects.filter(uuid=object_uuid)
         if bookmark.exists():
             args = {"bookmark": bookmark.first()}
-        bc_object, _ = BCObject.objects.get_or_create(**args)
+        bc_object, _ = BCQuestionObject.objects.get_or_create(**args)
 
         self.bc_objects.add(bc_object)
 
     def remove_related_object(self, bc_object_uuid):
 
-        bc_object = BCObject.objects.get(uuid=bc_object_uuid)
+        bc_object = BCQuestionObject.objects.get(uuid=bc_object_uuid)
         self.bc_objects.remove(bc_object)
 
-        # If there are no more objects related to this BCObject, delete it
+        # If there are no more objects related to this BCQuestionObject, delete it
         if bc_object.bc_objects.count() == 0:
             bc_object.delete()
 

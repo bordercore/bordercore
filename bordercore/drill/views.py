@@ -13,7 +13,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from accounts.models import DrillTag
-from blob.models import BCObject, Blob
+from blob.models import BCQuestionObject, Blob
 from bookmark.models import Bookmark
 from drill.forms import QuestionForm
 from lib.mixins import FormRequestMixin
@@ -456,7 +456,7 @@ def edit_related_object_note(request):
     bc_object_uuid = request.POST["bc_object_uuid"]
     note = request.POST["note"]
 
-    bc_object = BCObject.objects.get(uuid=bc_object_uuid)
+    bc_object = BCQuestionObject.objects.get(uuid=bc_object_uuid)
     bc_object.note = note
     bc_object.save()
 

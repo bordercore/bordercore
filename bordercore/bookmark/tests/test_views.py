@@ -6,8 +6,6 @@ from faker import Factory as FakerFactory
 
 from django import urls
 
-from blob.models import SortOrderBlobBookmark
-from blob.tests.factories import BlobFactory
 from bookmark.models import Bookmark
 from bookmark.tests.factories import BookmarkFactory
 from tag.tests.factories import TagFactory
@@ -200,103 +198,6 @@ def test_bookmark_get_title_from_url(auto_login_user, bookmark):
     url = urls.reverse("bookmark:get_title_from_url")
     resp = client.get(f"{url}?url=http%3A%2F%2Fwww.bordercore.com")
 
-    assert resp.status_code == 200
-
-
-def test_get_related_bookmark_list(auto_login_user, bookmark):
-
-    user, client = auto_login_user()
-
-    blob = BlobFactory(user=user, tags=[])
-    SortOrderBlobBookmark.objects.create(blob=blob, bookmark=bookmark[0])
-
-    url = urls.reverse("bookmark:get_related_bookmark_list", kwargs={"uuid": blob.uuid})
-    resp = client.get(f"{url}?model_name=blob.Blob")
-
-    assert resp.status_code == 200
-
-
-def test_add_related_bookmark(auto_login_user, bookmark):
-
-    user, client = auto_login_user()
-
-    blob = BlobFactory(user=user, tags=[])
-
-    url = urls.reverse("bookmark:add_related_bookmark")
-    resp = client.post(url, {
-        "bookmark_uuid": bookmark[0].uuid,
-        "object_uuid": blob.uuid,
-        "model_name": "blob.Blob"
-    })
-
-    assert len(blob.sortorderblobbookmark_set.all()) == 1
-    assert blob.sortorderblobbookmark_set.first().bookmark == bookmark[0]
-    assert resp.status_code == 200
-
-
-def test_remove_related_bookmark(auto_login_user, bookmark):
-
-    user, client = auto_login_user()
-
-    blob = BlobFactory(user=user, tags=[])
-    so = SortOrderBlobBookmark(blob=blob, bookmark=bookmark[0])
-    so.save()
-
-    url = urls.reverse("bookmark:remove_related_bookmark")
-    resp = client.post(url, {
-        "bookmark_uuid": bookmark[0].uuid,
-        "object_uuid": blob.uuid,
-        "model_name": "blob.Blob"
-    })
-
-    assert len(blob.sortorderblobbookmark_set.all()) == 0
-    assert resp.status_code == 200
-
-
-def test_sort_related_bookmark(auto_login_user, bookmark):
-
-    user, client = auto_login_user()
-
-    blob = BlobFactory(user=user, tags=[])
-    so = SortOrderBlobBookmark(blob=blob, bookmark=bookmark[0])
-    so.save()
-    so = SortOrderBlobBookmark(blob=blob, bookmark=bookmark[1])
-    so.save()
-
-    url = urls.reverse("bookmark:sort_related_bookmarks")
-    resp = client.post(url, {
-        "bookmark_uuid": bookmark[1].uuid,
-        "object_uuid": blob.uuid,
-        "model_name": "blob.Blob",
-        "new_position": "2"
-    })
-
-    assert len(blob.sortorderblobbookmark_set.all()) == 2
-    related_bookmarks = blob.sortorderblobbookmark_set.all()
-    assert related_bookmarks[0].bookmark == bookmark[0]
-    assert related_bookmarks[1].bookmark == bookmark[1]
-    assert resp.status_code == 200
-
-
-def test_edit_related_bookmark_note(auto_login_user, bookmark):
-
-    user, client = auto_login_user()
-
-    blob = BlobFactory(user=user, tags=[])
-    so = SortOrderBlobBookmark(blob=blob, bookmark=bookmark[0])
-    so.save()
-
-    note = faker.text()
-
-    url = urls.reverse("bookmark:edit_related_bookmark_note")
-    resp = client.post(url, {
-        "bookmark_uuid": bookmark[0].uuid,
-        "object_uuid": blob.uuid,
-        "model_name": "blob.Blob",
-        "note": note
-    })
-
-    assert blob.sortorderblobbookmark_set.first().note == note
     assert resp.status_code == 200
 
 

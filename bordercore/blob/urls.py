@@ -56,9 +56,9 @@ urlpatterns = [
         name="import"
     ),
     path(
-        route="related_blobs/<uuid:uuid>",
-        view=views.get_related_blobs,
-        name="related_blobs"
+        route="related_objects/<uuid:uuid>",
+        view=views.get_related_objects,
+        name="related_objects"
     ),
     path(
         route="link",
@@ -76,8 +76,13 @@ urlpatterns = [
         name="update_page_number"
     ),
     path(
-        route="related_blob/note/update",
-        view=views.update_related_blob_note,
-        name="update_related_blob_note"
+        route="related_objects/sort",
+        view=views.sort_related_objects,
+        name="sort_related_objects"
+    ),
+    path(
+        route="related_objects/note/update",
+        view=views.update_related_object_note,
+        name="update_related_object_note"
     ),
 ]

@@ -7,7 +7,7 @@ import responses
 
 from django import urls
 
-from blob.models import BCObject
+from blob.models import BCQuestionObject
 from drill.models import Question
 from drill.views import handle_related_objects
 
@@ -77,7 +77,7 @@ def test_drill_handle_related_objects(monkeypatch_drill, auto_login_user, questi
 
     handle_related_objects(question[1], mock_request)
 
-    assert BCObject.objects.filter(bookmark=bookmark[0]).exists()
+    assert BCQuestionObject.objects.filter(bookmark=bookmark[0]).exists()
     assert Question.objects.get(uuid=question[1].uuid).bc_objects.all().count() == 1
 
 
@@ -372,7 +372,7 @@ def test_drill_add_object(auto_login_user, question, blob_note):
     })
 
     assert resp.status_code == 200
-    assert BCObject.objects.filter(blob=blob_note[0]).exists()
+    assert BCQuestionObject.objects.filter(blob=blob_note[0]).exists()
     assert Question.objects.get(uuid=question[0].uuid).bc_objects.all().count() == 3
 
 
@@ -390,7 +390,7 @@ def test_drill_remove_object(auto_login_user, question, blob_note):
     })
 
     assert resp.status_code == 200
-    assert not BCObject.objects.filter(blob=blob_note[0]).exists()
+    assert not BCQuestionObject.objects.filter(blob=blob_note[0]).exists()
     assert Question.objects.get(uuid=question[0].uuid).bc_objects.all().count() == 2
 
 

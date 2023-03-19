@@ -86,31 +86,6 @@ urlpatterns = [
         name="delete"
     ),
     path(
-        route="bookmark/add_related_bookmark",
-        view=views.add_related_bookmark,
-        name="add_related_bookmark"
-    ),
-    path(
-        route="bookmark/remove_related_bookmark",
-        view=views.remove_related_bookmark,
-        name="remove_related_bookmark"
-    ),
-    path(
-        route="bookmark/related/sort",
-        view=views.sort_related_bookmarks,
-        name="sort_related_bookmarks"
-    ),
-    path(
-        route="bookmark/edit_related_bookmark_note",
-        view=views.edit_related_bookmark_note,
-        name="edit_related_bookmark_note"
-    ),
-    path(
-        route="<uuid:uuid>/bookmark_list/",
-        view=views.get_related_bookmark_list,
-        name="get_related_bookmark_list"
-    ),
-    path(
         route="bookmark/add_tag",
         view=views.add_tag,
         name="add_tag"

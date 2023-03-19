@@ -64,7 +64,7 @@
 
             </div>
 
-            <related-objects
+            <related-question-objects
                 ref="relatedObjectsList"
                 object-uuid="{{ object.uuid }}"
                 related-objects-url="{% url 'drill:related_objects' object.uuid %}"
@@ -72,7 +72,7 @@
                 remove-object-url="{% url 'drill:remove_object' %}" edit-object-note-url="{% url 'drill:edit_related_object_note' %}"
                 @open-object-select-modal="openObjectSelectModal"
             >
-            </related-objects>
+            </related-question-objects>
 
             <object-select
                 :has-filter="false"
@@ -269,7 +269,7 @@
                 FontAwesomeIcon,
                 ObjectSelect,
                 PythonConsole,
-                RelatedObjects,
+                RelatedQuestionObjects,
                 RelatedTags,
             },
             setup() {

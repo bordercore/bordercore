@@ -16,8 +16,9 @@ from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
-from blob.models import Blob, BlobBlob, MetaData, RecentlyViewedBlob
+from blob.models import Blob, BlobToObject, MetaData, RecentlyViewedBlob
 from blob.services import import_blob
+from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
 from lib.mixins import FormRequestMixin
 from lib.time_utils import parse_date_from_string
@@ -53,7 +54,7 @@ class FormValidMixin(ModelFormMixin):
         if new_object:
             if "linked_blob_uuid" in self.request.POST:
                 linked_blob = Blob.objects.get(uuid=self.request.POST["linked_blob_uuid"])
-                blob.blobs.add(linked_blob)
+                BlobToObject.objects.create(node=linked_blob, blob=blob)
 
             handle_linked_collection(blob, self.request)
 
@@ -186,11 +187,8 @@ class BlobDetailView(DetailView):
             context["is_pinned_note"] = self.object.is_pinned_note()
 
         try:
-
             context["elasticsearch_info"] = json.dumps(self.object.get_elasticsearch_info())
-
         except IndexError:
-
             # Give Elasticsearch up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
@@ -202,12 +200,6 @@ class BlobDetailView(DetailView):
         context["show_metadata"] = "content_type" in context \
             or self.object.sha1sum \
             or context["metadata_misc"] != "{}"
-
-        related_objects = self.object.bcobject_set
-        if related_objects.first():
-            context["related_questions"] = related_objects.first().bc_objects.all()
-        else:
-            context["related_questions"] = []
 
         context["tree"] = json.dumps(
             {
@@ -398,33 +390,42 @@ def get_elasticsearch_info(request, uuid):
     return JsonResponse(response, safe=False)
 
 
-def get_related_blobs(request, uuid):
+@login_required
+def get_related_objects(request, uuid):
     """
-    Get all related blobs for a given blob.
+    Get all related objects to a given blob.
     """
 
-    blob = Blob.objects.get(uuid=uuid, user=request.user)
+    blob = Blob.objects.get(user=request.user, uuid=uuid)
 
     response = {
         "status": "OK",
-        "blob_list": blob.get_related_blobs(),
+        "blob_list": Blob.related_objects(blob),
     }
 
     return JsonResponse(response)
 
 
+@login_required
 def link(request):
     """
     Add a relationshiop between two blobs.
     """
 
-    blob_1_uuid = request.POST["blob_1_uuid"]
-    blob_2_uuid = request.POST["blob_2_uuid"]
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
 
-    blob_1 = Blob.objects.get(uuid=blob_1_uuid, user=request.user)
-    blob_2 = Blob.objects.get(uuid=blob_2_uuid, user=request.user)
+    node = Blob.objects.get(uuid=node_uuid)
 
-    blob_1.blobs.add(blob_2)
+    blob = Blob.objects.filter(uuid=object_uuid)
+    if blob.exists():
+        args = {"blob": blob.first()}
+    else:
+        bookmark = Bookmark.objects.filter(uuid=object_uuid)
+        if bookmark.exists():
+            args = {"bookmark": bookmark.first()}
+
+    BlobToObject.objects.create(node=node, **args)
 
     response = {
         "status": "OK",
@@ -433,21 +434,21 @@ def link(request):
     return JsonResponse(response)
 
 
+@login_required
 def unlink(request):
     """
-    Remove a relationship between two blobs.
+    Remove a relationship between a blob and an object.
     """
 
-    blob_1_uuid = request.POST["blob_1_uuid"]
-    blob_2_uuid = request.POST["blob_2_uuid"]
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
 
-    blob_1 = Blob.objects.get(uuid=blob_1_uuid, user=request.user)
-    blob_2 = Blob.objects.get(uuid=blob_2_uuid, user=request.user)
-
-    # We don't know a priori which is blob_1 and which is blob_2,
-    #  so try removing from both directions.
-    blob_1.blobs.remove(blob_2)
-    blob_2.blobs.remove(blob_1)
+    BlobToObject.objects.get(
+        Q(node__uuid=node_uuid)
+        & (
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
+        )
+    ).delete()
 
     response = {
         "status": "OK",
@@ -456,6 +457,55 @@ def unlink(request):
     return JsonResponse(response)
 
 
+@login_required
+def sort_related_objects(request):
+    """
+    Change the sort order of a blob and a related object
+    """
+
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
+    new_position = int(request.POST["new_position"])
+
+    blob_to_object = BlobToObject.objects.get(
+        Q(node__uuid=node_uuid)
+        & (
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
+        )
+    )
+    BlobToObject.reorder(blob_to_object, new_position)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def update_related_object_note(request):
+
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
+    note = request.POST["note"]
+
+    blob_to_object = BlobToObject.objects.get(
+        Q(node__uuid=node_uuid)
+        & (
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
+        )
+    )
+    blob_to_object.note = note
+    blob_to_object.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
 def update_page_number(request):
     """
     Update the page number for a pdf that represents its cover image
@@ -470,31 +520,6 @@ def update_page_number(request):
     response = {
         "message": "Cover image will be updated soon",
         "status": "OK"
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def update_related_blob_note(request):
-
-    blob_1_uuid = request.POST["blob_1_uuid"]
-    blob_2_uuid = request.POST["blob_2_uuid"]
-    note = request.POST["note"]
-
-    bb = BlobBlob.objects.get(
-        Q(
-            Q(blob_1__uuid=blob_1_uuid) & Q(blob_2__uuid=blob_2_uuid)
-        )
-        | Q(
-            Q(blob_1__uuid=blob_2_uuid) & Q(blob_2__uuid=blob_1_uuid)
-        )
-    )
-    bb.note = note
-    bb.save()
-
-    response = {
-        "status": "OK",
     }
 
     return JsonResponse(response)

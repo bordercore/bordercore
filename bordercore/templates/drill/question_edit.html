@@ -19,7 +19,7 @@
 
         <div class="flex-grow-last col-lg-3 d-flex flex-column">
 
-            <related-objects
+            <related-question-objects
                 ref="relatedObjectsList"
                 object-uuid="{{ object.uuid }}"
                 related-objects-url="{% url 'drill:related_objects' '00000000-0000-0000-0000-000000000000' %}"
@@ -29,7 +29,7 @@
                 :new-question="true"
                 @open-object-select-modal="openObjectSelectModal"
             >
-            </related-objects>
+            </related-question-objects>
 
             <object-select
                 :has-filter="false"
@@ -144,7 +144,7 @@
             components: {
                 Card,
                 ObjectSelect,
-                RelatedObjects,
+                RelatedQuestionObjects,
                 TagsInput,
             },
             setup() {

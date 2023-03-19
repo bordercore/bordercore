@@ -16,13 +16,12 @@
                  included by the parent's "flex-grow-last" selector.
             -->
             <object-select
-                label="_objectSelectBookmark"
-                ref="objectSelectBookmark"
+                label="_objectSelect"
+                ref="objectSelect"
                 :has-filter="false"
-                :initial-doctypes="['bookmark']"
                 search-object-url="{% url 'search:search_names' %}"
-                title="Select Bookmark"
-                @select-object="addBookmark"
+                title="Select Object"
+                @select-object="handleObjectAdd"
             >
             </object-select>
 
@@ -204,61 +203,16 @@
                     </template>
                 </card>
 
-                <related-bookmarks-list
-                    ref="relatedBookmarksList"
+                <related-objects
+                    ref="relatedObjectsList"
                     object-uuid="{{ object.uuid }}"
-                    model-name="blob.Blob"
-                    get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
-                    add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
-                    remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
-                    sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                    edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
-                    :show-add-button="false"
-                    :show-empty-list="false"
-                    @open-object-select-modal="openObjectSelectModal"
-            >
-            </related-bookmarks-list>
-
-            <card v-if="relatedBlobList.length > 0" title="Related Blobs" class="backdrop-filter">
-                    <template #content>
-                        <ul class="list-group list-group-flush interior-borders">
-                            <li v-for="blob in relatedBlobList" class="hover-target hoverable list-group-item d-flex align-items-start mb-2 p-2">
-                                <div>
-                                    <img :src="blob.cover_url" />
-                                    <div class="d-flex justify-content-center w-100">
-                                        <a :href="blob.url">[[ blob.name ]]</a>
-                                    </div>
-                                    <Transition name="fade" mode="out-in" @after-enter="onAfterEnter">
-                                        <div v-if="!blob.noteIsEditable" class="node-object-note" @click="blob.noteIsEditable = true" v-html="getRelatedBlobNote(blob.note)">
-                                        </div>
-                                        <span v-else>
-                                            <input ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="" @blur="onUpdateNote(blob, $event.target.value)" @keydown.enter="onUpdateNote(blob, $event.target.value)">
-                                        </span>
-                                    </Transition>
-                                </div>
-
-                                <drop-down-menu :show-on-hover="true">
-                                    <template #dropdown>
-                                        <ul class="list-group list-group-flush interior-borders">
-                                            <li class="list-group-item p-0">
-                                                <a class="dropdown-item" href="#" @click.prevent="onRemoveLink(blob.uuid)">
-                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Remove Blob
-                                                </a>
-                                            </li>
-                                            <li class="list-group-item p-0">
-                                                <a class="dropdown-item" href="#" @click.prevent="blob.noteIsEditable = true">
-                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon><span
-                                                v-if="blob.note">Edit</span>
-                                                    <span v-else>Add</span> Note
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </template>
-                                </drop-down-menu>
-                            </li>
-                        </ul>
-                    </template>
-                </card>
+                    related-objects-url="{% url 'blob:related_objects' '00000000-0000-0000-0000-000000000000' %}"
+                    add-object-url="{% url 'blob:link' %}"
+                    remove-object-url="{% url 'blob:unlink' %}"
+                    sort-related-objects-url="{% url 'blob:sort_related_objects' %}"
+                    update-related-object-note-url="{% url 'blob:update_related_object_note' %}"
+                    @open-object-select-modal="openObjectSelectModal">
+                </related-objects>
 
                 <div v-if="relatedQuestions.length > 0" class="card-body" v-cloak>
 
@@ -293,17 +247,6 @@
 
         <div class="col-lg-9 h-100 overflow-auto">
 
-            <object-select
-                label="_blobSelect"
-                ref="blobSelect"
-                :has-filter="false"
-                :initial-doctypes="['blob', 'book', 'document', 'note']"
-                search-object-url="{% url 'search:search_names' %}"
-                title="Select Blob"
-                @select-object="selectBlob"
-            >
-            </object-select>
-
             <div class="col-lg-12">
 
                 <div class="d-flex">
@@ -330,20 +273,6 @@
                                 <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">
                                     <span>
                                         <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to New Blob
-                                    </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#" @click.prevent="handleLinkToExistingBlob()">
-                                    <span>
-                                        <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to Existing Blob
-                                    </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#" @click.prevent="handleLinkToBookmark()">
-                                    <span>
-                                        <font-awesome-icon icon="link" class="text-primary me-3"></font-awesome-icon>Link to Bookmark
                                     </span>
                                 </a>
                             </li>
@@ -380,7 +309,7 @@
                                 </li>
                             {% endif %}
                             <li>
-                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete">
+                                <a class="dropdown-item" href="#" @click.prevent="handleDelete">
                                     <span>
                                         <font-awesome-icon icon="times" class="text-primary me-3"></font-awesome-icon>Delete
                                     </span>
@@ -478,7 +407,7 @@
                 DropDownMenu,
                 FontAwesomeIcon,
                 ObjectSelect,
-                RelatedBookmarksList,
+                RelatedObjects,
                 TreeMenu,
             },
             setup() {
@@ -515,9 +444,8 @@
                 ]);
 
                 const addToCollection = ref(null);
-                const blobSelect = ref(null);
-                const objectSelectBookmark = ref(null);
-                const relatedBookmarksList = ref(null);
+                const objectSelect = ref(null);
+                const relatedObjectsList = ref(null);
 
                 function getNote() {
                     return markdown.render("{{ blob.note|escapejs }}");
@@ -554,16 +482,6 @@
                     );
                 };
 
-                function getRelatedBlobList() {
-                    doGet(
-                        "{% url "blob:related_blobs" object.uuid %}",
-                        (response) => {
-                            relatedBlobList.value = response.data.blob_list;
-                        },
-                        "Error getting related blob list",
-                    );
-                };
-
                 function onAfterEnter(evt) {
                     const input = evt.querySelector("input");
                     if (input) {
@@ -571,45 +489,8 @@
                     }
                 };
 
-                function onUpdateNote(object, note) {
-                    // If the note hasn't changed, abort
-                    if (object.note === note) {
-                        object.noteIsEditable = false;
-                        return;
-                    }
-
-                    doPost(
-                        "{% url 'blob:update_related_blob_note' %}",
-                        {
-                            "blob_1_uuid": "{{ blob.uuid }}",
-                            "blob_2_uuid": object.uuid,
-                            "note": note,
-                        },
-                        (response) => {
-                            getRelatedBlobList();
-                        },
-                        "",
-                        "",
-                    );
-                };
-
-                function onRemoveLink(uuid) {
-                    doPost(
-                        "{% url "blob:unlink" %}",
-                        {
-                            "blob_1_uuid": "{{ object.uuid }}",
-                            "blob_2_uuid": uuid,
-                        },
-                        (response) => {
-                            getRelatedBlobList();
-                        },
-                        "Blob unlinked",
-                        "",
-                    );
-                };
-
-                function addBookmark(bookmarkInfo) {
-                    relatedBookmarksList.value.addBookmark(bookmarkInfo);
+                function handleObjectAdd(objectInfo) {
+                    relatedObjectsList.value.addObject(objectInfo);
                 };
 
                 function handleCopySha1sum(sha1sum) {
@@ -628,29 +509,6 @@
                     setTimeout(() => {
                         addToCollection.value.$refs.selectValue.focus();
                     }, 500);
-                };
-
-                function handleLinkToExistingBlob() {
-                    blobSelect.value.openModal(["blob", "book", "document", "note"]);
-                };
-
-                function handleLinkToBookmark() {
-                    relatedBookmarksList.value.openObjectSelectModal();
-                };
-
-                function selectBlob(blob) {
-                    doPost(
-                        "{% url "blob:link" %}",
-                        {
-                            "blob_1_uuid": "{{ object.uuid }}",
-                            "blob_2_uuid": blob.uuid,
-                        },
-                        (response) => {
-                            getRelatedBlobList();
-                        },
-                        "The two blobs are now linked",
-                        "",
-                    );
                 };
 
                 function getCollectionList() {
@@ -676,16 +534,14 @@
                         (response) => {
                             isPinnedNote.value = !isPinnedNote.value;
                         },
-                        "",
-                        "",
                     );
                 };
 
                 function openObjectSelectModal() {
-                    objectSelectBookmark.value.openModal();
+                    objectSelect.value.openModal();
                 };
 
-                function onClickDelete() {
+                function handleDelete() {
                     axios.delete("{% url 'blob-detail' blob.uuid %}")
                          .then((response) => {
                              window.location = "{% url 'blob:list' %}";
@@ -717,7 +573,6 @@
                         getBlobInfo();
                     }, getBlobInfoAttemptIntervals.value[getBlobInfoAttempts.value]);
                     {% endif %}
-                    getRelatedBlobList();
 
                     hotkeys("alt+c", function(event, handler) {
                         switch (handler.key) {
@@ -729,9 +584,7 @@
                 });
 
                 return {
-                    addBookmark,
                     addToCollection,
-                    blobSelect,
                     collectionList,
                     elasticsearchInfo,
                     getBlobInfo,
@@ -740,27 +593,22 @@
                     getCollectionList,
                     getContent,
                     getNote,
-                    getRelatedBlobList,
                     getRelatedBlobNote,
                     handleAddToCollection,
                     handleCopySha1sum,
-                    handleLinkToExistingBlob,
-                    handleLinkToBookmark,
+                    handleDelete,
+                    handleObjectAdd,
                     isPinnedNote,
                     metadata_misc,
-                    objectSelectBookmark,
+                    objectSelect,
                     onAfterEnter,
                     onClick,
                     onClickPinnedNote,
-                    onClickDelete,
-                    onUpdateNote,
-                    onRemoveLink,
                     openObjectSelectModal,
                     pinnedButtonValue,
                     relatedBlobList,
-                    relatedBookmarksList,
+                    relatedObjectsList,
                     relatedQuestions,
-                    selectBlob,
                     tree,
                 };
             },
