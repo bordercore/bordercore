@@ -1,5 +1,5 @@
 * {
-  --border-radius1: 0.25rem; // bootstrap default, defined by $border-radius
+  --border-radius1: 0.375rem; // bootstrap default, defined by $border-radius
   --border-radius2: 0.40rem;
   --collection-list-item-width: 12rem;
   --dropdown-height: 2.5rem;
@@ -2394,6 +2394,15 @@ tr.hover-target:hover {
     color: var(--text4) !important;
     // This transition mimics Bootstrap behavior
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out !important;
+  }
+}
+
+.vs--disabled {
+  background-color: var(--form-bg-disabled) !important;
+  border-radius: var(--border-radius1);
+
+  .vs__dropdown-toggle {
+    background-color: var(--form-bg-disabled) !important;
   }
 }
 
