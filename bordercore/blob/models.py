@@ -87,8 +87,6 @@ class Blob(TimeStampedModel):
     is_indexed = models.BooleanField(default=True)
     math_support = models.BooleanField(default=False)
     data = JSONField(null=True, blank=True)
-    blobs = models.ManyToManyField("blob.Blob", through="BlobBlob")
-    bookmarks = models.ManyToManyField(Bookmark, through="SortOrderBlobBookmark")
     bc_objects = models.ManyToManyField("blob.BCObject", through="blob.BlobToObject", through_fields=("node", "bc_object"))
 
     class Meta:

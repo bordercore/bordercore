@@ -61,7 +61,6 @@ class BlobViewSet(viewsets.ModelViewSet):
             return Blob.objects.filter(
                 user=self.request.user
             ).prefetch_related(
-                "blobs",
                 "metadata",
                 "tags"
             )
@@ -108,7 +107,6 @@ class BlobSha1sumViewSet(viewsets.ModelViewSet):
             return Blob.objects.filter(
                 user=self.request.user
             ).prefetch_related(
-                "blobs",
                 "metadata",
                 "tags"
             )
