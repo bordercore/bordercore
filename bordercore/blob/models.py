@@ -411,14 +411,14 @@ class Blob(TimeStampedModel):
     def get_collection_info(self):
         return Collection.objects.filter(
             user=self.user,
-            collectionobject__blob__uuid=self.uuid,
+            collectionobject__blob=self,
             is_private=False)
 
     def get_linked_objects(self):
 
         return Collection.objects.filter(
             user=self.user,
-            collectionobject__blob__uuid=self.uuid,
+            collectionobject__blob=self,
             is_private=True
         )
 
