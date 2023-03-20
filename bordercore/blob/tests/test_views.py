@@ -434,14 +434,14 @@ def test_related_objects(auto_login_user):
     assert payload["blob_list"][0]["uuid"] == str(blob_2.uuid)
 
 
-def test_blob_link(auto_login_user):
+def test_blob_add_related_object(auto_login_user):
 
     user, client = auto_login_user()
 
     blob_1 = BlobFactory.create(user=user)
     blob_2 = BlobFactory.create(user=user)
 
-    url = urls.reverse("blob:link")
+    url = urls.reverse("blob:add_related_object")
     resp = client.post(url, {
         "node_uuid": blob_1.uuid,
         "object_uuid": blob_2.uuid,
@@ -454,7 +454,7 @@ def test_blob_link(auto_login_user):
     assert related_blobs.first().blob == blob_2
 
 
-def test_blob_unlink(auto_login_user):
+def test_blob_remove_related_object(auto_login_user):
 
     user, client = auto_login_user()
 
@@ -463,7 +463,7 @@ def test_blob_unlink(auto_login_user):
 
     BlobToObject.objects.create(node=blob_1, blob=blob_2)
 
-    url = urls.reverse("blob:unlink")
+    url = urls.reverse("blob:remove_related_object")
     resp = client.post(url, {
         "node_uuid": blob_1.uuid,
         "object_uuid": blob_2.uuid,

@@ -407,9 +407,9 @@ def get_related_objects(request, uuid):
 
 
 @login_required
-def link(request):
+def add_related_object(request):
     """
-    Add a relationshiop between two blobs.
+    Add a relationshiop between a blob and another object.
     """
 
     node_uuid = request.POST["node_uuid"]
@@ -435,9 +435,9 @@ def link(request):
 
 
 @login_required
-def unlink(request):
+def remove_related_object(request):
     """
-    Remove a relationship between a blob and an object.
+    Remove a relationship between a blob and another object.
     """
 
     node_uuid = request.POST["node_uuid"]

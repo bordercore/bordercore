@@ -61,14 +61,14 @@ urlpatterns = [
         name="related_objects"
     ),
     path(
-        route="link",
-        view=views.link,
-        name="link"
+        route="related_objects/add",
+        view=views.add_related_object,
+        name="add_related_object"
     ),
     path(
-        route="unlink",
-        view=views.unlink,
-        name="unlink"
+        route="related_objects/remove",
+        view=views.remove_related_object,
+        name="remove_related_object"
     ),
     path(
         route="update_page_number",

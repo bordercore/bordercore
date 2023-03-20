@@ -207,8 +207,8 @@
                     ref="relatedObjectsList"
                     object-uuid="{{ object.uuid }}"
                     related-objects-url="{% url 'blob:related_objects' '00000000-0000-0000-0000-000000000000' %}"
-                    add-object-url="{% url 'blob:link' %}"
-                    remove-object-url="{% url 'blob:unlink' %}"
+                    add-object-url="{% url 'blob:add_related_object' %}"
+                    remove-object-url="{% url 'blob:remove_related_object' %}"
                     sort-related-objects-url="{% url 'blob:sort_related_objects' %}"
                     update-related-object-note-url="{% url 'blob:update_related_object_note' %}"
                     @open-object-select-modal="openObjectSelectModal">
