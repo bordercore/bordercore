@@ -1,5 +1,5 @@
 <template>
-    <div class="card-body backdrop-filter">
+    <div class="card-body backdrop-filter h-100">
         <div class="card-title-large">
             Pinned Tags
         </div>
