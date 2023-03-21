@@ -425,11 +425,16 @@ def add_related_object(request):
         if bookmark.exists():
             args = {"bookmark": bookmark.first()}
 
-    BlobToObject.objects.create(node=node, **args)
-
-    response = {
-        "status": "OK",
-    }
+    if BlobToObject.objects.filter(node=node, **args).exists():
+        response = {
+            "status": "Error",
+            "message": "That object is already related",
+        }
+    else:
+        BlobToObject.objects.create(node=node, **args)
+        response = {
+            "status": "OK",
+        }
 
     return JsonResponse(response)
 

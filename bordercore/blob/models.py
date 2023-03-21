@@ -869,7 +869,9 @@ class BlobToObject(SortOrderMixin):
     class Meta:
         ordering = ("sort_order",)
         unique_together = (
-            ("node", "blob", "bookmark", "question")
+            ("node", "blob"),
+            ("node", "bookmark"),
+            ("node", "question")
         )
 
     def __str__(self):

@@ -4,10 +4,12 @@ from pathlib import Path
 from urllib.parse import quote_plus, urlparse
 
 import boto3
+import pytest
 from faker import Factory as FakerFactory
 
 import django
 from django.conf import settings
+from django.db import IntegrityError
 
 from collection.models import Collection
 
@@ -17,6 +19,22 @@ from blob.models import Blob, BlobToObject  # isort:skip
 from blob.tests.factories import BlobFactory
 
 faker = FakerFactory.create()
+
+
+def test_node_unique_constraints(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    node = BlobFactory.create(user=user)
+    blob = BlobFactory.create(user=user)
+
+    BlobToObject.objects.create(node=node, blob=blob)
+
+    assert BlobToObject.objects.filter(node=node, blob=blob).exists()
+
+    # Adding the same blob to the same node should violate a unique constraint
+    with pytest.raises(IntegrityError):
+        BlobToObject.objects.create(node=node, blob=blob)
 
 
 def test_get_s3_key(blob_image_factory, blob_text_factory):
