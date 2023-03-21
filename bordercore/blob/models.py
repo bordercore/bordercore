@@ -408,18 +408,10 @@ class Blob(TimeStampedModel):
     def is_pinned_note(self):
         return self in self.user.userprofile.pinned_notes.all()
 
-    def get_collection_info(self):
+    def get_collections(self):
         return Collection.objects.filter(
             user=self.user,
             collectionobject__blob=self,
-            is_private=False)
-
-    def get_linked_objects(self):
-
-        return Collection.objects.filter(
-            user=self.user,
-            collectionobject__blob=self,
-            is_private=True
         )
 
     def get_date(self):

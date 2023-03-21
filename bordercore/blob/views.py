@@ -193,9 +193,9 @@ class BlobDetailView(DetailView):
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
-        context["linked_objects"] = self.object.get_linked_objects()
-
-        context["collection_list"] = self.object.get_collection_info()
+        collections = self.object.get_collections()
+        context["linked_objects"] = [x for x in collections if x.is_private]
+        context["collection_list"] = [x for x in collections if not x.is_private]
 
         context["show_metadata"] = "content_type" in context \
             or self.object.sha1sum \
