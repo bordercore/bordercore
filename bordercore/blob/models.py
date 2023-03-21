@@ -16,6 +16,7 @@ from elasticsearch import NotFoundError
 from PIL import Image
 from storages.backends.s3boto3 import S3Boto3Storage
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -344,11 +345,13 @@ class Blob(TimeStampedModel):
         return self.modified - self.created > timedelta(seconds=1)
 
     @staticmethod
-    def related_objects(base_object):
+    def related_objects(app, model, base_object):
+
+        model = apps.get_model(app, model)
 
         related_objects = []
 
-        for related_object in BlobToObject.objects.filter(node=base_object).select_related("bookmark").select_related("blob"):
+        for related_object in model.objects.filter(node=base_object).select_related("bookmark").select_related("blob"):
             if related_object.blob:
                 related_objects.append(
                     {

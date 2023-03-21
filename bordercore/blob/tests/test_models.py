@@ -107,7 +107,7 @@ def test_related_blobs(auto_login_user):
 
     BlobToObject.objects.create(node=blob_1, blob=blob_2)
 
-    related_blobs = Blob.related_objects(blob_1)
+    related_blobs = Blob.related_objects("blob", "BlobToObject", blob_1)
     assert len(related_blobs) == 1
     assert related_blobs[0]["uuid"] == blob_2.uuid
 
