@@ -28,39 +28,44 @@
                 <template #content>
                     <hr class="divider">
                     <ul class="list-group list-group-flush interior-borders">
-                        <li v-for="(object, index) in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary px-0" :data-uuid="object.uuid">
-                            <div class="dropdown-height d-flex align-items-start">
-                                <div v-if="object.type === 'bookmark'" class="pe-2" v-html="object.favicon_url" />
-                                <div v-else-if="object.type === 'blob'" class="pe-2">
-                                    <img :src="[[ object.cover_url ]]" height="75" width="70">
-                                </div>
-                                <div>
-                                    <a :href="object.url">{{ object.name }}</a>
-
-                                    <div v-show="!object.noteIsEditable" v-if="object.note" class="node-object-note" @click="handleSetNoteIsEditable(object, index)">
-                                        {{ object.note }}
+                        <draggable v-model="objectList" draggable=".draggable" item-key="uuid" :component-data="{type:'transition-group'}" chosen-class="related-draggable" ghost-class="related-draggable" drag-class="related-draggable" @change="handleSort">
+                            <template #item="{element}">
+                                <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable px-0" :data-uuid="element.uuid">
+                                    <div class="dropdown-height d-flex align-items-start">
+                                        <div v-if="element.type === 'bookmark'" class="pe-2" v-html="element.favicon_url" />
+                                        <div v-else-if="element.type === 'blob'" class="pe-2">
+                                            <img :src="[[ element.cover_url ]]" height="75" width="70">
+                                        </div>
+                                        <div>
+                                            <a :href="element.url">{{ element.name }}</a>
+                                            <Transition name="fade" mode="out-in" @after-enter="handleInputTransition">
+                                                <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true">
+                                                    {{ element.note }}
+                                                </div>
+                                                <div v-else>
+                                                    <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" autocomplete="off" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
+                                                </div>
+                                            </Transition>
+                                        </div>
+                                        <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
+                                            <template #dropdown>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element)">
+                                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
+                                                    </a>
+                                                    <a class="dropdown-item" :href="element.edit_url">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit <span>{{ element.type }}</span>
+                                                    </a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="element.noteIsEditable = true">
+                                                        <font-awesome-icon :icon="element.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ element.note ? 'Edit' : 'Add' }} note
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </drop-down-menu>
                                     </div>
-                                    <span v-show="object.noteIsEditable">
-                                        <input ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" autocomplete="off" @blur="handleEditNote(object, $event.target.value)" @keydown.enter="handleEditNote(object, $event.target.value)">
-                                    </span>
-                                </div>
-                                <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
-                                    <template #dropdown>
-                                        <li>
-                                            <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(object.bc_object_uuid, object.uuid)">
-                                                <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
-                                            </a>
-                                            <a class="dropdown-item" :href="object.edit_url">
-                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit <span>{{ object.type }}</span>
-                                            </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="handleSetNoteIsEditable(object, index)">
-                                                <font-awesome-icon :icon="object.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ object.note ? 'Edit' : 'Add' }} note
-                                            </a>
-                                        </li>
-                                    </template>
-                                </drop-down-menu>
-                            </div>
-                        </li>
+                                </li>
+                            </template>
+                        </draggable>
                         <div v-cloak v-if="objectList.length == 0" :key="1" class="text-muted">
                             No objects
                         </div>
@@ -74,12 +79,14 @@
 <script>
 
     import Card from "/front-end/vue/common/Card.vue";
+    import draggable from "vuedraggable";
     import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
     export default {
         components: {
             Card,
+            draggable,
             DropDownMenu,
             FontAwesomeIcon,
         },
@@ -104,7 +111,11 @@
                 default: "",
                 type: String,
             },
-            editObjectNoteUrl: {
+            sortRelatedObjectsUrl: {
+                default: "url",
+                type: String,
+            },
+            updateRelatedObjectNoteUrl: {
                 default: "url",
                 type: String,
             },
@@ -126,8 +137,6 @@
             const input = ref(null);
             const objectList = ref([]);
 
-            let isEditingNote = false;
-
             function addObject(bcObject) {
                 if (props.newQuestion) {
                     objectList.value.push(bcObject);
@@ -137,14 +146,13 @@
                 doPost(
                     props.addObjectUrl,
                     {
-                        "question_uuid": props.objectUuid,
+                        "node_uuid": props.objectUuid,
                         "object_uuid": bcObject.uuid,
                     },
                     (response) => {
                         getRelatedObjects();
                     },
                     "Object added",
-                    "",
                 );
             };
 
@@ -159,39 +167,30 @@
             };
 
             function handleEditNote(bcObject, note) {
-                if (isEditingNote) {
-                    return;
-                }
-                isEditingNote = true;
+                bcObject.noteIsEditable = false;
 
                 // If the note hasn't changed, abort
                 if (note == bcObject.note) {
-                    isEditingNote = false;
                     return;
                 }
 
-                if (props.newQuestion) {
-                    bcObject.note = note;
-                } else {
-                    doPost(
-                        props.editObjectNoteUrl,
-                        {
-                            "bc_object_uuid": bcObject.bc_object_uuid,
-                            "note": note,
-                        },
-                        (response) => {
-                            getRelatedObjects();
-                        },
-                        "",
-                        "",
-                    );
-                }
-                isEditingNote = false;
+                bcObject.note = note;
+                doPost(
+                    props.updateRelatedObjectNoteUrl,
+                    {
+                        "node_uuid": props.objectUuid,
+                        "object_uuid": bcObject.uuid,
+                        "note": note,
+                    },
+                    (response) => {
+                        getRelatedObjects();
+                    },
+                );
             };
 
-            function handleRemoveObject(bcObjectUuid, uuid) {
+            function handleRemoveObject(bcObject) {
                 if (props.newQuestion) {
-                    const newObjectList = objectList.value.filter((x) => x.uuid !== uuid);
+                    const newObjectList = objectList.value.filter((x) => x.uuid !== bcObject.uuid);
                     objectList.value = newObjectList;
                     return;
                 }
@@ -199,23 +198,36 @@
                 doPost(
                     props.removeObjectUrl,
                     {
-                        "question_uuid": props.objectUuid,
-                        "bc_object_uuid": bcObjectUuid,
+                        "node_uuid": props.objectUuid,
+                        "object_uuid": bcObject.uuid,
                     },
                     (response) => {
                         getRelatedObjects();
                     },
                     "Object removed",
-                    "",
                 );
             };
 
-            function handleSetNoteIsEditable(bcObject, index) {
-                bcObject.noteIsEditable = true;
+            function handleSort(evt) {
+                const questionUuid = evt.moved.element.uuid;
 
-                nextTick(() => {
-                    input.value[index].focus();
-                });
+                // The backend expects the ordering to begin
+                // with 1, not 0, so add 1.
+                const newPosition = evt.moved.newIndex + 1;
+
+                if (props.newQuestion) {
+                    return;
+                }
+
+                doPost(
+                    props.sortRelatedObjectsUrl,
+                    {
+                        "node_uuid": props.objectUuid,
+                        "object_uuid": questionUuid,
+                        "new_position": newPosition,
+                    },
+                    () => {},
+                );
             };
 
             function openObjectSelectModal() {
@@ -234,7 +246,7 @@
                 objectList,
                 handleEditNote,
                 handleRemoveObject,
-                handleSetNoteIsEditable,
+                handleSort,
                 openObjectSelectModal,
             };
         },

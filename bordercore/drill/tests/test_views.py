@@ -7,8 +7,7 @@ import responses
 
 from django import urls
 
-from blob.models import BCQuestionObject
-from drill.models import Question
+from drill.models import Question, QuestionToObject
 from drill.views import handle_related_objects
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
@@ -77,8 +76,7 @@ def test_drill_handle_related_objects(monkeypatch_drill, auto_login_user, questi
 
     handle_related_objects(question[1], mock_request)
 
-    assert BCQuestionObject.objects.filter(bookmark=bookmark[0]).exists()
-    assert Question.objects.get(uuid=question[1].uuid).bc_objects.all().count() == 1
+    assert QuestionToObject.objects.filter(node=question[1], bookmark=bookmark[0]).exists()
 
 
 def test_drill_delete(monkeypatch_drill, auto_login_user, question):
@@ -365,15 +363,15 @@ def test_drill_add_object(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:add_object")
+    url = urls.reverse("drill:add_related_object")
     resp = client.post(url, {
-        "question_uuid": question[0].uuid,
+        "node_uuid": question[0].uuid,
         "object_uuid": blob_note[0].uuid,
     })
 
     assert resp.status_code == 200
-    assert BCQuestionObject.objects.filter(blob=blob_note[0]).exists()
-    assert Question.objects.get(uuid=question[0].uuid).bc_objects.all().count() == 3
+    assert QuestionToObject.objects.filter(node=question[0], blob=blob_note[0]).exists()
+    assert QuestionToObject.objects.filter(node=question[0]).count() == 3
 
 
 def test_drill_remove_object(auto_login_user, question, blob_note):
@@ -381,35 +379,35 @@ def test_drill_remove_object(auto_login_user, question, blob_note):
     _, client = auto_login_user()
 
     question[0].add_related_object(blob_note[0].uuid)
-    bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
 
-    url = urls.reverse("drill:remove_object")
+    url = urls.reverse("drill:remove_related_object")
     resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "bc_object_uuid": bc_object.uuid,
+        "node_uuid": question[0].uuid,
+        "object_uuid": blob_note[0].uuid,
     })
 
     assert resp.status_code == 200
-    assert not BCQuestionObject.objects.filter(blob=blob_note[0]).exists()
-    assert Question.objects.get(uuid=question[0].uuid).bc_objects.all().count() == 2
+    assert not QuestionToObject.objects.filter(node=question[0], blob=blob_note[0]).exists()
+    assert QuestionToObject.objects.filter(node=question[0]).count() == 2
 
 
-def test_drill_edit_related_object_note(auto_login_user, question, blob_note):
+def test_drill_update_related_object_note(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
     question[0].add_related_object(blob_note[0].uuid)
-    bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
 
     note = "Updated Note"
 
-    url = urls.reverse("drill:edit_related_object_note")
+    url = urls.reverse("drill:update_related_object_note")
     resp = client.post(url, {
-        "bc_object_uuid": bc_object.uuid,
+        "node_uuid": question[0].uuid,
+        "object_uuid": blob_note[0].uuid,
         "note": note
     })
 
     assert resp.status_code == 200
 
-    bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
-    assert bc_object.note == note
+    question_to_object = QuestionToObject.objects.get(node=question[0], blob=blob_note[0])
+    # bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
+    assert question_to_object.note == note

@@ -23,9 +23,9 @@
                 ref="relatedObjectsList"
                 object-uuid="{{ object.uuid }}"
                 related-objects-url="{% url 'drill:related_objects' '00000000-0000-0000-0000-000000000000' %}"
-                add-object-url="{% url 'drill:add_object' %}"
-                remove-object-url="{% url 'drill:remove_object' %}"
-                edit-object-note-url="{% url 'drill:edit_related_object_note' %}"
+                add-object-url="{% url 'drill:add_related_object' %}"
+                remove-object-url="{% url 'drill:remove_related_object' %}"
+                update-object-note-url="{% url 'drill:update_related_object_note' %}"
                 :new-question="true"
                 @open-object-select-modal="openObjectSelectModal"
             >

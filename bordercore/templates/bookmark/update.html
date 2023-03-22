@@ -175,12 +175,12 @@
                 const importance = ref({{ form.importance.value|yesno:"true,false" }});
                 const isPinned = ref({{ form.is_pinned.value|yesno:"true,false" }});
                 const relatedQuestions = ref([
-                    {% for question in related_questions.bc_objects.all %}
+                    {% for question in related_questions %}
                     {
-                        question: markdown.render("{{ question.question|escapejs }}"),
-                        url: "{% url 'drill:detail' question.uuid %}",
+                        question: markdown.render("{{ question.node.question|escapejs }}"),
+                        url: "{% url 'drill:detail' question.node.uuid %}",
                         tags: [
-                            {% for tag in question.tags.all %}
+                            {% for tag in question.node.tags.all %}
                             {
                                 tag: "{{ tag }}",
                             },

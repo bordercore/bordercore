@@ -68,8 +68,10 @@
                 ref="relatedObjectsList"
                 object-uuid="{{ object.uuid }}"
                 related-objects-url="{% url 'drill:related_objects' object.uuid %}"
-                add-object-url="{% url 'drill:add_object' %}"
-                remove-object-url="{% url 'drill:remove_object' %}" edit-object-note-url="{% url 'drill:edit_related_object_note' %}"
+                add-object-url="{% url 'drill:add_related_object' %}"
+                remove-object-url="{% url 'drill:remove_related_object' %}"
+                sort-related-objects-url="{% url 'drill:sort_related_objects' %}"
+                update-related-object-note-url="{% url 'drill:update_related_object_note' %}"
                 @open-object-select-modal="openObjectSelectModal"
             >
             </related-question-objects>

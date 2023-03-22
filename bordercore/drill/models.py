@@ -7,13 +7,15 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Max, Q
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import timezone
 
-from blob.models import BCQuestionObject, Blob
+from blob.models import Blob
 from bookmark.models import Bookmark
-from lib.mixins import TimeStampedModel
+from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.util import get_elasticsearch_connection
 from tag.models import Tag
 
@@ -38,7 +40,7 @@ class Question(TimeStampedModel):
     interval_index = models.IntegerField(default=0, null=False)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bc_objects = models.ManyToManyField("blob.BCQuestionObject", blank=True, related_name="bc_objects")
+    bc_objects = models.ManyToManyField("drill.BCObject", through="drill.QuestionToObject", through_fields=("node", "bc_object"))
 
     objects = DrillManager()
 
@@ -174,28 +176,6 @@ class Question(TimeStampedModel):
 
         return info
 
-    def add_related_object(self, object_uuid):
-
-        args = {}
-        blob = Blob.objects.filter(uuid=object_uuid)
-        if blob.exists():
-            args = {"blob": blob.first()}
-        bookmark = Bookmark.objects.filter(uuid=object_uuid)
-        if bookmark.exists():
-            args = {"bookmark": bookmark.first()}
-        bc_object, _ = BCQuestionObject.objects.get_or_create(**args)
-
-        self.bc_objects.add(bc_object)
-
-    def remove_related_object(self, bc_object_uuid):
-
-        bc_object = BCQuestionObject.objects.get(uuid=bc_object_uuid)
-        self.bc_objects.remove(bc_object)
-
-        # If there are no more objects related to this BCQuestionObject, delete it
-        if bc_object.bc_objects.count() == 0:
-            bc_object.delete()
-
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -215,6 +195,29 @@ class Question(TimeStampedModel):
             es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
+
+    def add_related_object(self, object_uuid):
+
+        blob = Blob.objects.filter(uuid=object_uuid)
+        if blob.exists():
+            args = {"blob": blob.first()}
+        else:
+            bookmark = Bookmark.objects.filter(uuid=object_uuid)
+            if bookmark.exists():
+                args = {"bookmark": bookmark.first()}
+
+        if QuestionToObject.objects.filter(node=self, **args).exists():
+            response = {
+                "status": "Error",
+                "message": "That object is already related",
+            }
+        else:
+            QuestionToObject.objects.create(node=self, **args)
+            response = {
+                "status": "OK",
+            }
+
+        return response
 
     @property
     def elasticsearch_document(self):
@@ -339,3 +342,42 @@ class QuestionResponse(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     response = models.TextField(blank=False, null=False)
     date = models.DateTimeField(auto_now_add=True)
+
+
+class QuestionToObject(SortOrderMixin):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    node = models.ForeignKey("drill.Question", null=False, on_delete=models.CASCADE, related_name="nodes")
+    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.CASCADE)
+    question = models.ForeignKey("drill.Question", null=True, on_delete=models.CASCADE)
+    bc_object = models.ForeignKey("drill.BCObject", on_delete=models.CASCADE, null=True)
+    note = models.TextField(blank=True, null=True)
+
+    field_name = "node"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("node", "blob"),
+            ("node", "bookmark"),
+            ("node", "question")
+        )
+
+    def __str__(self):
+        if self.blob:
+            return f"{self.node} -> {self.blob}"
+        elif self.bookmark:
+            return f"{self.node} -> {self.bookmark}"
+        else:
+            return f"{self.node} -> {self.question}"
+
+
+class BCObject(TimeStampedModel):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
+
+@receiver(pre_delete, sender=QuestionToObject)
+def remove_relationship(sender, instance, **kwargs):
+    instance.handle_delete()

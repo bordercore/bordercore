@@ -839,24 +839,6 @@ def remove_recently_viewed_blob(sender, instance, **kwargs):
         )
 
 
-class BCQuestionObject(TimeStampedModel):
-
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
-    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.CASCADE)
-    note = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        if self.blob:
-            return f"Blob: {self.blob}"
-        elif self.bookmark:
-            return f"Bookmark: {self.bookmark}"
-        elif self.question:
-            return f"Question: {self.question}"
-        else:
-            return "Empty object"
-
-
 class BlobToObject(SortOrderMixin):
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)

@@ -4,6 +4,7 @@ from urllib.parse import unquote
 from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -13,14 +14,14 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from accounts.models import DrillTag
-from blob.models import BCQuestionObject, Blob
+from blob.models import Blob
 from bookmark.models import Bookmark
 from drill.forms import QuestionForm
 from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import Question
+from .models import Question, QuestionToObject
 
 
 @method_decorator(login_required, name="dispatch")
@@ -403,29 +404,48 @@ def get_title_from_url(request):
 
 def get_related_objects(request, uuid):
     """
-    Get all related objects for a given blob/bookmark/question.
+    Get all related objects to a given question.
     """
 
-    base_object = Question.objects.filter(user=request.user, uuid=uuid)
-    if base_object.exists():
-        related_objects = Blob.related_objects(base_object.first())
+    question = Question.objects.get(user=request.user, uuid=uuid)
 
     response = {
         "status": "OK",
-        "related_objects": related_objects
+        "related_objects": Blob.related_objects("drill", "QuestionToObject", question)
     }
 
     return JsonResponse(response)
 
 
-@login_required
-def add_object(request):
+def add_related_object(request):
+    """
+    Add a relationshiop between a question and another object.
+    """
 
-    question_uuid = request.POST["question_uuid"]
+    node_uuid = request.POST["node_uuid"]
     object_uuid = request.POST["object_uuid"]
 
-    question = Question.objects.get(uuid=question_uuid)
-    question.add_related_object(object_uuid)
+    node = Question.objects.get(uuid=node_uuid)
+    response = node.add_related_object(object_uuid)
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_related_object(request):
+    """
+    Remove a relationship between a question and another object.
+    """
+
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
+
+    QuestionToObject.objects.get(
+        Q(node__uuid=node_uuid)
+        & (
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
+        )
+    ).delete()
 
     response = {
         "status": "OK",
@@ -435,13 +455,22 @@ def add_object(request):
 
 
 @login_required
-def remove_object(request):
+def sort_related_objects(request):
+    """
+    Change the sort order of a question and a related object
+    """
 
-    question_uuid = request.POST["question_uuid"]
-    bc_object_uuid = request.POST["bc_object_uuid"]
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
+    new_position = int(request.POST["new_position"])
 
-    question = Question.objects.get(uuid=question_uuid)
-    question.remove_related_object(bc_object_uuid)
+    question_to_object = QuestionToObject.objects.get(
+        Q(node__uuid=node_uuid)
+        & (
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
+        )
+    )
+    QuestionToObject.reorder(question_to_object, new_position)
 
     response = {
         "status": "OK",
@@ -451,14 +480,20 @@ def remove_object(request):
 
 
 @login_required
-def edit_related_object_note(request):
+def update_related_object_note(request):
 
-    bc_object_uuid = request.POST["bc_object_uuid"]
+    node_uuid = request.POST["node_uuid"]
+    object_uuid = request.POST["object_uuid"]
     note = request.POST["note"]
 
-    bc_object = BCQuestionObject.objects.get(uuid=bc_object_uuid)
-    bc_object.note = note
-    bc_object.save()
+    question_to_object = QuestionToObject.objects.get(
+        Q(node__uuid=node_uuid)
+        & (
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
+        )
+    )
+    question_to_object.note = note
+    question_to_object.save()
 
     response = {
         "status": "OK",
