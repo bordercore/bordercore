@@ -185,17 +185,22 @@
                             </div>
                         </template>
                         <template #content>
-                        {% for collection in linked_objects %}
+                            <hr class="divider">
+                            {% for collection in linked_objects %}
                             {{ collection.name }}
                             <ul class="list-group interior-borders">
                                 {% for object in collection.collectionobject_set.all %}
                                     {% if object.blob and object.blob.uuid != blob.uuid %}
                                         <li class="list-group-item list-group-item-secondary d-flex align-items-center">
-                                        {% if object.blob.get_cover_url_small %}
-                                            <img src="{{ object.blob.get_cover_url_small }}" />
-                                        {% endif %}
-                                            <div class="ms-2">
-                                                <a href="{% url 'blob:detail' object.blob.uuid %}">{{ object.blob.name|default:"No Name" }}</a>
+                                            <div class="d-flex flex-column">
+                                            {% if object.blob.get_cover_url_small %}
+                                                <div>
+                                                    <img src="{{ object.blob.get_cover_url_small }}" />
+                                                </div>
+                                            {% endif %}
+                                                <div class="ms-2">
+                                                    <a href="{% url 'blob:detail' object.blob.uuid %}">{{ object.blob.name|default:"No Name" }}</a>
+                                                </div>
                                             </div>
                                         </li>
                                     {% endif %}

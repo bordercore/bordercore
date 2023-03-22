@@ -32,14 +32,16 @@
                             <template #item="{element}">
                                 <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable px-0" :data-uuid="element.uuid">
                                     <div class="dropdown-height d-flex align-items-start">
-                                        <div v-if="element.type === 'bookmark'" class="pe-2">
-                                            <img :src="element.cover_url" width="120" height="67">
-                                        </div>
-                                        <div v-else-if="element.type === 'blob'" class="pe-2">
-                                            <img :src="element.cover_url">
-                                        </div>
-                                        <div>
-                                            <a :href="element.url">{{ element.name }}</a>
+                                        <div class="d-flex flex-column">
+                                            <div v-if="element.type === 'bookmark'" class="pe-2">
+                                                <img :src="element.cover_url" width="120" height="67">
+                                            </div>
+                                            <div v-else-if="element.type === 'blob'" class="pe-2">
+                                                <img :src="element.cover_url">
+                                            </div>
+                                            <div>
+                                                <a :href="element.url">{{ element.name }}</a>
+                                            </div>
                                             <Transition name="fade" mode="out-in" @after-enter="handleInputTransition">
                                                 <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true">
                                                     {{ element.note }}
