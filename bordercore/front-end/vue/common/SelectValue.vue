@@ -153,6 +153,8 @@
             };
 
             function handleEnter(event) {
+                // Term search -- let the parent handle it
+                ctx.emit("search", multiselect.value.search);
                 setValue(multiselect.value.search);
                 multiselect.value.$refs.search.blur();
             };
