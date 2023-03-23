@@ -42,6 +42,10 @@ class Collection(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    @property
+    def cover_url(self):
+        return f"{settings.COVER_URL}collections/{self.uuid}.jpg"
+
     def add_object(self, object):
 
         from blob.models import Blob
