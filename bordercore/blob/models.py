@@ -21,7 +21,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models, transaction
-from django.db.models import F, JSONField
+from django.db.models import Count, F, JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
@@ -414,7 +414,10 @@ class Blob(TimeStampedModel):
     def get_collections(self):
         return Collection.objects.filter(
             user=self.user,
-            collectionobject__blob=self,
+        ).annotate(
+            num_objects=Count("collectionobject__blob")
+        ).filter(
+            collectionobject__blob__in=[self]
         )
 
     def get_date(self):

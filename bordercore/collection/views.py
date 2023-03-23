@@ -55,7 +55,7 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
                 "name": c.name,
                 "url": reverse("collection:detail", kwargs={"collection_uuid": c.uuid}),
                 "num_blobs": c.num_blobs,
-                "cover_url": f"{settings.COVER_URL}collections/{c.uuid}.jpg"
+                "cover_url": c.cover_url,
             } for c in self.object_list
 
         ]

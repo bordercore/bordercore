@@ -160,24 +160,23 @@
                     ></tree-menu>
                 </div>
 
-                {% if linked_objects %}
-                    <card class="backdrop-filter hover-reveal-target">
-                        <template #title-slot>
-                            <div class="d-flex">
-                                <div class="card-title d-flex">
-                                    <font-awesome-icon icon="object-group" class="text-primary me-3 mt-1"></font-awesome-icon>
-                            Collection
-                                </div>
-                                <div class="dropdown-menu-container ms-auto">
-                                    <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
-                                        <template #dropdown>
-                                            <li>
-                                                <a class="dropdown-item" href="{% url 'blob:create' %}?linked_collection={{ linked_objects.0.uuid }}">
-                                                    <span>
-                                                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                                                    </span>
-                                                    Add to Collection
-                                                </a>
+                <card v-if="collectionList.length" class="backdrop-filter hover-reveal-target">
+                    <template #title-slot>
+                        <div class="d-flex">
+                            <div class="card-title d-flex">
+                                <font-awesome-icon icon="object-group" class="text-primary me-3 mt-1"></font-awesome-icon>
+                                    Collections
+                            </div>
+                            <div class="dropdown-menu-container ms-auto">
+                                <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
+                                    <template #dropdown>
+                                        <li>
+                                            <a class="dropdown-item" :href="'{% url 'blob:create' %}?linked_collection=' + collectionList[0].uuid">
+                                                <span>
+                                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                                </span>
+                                                Add to Collection
+                                            </a>
                                             </li>
                                         </template>
                                     </drop-down-menu>
@@ -186,53 +185,19 @@
                         </template>
                         <template #content>
                             <hr class="divider">
-                            {% for collection in linked_objects %}
-                            {{ collection.name }}
-                            <ul class="list-group interior-borders">
-                                {% for object in collection.collectionobject_set.all %}
-                                    {% if object.blob and object.blob.uuid != blob.uuid %}
-                                        <li class="list-group-item list-group-item-secondary d-flex align-items-center">
-                                            <div class="d-flex flex-column">
-                                            {% if object.blob.get_cover_url_small %}
-                                                <div>
-                                                    <img src="{{ object.blob.get_cover_url_small }}" />
-                                                </div>
-                                            {% endif %}
-                                                <div class="ms-2">
-                                                    <a href="{% url 'blob:detail' object.blob.uuid %}">{{ object.blob.name|default:"No Name" }}</a>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        {% endfor %}
+                                <div v-for="collection in collectionList" class="d-flex flex-column">
+                                    <div>
+                                        <a :href="collection.url">
+                                            <img :src="collection.cover_url" class="mw-100">
+                                        </a>
+                                    </div>
+                                    <div class="d-flex align-items-center mt-2 mb-3">
+                                        <h5 class="mb-0 me-3">[[ collection.name ]]</h5>
+                                        <div><strong>[[ collection.num_objects ]]</strong> Objects</div>
+                                    </div>
+                                </div>
                         </template>
                     </card>
-                {% endif %}
-
-                <card
-                    v-if="collectionList.length > 0"
-                    class="backdrop-filter"
-                >
-                    <template #title-slot>
-                        <div class="d-flex">
-                            <div class="card-title d-flex">
-                                <font-awesome-icon icon="object-group" class="text-primary me-3 mt-1"></font-awesome-icon>
-                            Collections
-                            </div>
-                        </div>
-                    </template>
-                    <template #content>
-                        <div class="col-lg-12">
-                            <ul>
-                                <li v-for="(collection, index) in collectionList">
-                                    <a :href="collection.url">[[ collection.name ]]</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </template>
-                </card>
 
                 <related-objects
                     ref="relatedObjectsList"
@@ -448,6 +413,8 @@
                         "uuid": "{{ collection.uuid }}",
                         "name": "{{ collection.name|safe }}",
                         "url": "{% url 'collection:detail' collection.uuid %}",
+                        "cover_url": "{{ collection.cover_url }}",
+                        "num_objects": "{{ collection.num_objects }}",
                     },
                     {% endfor %}
                 ]);

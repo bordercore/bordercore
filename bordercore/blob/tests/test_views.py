@@ -430,8 +430,8 @@ def test_related_objects(auto_login_user):
 
     payload = resp.json()
     assert payload["status"] == "OK"
-    assert len(payload["blob_list"]) == 1
-    assert payload["blob_list"][0]["uuid"] == str(blob_2.uuid)
+    assert len(payload["related_objects"]) == 1
+    assert payload["related_objects"][0]["uuid"] == str(blob_2.uuid)
 
 
 def test_blob_add_related_object(auto_login_user):
