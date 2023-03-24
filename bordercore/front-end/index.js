@@ -179,9 +179,6 @@ window.TreeMenu = TreeMenu;
 import PinnedTags from "./vue/bookmark/PinnedTags.vue";
 window.PinnedTags = PinnedTags;
 
-import RelatedQuestionObjects from "./vue/common/RelatedQuestionObjects.vue";
-window.RelatedQuestionObjects = RelatedQuestionObjects;
-
 import RelatedObjects from "./vue/common/RelatedObjects.vue";
 window.RelatedObjects = RelatedObjects;
 

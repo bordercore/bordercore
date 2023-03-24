@@ -398,7 +398,7 @@ def get_related_objects(request, uuid):
 
     response = {
         "status": "OK",
-        "blob_list": Blob.related_objects("blob", "BlobToObject", blob),
+        "related_objects": Blob.related_objects("blob", "BlobToObject", blob),
     }
 
     return JsonResponse(response)

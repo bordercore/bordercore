@@ -131,7 +131,7 @@
                 default: true,
                 type: Boolean,
             },
-            newBlob: {
+            newObject: {
                 default: false,
                 type: Boolean,
             },
@@ -142,7 +142,7 @@
             const objectList = ref([]);
 
             function addObject(bcObject) {
-                if (props.newBlob) {
+                if (props.newObject) {
                     objectList.value.push(bcObject);
                     return;
                 }
@@ -164,7 +164,7 @@
                 doGet(
                     props.relatedObjectsUrl.replace(/00000000-0000-0000-0000-000000000000/, props.objectUuid),
                     (response) => {
-                        objectList.value = response.data.blob_list;
+                        objectList.value = response.data.related_objects;
                     },
                     "Error getting related objects",
                 );
@@ -200,7 +200,7 @@
             };
 
             function handleRemoveObject(bcObject) {
-                if (props.newBlob) {
+                if (props.newObject) {
                     const newObjectList = objectList.value.filter((x) => x.uuid !== bcObject.uuid);
                     objectList.value = newObjectList;
                     return;
@@ -226,7 +226,7 @@
                 // with 1, not 0, so add 1.
                 const newPosition = evt.moved.newIndex + 1;
 
-                if (props.newBlob) {
+                if (props.newObject) {
                     return;
                 }
 
@@ -246,7 +246,7 @@
             };
 
             onMounted(() => {
-                if (!props.newBlob) {
+                if (!props.newObject) {
                     getRelatedObjects();
                 }
             });
