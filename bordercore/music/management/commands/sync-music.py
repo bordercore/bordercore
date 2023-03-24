@@ -57,6 +57,11 @@ class Command(BaseCommand):
             action="store_true"
         )
         parser.add_argument(
+            "--song-uuid",
+            "-i",
+            help="The song UUID",
+        )
+        parser.add_argument(
             "--dry-run",
             "-n",
             help="Dry run. Take no action",
@@ -64,7 +69,7 @@ class Command(BaseCommand):
         )
 
     @atomic
-    def handle(self, *args, album_name, artist, directory, file_name, title, uuid, **kwargs):
+    def handle(self, *args, album_name, artist, directory, file_name, title, uuid, song_uuid, **kwargs):
 
         self.args = kwargs
         if uuid:
@@ -72,7 +77,7 @@ class Command(BaseCommand):
         elif directory:
             self.sync_directory(directory, album_name)
         elif file_name:
-            self.sync_file(file_name, artist, title, album_name)
+            self.sync_file(file_name, artist, title, album_name, song_uuid)
         else:
             self.stdout.write(f"  {Fore.YELLOW}No file or directory specified. Processing the current directory...{Style.RESET_ALL}")
             self.sync_directory(".", album_name)
@@ -144,7 +149,7 @@ class Command(BaseCommand):
         for path in pathlist:
             self.sync_file(filename=str(path), artist=None, title=None, album_name=album_name)
 
-    def sync_file(self, filename, artist, title, album_name):
+    def sync_file(self, filename, artist, title, album_name, song_uuid=None):
 
         try:
             id3_info = EasyID3(filename)
@@ -180,7 +185,10 @@ class Command(BaseCommand):
         #  This handles edge cases like the band 'Til Tuesday
         first_letter_dir = re.sub(r"\W+", "", artist).lower()[0]
 
-        song = Song.objects.filter(title=title, artist__name=artist)
+        if song_uuid:
+            song = Song.objects.filter(uuid=song_uuid)
+        else:
+            song = Song.objects.filter(title=title, artist__name=artist)
 
         if self.args["sync_album_song"]:
             song.filter(album__title=album_name)
