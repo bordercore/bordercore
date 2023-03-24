@@ -18,7 +18,7 @@
     "license": "ISC",
     "devDependencies": {
         "css-loader": "^5.0.0",
-        "eslint": "^7.27.0",
+        "eslint": "^8.36.0",
         "eslint-config-google": "^0.14.0",
         "eslint-plugin-html": "^6.2.0",
         "eslint-plugin-vue": "^7.10.0",
