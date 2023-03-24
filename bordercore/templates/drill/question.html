@@ -238,8 +238,7 @@
                 };
 
                 function showPythonConsole() {
-                    drillStore.commit("updateShowPythonConsole", true);
-                    pythonConsole.value.initialize();
+                    EventBus.$emit("show-python-console");
                 };
 
                 const favoriteClass = computed(() => {
@@ -316,7 +315,12 @@
                 };
 
                 onMounted(() => {
-                    hotkeys.filter = function(event) {
+                    EventBus.$on("show-python-console", () => {
+                        drillStore.commit("updateShowPythonConsole", true);
+                        pythonConsole.value.initialize();
+                    });
+
+                    hotkeys.filter = function (event) {
                         // By default hotkeys filters form elements. Eliminate that
                         // filter so we can capture ctrl-return events from
                         // the Python console textarea.

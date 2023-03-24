@@ -23,29 +23,14 @@
 <script>
 
     export default {
-        data() {
-            return {
-                output: "",
-                pythonError: false,
-                suppressOutput: true,
-            };
-        },
-        methods: {
-            initialize() {
-                this.pyodideReadyPromise = this.main();
+        setup() {
+            let pyodideReadyPromise = null;
+            let suppressOutput = true;
 
-                const resultElement = document.querySelector(".code-input pre code");
-                resultElement.value = "";
-            },
-            async main() {
-                const self = this;
-                return await loadPyodide({
-                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.19.1/full/",
-                    stdout: self.handleStdOut,
-                    stderr: self.handleStdErr,
-                });
-            },
-            update() {
+            const output = ref("");
+            const pythonError = ref(false);
+
+            function update() {
                 const raw = document.querySelector(".code-input textarea");
                 const resultElement = document.querySelector(".code-input pre code");
 
@@ -53,41 +38,51 @@
 
                 // Syntax Highlight
                 Prism.highlightElement(resultElement);
-            },
-            syncScroll() {
-                // Scroll result to scroll coords of event - sync with textarea
-                const inputElement = document.querySelector(".code-input textarea");
-                const resultElement = document.querySelector(".code-input pre");
+            };
 
-                // Get and set x and y
-                resultElement.scrollTop = inputElement.scrollTop;
-                resultElement.scrollLeft = inputElement.scrollLeft;
-            },
-            handleStdOut(out) {
-                if (this.suppressOutput) {
+            function handleStdOut(out) {
+                if (suppressOutput) {
                     // Ignore initial pyodide intialization message
-                    this.suppressOutput = false;
+                    suppressOutput = false;
                 } else {
-                    this.output += out + "\n";
+                    output.value += out + "\n";
                 }
-            },
-            handleStdErr(out) {
+            };
+
+            function handleStdErr(out) {
                 pythonError = true;
-                this.output = out;
-            },
-            async evaluatePython() {
-                this.output = "";
-                this.pythonError = false;
-                const pyodide = await this.pyodideReadyPromise;
+                output.value = out;
+            };
+
+            async function main() {
+                return await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.19.1/full/",
+                    stdout: handleStdOut,
+                    stderr: handleStdErr,
+                });
+            };
+
+            async function evaluatePython() {
+                output.value = "";
+                pythonError.value = false;
+                const pyodide = await pyodideReadyPromise;
                 const code = document.querySelector(".code-input textarea");
                 try {
                     pyodide.runPython(code.value);
                 } catch (err) {
-                    this.pythonError = true;
-                    this.output = err;
+                    pythonError.value = true;
+                    output.value = err;
                 }
-            },
-            checkTab(event) {
+            };
+
+            function initialize() {
+                pyodideReadyPromise = main();
+
+                const resultElement = document.querySelector(".code-input pre code");
+                resultElement.value = "";
+            };
+
+            function checkTab(event) {
                 const element = document.querySelector(".code-input textarea");
                 if (event.key == "Tab") {
                     event.preventDefault(); // stop normal
@@ -98,9 +93,30 @@
                     // move cursor
                     element.selectionStart = cursorPos;
                     element.selectionEnd = cursorPos;
-                    this.update(element.value); // Update text to include indent
+                    update(element.value); // Update text to include indent
                 }
-            },
+            };
+
+            function syncScroll() {
+                // Scroll result to scroll coords of event - sync with textarea
+                const inputElement = document.querySelector(".code-input textarea");
+                const resultElement = document.querySelector(".code-input pre");
+
+                // Get and set x and y
+                resultElement.scrollTop = inputElement.scrollTop;
+                resultElement.scrollLeft = inputElement.scrollLeft;
+            };
+
+            return {
+                checkTab,
+                evaluatePython,
+                initialize,
+                output,
+                pythonError,
+                suppressOutput,
+                syncScroll,
+                update,
+            };
         },
     };
 
