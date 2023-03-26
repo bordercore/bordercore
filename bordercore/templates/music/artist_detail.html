@@ -12,7 +12,7 @@
                         <font-awesome-icon icon="home" class="glow"></font-awesome-icon>
                     </a>
                 </li>
-                <li class="breadcrumb-item active">{{ artist.name|safe }}</li>
+                <li class="breadcrumb-item active">{{ artist.name }}</li>
             </ul>
         </div>
     </div>
@@ -186,7 +186,7 @@
                                     </o-table-column>
 
                                     <o-table-column field="year" label="Year" :th-attrs="()=> ({ class: 'text-nowrap' })" sortable v-slot="props">
-                                        <span>[[ props.row.year ]]</span>
+                                        <span>[[ props.row.year_effective ]]</span>
                                     </o-table-column>
 
                                     <o-table-column field="rating" label="Rating" :th-attrs="()=> ({ class: 'text-end' })" sortable v-slot="props">
@@ -294,6 +294,8 @@
 
     {{ block.super }}
 
+    {{ song_list|json_script:"songList" }}
+
     <script type="text/javascript" charset="utf-8">
 
         const navApp = createApp({
@@ -327,18 +329,7 @@
                 ]);
                 const isOver = ref(false);
                 const selectedSong = ref({});
-                const songList = ref([
-                    {% for song in song_list %}
-                    {
-                        "uuid": "{{ song.uuid }}",
-                        "year": "{{ song.year_effective|default:'' }}",
-                        "title": "{{ song.title|safe }}",
-                        "length": "{{ song.length }}",
-                        "note": "{{ song.note|safe|escapejs }}",
-                        "rating": "{{ song.rating|default:'' }}",
-                    },
-                    {% endfor %}
-                ]);
+                const songList = JSON.parse(document.getElementById("songList").textContent)
 
                 const addToPlaylist = ref(null);
                 const audioPlayer = ref(null);
@@ -386,7 +377,7 @@
                             "rating": rating,
                         },
                         (response) => {
-                            for (const song of songList.value) {
+                            for (const song of songList) {
                                 if (song.uuid === row.uuid) {
                                     song.rating = rating;
                                 }
@@ -430,7 +421,7 @@
                 }
 
                 function onClickUpdate(uuid) {
-                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path|safe }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
+                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
                 }
 
                 function onClickAddToPlaylist(uuid) {

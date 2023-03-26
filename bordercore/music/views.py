@@ -117,13 +117,17 @@ class ArtistDetailView(TemplateView):
         song_list = []
 
         for song in songs:
-            song_list.append(dict(uuid=song.uuid,
-                                  year_effective=song.original_year or song.year,
-                                  title=song.title,
-                                  rating=song.rating,
-                                  length=convert_seconds(song.length),
-                                  artist=song.artist,
-                                  note=re.sub("[\n\r\"]", "", song.note or "")))
+            song_list.append(
+                {
+                    "uuid": song.uuid,
+                    "year_effective": song.original_year or song.year,
+                    "title": song.title,
+                    "rating": song.rating,
+                    "length": convert_seconds(song.length),
+                    "artist": song.artist.name,
+                    "note": re.sub("[\n\r\"]", "", song.note or "")
+                }
+            )
 
         return {
             **context,
