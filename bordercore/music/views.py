@@ -199,18 +199,20 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
         song_list = []
 
         for song in s:
-            if self.object.compilation:
-                display_title = song.title + " - " + song.artist.name
-            else:
-                display_title = song.title
-            song_list.append(dict(uuid=song.uuid,
-                                  track=song.track,
-                                  raw_title=song.title.replace("/", "FORWARDSLASH"),
-                                  title=display_title,
-                                  note=song.note or "",
-                                  rating=song.rating,
-                                  length_seconds=song.length,
-                                  length=convert_seconds(song.length)))
+            display_title = song.title + " - " + song.artist.name if \
+                self.object.compilation else song.title
+            song_list.append(
+                {
+                    "uuid": song.uuid,
+                    "track": song.track,
+                    "raw_title": song.title.replace("/", "FORWARDSLASH"),
+                    "title": display_title,
+                    "note": song.note or "",
+                    "rating": song.rating,
+                    "length_seconds": song.length,
+                    "length": convert_seconds(song.length)
+                }
+            )
 
         return {
             **context,
