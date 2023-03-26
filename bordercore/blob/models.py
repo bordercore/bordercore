@@ -427,10 +427,7 @@ class Blob(TimeStampedModel):
     def is_ingestible_file(filename):
 
         file_extension = PurePath(str(filename)).suffix
-        if file_extension[1:].lower() in FILE_TYPES_TO_INGEST:
-            return True
-        else:
-            return False
+        return file_extension[1:].lower() in FILE_TYPES_TO_INGEST
 
     def get_cover_url_static(uuid, filename, size="large"):
 
