@@ -43,6 +43,14 @@
                         </div>
                         <div v-if="showAddCollection">
                             <input id="collectionName" class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
+                            <div class="mt-3">
+                                <div class="form-check">
+                                    <input id="isPrivate" class="form-check-input mt-2" type="radio">
+                                    <label class="form-check-label d-flex" for="isPrivate">
+                                        Private
+                                    </label>
+                                </div>
+                            </div>
                             <button class="btn btn-primary d-flex ms-auto" @click="handleCollectionCreate">
                                 Create
                             </button>
@@ -109,11 +117,13 @@
             };
 
             function handleCollectionCreate() {
+                const isPrivate = document.querySelector("#isPrivate").value;
                 const name = document.querySelector("#collectionName").value;
 
                 doPost(
                     props.addCollectionUrl,
                     {
+                        "is_private": isPrivate,
                         "name": name,
                     },
                     (response) => {
