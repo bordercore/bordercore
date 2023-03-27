@@ -119,6 +119,9 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
                 ).first().blob.tags.all()
             ]
 
+        if "metadata" not in context:
+            context["metadata"] = []
+
         if "collection_uuid" in self.request.GET:
             context["collection_info"] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
 
@@ -226,7 +229,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         if self.object.sha1sum:
             context["cover_url"] = self.object.get_cover_url()
 
-        context["metadata"] = self.object.metadata.exclude(name="is_book")
+        context["metadata"] = list(self.object.metadata.exclude(name="is_book").values())
 
         context["is_book"] = self.object.metadata.filter(name="is_book").exists()
 

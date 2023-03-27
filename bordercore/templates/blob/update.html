@@ -180,7 +180,7 @@
                             <strong class="text-white">
                                 Errors
                             </strong>
-                            {{ error|safe }}
+                            {{ error }}
                         </div>
                     {% endfor %}
                     </div>
@@ -414,6 +414,7 @@
 
     {{ block.super }}
 
+    {{ metadata|json_script:"metadata" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript">
@@ -464,14 +465,7 @@
                 const fileObject = ref();
                 const isOver = ref(false);
                 const showRelatedTags = ref(false);
-                const metadata =ref([
-                    {% for m in metadata %}
-                    {
-                        name: "{{ m.name|safe|escapejs }}",
-                        value: "{{ m.value|safe|escapejs }}",
-                    },
-                    {% endfor %}
-                ]);
+                const metadata = ref(JSON.parse(document.getElementById("metadata").textContent))
                 const metadataJson = computed(() => {
                     return JSON.stringify(metadata.value);
                 });
