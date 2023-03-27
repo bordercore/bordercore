@@ -505,7 +505,7 @@
                 };
 
                 function getPluralized() {
-                    return pluralize("blob", paginator.count);
+                    return pluralize("blob", paginator.value.count);
                 };
 
                 const blobList = ref([]);
