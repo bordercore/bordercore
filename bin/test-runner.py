@@ -71,6 +71,7 @@ def run_test(test, verbose=False):
                 "-m",
                 "not data_quality and not functional",
                 f"--junitxml={TEST_REPORT}",
+                "--ignore-glob=**/node_modules/*",
                 f"{os.environ.get('BORDERCORE_HOME')}/"
             ]
         }
@@ -103,6 +104,7 @@ def run_test(test, verbose=False):
                 "-m",
                 "functional",
                 f"--junitxml={TEST_REPORT}",
+                "--ignore-glob=**/node_modules/*",
                 f"{os.environ.get('BORDERCORE_HOME')}/"
             ]
         }
@@ -118,7 +120,8 @@ def run_test(test, verbose=False):
                 "-p",
                 "no:django",
                 f"--junitxml={TEST_REPORT}",
-                f"{os.environ.get('BORDERCORE_HOME')}/"
+                "--ignore-glob=**/node_modules/*",
+                f"{os.environ.get('BORDERCORE_HOME')}/",
             ]
         }
 
