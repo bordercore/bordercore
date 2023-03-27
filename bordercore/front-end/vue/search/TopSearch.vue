@@ -240,6 +240,9 @@
                 document.addEventListener("keydown", function(evt) {
                     if (evt.key === "s" && evt.altKey) {
                         showSearchWindow.value = true;
+                        setTimeout(() => {
+                            focusSearch();
+                        }, 200);
                     }
                 } );
 
