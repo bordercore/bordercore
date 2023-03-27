@@ -87,7 +87,6 @@
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
     import {boldenOption} from "/front-end/util.js";
     import SelectValue from "/front-end/vue/common/SelectValue.vue";
-    import "vue-multiselect/dist/vue-multiselect.min.css";
 
     export default {
         components: {

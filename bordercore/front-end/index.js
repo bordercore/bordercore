@@ -146,7 +146,7 @@ import EditableTextArea from "./vue/common/EditableTextArea.vue";
 window.EditableTextArea= EditableTextArea;
 
 import SelectValue from "./vue/common/SelectValue.vue";
-import "vue-multiselect/dist/vue-multiselect.min.css";
+import "vue-multiselect/dist/vue-multiselect.css";
 window.SelectValue = SelectValue;
 
 import SearchResult from "./vue/search/SearchResult.vue";
