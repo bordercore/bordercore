@@ -44,7 +44,9 @@
             </template>
             <template #noResult>
                 <div v-show="showNoResult">
-                    Nothing found
+                    <span class="multiselect__option">
+                        Nothing found
+                    </span>
                 </div>
             </template>
         </multiselect>
