@@ -412,13 +412,26 @@ class Blob(TimeStampedModel):
         return self in self.user.userprofile.pinned_notes.all()
 
     def get_collections(self):
-        return Collection.objects.filter(
+        collection_list = []
+
+        for x in Collection.objects.filter(
             user=self.user,
         ).annotate(
             num_objects=Count("collectionobject__blob")
         ).filter(
             collectionobject__blob__in=[self]
-        )
+        ):
+            collection_list.append(
+                {
+                    "name": x.name,
+                    "uuid": x.uuid,
+                    "url": x.get_absolute_url(),
+                    "num_objects": x.num_objects,
+                    "cover_url": x.cover_url,
+                }
+            )
+
+        return collection_list
 
     def get_date(self):
         return get_date_from_pattern({"gte": self.date})

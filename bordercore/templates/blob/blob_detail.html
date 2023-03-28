@@ -80,9 +80,9 @@
                     {% if show_metadata %}
 
                         <transition name="fade">
-                            <div v-if="Object.keys(elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
+                            <div v-if="Object.keys(elasticsearchInfo).length !== 0 || Object.keys(metadataMisc).length !== 0" class="highlight-box mb-3">
 
-                                <div v-for="(value, name) in metadata_misc" class="d-flex">
+                                <div v-for="(value, name) in metadataMisc" class="d-flex">
                                     <div class="item-name me-2">
                                         [[ name ]]
                                     </div>
@@ -145,7 +145,7 @@
                     {% endif %}
 
                     {% if blob.sha1sum %}
-                        <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" role="button">
+                        <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url }}" role="button">
                             <font-awesome-icon icon="download" class="text-emphasis" />
                         </a>
                     {% endif %}
@@ -320,7 +320,7 @@
                 {% if blob.is_video %}
                 <div v-cloak>
                     <video class="h-100 w-100" controls muted>
-                        <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
+                        <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url }}" type="video/mp4">
                     </video>
                 </div>
                 {% elif blob.sha1sum and not blob.is_audio %}
@@ -335,7 +335,7 @@
                 {% endif %}
 
                 <media-controller v-if="elasticsearchInfo.content_type === 'Audio'" audio v-cloak class="w-100">
-                    <audio id="player" slot="media" src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
+                    <audio id="player" slot="media" src="{{ MEDIA_URL }}blobs/{{ blob.get_url }}" type="audio/mpeg">
                     </audio>
                     <media-control-bar class="w-100">
                         <media-play-button></media-play-button>
@@ -374,6 +374,11 @@
 
     {{ block.super }}
 
+    {{ collection_list|json_script:"collectionList" }}
+    {{ elasticsearch_info|json_script:"elasticsearchInfo" }}
+    {{ metadata_misc|json_script:"metadataMisc" }}
+    {{ tree|json_script:"tree" }}
+
     {% if blob.math_support %}
     <script type="text/javascript" id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -407,24 +412,14 @@
                 TreeMenu,
             },
             setup() {
-                const collectionList = ref([
-                    {% for collection in collection_list %}
-                    {
-                        "uuid": "{{ collection.uuid }}",
-                        "name": "{{ collection.name|safe }}",
-                        "url": "{% url 'collection:detail' collection.uuid %}",
-                        "cover_url": "{{ collection.cover_url }}",
-                        "num_objects": "{{ collection.num_objects }}",
-                    },
-                    {% endfor %}
-                ]);
-                const elasticsearchInfo = ref({{ elasticsearch_info|safe|default:"{}" }});
+                const collectionList = JSON.parse(document.getElementById("collectionList").textContent);
+                const elasticsearchInfo = JSON.parse(document.getElementById("elasticsearchInfo").textContent);
                 const isPinnedNote = ref({{ is_pinned_note|yesno:"true,false" }});
                 const relatedBlobList = ref([]);
-                const getBlobInfoAttemptIntervals = ref([1000, 3000, 6000]);
-                const getBlobInfoAttempts = ref(0);
-                const tree = ref({{ tree|safe }});
-                const metadata_misc = ref({{ metadata_misc|safe|default:"{}" }});
+                const getBlobInfoAttemptIntervals = [1000, 3000, 6000];
+                const getBlobInfoAttempts = 0;
+                const tree = JSON.parse(document.getElementById("tree").textContent);
+                const metadataMisc = JSON.parse(document.getElementById("metadataMisc").textContent);
                 const relatedQuestions = ref([
                     {% for question in relatedQuestions %}
                     {
@@ -597,7 +592,7 @@
                     handleDelete,
                     handleObjectAdd,
                     isPinnedNote,
-                    metadata_misc,
+                    metadataMisc,
                     objectSelect,
                     onAfterEnter,
                     onClick,

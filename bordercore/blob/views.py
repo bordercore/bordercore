@@ -165,21 +165,19 @@ class BlobDetailView(DetailView):
 
         context["metadata"], context["urls"] = self.object.get_metadata()
 
-        context["metadata_misc"] = json.dumps(
-            {
-                key: value for (key, value)
-                in context["metadata"].items()
-                if key not in
-                [
-                    "is_book",
-                    "Url",
-                    "Publication Date",
-                    "Subtitle",
-                    "Name",
-                    "Author"
-                ]
-            }
-        )
+        context["metadata_misc"] = {
+            key: value for (key, value)
+            in context["metadata"].items()
+            if key not in
+            [
+                "is_book",
+                "Url",
+                "Publication Date",
+                "Subtitle",
+                "Name",
+                "Author"
+            ]
+        }
 
         context["date"] = self.object.get_date()
 
@@ -190,7 +188,7 @@ class BlobDetailView(DetailView):
             context["is_pinned_note"] = self.object.is_pinned_note()
 
         try:
-            context["elasticsearch_info"] = json.dumps(self.object.get_elasticsearch_info())
+            context["elasticsearch_info"] = self.object.get_elasticsearch_info()
         except IndexError:
             # Give Elasticsearch up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
@@ -200,14 +198,12 @@ class BlobDetailView(DetailView):
 
         context["show_metadata"] = "content_type" in context \
             or self.object.sha1sum \
-            or context["metadata_misc"] != "{}"
+            or context["metadata_misc"] != {}
 
-        context["tree"] = json.dumps(
-            {
-                "label": "Root",
-                "nodes": self.object.get_tree()
-            }
-        )
+        context["tree"] = {
+            "label": "Root",
+            "nodes": self.object.get_tree()
+        }
 
         context["name"] = self.object.get_name(remove_edition_string=True)
 
