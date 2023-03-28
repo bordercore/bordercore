@@ -34,7 +34,7 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
 
         query = Collection.objects.filter(
             user=self.request.user,
-            is_private=False
+            is_favorite=True
         )
 
         if "query" in self.request.GET:
@@ -212,7 +212,7 @@ def get_images(request, collection_uuid):
 def search(request):
 
     query = Collection.objects.filter(user=request.user). \
-        filter(is_private=False)
+        filter(is_favorite=True)
 
     if "query" in request.GET:
         query = query.filter(name__icontains=request.GET.get("query"))

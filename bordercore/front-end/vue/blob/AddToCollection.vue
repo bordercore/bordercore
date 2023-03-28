@@ -45,8 +45,8 @@
                             <input id="collectionName" class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
                             <div class="mt-3">
                                 <div class="form-check">
-                                    <input id="isPrivate" class="form-check-input mt-2" type="radio">
-                                    <label class="form-check-label d-flex" for="isPrivate">
+                                    <input id="isFavorite" class="form-check-input mt-2" type="radio">
+                                    <label class="form-check-label d-flex" for="isFavorite">
                                         Private
                                     </label>
                                 </div>
@@ -117,13 +117,13 @@
             };
 
             function handleCollectionCreate() {
-                const isPrivate = document.querySelector("#isPrivate").value;
+                const isFavorite = document.querySelector("#isFavorite").value;
                 const name = document.querySelector("#collectionName").value;
 
                 doPost(
                     props.addCollectionUrl,
                     {
-                        "is_private": isPrivate,
+                        "is_favorite": isFavorite,
                         "name": name,
                     },
                     (response) => {

@@ -37,7 +37,7 @@ class Collection(TimeStampedModel):
     bc_objects = models.ManyToManyField("collection.BCObject", through="CollectionObject")
     tags = models.ManyToManyField(Tag)
     description = models.TextField(blank=True, default="")
-    is_private = models.BooleanField(default=False)
+    is_favorite = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

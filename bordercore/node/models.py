@@ -42,8 +42,7 @@ class Node(TimeStampedModel):
             collection = Collection.objects.get(uuid=uuid)
             collection_type = "permanent"
         else:
-            # New collections are private to avoid display on the collection list page
-            collection = Collection.objects.create(name=name, user=self.user, is_private=True)
+            collection = Collection.objects.create(name=name, user=self.user)
             collection_type = "ad-hoc"
 
         layout = self.layout

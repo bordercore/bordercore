@@ -117,7 +117,7 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Collection
-        fields = ["description", "is_private", "name", "tags"]
+        fields = ["description", "is_favorite", "name", "tags"]
 
 
 class FeedSerializer(serializers.ModelSerializer):

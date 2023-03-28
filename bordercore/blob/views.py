@@ -235,7 +235,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
 
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
                                                                  & ~Q(collectionobject__blob__uuid=self.object.uuid)
-                                                                 & Q(is_private=False))
+                                                                 & Q(is_favorite=True))
         context["date_format"] = "year" if self.object.date_is_year else "standard"
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
