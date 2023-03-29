@@ -1,6 +1,7 @@
 import os
 import string
 from pathlib import PurePath
+from urllib.parse import urlparse
 
 import requests
 
@@ -157,3 +158,16 @@ def parse_title_from_url(url):
         return (r.url, title[0].text)
     else:
         return (r.url, "No title")
+
+
+def favicon_url(url, size=32):
+
+    if not url:
+        return ""
+
+    t = urlparse(url).netloc
+
+    # We want the domain part of the hostname (eg bordercore.com instead of www.bordercore.com)
+    domain = ".".join(t.split(".")[1:])
+
+    return f"<img src=\"https://www.bordercore.com/favicons/{domain}.ico\" width=\"{size}\" height=\"{size}\" />"
