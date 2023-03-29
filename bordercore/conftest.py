@@ -406,7 +406,7 @@ def fitness(auto_login_user):
 @pytest.fixture()
 def collection(monkeypatch_collection, blob_image_factory, blob_pdf_factory):
 
-    collection_0 = CollectionFactory()
+    collection_0 = CollectionFactory(is_favorite=True)
 
     tag_1 = TagFactory(name="linux")
     tag_2 = TagFactory(name="django")
@@ -415,7 +415,7 @@ def collection(monkeypatch_collection, blob_image_factory, blob_pdf_factory):
     collection_0.add_object(blob_image_factory[0])
     collection_0.add_object(blob_pdf_factory[0])
 
-    collection_1 = CollectionFactory(name="To Display")
+    collection_1 = CollectionFactory(name="To Display", is_favorite=True)
     collection_1.add_object(blob_pdf_factory[0])
 
     yield [collection_0, collection_1]

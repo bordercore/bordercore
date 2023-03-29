@@ -152,7 +152,7 @@ def test_is_pinned_note(blob_note):
 
 def test_get_collections(collection, blob_pdf_factory):
     assert len(blob_pdf_factory[0].get_collections()) == 2
-    assert "To Display" in [x.name for x in blob_pdf_factory[0].get_collections()]
+    assert "To Display" in [x["name"] for x in blob_pdf_factory[0].get_collections()]
 
 
 def test_get_linked_blobs(blob_pdf_factory):

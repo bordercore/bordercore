@@ -43,13 +43,11 @@
                         </div>
                         <div v-if="showAddCollection">
                             <input id="collectionName" class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
-                            <div class="mt-3">
-                                <div class="form-check">
-                                    <input id="isFavorite" class="form-check-input mt-2" type="radio">
-                                    <label class="form-check-label d-flex" for="isFavorite">
-                                        Private
-                                    </label>
+                            <div class="mt-3 d-flex">
+                                <div class="me-3">
+                                    Is Favorite
                                 </div>
+                                <o-switch v-model="isFavorite" name="is_favorite" />
                             </div>
                             <button class="btn btn-primary d-flex ms-auto" @click="handleCollectionCreate">
                                 Create
@@ -90,6 +88,7 @@
         },
         emits: ["add-to-collection"],
         setup(props, ctx) {
+            const isFavorite = ref(false);
             const showAddCollection = ref(false);
 
             const selectValue = ref();
@@ -117,13 +116,12 @@
             };
 
             function handleCollectionCreate() {
-                const isFavorite = document.querySelector("#isFavorite").value;
                 const name = document.querySelector("#collectionName").value;
 
                 doPost(
                     props.addCollectionUrl,
                     {
-                        "is_favorite": isFavorite,
+                        "is_favorite": isFavorite.value,
                         "name": name,
                     },
                     (response) => {
@@ -162,6 +160,7 @@
             return {
                 handleCollectionCreate,
                 handleCollectionSelect,
+                isFavorite,
                 showAddCollection,
                 selectValue,
                 showCreateNewCollection,

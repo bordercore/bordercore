@@ -167,7 +167,7 @@
                             <div class="{% if field.errors %} error{% endif %} row mb-3">
                                 <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
 
-                                <div class="col-lg-9">
+                                <div class="col-lg-9 d-flex">
 
                             {% if field.label == "Tags" %}
 
@@ -176,6 +176,8 @@
                                 >
                                 </tags-input>
 
+                            {% elif field.label == "Is Favorite" %}
+                                <o-switch v-model="isFavorite" name="is_favorite" :native-value="is_favorite"></o-switch>
                             {% else %}
 
                                 {{ field }}
@@ -349,6 +351,7 @@
                 TagsInput,
             },
             setup() {
+                const isFavorite = ref({{ object.is_favorite|yesno:"true,false" }});
                 const collectionDetailMenuItems = [
                     {
                         id: uuidv4(),
@@ -646,6 +649,7 @@
                     collectionDetailMenuItems,
                     getBlobList,
                     getPluralized,
+                    isFavorite,
                     needsPagination,
                     objectTags,
                     onAddBlob,

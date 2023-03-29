@@ -17,6 +17,7 @@ class CollectionForm(ModelForm):
         if self.instance.id:
             self.initial["tags"] = self.instance.get_tags()
 
+        self.fields["is_favorite"].label = "Is Favorite"
         self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
@@ -25,7 +26,7 @@ class CollectionForm(ModelForm):
 
     class Meta:
         model = Collection
-        fields = ("name", "description", "tags")
+        fields = ("name", "description", "tags", "is_favorite")
         widgets = {
             "description": Textarea(attrs={"class": "form-control"}),
             "name": TextInput(attrs={"class": "form-control", "autocomplete": "off"})

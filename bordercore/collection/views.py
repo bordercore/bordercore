@@ -211,8 +211,7 @@ def get_images(request, collection_uuid):
 @login_required
 def search(request):
 
-    query = Collection.objects.filter(user=request.user). \
-        filter(is_favorite=True)
+    query = Collection.objects.filter(user=request.user)
 
     if "query" in request.GET:
         query = query.filter(name__icontains=request.GET.get("query"))
