@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Exists, OuterRef, Q
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
@@ -104,7 +104,6 @@ class CollectionCreateView(FormRequestMixin, CreateView):
     form_class = CollectionForm
 
     def form_valid(self, form):
-
         collection = form.save(commit=False)
         collection.user = self.request.user
         collection.save()
@@ -144,9 +143,6 @@ class CollectionUpdateView(FormRequestMixin, UpdateView):
 
         return HttpResponseRedirect(self.get_success_url())
 
-    def get_success_url(self):
-        return reverse("collection:detail", kwargs={"collection_uuid": self.object.uuid})
-
 
 @method_decorator(login_required, name='dispatch')
 class CollectionDeleteView(DeleteView):
@@ -155,6 +151,7 @@ class CollectionDeleteView(DeleteView):
     form_class = CollectionForm
     slug_field = "uuid"
     slug_url_kwarg = "collection_uuid"
+    success_url = reverse_lazy("collection:list")
 
     # Verify that the user is the owner of the task
     def get_object(self, queryset=None):
@@ -171,9 +168,6 @@ class CollectionDeleteView(DeleteView):
             f"Collection <strong>{self.object.name}</strong> deleted"
         )
         return response
-
-    def get_success_url(self):
-        return reverse("collection:list")
 
 
 @login_required

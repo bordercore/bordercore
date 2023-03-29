@@ -28,7 +28,7 @@ BLOB_COUNT_PER_PAGE = 30
 
 class Collection(TimeStampedModel):
     """
-    A collection of blobs organized around a common theme or project
+    A collection of objects organized around a common theme or project
     """
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -41,6 +41,9 @@ class Collection(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("collection:detail", kwargs={"collection_uuid": self.uuid})
 
     @property
     def cover_url(self):
