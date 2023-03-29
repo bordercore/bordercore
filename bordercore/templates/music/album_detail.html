@@ -121,15 +121,15 @@
                                 <o-table-column field="rating" label="Rating" :th-attrs="()=> ({ class: 'text-end' })"
                                     v-slot="props">
                                     <div class="ms-auto">
-                                        <div class="rating-container d-flex" :class="{'d-none': props.row.rating === ''}" @mouseleave="onMouseLeaveRatingContainer">
+                                        <div class="rating-container d-flex" :class="{'d-none': props.row.rating === ''}" @mouseleave="handleRatingMouseLeave">
                                             <span
                                                 v-for="starCount in Array(5).fill().map((x,i)=>i)"
                                                 :key="starCount"
                                                 class="rating me-1"
                                                 :class="{'rating-star-selected': parseInt(props.row.rating, 10) > starCount}"
                                                 :data-rating="starCount"
-                                                @click="setRating($event, props.row, starCount)"
-                                                @mouseover="onMouseOverRating($event, starCount)">
+                                                @click="setRating($event, props.row, starCount, '{% url 'music:set_song_rating' %}', songList)"
+                                                @mouseover="handleRatingMouseOver($event, starCount)">
                                                 <font-awesome-icon icon="star"></font-awesome-icon>
                                             </span>
                                         </div>
@@ -324,6 +324,8 @@
                 ]);
                 const songList = JSON.parse(document.getElementById("songList").textContent)
 
+                const { handleRatingMouseLeave, handleRatingMouseOver, setRating } = mouseRating();
+
                 const addToPlaylist = ref(null);
                 const audioPlayer = ref(null);
 
@@ -336,67 +338,6 @@
 
                 function onShowNote(song) {
                     return markdown.render(song.note);
-                }
-
-                function setRating(evt, row, rating) {
-                    const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
-                    for (const el of els) {
-                        el.classList.remove("rating-star-hovered");
-                        if (parseInt(el.getAttribute("data-rating", 10)) < rating + 1) {
-                            el.classList.add("rating-star-selected");
-                        } else {
-                            el.classList.remove("rating-star-selected");
-                        }
-                    }
-                    rating = rating + 1;
-                    if (rating === parseInt(row.rating, 10)) {
-                        // If we've selected the current rating, treat it
-                        // as if we've de-selected a rating entirely
-                        // and remove it.
-                        rating = "";
-                    }
-                    nextTick(() => {
-                        animateCSS(evt.currentTarget, "heartBeat");
-                    });
-                    doPost(
-                        "{% url 'music:set_song_rating' %}",
-                        {
-                            "song_uuid": row.uuid,
-                            "rating": rating,
-                        },
-                        (response) => {
-                            for (const song of songList) {
-                                if (song.uuid === row.uuid) {
-                                    song.rating = rating;
-                                }
-                            }
-                        },
-                        "",
-                    );
-                }
-
-                function onMouseLeaveRatingContainer() {
-                    const els = document.querySelectorAll(".rating");
-                    for (const el of els) {
-                        el.classList.remove("rating-star-hovered");
-                    }
-                }
-
-                function onMouseOverRating(event, rating) {
-                    // The event is triggered on an individual star. Go
-                    // up to the parent and select all stars for the row.
-                    const els = event.currentTarget.parentElement.querySelectorAll(".rating");
-                    // Loop over each star rating. Add the "hovered" class if:
-                    //  1) The rating is > the currently selected rating
-                    //  2) The rating is < the currently "hovered" rating
-                    for (const el of els) {
-                        if (!el.classList.contains("rating-star-selected") &&
-                            parseInt(el.getAttribute("data-rating"), 10) < rating + 1) {
-                            el.classList.add("rating-star-hovered");
-                        } else {
-                            el.classList.remove("rating-star-hovered");
-                        }
-                    }
                 }
 
                 function onSongClicked(row, column, rowIndex, columnIndex) {
@@ -442,13 +383,13 @@
                     audioPlayer,
                     getNote,
                     handleDeleteAlbum,
+                    handleRatingMouseLeave,
+                    handleRatingMouseOver,
                     handleUpdateAlbum,
                     onClickAddToPlaylist,
                     onClickUpdate,
                     onCoverImageSelect,
                     onCurrentSong,
-                    onMouseLeaveRatingContainer,
-                    onMouseOverRating,
                     onShowNote,
                     onSongClicked,
                     setRating,

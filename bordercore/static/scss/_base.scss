@@ -2198,6 +2198,10 @@ media-volume-range {
 }
 
 .rating {
+  color: var(--surface1-transparent);
+}
+
+.rating-no-hover {
   color: var(--text-disabled);
 }
 

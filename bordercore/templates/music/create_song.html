@@ -136,15 +136,15 @@
                         <div class="row align-items-center mb-3">
                             <label class="col-lg-3 col-form-label fw-bold text-end">Rating</label>
 
-                            <div class="col-lg-9" @mouseleave="onMouseLeaveRatingContainer">
+                            <div class="col-lg-9" @mouseleave="handleRatingMouseLeave">
                                 <span
                                     v-for="starCount in Array(5).fill().map((x,i)=>i)"
                                     :key="starCount"
-                                    class="rating me-1"
+                                    class="rating-no-hover me-1"
                                     :class="{'rating-star-selected': rating > starCount}"
                                     :data-rating="starCount"
                                     @click="setRating($event, starCount)"
-                                    @mouseover="onMouseOverRating($event, starCount)"
+                                    @mouseover="handleRatingMouseOver($event, starCount)"
                                 >
                                     <font-awesome-icon icon="star"></font-awesome-icon>
                                 </span>
@@ -292,6 +292,8 @@
                 const isCompilation = ref(false);
                 const uuid = "{{ song.uuid }}";
 
+                const { handleRatingMouseLeave, handleRatingMouseOver } = mouseRating();
+
                 const selectValue = ref(null);
                 const tagsInput = ref(null);
 
@@ -371,28 +373,6 @@
                     });
                 }
 
-                function onMouseLeaveRatingContainer() {
-                    const els = document.querySelectorAll(".rating");
-                    for (const el of els) {
-                        el.classList.remove("rating-star-hovered");
-                    }
-                }
-
-                function onMouseOverRating(evt, rating) {
-                    const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
-                    // Loop over each star rating. Add the "hovered" class if:
-                    //  1) The rating is > the currently selected rating
-                    //  2) The rating is < the currently "hovered" rating
-                    for (const el of els) {
-                        if (!el.classList.contains("rating-star-selected") &&
-                            parseInt(el.getAttribute("data-rating"), 10) < rating + 1) {
-                            el.classList.add("rating-star-hovered");
-                        } else {
-                            el.classList.remove("rating-star-hovered");
-                        }
-                    }
-                }
-
                 function setRating(evt, ratingParam) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {
@@ -438,13 +418,13 @@
                 return {
                     filename,
                     rating,
+                    handleRatingMouseLeave,
+                    handleRatingMouseOver,
                     handleSongChange,
                     handleSongDelete,
                     handleSongDupeCheck,
                     handleTagClick,
                     isCompilation,
-                    onMouseLeaveRatingContainer,
-                    onMouseOverRating,
                     selectValue,
                     setRating,
                     songLength,

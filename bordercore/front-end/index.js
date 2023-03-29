@@ -9,6 +9,10 @@ window.reactive = reactive;
 window.ref = ref;
 window.watch = watch;
 
+// Vue composables
+import mouseRating from "./useMouseRating.js";
+window.mouseRating = mouseRating;
+
 // Use the tiny-emitter package as an event bus
 import emitter from "tiny-emitter/instance";
 
