@@ -74,259 +74,194 @@
 
             <div id="blob" class="tab-pane fade">
                 <ul class="list-unstyled d-flex flex-wrap">
-
-                    {% for match in search_results.matches.blob %}
-
-                        <li class="search-result grid me-3 py-3">
-                            <div class="d-flex my-1">
+                    <li v-for="match in searchResults.matches.blob" class="search-result grid me-3 py-3">
+                        <div class="d-flex my-1">
+                            <div>
+                                <img :src="match.cover_url" />
+                            </div>
+                            <div class="d-flex flex-column ms-2">
+                                <h4>
+                                    <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                    <a :href="'{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                                        [[ match.name ]]
+                                    </a>
+                                </h4>
                                 <div>
-                                    <img src="{{ match.cover_url }}" />
+                                    <small v-if="match.creators">
+                                        [[ match.creators ]]
+                                    </small>
                                 </div>
-                                <div class="d-flex flex-column ms-2">
-                                    <h4>
-                                        {% if match.importance > 1 %}
-                                            <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
-                                        {% endif %}
-                                        <a href="{% url 'blob:detail' match.uuid %}">
-                                            {{ match.name|default:"No name" }}
-                                        </a>
-                                    </h4>
-                                    <div>
-                                        {% if match.creators %}
-                                            <small>
-                                                {{ match.creators }}
-                                            </small>
-                                        {% endif %}
-                                    </div>
-                                    <div class="search-result-date text-nowrap">
-                                        {{ match.date }}
-                                    </div>
-                                    <div>
-                                        <div class="mt-2">
-                                            {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
+                                <div class="search-result-date text-nowrap">
+                                    [[ match.date ]]
+                                </div>
+                                <div class="mt-2">
+                                    <a v-for="tag in match.tags" :href="tag.url" class="tag">[[ tag.name ]]</a>
                                 </div>
                             </div>
-                        </li>
-
-                    {% endfor %}
-
+                        </div>
+                    </li>
                 </ul>
             </div>
 
             <div id="book" class="tab-pane fade">
                 <ul class="list-unstyled d-flex flex-wrap">
-
-                    {% for match in search_results.matches.book %}
-
-                        <li class="search-result grid me-3 py-3">
-                            <div class="d-flex my-1">
+                    <li v-for="match in searchResults.matches.book" class="search-result grid me-3 py-3">
+                        <div class="d-flex my-1">
+                            <div>
+                                <img :src="match.cover_url" />
+                            </div>
+                            <div class="d-flex flex-column ms-2">
+                                <h4>
+                                    <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                    <a :href="'{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                                        [[ match.name ]]
+                                    </a>
+                                </h4>
                                 <div>
-                                    <img src="{{ match.cover_url }}" />
+                                    <small v-if="match.creators">
+                                        [[ match.creators ]]
+                                    </small>
                                 </div>
-                                <div class="d-flex flex-column ms-2">
-                                    <h4>
-                                        {% if match.importance > 1 %}
-                                            <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
-                                        {% endif %}
-                                        <a href="{% url 'blob:detail' match.uuid %}">
-                                            {{ match.name|default:"No name" }}
-                                        </a>
-                                    </h4>
-                                    <div>
-                                        {% if match.creators %}
-                                            <small>
-                                                {{ match.creators }}
-                                            </small>
-                                        {% endif %}
-                                    </div>
-                                    <div class="search-result-date text-nowrap">
-                                        {{ match.date }}
-                                    </div>
-                                    <div>
-                                        <div class="mt-2">
-                                            {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge">{{ tag }}</a>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
+                                <div class="search-result-date text-nowrap">
+                                    [[ match.date ]]
+                                </div>
+                                <div class="mt-2">
+                                    <a v-for="tag in match.tags" :href="tag.url" class="tag">[[ tag.name ]]</a>
                                 </div>
                             </div>
-                        </li>
-
-                    {% endfor %}
-
+                        </div>
+                    </li>
                 </ul>
             </div>
 
             <div id="bookmark" class="tab-pane fade">
                 <ul class="list-unstyled">
-
-                    {% for match in search_results.matches.bookmark %}
-
-                        <li class="search-result me-3">
-                            <div class="d-flex my-1">
-
-                                <div class="me-2 my-1">
-                                    <font-awesome-icon icon="bookmark" class="text-light"></font-awesome-icon>
-                                </div>
-
-                                <div class="d-flex flex-column">
-                                    <h4>
-                                    {% if match.importance > 1 %}
-                                        <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
-                                    {% endif %}
-                                    <a href="{{ match.url }}">{{ match.name }}</a>
-                                    </h4>
-                                    <div class="d-flex mb-2 align-items-center text-primary">
-                                    {{ match.url|favicon|safe }}
-                                        <div class="ms-2">
-                                        {{ match.url|domain }}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="mt-2">
-                                            {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="search-result-date text-nowrap ms-auto ps-4">
-                                    {{ match.date }}
-                                </div>
-
+                    <li v-for="match in searchResults.matches.bookmark" class="search-result me-3">
+                        <div class="d-flex my-1">
+                            <div class="me-2 my-1">
+                                <font-awesome-icon icon="bookmark" class="text-light"></font-awesome-icon>
                             </div>
-                        </li>
-
-                    {% endfor %}
-
+                            <div class="d-flex flex-column">
+                                <h4>
+                                    <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                    <a :href="match.url">[[ match.name ]]</a>
+                                </h4>
+                                <div class="d-flex mb-2 align-items-center text-primary">
+                                    <span v-html="match.favicon_url"></span>
+                                    <div class="ms-2">
+                                        [[ match.url_domain ]]
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a v-for="tag in match.tags" :href="tag.url" class="tag">[[ tag.name ]]</a>
+                                </div>
+                            </div>
+                            <div class="search-result-date text-nowrap ms-auto ps-4">
+                                [[ match.date ]]
+                            </div>
+                        </div>
+                    </li>
                 </ul>
             </div>
 
             <ul id="document" class="tab-pane fade list-unstyled">
-
-            {% for match in search_results.matches.document %}
-
-                <li class="search-result me-3">
+                <li v-for="match in searchResults.matches.document" class="search-result me-3">
                     <div class="d-flex my-1">
                         <div class="me-2 mt-1">
                             <font-awesome-icon icon="sticky-note" class="text-light" />
                         </div>
                         <div class="d-flex flex-column">
                             <h4>
-                                {% if match.importance > 1 %}
-                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
-                                {% endif %}
-                                <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"No Name" }}</a>
+                                <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                <a :href="'{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                                    [[ match.name ]]
+                                </a>
                             </h4>
-
-                            <h5 v-pre>{{ match.contents|safe }}</h5>
-                                <div class="mt-2">
-                                    {% for tag in match.tags %}
-                                        <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
-                                    {% endfor %}
-                                </div>
-                        </div>
-                        <div class="search-result-date text-nowrap ms-auto ps-4">
-                            {{ match.date }}
-                        </div>
-                    </div>
-                </li>
-
-            {% endfor %}
-
-            </ul>
-
-            <ul id="note" class="tab-pane fade list-unstyled">
-
-            {% for match in search_results.matches.note %}
-
-                <li class="search-result me-3">
-                    <div class="d-flex my-1">
-
-                        <div class="me-2 mt-1">
-                            <font-awesome-icon icon="sticky-note" class="text-light" />
-                        </div>
-                        <div class="d-flex flex-column">
-                            <h4>
-                                {% if match.importance > 1 %}
-                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
-                                {% endif %}
-                                <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"Note" }}</a>
-                            </h4>
-
                             <h5>
-                                {{ match.contents }}
+                                [[ match.contents ]]
                             </h5>
-                            <div>
-                                {% for tag in match.tags %}
-                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
-                                {% endfor %}
+                            <div class="mt-2">
+                                <a v-for="tag in match.tags" :href="tag.url" class="tag">[[ tag.name ]]</a>
                             </div>
                         </div>
                         <div class="search-result-date text-nowrap ms-auto ps-4">
-                            {{ match.date }}
+                            [[ match.date ]]
                         </div>
                     </div>
                 </li>
+            </ul>
 
-            {% endfor %}
-
+            <ul id="note" class="tab-pane fade list-unstyled">
+                <li v-for="match in searchResults.matches.note" class="search-result me-3">
+                    <div class="d-flex my-1">
+                        <div class="me-2 mt-1">
+                            <font-awesome-icon icon="sticky-note" class="text-light" />
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h4>
+                                <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                <a :href="'{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                                    [[ match.name ]]
+                                </a>
+                            </h4>
+                            <h5>
+                                [[ match.contents ]]
+                            </h5>
+                            <div class="mt-2">
+                                <a v-for="tag in match.tags" :href="tag.url" class="tag">[[ tag.name ]]</a>
+                            </div>
+                        </div>
+                        <div class="search-result-date text-nowrap ms-auto ps-4">
+                            [[ match.date ]]
+                        </div>
+                    </div>
+                </li>
             </ul>
 
             <div id="drill" class="tab-pane fade">
-            {% for match in search_results.matches.drill %}
-                <div class="row mt-2">
+                <div v-for="match in searchResults.matches.drill" class="row mt-2">
                     <div class="col-lg-12">
-                        <a href="{% url 'drill:detail' match.uuid %}">{{ match.question }}</a>
+                        <a :href="'{% url 'drill:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                            [[ match.question ]]
+                        </a>
                     </div>
                 </div>
-            {% endfor %}
             </div>
 
             <div id="song" class="tab-pane fade">
-            {% for match in search_results.matches.song %}
-                <div class="row mt-2">
+                <div v-for="match in searchResults.matches.song" class="row mt-2">
                     <div class="col-lg-12">
-                        <a href="{% url 'music:artist_detail' match.artist_uuid %}">{{ match.artist }} - {{ match.title }}</a>
+                        <a :href="'{% url 'music:artist_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.artist_uuid)">
+                            [[ match.artist ]] - [[ match.title ]]
+                        </a>
                     </div>
                 </div>
-            {% endfor %}
             </div>
 
             <div id="todo" class="tab-pane fade">
-            {% for match in search_results.matches.todo %}
-                <div class="row mt-2">
+                <div v-for="match in searchResults.matches.todo" class="row mt-2">
                     <div class="col-lg-12">
-                        {{ match.name }} <span class="search-todo-date">{{ match.last_modified }}</span>
+                        [[ match.name ]] <span class="search-todo-date">[[ match.last_modified ]]</span>
                     </div>
                 </div>
-            {% endfor %}
             </div>
 
             <div id="album" class="tab-pane fade d-flex flex-wrap">
-            {% for match in search_results.matches.album %}
-                <div class="mt-3 p-3">
+                <div v-for="match in searchResults.matches.album" class="mt-3 p-3">
                     <div>
-                        <a href="{% url 'music:album_detail' match.uuid %}">
-                            <img src="{{ IMAGES_URL }}album_artwork/{{ match.uuid }}" height="150" width="150" />
+                        <a :href="'{% url 'music:album_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                            <img :src="'{{ IMAGES_URL }}album_artwork/00000000-0000-0000-0000-000000000000'.replace('00000000-0000-0000-0000-000000000000', match.uuid)" height="150" width="150" />
                         </a>
                     </div>
                     <div class="mt-1 fw-bold">
-                        {{ match.title }}
+                        [[ match.title ]]
                     </div>
                     <div class="text-light">
-                        <a href="{% url 'music:album_detail' match.uuid %}">
-                            {{ match.artist|safe }}
+                        <a :href="'{% url 'music:album_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', match.uuid)">
+                            [[ match.artist ]]
                         </a>
                     </div>
                 </div>
-            {% endfor %}
             </div>
 
         </div>
@@ -339,6 +274,7 @@
 
     {{ block.super }}
 
+    {{ search_results|json_script:"searchResults" }}
     {{ tag_list|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript">
@@ -349,14 +285,16 @@
         }
 
         const app = createApp({
+            delimiters: ["[[", "]]"],
             components: {
                 FontAwesomeIcon,
                 TagsInput,
             },
             setup() {
+                const searchResults = JSON.parse(document.getElementById("searchResults").textContent);
                 function handleTagSearch(tagList) {
                     const tagsChangedUrl = "{% url 'search:kb_search_tag_detail' 666 %}";
-                    window.location = tagsChangedUrl.replace("666", tagList.join(","));
+                    window.location = tagsChangedUrl.replace("666", tagList.join(",")).replace("//", "/");
                 };
 
                 function onChange(evt) {
@@ -373,8 +311,6 @@
                         (response) => {
                             evt.preventDefault();
                         },
-                        "",
-                        "",
                     );
                 };
 
@@ -415,6 +351,7 @@
                     onChange,
                     onClickDoctype,
                     onClickMetaTag,
+                    searchResults,
                 };
             },
         });

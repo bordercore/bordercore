@@ -2,7 +2,7 @@ import datetime
 import json
 import math
 import re
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 
 import markdown
 from elasticsearch import RequestError
@@ -18,8 +18,8 @@ from django.views.generic.list import ListView
 from blob.models import Blob
 from bookmark.models import Bookmark
 from lib.time_utils import get_date_from_pattern, get_relative_date
-from lib.util import (get_elasticsearch_connection, get_pagination_range,
-                      truncate)
+from lib.util import (favicon_url, get_elasticsearch_connection,
+                      get_pagination_range, truncate)
 from tag.models import Tag
 from tag.services import get_tag_aliases, get_tag_link
 
@@ -427,8 +427,14 @@ class SearchTagDetailView(ListView):
 
             if "tags" in match["_source"]:
                 # Only show tags that were not searched for
-                result["tags"] = [tag for tag in match["_source"]["tags"]
-                                  if tag not in self.kwargs["taglist"]]
+                result["tags"] = [
+                    {
+                        "name": tag,
+                        "url": reverse("search:kb_search_tag_detail", args=[tag])
+                    }
+                    for tag in match["_source"]["tags"]
+                    if tag not in self.kwargs["taglist"]
+                ]
 
             if "sha1sum" in match["_source"]:
 
@@ -450,6 +456,8 @@ class SearchTagDetailView(ListView):
                 if "content_type" in match["_source"]:
                     result["content_type"] = Blob.get_content_type(match["_source"]["content_type"])
 
+            result["favicon_url"] = favicon_url(result["url"])
+            result["url_domain"] = urlparse(result["url"]).netloc
             results.setdefault(match["_source"]["doctype"], []).append(result)
 
         context["search_results"]["matches"] = results
