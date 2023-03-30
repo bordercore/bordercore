@@ -40,7 +40,7 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
         if "query" in self.request.GET:
             query = query.filter(name__icontains=self.request.GET.get("query"))
 
-        query = query.annotate(num_blobs=Count("collectionobject__blob"))
+        query = query.annotate(num_blobs=Count("collectionobject"))
 
         query = query.order_by("-modified")
 

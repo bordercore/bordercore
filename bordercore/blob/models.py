@@ -417,7 +417,7 @@ class Blob(TimeStampedModel):
         for x in Collection.objects.filter(
             user=self.user,
         ).annotate(
-            num_objects=Count("collectionobject__blob")
+            num_objects=Count("collectionobject")
         ).filter(
             collectionobject__blob__in=[self]
         ):
