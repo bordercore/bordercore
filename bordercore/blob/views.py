@@ -100,12 +100,14 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
 
         if "linked_blob_uuid" in self.request.GET:
             linked_blob = Blob.objects.get(user=self.request.user, uuid=self.request.GET["linked_blob_uuid"])
-            context["linked_blob"] = linked_blob
-            context["linked_blob"].thumbnail_url = linked_blob.get_cover_url_small()
-
+            context["linked_blob"] = {
+                "name": linked_blob.name,
+                "thumbnail_url": linked_blob.get_cover_url_small(),
+                "uuid": linked_blob.uuid
+            }
             # Grab the initial metadata and tags from the linked blob
-            context["metadata"] = linked_blob.metadata.all()
-            context["tags"] = [x.name for x in linked_blob.tags.all()]
+            context["metadata"] = list(linked_blob.metadata.all().values())
+            context["tags"] = [x["name"] for x in linked_blob.tags.all().values()]
 
         if "linked_collection" in self.request.GET:
             context["linked_collection"] = Collection.objects.get(
@@ -226,16 +228,17 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
             context["cover_url"] = self.object.get_cover_url()
 
         context["metadata"] = list(self.object.metadata.exclude(name="is_book").values())
-
         context["is_book"] = self.object.metadata.filter(name="is_book").exists()
-
-        context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
-                                                                 & ~Q(collectionobject__blob__uuid=self.object.uuid)
-                                                                 & Q(is_favorite=True))
+        context["collections_other"] = Collection.objects.filter(
+            Q(user=self.request.user)
+            & ~Q(collectionobject__blob__uuid=self.object.uuid)
+            & Q(is_favorite=True)
+        )
         context["date_format"] = "year" if self.object.date_is_year else "standard"
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
         context["tags"] = [x.name for x in self.object.tags.all()]
+
         return context
 
     def get(self, request, **kwargs):
