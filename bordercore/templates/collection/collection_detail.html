@@ -32,7 +32,7 @@
                 <div class="mb-3" v-cloak>
                     <strong>Count</strong>
                     <span v-if="paginator" class="text-primary ms-1">
-                        [[ paginator.count ]] [[ getPluralized() ]]
+                        [[ paginator.count ]] [[ pluralize("blob", paginator.count) ]]
                     </span>
                 </div>
 
@@ -507,10 +507,6 @@
                     getBlobList(pageNumber);
                 };
 
-                function getPluralized() {
-                    return pluralize("blob", paginator.value.count);
-                };
-
                 const blobList = ref([]);
 
                 function onAddBlob(evt) {
@@ -648,7 +644,6 @@
                     blobList,
                     collectionDetailMenuItems,
                     getBlobList,
-                    getPluralized,
                     isFavorite,
                     needsPagination,
                     objectTags,
@@ -660,6 +655,7 @@
                     onSort,
                     paginate,
                     paginator,
+                    pluralize,
                     removeBlob,
                     selectedTag,
                     slideShowImageInfo,

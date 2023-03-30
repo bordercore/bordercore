@@ -8,7 +8,7 @@
                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px">{{ getProgress() }}%</text>
             </svg>
         </div>
-        <span class="text-primary mt-2">{{ count }} {{ getPluralized() }}</span>
+        <span class="text-primary mt-2">{{ count }} {{ pluralize("question", count) }}</span>
     </div>
 </template>
 
@@ -36,10 +36,6 @@
                 return Math.round(props.progress);
             };
 
-            function getPluralized() {
-                return pluralize("question", props.count);
-            };
-
             const strokeDashArray = computed(() => {
                 return 2 * 3.14 * circleRadius.value;
             });
@@ -47,8 +43,8 @@
             return {
                 circleRadius,
                 getDashOffset,
-                getPluralized,
                 getProgress,
+                pluralize,
                 strokeDashArray,
             };
         },

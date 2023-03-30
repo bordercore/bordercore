@@ -8,7 +8,7 @@
                         {{ collectionObjectList.name }}
                     </div>
                     <div class="text-secondary text-small text-nowrap ms-3">
-                        {{ objectList.length }} <span>{{ getPluralized(objectList.length) }}</span>
+                        {{ objectList.length }} <span>{{ pluralize("object", objectList.length) }}</span>
                     </div>
                     <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
@@ -207,10 +207,6 @@
                 }
             };
 
-            function getPluralized(count) {
-                return pluralize("object", count);
-            };
-
             function handleDeleteCollection() {
                 doPost(
                     props.deleteCollectionUrl,
@@ -369,7 +365,6 @@
                 collectionObjectList,
                 currentObjectIndex,
                 getNote,
-                getPluralized,
                 isHovered,
                 limitedObjectList,
                 handleAfterEnterTransition,
@@ -382,6 +377,7 @@
                 handleSort,
                 objectList,
                 openObjectSelectModal,
+                pluralize,
             };
         },
     };

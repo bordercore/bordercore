@@ -193,7 +193,7 @@
                                     </div>
                                     <div class="d-flex align-items-center mt-2 mb-3">
                                         <h5 class="mb-0 me-3">[[ collection.name ]]</h5>
-                                        <div><strong class="me-1">[[ collection.num_objects ]]</strong> Object{{ collection.num_object|pluralize:"s" }}</div>
+                                        <div><strong class="me-1">[[ collection.num_objects ]]</strong> [[ pluralize("Object", collection.num_objects) ]]</div>
                                     </div>
                                 </div>
                         </template>
@@ -599,6 +599,7 @@
                     onClickPinnedNote,
                     openObjectSelectModal,
                     pinnedButtonValue,
+                    pluralize,
                     relatedBlobList,
                     relatedObjectsList,
                     relatedQuestions,
