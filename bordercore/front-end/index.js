@@ -156,6 +156,9 @@ window.SelectValue = SelectValue;
 import SearchResult from "./vue/search/SearchResult.vue";
 window.SearchResult = SearchResult;
 
+import TagSearchResult from "./vue/search/TagSearchResult.vue";
+window.TagSearchResult = TagSearchResult;
+
 import TopSearch from "./vue/search/TopSearch.vue";
 window.TopSearch = TopSearch;
 

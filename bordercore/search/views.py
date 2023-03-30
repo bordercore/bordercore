@@ -418,7 +418,7 @@ class SearchTagDetailView(ListView):
                 "name": match["_source"].get("name", "No Name"),
                 "title": match["_source"].get("title", "No Title"),
                 "task": match["_source"].get("name", ""),
-                "url": match["_source"].get("url", ""),
+                "url": match["_source"].get("url", "") or "",
                 "uuid": match["_source"].get("uuid", ""),
                 "creators": get_creators(match["_source"]),
                 "contents": match["_source"].get("contents", "")[:200],
@@ -456,8 +456,11 @@ class SearchTagDetailView(ListView):
                 if "content_type" in match["_source"]:
                     result["content_type"] = Blob.get_content_type(match["_source"]["content_type"])
 
+            if match["_source"]["doctype"] == "album":
+                result["album_artwork_url"] = f"{settings.IMAGES_URL}album_artwork/{match['_source']['uuid']}"
             result["favicon_url"] = favicon_url(result["url"])
             result["url_domain"] = urlparse(result["url"]).netloc
+            result["object_url"] = get_link(get_doctype(match), match["_source"])
             results.setdefault(match["_source"]["doctype"], []).append(result)
 
         context["search_results"]["matches"] = results
@@ -563,8 +566,6 @@ def get_link(doc_type, match):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
     if doc_type == "Drill":
         return reverse("drill:detail", kwargs={"uuid": match["uuid"]})
-    # if doc_type == "Todo":
-    #     return reverse("todo:update", kwargs={"uuid": match["uuid"]})
 
     return ""
 
