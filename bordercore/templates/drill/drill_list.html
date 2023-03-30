@@ -329,6 +329,7 @@
 
     {{ block.super }}
 
+    {{ random_tag|json_script:"featuredTag" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript" charset="utf-8">
@@ -346,7 +347,7 @@
                 TagsInput,
             },
             setup() {
-                const featuredTag = ref({{ random_tag|safe }});
+                const featuredTag = JSON.parse(document.getElementById("featuredTag").textContent);
                 const showFeaturedTagInput = ref(false);
                 const studyMethod = ref("all");
                 const tagList = ref([]);
@@ -454,7 +455,7 @@
 
                 function selectFeaturedTag(tagInfo) {
                     showFeaturedTagInput.value = false;
-                    featuredTag.value = tagInfo.info;
+                    featuredTag = tagInfo.info;
                 };
 
                 onMounted(() => {
