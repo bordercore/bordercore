@@ -417,7 +417,7 @@
                 const isPinnedNote = ref({{ is_pinned_note|yesno:"true,false" }});
                 const relatedBlobList = ref([]);
                 const getBlobInfoAttemptIntervals = [1000, 3000, 6000];
-                const getBlobInfoAttempts = 0;
+                let getBlobInfoAttempts = 0;
                 const tree = JSON.parse(document.getElementById("tree").textContent);
                 const metadataMisc = JSON.parse(document.getElementById("metadataMisc").textContent);
                 const relatedQuestions = ref([
@@ -455,8 +455,8 @@
                 };
 
                 function getBlobInfo() {
-                    getBlobInfoAttempts.value++;
-                    console.log(`Retrieving blob info, attempt #${getBlobInfoAttempts.value}`);
+                    getBlobInfoAttempts++;
+                    console.log(`Retrieving blob info, attempt #${getBlobInfoAttempts}`);
                     doGet(
                         "{% url 'blob:get_elasticsearch_info' blob.uuid %}",
                         (response) => {
@@ -464,10 +464,10 @@
                                 elasticsearchInfo.value = response.data.info;
                             } else {
                                 // Keep trying to retrieve the blob's info until we run out of attempts
-                                if (getBlobInfoAttempts.value <= getBlobInfoAttemptIntervals.value.length) {
+                                if (getBlobInfoAttempts <= getBlobInfoAttemptIntervals.length) {
                                     setTimeout( () => {
                                         getBlobInfo();
-                                    }, getBlobInfoAttemptIntervals.value[getBlobInfoAttempts.value - 1]);
+                                    }, getBlobInfoAttemptIntervals[getBlobInfoAttempts - 1]);
                                 }
                             }
                         },
@@ -564,7 +564,7 @@
                     {% if not elasticsearch_info %}
                     setTimeout(() => {
                         getBlobInfo();
-                    }, getBlobInfoAttemptIntervals.value[getBlobInfoAttempts.value]);
+                    }, getBlobInfoAttemptIntervals[getBlobInfoAttempts]);
                     {% endif %}
 
                     hotkeys("alt+c", function(event, handler) {
@@ -581,8 +581,6 @@
                     collectionList,
                     elasticsearchInfo,
                     getBlobInfo,
-                    getBlobInfoAttempts,
-                    getBlobInfoAttemptIntervals,
                     getCollectionList,
                     getContent,
                     getNote,
