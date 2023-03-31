@@ -133,10 +133,13 @@ class Command(BaseCommand):
         s3_client.download_file(settings.AWS_BUCKET_NAME_MUSIC, f"songs/{uuid}", filename)
         self.stdout.write(f"{Fore.GREEN}Downloading '{filename}'{Style.RESET_ALL}")
 
+    def sanitize_tag(self, name):
+        return name.replace(" [Explicit]", "")
+
     def get_id3_tag(self, tag_name, id3_info, required=True):
 
         if tag_name in id3_info:
-            return id3_info[tag_name][0]
+            return self.sanitize_tag(id3_info[tag_name][0])
         elif required:
             raise CommandError(f"Tag '{tag_name}' not found in file")
 
