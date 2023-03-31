@@ -527,18 +527,9 @@ class SearchTagListView(ListView):
 
         context = super().get_context_data(**kwargs)
 
-        song_list = []
-
-        for match in context["object_list"]:
-            song_list.append(
-                {
-                    "uuid": match.uuid,
-                    "title": match.title,
-                    "artist": match.artist,
-                    "year": match.year,
-                    "length": convert_seconds(match.length)
-                }
-            )
+        song_list = list(context["object_list"].values("uuid", "title", "artist__name", "year", "length"))
+        for song in song_list:
+            song["length"] = convert_seconds(song["length"])
 
         album_list = []
 

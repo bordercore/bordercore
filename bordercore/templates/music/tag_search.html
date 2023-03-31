@@ -17,10 +17,10 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100" id="vue-app">
+    <div id="vue-app" class="row g-0 h-100 align-items-start">
 
-        {% if not album_list and not song_list %}
-            <div class="col-lg-12">
+        {% if not album_list %}
+            <div v-if="!songList.length" class="col-lg-12">
                 <div class="card-grid ms-2">
                 <search-no-result class="me-3">
                     <template v-slot:message>
@@ -31,21 +31,19 @@
             </div>
         {% endif %}
 
-
-        <div class="col-lg-3 d-flex flex-column">
+        <div class="sticky-top col-lg-3 d-flex flex-column">
 
             <div class="card-grid ms-2">
 
-                {% if song_list %}
-                    <audio-player
-                        ref="audioPlayer"
-                        :track-list="songList"
-                        song-url="{{ MEDIA_URL_MUSIC }}songs/"
-                        mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
-                        @current-song="selectRow"
-                    >
-                    </audio-player>
-                {% endif %}
+                <audio-player
+                    v-if="songList"
+                    ref="audioPlayer"
+                    :track-list="songList"
+                    song-url="{{ MEDIA_URL_MUSIC }}songs/"
+                    mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                    @current-song="onCurrentSong"
+                >
+                </audio-player>
 
             </div>
 
@@ -110,14 +108,12 @@
 
             <div class="card-grid ms-2 pe-0">
 
-                {% if song_list %}
-
-                <div class="me-3">
+                <div v-if="songList" class="me-3">
                     <card>
                         <template v-slot:title-slot>
                             <h4>
                                 <strong>
-                                {{ song_list|length }} song{{ song_list|pluralize }}
+                                    [[ songList.length ]] [[ pluralize("song", songList.length) ]]
                                 </strong>
                             </h4>
                         </template>
@@ -129,7 +125,7 @@
                                 :default-sort="['year', 'desc']"
                                 hoverable
                                 v-model:selected.sync="selectedSong"
-                                @select="onSongClicked"
+                                @select="handleSongSelect"
                                 ref="table"
                             >
 
@@ -137,8 +133,8 @@
                                     <span>[[ props.row.title ]]</span>
                                 </o-table-column>
 
-                                <o-table-column field="artist" label="Artist" sortable v-slot="props">
-                                    <span>[[ props.row.artist ]]</span>
+                                <o-table-column field="artist__name" label="Artist" sortable v-slot="props">
+                                    <span>[[ props.row.artist__name ]]</span>
                                 </o-table-column>
 
                                 <o-table-column field="year" label="Year" sortable v-slot="props">
@@ -156,8 +152,6 @@
                     </card>
                 </div>
 
-                {% endif %}
-
             </div>
 
         </div>
@@ -170,16 +164,18 @@
 
     {{ block.super }}
 
+    {{ song_list|json_script:"songList" }}
+
     <script type="text/javascript" charset="utf-8">
 
         const app = createApp({
             name: "SongList",
+            delimiters: ["[[", "]]"],
             components: {
                 AudioPlayer,
                 Card,
                 SearchNoResult,
             },
-            delimiters: ["[[", "]]"],
             setup() {
                 const selectedSong = ref({});
 
@@ -192,37 +188,16 @@
                     selectedSong.value = songList[songNumber];
                 };
 
-                function onSongClicked(row) {
+                function handleSongSelect(row) {
                     audioPlayer.value.playTrack(row.uuid);
-                };
-
-                function selectRow(index) {
-
-                    // Select a row based on index number. If the index is -1,
-                    // assume we only want to deselect any currently selected row.
-                    if (index != -1) {
-                        const selectedRow = songList[index];
-                        this.$refs.table.selectRow(selectedRow);
-                    } else {
-                        this.$refs.table.selectRow({});
-                    }
                 };
 
                 return {
                     audioPlayer,
+                    handleSongSelect,
                     onCurrentSong,
-                    onSongClicked,
-                    songList: [
-                        {% for song in song_list %}
-                        {
-                            "uuid": "{{ song.uuid }}",
-                            "title": "{{ song.title|safe }}",
-                            "artist": "{{ song.artist|safe }}",
-                            "year": "{{ song.year|default:'' }}",
-                            "length": "{{ song.length }}",
-                        },
-                        {% endfor %}
-                    ],
+                    pluralize,
+                    songList: JSON.parse(document.getElementById("songList").textContent),
                     selectedSong,
                 };
             },
