@@ -2,7 +2,7 @@
     <div class="hover-target" @mouseover="hover = true" @mouseleave="hover = false">
         <card class="backdrop-filter" :class="cardClass" title="">
             <template #title-slot>
-                <div v-if="nodeQuoteInitial.format !== 'minimal'" class="dropdown-height d-flex">
+                <div v-if="nodeQuote.format !== 'minimal'" class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">
                         <div>
                             <font-awesome-icon icon="quote-left" class="text-primary me-3" />
@@ -13,7 +13,7 @@
                         <drop-down-menu :show-on-hover="true">
                             <template #dropdown>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onUpdateQuote()">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleQuoteUpdate()">
                                         <span>
                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
                                         </span>
@@ -93,7 +93,8 @@
             const hover = ref(false);
             const quote = ref(null);
 
-            const nodeQuote = ref({});
+            const nodeQuote = ref(props.nodeQuoteInitial);
+
             let rotateInterval = null;
 
             function getQuote() {
@@ -105,7 +106,6 @@
                     "Error getting quote",
                 );
             };
-
 
             function getRandomQuote() {
                 doPost(
@@ -153,7 +153,7 @@
                 );
             };
 
-            function onUpdateQuote() {
+            function handleQuoteUpdate() {
                 ctx.emit("open-quote-update-modal", updateQuote, nodeQuote.value);
             };
 
@@ -168,23 +168,24 @@
             };
 
             onMounted(() => {
-                nodeQuote.value = props.nodeQuoteInitial;
-
                 getQuote();
 
                 if (nodeQuote.value.rotate !== null && nodeQuote.value.rotate !== -1) {
                     setTimer();
                 }
 
-                hotkeys("right,u", function(event, handler) {
+                hotkeys("m,right,u", function(event, handler) {
                     switch (handler.key) {
+                    case "m":
+                        nodeQuote.value.format = nodeQuote.value.format === "minimal" ? "standard": "minimal";
+                        break;
                     case "right":
                         if (hover.value) {
                             getRandomQuote();
                         }
                         break;
                     case "u":
-                        onUpdateQuote();
+                        handleQuoteUpdate();
                         break;
                     }
                 });
@@ -197,8 +198,9 @@
             return {
                 cardClass,
                 handleQuoteRemove,
-                onUpdateQuote,
+                handleQuoteUpdate,
                 hover,
+                nodeQuote,
                 quote,
             };
         },
