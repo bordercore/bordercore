@@ -392,6 +392,18 @@
                                     }
                                 },
                                 {
+                                    href: "{% url 'collection:list' %}",
+                                    title: "Collections",
+                                    alias: "/collection/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "grip-horizontal",
+                                        },
+                                        class: "sidebar-icon-2"
+                                    }
+                                },
+                                {
                                     href: "{% url 'feed:list' %}",
                                     title: "Feeds",
                                     icon: {
@@ -416,6 +428,7 @@
                                 {
                                     href: "{% url 'blob:list' %}",
                                     title: "Blobs",
+                                    alias: "/blob/list",
                                     icon: {
                                         element: "font-awesome-icon",
                                         attributes: {
@@ -423,23 +436,6 @@
                                         },
                                         class: "sidebar-icon-1"
                                     },
-                                    child: [
-                                        {
-                                            href: "{% url 'blob:list' %}",
-                                            title: "Home",
-                                            alias: "/blob/list",
-                                        },
-                                        {
-                                            href: "{% url 'search:kb_search_tag_detail_search' %}",
-                                            title: "Tag Search",
-                                            alias: "/search/tagdetail/*",
-                                        },
-                                        {
-                                            href: "{% url 'collection:list' %}",
-                                            title: "Collections",
-                                            alias: "/collection/*",
-                                        },
-                                    ]
                                 },
                                 {
                                     href: "{% url 'drill:list' %}",
@@ -463,6 +459,18 @@
                                             icon: "music"
                                         },
                                         class: "sidebar-icon-3"
+                                    }
+                                },
+                                {
+                                    href: "{% url 'search:kb_search_tag_detail_search' %}",
+                                    title: "Tag Search",
+                                    alias: "/search/tagdetail/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "search",
+                                        },
+                                        class: "sidebar-icon-2"
                                     }
                                 },
                                 {
