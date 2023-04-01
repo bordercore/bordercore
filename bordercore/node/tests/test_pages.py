@@ -5,6 +5,7 @@ from faker import Factory as FakerFactory
 
 from django.urls import reverse
 
+from blob.models import Blob
 from blob.tests.factories import BlobFactory
 from bookmark.tests.factories import BookmarkFactory
 
@@ -18,9 +19,6 @@ except (ModuleNotFoundError, NameError):
     pass
 
 pytestmark = pytest.mark.functional
-
-
-from blob.models import Blob
 
 
 def _delete_input(action, search_input):
@@ -124,9 +122,9 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     time.sleep(2)
 
-    # With the filter on, there should only be one match
+    # With the filter on, there should only be one match, plus the empty first suggestion
     suggestion_list = page.search_suggestion_list(modal)
-    assert len(suggestion_list) == 1
+    assert len(suggestion_list) == 2
 
     _delete_input(action, search_input)
 
@@ -136,9 +134,9 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     time.sleep(1)
 
-    # With the filter on, there should only be one match
+    # With the filter on, there should only be one match, plus the empty first suggestion
     suggestion_list = page.search_suggestion_list(modal)
-    assert len(suggestion_list) == 1
+    assert len(suggestion_list) == 2
 
     _delete_input(action, search_input)
 
@@ -147,6 +145,6 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     time.sleep(1)
 
-    # With the filter off, there should be two matches
+    # With the filter off, there should be two matches, plus the empty first suggestion
     suggestion_list = page.search_suggestion_list(modal)
-    assert len(suggestion_list) == 2
+    assert len(suggestion_list) == 3
