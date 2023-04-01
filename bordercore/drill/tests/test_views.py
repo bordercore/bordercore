@@ -363,10 +363,11 @@ def test_drill_add_object(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:add_related_object")
+    url = urls.reverse("blob:add_related_object")
     resp = client.post(url, {
         "node_uuid": question[0].uuid,
         "object_uuid": blob_note[0].uuid,
+        "node_type": "drill"
     })
 
     assert resp.status_code == 200
@@ -380,10 +381,11 @@ def test_drill_remove_object(auto_login_user, question, blob_note):
 
     question[0].add_related_object(blob_note[0].uuid)
 
-    url = urls.reverse("drill:remove_related_object")
+    url = urls.reverse("blob:remove_related_object")
     resp = client.post(url, {
         "node_uuid": question[0].uuid,
         "object_uuid": blob_note[0].uuid,
+        "node_type": "drill"
     })
 
     assert resp.status_code == 200
@@ -399,11 +401,12 @@ def test_drill_update_related_object_note(auto_login_user, question, blob_note):
 
     note = "Updated Note"
 
-    url = urls.reverse("drill:update_related_object_note")
+    url = urls.reverse("blob:update_related_object_note")
     resp = client.post(url, {
         "node_uuid": question[0].uuid,
         "object_uuid": blob_note[0].uuid,
-        "note": note
+        "note": note,
+        "node_type": "drill"
     })
 
     assert resp.status_code == 200

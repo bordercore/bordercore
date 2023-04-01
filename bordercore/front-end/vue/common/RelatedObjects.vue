@@ -103,6 +103,10 @@
                 default: "Related Objects",
                 type: String,
             },
+            nodeType: {
+                default: "blob",
+                type: String,
+            },
             relatedObjectsUrl: {
                 default: "",
                 type: String,
@@ -152,6 +156,7 @@
                     {
                         "node_uuid": props.objectUuid,
                         "object_uuid": bcObject.uuid,
+                        "node_type": props.nodeType,
                     },
                     (response) => {
                         getRelatedObjects();
@@ -185,6 +190,7 @@
                         "node_uuid": props.objectUuid,
                         "object_uuid": bcObject.uuid,
                         "note": note,
+                        "node_type": props.nodeType,
                     },
                     (response) => {
                         getRelatedObjects();
@@ -211,6 +217,7 @@
                     {
                         "node_uuid": props.objectUuid,
                         "object_uuid": bcObject.uuid,
+                        "node_type": props.nodeType,
                     },
                     (response) => {
                         getRelatedObjects();
@@ -236,6 +243,7 @@
                         "node_uuid": props.objectUuid,
                         "object_uuid": blobUuid,
                         "new_position": newPosition,
+                        "node_type": props.nodeType,
                     },
                     () => {},
                 );

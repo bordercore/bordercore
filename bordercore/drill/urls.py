@@ -105,24 +105,4 @@ urlpatterns = [
         view=views.get_related_objects,
         name="related_objects"
     ),
-    path(
-        route="related_objects/add",
-        view=views.add_related_object,
-        name="add_related_object"
-    ),
-    path(
-        route="related_objects/remove",
-        view=views.remove_related_object,
-        name="remove_related_object"
-    ),
-    path(
-        route="related_objects/sort",
-        view=views.sort_related_objects,
-        name="sort_related_objects"
-    ),
-    path(
-        route="related_objects/note/update",
-        view=views.update_related_object_note,
-        name="update_related_object_note"
-    ),
 ]

@@ -445,6 +445,7 @@ def test_blob_add_related_object(auto_login_user):
     resp = client.post(url, {
         "node_uuid": blob_1.uuid,
         "object_uuid": blob_2.uuid,
+        "node_type": "blob"
     })
 
     assert resp.status_code == 200
@@ -467,6 +468,7 @@ def test_blob_remove_related_object(auto_login_user):
     resp = client.post(url, {
         "node_uuid": blob_1.uuid,
         "object_uuid": blob_2.uuid,
+        "node_type": "blob"
     })
 
     assert resp.status_code == 200
@@ -514,7 +516,8 @@ def test_blob_update_related_object_note(auto_login_user):
     resp = client.post(url, {
         "node_uuid": blob_1.uuid,
         "object_uuid": blob_2.uuid,
-        "note": note
+        "note": note,
+        "node_type": "blob"
     })
 
     assert resp.status_code == 200

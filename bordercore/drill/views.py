@@ -4,7 +4,6 @@ from urllib.parse import unquote
 from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -21,7 +20,7 @@ from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import Question, QuestionToObject
+from .models import Question
 
 
 @method_decorator(login_required, name="dispatch")
@@ -412,91 +411,6 @@ def get_related_objects(request, uuid):
     response = {
         "status": "OK",
         "related_objects": Blob.related_objects("drill", "QuestionToObject", question)
-    }
-
-    return JsonResponse(response)
-
-
-def add_related_object(request):
-    """
-    Add a relationshiop between a question and another object.
-    """
-
-    node_uuid = request.POST["node_uuid"]
-    object_uuid = request.POST["object_uuid"]
-
-    node = Question.objects.get(uuid=node_uuid)
-    response = node.add_related_object(object_uuid)
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_related_object(request):
-    """
-    Remove a relationship between a question and another object.
-    """
-
-    node_uuid = request.POST["node_uuid"]
-    object_uuid = request.POST["object_uuid"]
-
-    QuestionToObject.objects.get(
-        Q(node__uuid=node_uuid)
-        & (
-            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
-        )
-    ).delete()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def sort_related_objects(request):
-    """
-    Change the sort order of a question and a related object
-    """
-
-    node_uuid = request.POST["node_uuid"]
-    object_uuid = request.POST["object_uuid"]
-    new_position = int(request.POST["new_position"])
-
-    question_to_object = QuestionToObject.objects.get(
-        Q(node__uuid=node_uuid)
-        & (
-            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
-        )
-    )
-    QuestionToObject.reorder(question_to_object, new_position)
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def update_related_object_note(request):
-
-    node_uuid = request.POST["node_uuid"]
-    object_uuid = request.POST["object_uuid"]
-    note = request.POST["note"]
-
-    question_to_object = QuestionToObject.objects.get(
-        Q(node__uuid=node_uuid)
-        & (
-            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
-        )
-    )
-    question_to_object.note = note
-    question_to_object.save()
-
-    response = {
-        "status": "OK",
     }
 
     return JsonResponse(response)

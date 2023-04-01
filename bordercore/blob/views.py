@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -20,6 +21,7 @@ from blob.models import Blob, BlobToObject, MetaData, RecentlyViewedBlob
 from blob.services import import_blob
 from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
+from drill.models import Question
 from lib.mixins import FormRequestMixin
 from lib.time_utils import parse_date_from_string
 
@@ -406,16 +408,27 @@ def get_related_objects(request, uuid):
     return JsonResponse(response)
 
 
+def get_node_model(node_type):
+    """
+    Return the node model, given its type
+    """
+    if node_type == "blob":
+        return apps.get_model("blob", "BlobToObject")
+    else:
+        return apps.get_model("drill", "QuestionToObject")
+
+
 @login_required
 def add_related_object(request):
     """
-    Add a relationshiop between a blob and another object.
+    Add a relationshiop between a node and another object.
     """
 
     node_uuid = request.POST["node_uuid"]
     object_uuid = request.POST["object_uuid"]
+    node_type = request.POST.get("node_type", "blob")
 
-    node = Blob.objects.get(uuid=node_uuid)
+    node_model = get_node_model(node_type)
 
     blob = Blob.objects.filter(uuid=object_uuid)
     if blob.exists():
@@ -425,13 +438,18 @@ def add_related_object(request):
         if bookmark.exists():
             args = {"bookmark": bookmark.first()}
 
-    if BlobToObject.objects.filter(node=node, **args).exists():
+    if node_type == "blob":
+        node = Blob.objects.get(uuid=node_uuid)
+    else:
+        node = Question.objects.get(uuid=node_uuid)
+
+    if node_model.objects.filter(node=node, **args).exists():
         response = {
             "status": "Error",
             "message": "That object is already related",
         }
     else:
-        BlobToObject.objects.create(node=node, **args)
+        node_model.objects.create(node=node, **args)
         response = {
             "status": "OK",
         }
@@ -442,13 +460,16 @@ def add_related_object(request):
 @login_required
 def remove_related_object(request):
     """
-    Remove a relationship between a blob and another object.
+    Remove a relationship between a node and another object.
     """
 
     node_uuid = request.POST["node_uuid"]
     object_uuid = request.POST["object_uuid"]
+    node_type = request.POST.get("node_type", "blob")
 
-    BlobToObject.objects.get(
+    node_model = get_node_model(node_type)
+
+    node_model.objects.get(
         Q(node__uuid=node_uuid)
         & (
             Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
@@ -465,20 +486,23 @@ def remove_related_object(request):
 @login_required
 def sort_related_objects(request):
     """
-    Change the sort order of a blob and a related object
+    Change the sort order of a node and a related object
     """
 
     node_uuid = request.POST["node_uuid"]
     object_uuid = request.POST["object_uuid"]
     new_position = int(request.POST["new_position"])
+    node_type = request.POST.get("node_type", "blob")
 
-    blob_to_object = BlobToObject.objects.get(
+    node_model = get_node_model(node_type)
+
+    node_to_object = node_model.objects.get(
         Q(node__uuid=node_uuid)
         & (
             Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
         )
     )
-    BlobToObject.reorder(blob_to_object, new_position)
+    node_model.reorder(node_to_object, new_position)
 
     response = {
         "status": "OK",
@@ -493,15 +517,18 @@ def update_related_object_note(request):
     node_uuid = request.POST["node_uuid"]
     object_uuid = request.POST["object_uuid"]
     note = request.POST["note"]
+    node_type = request.POST.get("node_type", "blob")
 
-    blob_to_object = BlobToObject.objects.get(
+    node_model = get_node_model(node_type)
+
+    node_to_object = node_model.objects.get(
         Q(node__uuid=node_uuid)
         & (
             Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid)
         )
     )
-    blob_to_object.note = note
-    blob_to_object.save()
+    node_to_object.note = note
+    node_to_object.save()
 
     response = {
         "status": "OK",
