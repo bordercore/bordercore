@@ -49,7 +49,7 @@
 
                 <ul class="list-group flex-column w-100">
                     <div v-cloak>
-                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
+                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="handleTagSelect">
                             <div class="ps-2">
                                 All Objects
                             </div>
@@ -59,7 +59,7 @@
                                 </span>
                             </div>
                         </div>
-                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
+                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="handleTagSelect" :data-tag="tag.tag" :key="tag.tag">
                             <div class="ps-2">
                                 [[ tag.tag ]]
                             </div>
@@ -98,14 +98,14 @@
 
                     <div class="d-flex ms-2">
                         <div>
-                            <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
+                            <div id="collection-list" @drop.prevent="handleBlobAdd($event)" @dragover.prevent="handleBlobDragOver($event)" @dragleave.prevent="handleBlobDragLeave($event)" @dragenter.prevent>
                                 <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
-                                    <draggable v-model="blobList" @change="onSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true" item-key="id">
+                                    <draggable v-model="blobList" @change="handleSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true" item-key="id">
                                         <template #item="{element}">
                                         <li :key="element.id" class="collection-item hoverable cursor-pointer float-start p-3">
                                             <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(element.uuid)">
                                             </button>
-                                            <div class="d-flex flex-column h-100" @click="onClick(element.url)">
+                                            <div class="d-flex flex-column h-100" @click="handleBlobRemove(element.url)">
                                                 <a :href="element.url">
                                                     <div v-if="element.type === 'blob'">
                                                         <img :src="element.cover_url" />
@@ -307,7 +307,7 @@
                     </div>
 
                     <div class="modal-footer justify-content-end">
-                        <input id="btn-action" class="btn btn-primary" type="button" name="Go" value="Confirm" @click="startSlideShow()" />
+                        <input id="btn-action" class="btn btn-primary" type="button" name="Go" value="Confirm" @click="handleStartSlideShow()" />
                     </div>
 
                 </div>
@@ -335,6 +335,7 @@
 
     {{ block.super }}
 
+    {{ collection_json|json_script:"collectionJson" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
     {{ object_tags|json_script:"object_tags" }}
 
@@ -363,31 +364,31 @@
                         id: uuidv4(),
                         title: "Slide Show",
                         url: "#",
-                        clickHandler: onClickSlideShow,
+                        clickHandler: handleSlideShowModal,
                         icon: "images",
                     },
                     {
                         id: uuidv4(),
                         title: "Update",
                         url: "#",
-                        clickHandler: onClickUpdate,
+                        clickHandler: handleUpdate,
                         icon: "pencil-alt",
                     },
                     {
                         id: uuidv4(),
                         title: "Delete",
                         url: "#",
-                        clickHandler: onClickDelete,
+                        clickHandler: handleDelete,
                         icon: "times",
                     },
                 ];
 
-                const slideShowImageInfo = ref({});
-                const slideShowImageIndex = ref(-1);
+                let slideShowImageIndex = -1;
                 const slideShowType = ref("manual");
                 const slideShowInterval = ref("60");
                 const slideShowRandomize = ref(false);
 
+                const collectionJson = JSON.parse(document.getElementById("collectionJson").textContent);
                 const objectTags = ref(JSON.parse(document.getElementById("object_tags").textContent));
 
                 const slideShowOptions = [
@@ -427,7 +428,7 @@
                     return paginator.value.has_previous || paginator.value.has_next;
                 });
 
-                function onClickSelectTag(evt) {
+                function handleTagSelect(evt) {
                     const element = evt.currentTarget;
                     let url = "{% url 'collection:detail' collection.uuid %}";
                     if (element.dataset.tag) {
@@ -436,18 +437,18 @@
                     window.location = url;
                 };
 
-                function onClickUpdate() {
+                function handleUpdate() {
                     const modal = new Modal("#modalUpdate");
                     modal.show();
                 };
 
-                function onClickSlideShow() {
+                function handleSlideShowModal() {
                     document.getElementById("tag").value = "";
                     const modal = new Modal("#modalSlideShow");
                     modal.show();
                 };
 
-                function startSlideShow() {
+                function handleStartSlideShow() {
                     const modal = Modal.getInstance(document.getElementById("modalSlideShow"));
                     modal.hide();
 
@@ -457,7 +458,7 @@
                     // Add a black background
                     document.getElementById("overlay").classList.remove("d-none");
 
-                    slideShowImageIndex.value = -1;
+                    slideShowImageIndex = -1;
 
                     if (slideShowType.value === "automatic") {
                         getSlideShowImage();
@@ -471,9 +472,9 @@
 
                 function getSlideShowImage(direction = "next") {
                     const tag = document.getElementById("tag").value;
-                    axios.get("{% url "collection:get_blob" collection.uuid %}" + `?randomize=${slideShowRandomize.value}&position=${slideShowImageIndex.value}&tag=${tag}&direction=${direction}`)
+                    axios.get("{% url "collection:get_blob" collection.uuid %}" + `?randomize=${slideShowRandomize.value}&position=${slideShowImageIndex}&tag=${tag}&direction=${direction}`)
                          .then(response => {
-                             slideShowImageIndex.value = response.data.index;
+                             slideShowImageIndex = response.data.index;
                              changeSlideShowImage(response.data.url, response.data.content_type);
                          })
                 };
@@ -492,7 +493,7 @@
                     }
                 };
 
-                function onClickDelete() {
+                function handleDelete() {
                     const modal = new Modal("#modalDelete");
                     modal.show();
                 };
@@ -509,7 +510,7 @@
 
                 const blobList = ref([]);
 
-                function onAddBlob(evt) {
+                function handleBlobAdd(evt) {
                     document.getElementById("collection-list").classList.remove("collection-drag-over");
 
                     const fileList = evt.dataTransfer.files;
@@ -551,15 +552,15 @@
                     });
                 };
 
-                function onDragOverBlob(evt) {
+                function handleBlobDragOver(evt) {
                     document.getElementById("collection-list").classList.add("collection-drag-over");
                 };
 
-                function onDragLeaveBlob(evt) {
+                function handleBlobDragLeave(evt) {
                     document.getElementById("collection-list").classList.remove("collection-drag-over");
                 };
 
-                function onSort(evt) {
+                function handleSort(evt) {
                     // The backend expects the ordering to begin
                     // with 1, not 0, so add 1.
                     const newPosition = evt.moved.newIndex + 1;
@@ -577,7 +578,7 @@
                     );
                 };
 
-                function onClick(url) {
+                function handleBlobRemove(url) {
                     window.location=url;
                 };
 
@@ -614,7 +615,7 @@
                 };
 
                 onMounted(() => {
-                        hotkeys("right,left,escape", function(event, handler) {
+                    hotkeys("right,left,escape", function(event, handler) {
                         switch (handler.key) {
                             case "right":
                                 getSlideShowImage("next");
@@ -635,8 +636,8 @@
                         }
                     });
 
-                    document.getElementById("id_name").value = "{{ collection.name|safe }}";
-                    document.getElementById("id_description").value = "{{ collection.description|safe }}";
+                    document.getElementById("id_name").value = collectionJson.name;
+                    document.getElementById("id_description").value = collectionJson.description;
                     getBlobList();
                 });
 
@@ -644,27 +645,25 @@
                     blobList,
                     collectionDetailMenuItems,
                     getBlobList,
+                    handleBlobAdd,
+                    handleBlobRemove,
+                    handleTagSelect,
+                    handleBlobDragLeave,
+                    handleBlobDragOver,
+                    handleStartSlideShow,
+                    handleSort,
                     isFavorite,
                     needsPagination,
                     objectTags,
-                    onAddBlob,
-                    onClick,
-                    onClickSelectTag,
-                    onDragLeaveBlob,
-                    onDragOverBlob,
-                    onSort,
                     paginate,
                     paginator,
                     pluralize,
                     removeBlob,
                     selectedTag,
-                    slideShowImageInfo,
-                    slideShowImageIndex,
                     slideShowInterval,
                     slideShowOptions,
                     slideShowType,
                     slideShowRandomize,
-                    startSlideShow,
                 };
             },
         });

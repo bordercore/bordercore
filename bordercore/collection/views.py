@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Exists, OuterRef, Q
+from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -93,6 +94,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
                 "-blob_count"
             )
         ]
+        context["collection_json"] = model_to_dict(self.object, fields=["name", "description"])
         context["title"] = f"Collection Detail :: {self.object.name}"
 
         return context
