@@ -97,6 +97,41 @@ def test_edit_note(auto_login_user, fitness):
     assert updated_exercise.note == note
 
 
+def test_fitness_get_workout_data(auto_login_user, fitness):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("fitness:get_workout_data")
+    resp = client.get(f"{url}?uuid={fitness[0].uuid}")
+
+    result = resp.json()
+    assert resp.status_code == 200
+    assert result["status"] == "OK"
+    assert len(json.loads(result["workout_data"]["labels"])) == 11
+    assert len(json.loads(result["workout_data"]["plotdata"])["reps"]) == 11
+    assert len(json.loads(result["workout_data"]["plotdata"])["reps"][0]) == 4
+    assert result["workout_data"]["initial_plot_type"] == "weight"
+    assert json.loads(result["workout_data"]["paginator"])["page_number"] == 1
+
+
+def test_fitness_update_frequency(auto_login_user, fitness):
+
+    user, client = auto_login_user()
+
+    frequency = 5
+
+    url = urls.reverse("fitness:update_frequency")
+    resp = client.post(url, {
+        "uuid": fitness[0].uuid,
+        "frequency": frequency
+    })
+
+    assert resp.status_code == 200
+
+    updated_exercise_user = ExerciseUser.objects.get(user=user, exercise__uuid=fitness[0].uuid)
+    assert updated_exercise_user.frequency.days == frequency
+
+
 def test_fitness_update_rest_period(auto_login_user, fitness):
 
     user, client = auto_login_user()
