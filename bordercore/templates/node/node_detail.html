@@ -134,12 +134,11 @@
                     :data-col-number="colIndex"
                     :disabled="!editLayout"
                     class="position-relative"
-                    :style="'z-index: ' + (2*10 - colIndex)"
                     :item-key="colIndex.toString()"
                 >
                     <template #item="{element, index}">
-                        <div class="position-relative">
-                            <div v-if="element.type === 'collection'" :key="element.uuid" :style="'z-index: ' + (2*10 - colIndex - {index})">
+                        <div class="position-relative" :style="'z-index: ' + (2*10 - colIndex - index)">
+                            <div v-if="element.type === 'collection'">
                                 <collection-object-list
                                     node-uuid="{{ object.uuid }}"
                                     :uuid="element.uuid"
@@ -157,7 +156,7 @@
                                 >
                                 </collection-object-list>
                             </div>
-                            <div v-if="element.type === 'note'" :draggable="editLayout" :key="element.uuid">
+                            <div v-if="element.type === 'note'" :draggable="editLayout">
                                 <node-note
                                     node-uuid="{{ object.uuid }}"
                                     :node-note-initial="element"
@@ -169,7 +168,7 @@
                                 >
                                 </node-note>
                             </div>
-                            <div v-else-if="element.type === 'todo'" :draggable="editLayout" key="todo">
+                            <div v-else-if="element.type === 'todo'" :draggable="editLayout">
                                 <node-todo-list
                                     ref="todoList"
                                     node-uuid="{{ object.uuid }}"
@@ -183,7 +182,7 @@
                                 >
                                 </node-todo-list>
                             </div>
-                            <div v-else-if="element.type === 'image'" :draggable="editLayout" key="element.uuid">
+                            <div v-else-if="element.type === 'image'" :draggable="editLayout">
                                 <node-image
                                     node-uuid="{{ object.uuid }}"
                                     :image-uuid="element.uuid"
@@ -195,7 +194,7 @@
                                 >
                                 </node-image>
                             </div>
-                            <div v-else-if="element.type === 'quote'" :draggable="editLayout" key="quote">
+                            <div v-else-if="element.type === 'quote'" :draggable="editLayout">
                                 <node-quote
                                     ref="quote"
                                     node-uuid="{{ object.uuid }}"
@@ -303,7 +302,7 @@
                 const updateTodo = ref(null);
 
                 const editLayoutDropDownItemValue = computed(() => {
-                    return editLayout.value ? "Disable Edit Layout" : "Enable Edit Layout"
+                    return editLayout.value ? "Disable Edit Layout" : "Enable Edit Layout";
                 });
 
                 const hasTodoList = computed(() => {
@@ -417,14 +416,14 @@
                             "name": "New Collection",
                             "display": "list",
                             "rotate": -1,
-                            limit: 5,
-                            "uuid": ""
-                        }
+                            "limit": 5,
+                            "uuid": "",
+                        },
                     );
                 };
 
                 function openAddNoteModal() {
-                    noteUpdate.value.openModal("Add", addNote, { "color": 1 });
+                    noteUpdate.value.openModal("Add", addNote, {"color": 1});
                 };
 
                 function openCreateUpdateTodoModal(action, data) {
@@ -456,8 +455,8 @@
                 };
 
                 function selectObjectCollection(object, callback, returnArgs) {
-                    let args = {
-                        "collection_uuid": returnArgs.collectionUuid
+                    const args = {
+                        "collection_uuid": returnArgs.collectionUuid,
                     };
                     if (object.doctype === "Bookmark") {
                         args.bookmark_uuid = object.uuid;
