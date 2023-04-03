@@ -19,10 +19,10 @@
 
                     <template v-slot:content>
                         <ul class="list-group list-group-flush interior-borders">
-                            <draggable v-model="pinnedNotes" @change="onChange" :component-data={type:"transition-group"} item-key="uuid">
+                            <draggable v-model="pinnedNotes" @change="onChange" :component-data={type:"transition-group"} item-key="uuid" chosen-class="node-draggable" ghost-class="node-draggable" drag-class="node-draggable">
                                 <template #item="{element}">
-                                    <li v-for="note in pinnedNotes" class="list-group-item" :data-uuid="note.uuid" :key="note.uuid">
-                                        <a :href="note.url">[[ note.name ]]</a>
+                                    <li class="list-group-item" :data-uuid="element.uuid" :key="element.uuid">
+                                        <a :href="element.url">[[ element.name ]]</a>
                                     </li>
                                 </template>
                             </draggable>
