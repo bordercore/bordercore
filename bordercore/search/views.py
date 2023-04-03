@@ -310,6 +310,8 @@ class NoteListView(SearchListView):
         if "search" not in self.request.GET:
             context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("usernote__sort_order")
 
+        if context["search_results"]:
+            context["search_results"] = context["search_results"]["hits"]["hits"]
         return context
 
 

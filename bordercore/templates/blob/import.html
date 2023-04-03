@@ -42,7 +42,7 @@
             {% for message in messages %}
                 <div class="message-{{ message.tags }} card-body ms-3 p-3">
                     <font-awesome-icon class="me-1" icon="exclamation-triangle"></font-awesome-icon>
-                    {{ message|safe }}
+                    {{ message }}
                 </div>
             {% endfor %}
 
