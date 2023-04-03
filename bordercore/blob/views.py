@@ -198,6 +198,7 @@ class BlobDetailView(DetailView):
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
+        context["back_references"] = Blob.back_references(self.object.uuid)
         context["collection_list"] = self.object.get_collections()
 
         context["show_metadata"] = "content_type" in context \

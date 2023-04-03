@@ -211,32 +211,8 @@
                     @open-object-select-modal="openObjectSelectModal">
                 </related-objects>
 
-                <div v-if="relatedQuestions.length > 0" class="card-body" v-cloak>
-
-                    <div class="card-title">
-                        Related Questions
-                    </div>
-
-                    <div class="cursor-pointer">
-                        <ul class="list-group interior-borders">
-                            <li v-for="question in relatedQuestions"
-                                class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
-                                <div class="d-flex p-1">
-                                    <div class="mt-1 me-2">
-                                        <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
-                                    </div>
-                                    <div>
-                                        <span v-html="question.question" @click="onClick(question.url)"></span>
-                                        <div>
-                                            <span v-for="tag in question.tags" class="tag me-2">[[ tag.tag ]]</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                </div>
+                <back-references v-if="backReferences.length > 0" :back-references="backReferences">
+                </back-references>
 
             </div>
 
@@ -353,14 +329,10 @@
                     </div>
                 {% endif %}
 
-                <add-to-collection
-                    ref="addToCollection"
-                    blob-uuid="{{ blob.uuid }}"
+                <add-to-collection ref="addToCollection" blob-uuid="{{ blob.uuid }}"
                     search-url="{% url 'collection:search' %}?exclude_blob_uuid={{ blob.uuid }}&query="
-                    add-object-url="{% url 'collection:add_object' %}"
-                    add-collection-url="{% url 'collection-list' %}"
-                    @add-to-collection="getCollectionList"
-                >
+                    add-object-url="{% url 'collection:add_object' %}" add-collection-url="{% url 'collection-list' %}"
+                    @add-to-collection="getCollectionList">
                 </add-to-collection>
 
             </div>
@@ -375,6 +347,7 @@
 
     {{ block.super }}
 
+    {{ back_references|json_script:"backReferences" }}
     {{ collection_list|json_script:"collectionList" }}
     {{ elasticsearch_info|json_script:"elasticsearchInfo" }}
     {{ metadata_misc|json_script:"metadataMisc" }}
@@ -404,6 +377,7 @@
             delimiters: ["[[", "]]"],
             components: {
                 AddToCollection,
+                BackReferences,
                 BlobDetailCover,
                 Card,
                 DropDownMenu,
@@ -413,29 +387,14 @@
                 TreeMenu,
             },
             setup() {
+                const backReferences = JSON.parse(document.getElementById("backReferences").textContent);
                 const collectionList = JSON.parse(document.getElementById("collectionList").textContent);
                 const elasticsearchInfo = JSON.parse(document.getElementById("elasticsearchInfo").textContent);
                 const isPinnedNote = ref({{ is_pinned_note|yesno:"true,false" }});
-                const relatedBlobList = ref([]);
                 const getBlobInfoAttemptIntervals = [1000, 3000, 6000];
                 let getBlobInfoAttempts = 0;
                 const tree = JSON.parse(document.getElementById("tree").textContent);
                 const metadataMisc = JSON.parse(document.getElementById("metadataMisc").textContent);
-                const relatedQuestions = ref([
-                    {% for question in relatedQuestions %}
-                    {
-                        question: markdown.render("{{ question.question|escapejs }}"),
-                        url: "{% url 'drill:detail' question.uuid %}",
-                        tags: [
-                            {% for tag in question.tags.all %}
-                            {
-                                tag: "{{ tag }}",
-                            },
-                            {% endfor %}
-                        ],
-                    },
-                    {% endfor %}
-                ]);
 
                 const addToCollection = ref(null);
                 const objectSelect = ref(null);
@@ -579,6 +538,7 @@
 
                 return {
                     addToCollection,
+                    backReferences,
                     collectionList,
                     elasticsearchInfo,
                     getBlobInfo,
@@ -599,9 +559,7 @@
                     openObjectSelectModal,
                     pinnedButtonValue,
                     pluralize,
-                    relatedBlobList,
                     relatedObjectsList,
-                    relatedQuestions,
                     tree,
                 };
             },

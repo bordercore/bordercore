@@ -25,28 +25,11 @@
             >
             </related-tags>
 
-            <div v-if="relatedQuestions.length > 0" class="d-flex">
-                <card title="Related Questions" class="backdrop-filter w-100">
-                    <template v-slot:content>
-                        <hr class="divider" />
-                        <ul class="list-group interior-borders cursor-pointer">
-                            <li v-for="question in relatedQuestions" class="hoverable px-0 py-3 list-group-item list-group-item-secondary text-primary">
-                                <div class="d-flex">
-                                    <div class="mt-1 me-2">
-                                        <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
-                                    </div>
-                                    <div>
-                                        <div class="bookmark-related-question " v-html="question.question" @click="onClick(question.url)"></div>
-                                        <div class="pt-2">
-                                            <span v-for="tag in question.tags" class="tag me-2">[[ tag.tag ]]</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </template>
-                </card>
-            </div>
+            <back-references
+                v-if="backReferences.length > 0"
+                :back-references="backReferences"
+            >
+            </back-references>
 
             <div v-if="relatedNodes.length > 0" class="d-flex">
                 <card title="Related Nodes" class="backdrop-filter w-100">
@@ -66,79 +49,74 @@
 
         </div>
 
-        <div class="col-lg-9">
+        <div class="col-lg-9 d-flex flex-grow-last">
+            <div class="card-body">
+                <p class="lead offset-lg-2">
+                    {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
+                </p>
 
-            <div class="me-2">
-                <div class="card-body">
+                <form id="bookmark-form" action="{{ request.path }}" method="post">
 
-                    <p class="lead offset-lg-2">
-                        {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
-                    </p>
+                    {% csrf_token %}
 
-                    <form id="bookmark-form" action="{{ request.path }}" method="post">
+                    {% for field in form %}
 
-                        {% csrf_token %}
-
-                        {% for field in form %}
-
-                            <div class="{% if field.errors %}message-error {% endif %}row mb-3">
-                                <label class="fw-bold col-lg-2 col-form-label text-end">
-                                    {{ field.label }}
-                                </label>
-                                <div class="col-lg-7 d-flex align-items-center">
-                                    {% if field.label == "Tags" %}
-                                        <tags-input
-                                            ref="tagsInput"
-                                            search-url="{% url 'tag:search' %}?query="
-                                            @tags-changed="onTagsChanged"
-                                        >
-                                        </tags-input>
-                                    {% elif field.label == "Url" %}
-                                        <input
-                                            type="url"
-                                            name="url"
-                                            value="{{ field.value|default:'' }}"
-                                            class="form-control"
-                                            required
-                                            id="id_url"
-                                            {% if action == "Create" %}
-                                                @blur="onBlur"
-                                            {% endif %}
-                                            autocomplete="off"
-                                        />
-                                        {% if field.errors %}
-                                            <div class="form-error">{{ field.errors.0 }}</div>
+                        <div class="{% if field.errors %}message-error {% endif %}row mb-3">
+                            <label class="fw-bold col-lg-2 col-form-label text-end">
+                                {{ field.label }}
+                            </label>
+                            <div class="col-lg-7 d-flex align-items-center">
+                                {% if field.label == "Tags" %}
+                                    <tags-input
+                                        ref="tagsInput"
+                                        search-url="{% url 'tag:search' %}?query="
+                                        @tags-changed="onTagsChanged"
+                                    >
+                                    </tags-input>
+                                {% elif field.label == "Url" %}
+                                    <input
+                                        type="url"
+                                        name="url"
+                                        value="{{ field.value|default:'' }}"
+                                        class="form-control"
+                                        required
+                                        id="id_url"
+                                        {% if action == "Create" %}
+                                            @blur="onBlur"
                                         {% endif %}
-                                    {% elif field.label == "Important" %}
-                                        <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
-                                    {% elif field.label == "Is pinned" %}
-                                        <o-switch v-model="isPinned" name="is_pinned" value="{{ field.value }}"></o-switch>
-                                    {% elif field.label == "Daily" %}
-                                        <o-switch v-model="daily" name="daily" value="{{ field.value }}"></o-switch>
-                                    {% else %}
-                                        {{ field }}
+                                        autocomplete="off"
+                                    />
+                                    {% if field.errors %}
+                                        <div class="form-error">{{ field.errors.0 }}</div>
                                     {% endif %}
-                                    {% for error in field.errors %}
-                                        <span class="form-error">{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                        {% endfor %}
-
-                        <div>
-                            <div class="col-lg-7 offset-lg-2">
-                                <input class="btn btn-primary" type="submit" name="Go" value="{{ action }}" />
-                                {% if form.instance.id %}
-                                <input class="btn btn-secondary ms-3" type="button" name="Go" value="Delete" @click="onClickDelete" />
+                                {% elif field.label == "Important" %}
+                                    <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
+                                {% elif field.label == "Is pinned" %}
+                                    <o-switch v-model="isPinned" name="is_pinned" value="{{ field.value }}"></o-switch>
+                                {% elif field.label == "Daily" %}
+                                    <o-switch v-model="daily" name="daily" value="{{ field.value }}"></o-switch>
+                                {% else %}
+                                    {{ field }}
                                 {% endif %}
-                                <a href="{% url 'bookmark:overview' %}" class="ms-3">Cancel</a>
+                                {% for error in field.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
                             </div>
                         </div>
 
-                    </form>
+                    {% endfor %}
 
-                </div>
+                    <div>
+                        <div class="col-lg-7 offset-lg-2">
+                            <input class="btn btn-primary" type="submit" name="Go" value="{{ action }}" />
+                            {% if form.instance.id %}
+                                <input class="btn btn-secondary ms-3" type="button" name="Go" value="Delete" @click="onClickDelete" />
+                            {% endif %}
+                            <a href="{% url 'bookmark:overview' %}" class="ms-3">Cancel</a>
+                        </div>
+                    </div>
+
+                </form>
 
             </div>
 
@@ -152,6 +130,7 @@
 
     {{ block.super }}
 
+    {{ back_references|json_script:"backReferences" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
     {{ related_blobs|json_script:"related_blobs" }}
     {{ related_nodes|json_script:"related_nodes" }}
@@ -161,6 +140,7 @@
         const app = createApp({
             name: "BookmarkUpdate",
             components: {
+                BackReferences,
                 Card,
                 FontAwesomeIcon,
                 RelatedTags,
@@ -169,26 +149,12 @@
             delimiters: ["[[", "]]"],
             setup() {
                 {% if bookmark.uuid %}
-                const uuid = ref("{{ bookmark.uuid }}");
+                const uuid = "{{ bookmark.uuid }}";
                 {% endif %}
                 const daily = ref({{ form.daily.value }});
                 const importance = ref({{ form.importance.value|yesno:"true,false" }});
                 const isPinned = ref({{ form.is_pinned.value|yesno:"true,false" }});
-                const relatedQuestions = ref([
-                    {% for question in related_questions %}
-                    {
-                        question: markdown.render("{{ question.node.question|escapejs }}"),
-                        url: "{% url 'drill:detail' question.node.uuid %}",
-                        tags: [
-                            {% for tag in question.node.tags.all %}
-                            {
-                                tag: "{{ tag }}",
-                            },
-                            {% endfor %}
-                        ],
-                    },
-                    {% endfor %}
-                ]);
+                const backReferences = JSON.parse(document.getElementById("backReferences").textContent);
                 const relatedBlobs = ref(JSON.parse(document.getElementById("related_blobs").textContent));
                 const relatedNodes = ref(JSON.parse(document.getElementById("related_nodes").textContent));
 
@@ -197,7 +163,7 @@
 
                 function onClickDelete() {
                     const formEl = document.getElementById("bookmark-form");
-                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", uuid.value));
+                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", uuid));
                     formEl.submit();
                 }
 
@@ -237,12 +203,12 @@
                 }
 
                 return {
+                    backReferences,
                     daily,
                     importance,
                     isPinned,
                     relatedBlobs,
                     relatedNodes,
-                    relatedQuestions,
                     relatedTags,
                     onClickDelete,
                     onClickTag,

@@ -21,9 +21,9 @@ from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
 from accounts.models import UserTag
+from blob.models import Blob
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
-from drill.models import QuestionToObject
 from lib.mixins import FormRequestMixin
 from lib.util import get_pagination_range, parse_title_from_url
 from tag.models import Tag, TagBookmark
@@ -88,7 +88,7 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["tags"] = [x.name for x in self.object.tags.all()]
-        context["related_questions"] = QuestionToObject.objects.filter(bookmark=self.object)
+        context["back_references"] = Blob.back_references(self.object.uuid)
         context["related_nodes"] = self.object.related_nodes()
 
         return context

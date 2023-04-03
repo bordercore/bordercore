@@ -175,6 +175,9 @@ window.TagsInput = TagsInput;
 import RelatedTags from "./vue/common/RelatedTags.vue";
 window.RelatedTags = RelatedTags;
 
+import BackReferences from "./vue/common/BackReferences.vue";
+window.BackReferences = BackReferences;
+
 import Card from "./vue/common/Card.vue";
 window.Card = Card;
 

@@ -21,7 +21,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models, transaction
-from django.db.models import Count, F, JSONField
+from django.db.models import Count, F, JSONField, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
@@ -395,6 +395,44 @@ class Blob(TimeStampedModel):
                 )
 
         return related_objects
+
+    @staticmethod
+    def back_references(uuid):
+
+        back_references = []
+
+        QuestionToObject = apps.get_model("drill", "QuestionToObject")
+
+        blob_to_objects = BlobToObject.objects.filter(Q(blob__uuid=uuid) | Q(bookmark__uuid=uuid)).select_related("node")
+        question_to_objects = QuestionToObject.objects.filter(Q(blob__uuid=uuid) | Q(bookmark__uuid=uuid)).select_related("node")
+
+        if blob_to_objects:
+            back_references.extend(
+                [
+                    {
+                        "type": "blob",
+                        "name": x.node.name,
+                        "cover_url": x.node.get_cover_url(),
+                        "tags": [tag.name for tag in x.node.tags.all()],
+                        "url": reverse("blob:detail", args=[x.node.uuid]),
+                    }
+                    for x in blob_to_objects
+                ]
+            )
+        if question_to_objects:
+            back_references.extend(
+                [
+                    {
+                        "type": "question",
+                        "question": x.node.question,
+                        "tags": [tag.name for tag in x.node.tags.all()],
+                        "url": reverse("drill:detail", args=[x.node.uuid]),
+                    }
+                    for x in question_to_objects
+                ]
+            )
+
+        return back_references
 
     def is_image(self):
         return is_image(self.file)
