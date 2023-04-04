@@ -388,7 +388,7 @@
             },
             setup() {
                 const backReferences = JSON.parse(document.getElementById("backReferences").textContent);
-                const collectionList = JSON.parse(document.getElementById("collectionList").textContent);
+                const collectionList = ref(JSON.parse(document.getElementById("collectionList").textContent));
                 const elasticsearchInfo = JSON.parse(document.getElementById("elasticsearchInfo").textContent);
                 const isPinnedNote = ref({{ is_pinned_note|yesno:"true,false" }});
                 const getBlobInfoAttemptIntervals = [1000, 3000, 6000];
