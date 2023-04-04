@@ -217,6 +217,7 @@
 
     {{ block.super }}
 
+    {{ tag|json_script:"initialTag" }}
     {{ pinned_tags|json_script:"pinnedTags"|default:"" }}
 
     <script type="text/javascript">
@@ -248,11 +249,12 @@
                         {{ untagged_count }}
                     );
 
-                    {% if tag %}
-                    getBookmarkList({ searchTag:"{{ tag|safe }}" });
-                    {% else %}
-                    getBookmarkList({ pageNumber:1 });
-                    {% endif %}
+                    const tag = JSON.parse(document.getElementById("initialTag").textContent);
+                    if (tag) {
+                        getBookmarkList({ searchTag:tag });
+                    } else {
+                        getBookmarkList({ pageNumber:1 });
+                    }
 
                     hotkeys("alt+down,alt+up,d,o,escape", function (event, handler) {
                         let index = null;
