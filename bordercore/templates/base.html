@@ -59,7 +59,7 @@
                                     <top-search
                                         ref="topSearch"
                                         initial-search-filter="{{ request.session.top_search_filter }}"
-                                        suggest-search-url="{% url 'search:search_tags_and_names' %}?term="
+                                        initial-search-url="{% url 'search:search_tags_and_names' %}"
                                         query-search-url="{% url 'search:search' %}"
                                         note-query-search-url="{% url 'search:notes' %}"
                                         drill-query-search-url="{% url 'search:search' %}"

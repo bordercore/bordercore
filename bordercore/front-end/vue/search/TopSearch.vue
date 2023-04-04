@@ -10,7 +10,7 @@
                             ref="selectValue"
                             label="name"
                             place-holder="Search"
-                            :search-url="suggestSearchUrl"
+                            :search-url="searchUrl"
                             @keydown="onKeyDown"
                             @search="handleSearch"
                             @search-change="onSearchChange"
@@ -94,7 +94,7 @@
                 type: String,
                 default: "",
             },
-            suggestSearchUrl: {
+            initialSearchUrl: {
                 type: String,
                 default: "",
             },
@@ -124,6 +124,10 @@
             const showSearchWindow = ref(false);
             const searchFilter = ref(props.initialSearchFilter);
             const selectValue = ref(null);
+
+            const searchUrl = computed(() => {
+                return `${props.initialSearchUrl}?doc_type=${searchFilter.value}&term=`;
+            });
 
             const searchFilterTypes = ref([
                 {
@@ -267,6 +271,7 @@
             });
 
             return {
+                searchUrl,
                 boldenOption,
                 focusSearch,
                 getFilterName,
