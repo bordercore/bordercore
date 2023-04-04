@@ -203,6 +203,8 @@
 
     <script src="https://cdn.jsdelivr.net/pyodide/v0.19.1/full/pyodide.js"></script>
 
+    {{ intervals|json_script:"intervals" }}
+
     <script type="text/javascript">
 
         window.MathJax = {
@@ -276,7 +278,7 @@
             },
             setup() {
                 const intervalString = ref("");
-                const intervals = ref({{ intervals|safe }});
+                const intervals = JSON.parse(document.getElementById("intervals").textContent);
                 const mode = ref("question");
 
                 const objectSelect = ref(null);
@@ -288,7 +290,7 @@
                 };
 
                 function onMouseOverResponse(response) {
-                    intervalString.value = intervals.value[response]["description"];
+                    intervalString.value = intervals[response]["description"];
                 };
 
                 function openObjectSelectModal() {
@@ -374,7 +376,6 @@
                     getAnswer,
                     getQuestion,
                     intervalString,
-                    intervals,
                     mode,
                     objectSelect,
                     onMouseOutResponse,
