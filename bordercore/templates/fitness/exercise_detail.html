@@ -247,10 +247,10 @@
                 :latest-weight="JSON.parse('{{ latest_weight }}')"
                 :latest-reps="JSON.parse('{{ latest_reps }}')"
                 initial-plot-type="{{ plotdata.initial_plot_type }}"
-                :notes="JSON.parse('{{ plotdata.notes|safe|escapejs }}')"
-                :initial-paginator="JSON.parse('{{ plotdata.paginator|safe|escapejs }}')"
-                :plotdata="JSON.parse('{{ plotdata.plotdata|safe|escapejs }}')"
-                :labels="JSON.parse('{{ plotdata.labels|safe|escapejs }}')"
+                :notes="plotDataNotes"
+                :initial-paginator="JSON.parse('{{ plotdata.paginator|escapejs }}')"
+                :plotdata="JSON.parse('{{ plotdata.plotdata|escapejs }}')"
+                :labels="JSON.parse('{{ plotdata.labels|escapejs }}')"
                 get-workout-data-url="{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=">
            </workout-graph>
 
@@ -317,6 +317,7 @@
 
     {{ block.super }}
 
+    {{ plotdata.notes|json_script:"plotDataNotes" }}
     {{ related_exercises|json_script:"related_exercises" }}
 
     <script type="text/javascript" charset="utf-8">
@@ -622,6 +623,7 @@
             setup() {
                 const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
                 const restPeriod = ref({% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %}null{% endif %});
+                const plotDataNotes = JSON.parse(document.getElementById("plotDataNotes").textContent);
                 const timer = ref({});
 
                 function onChangeRestPeriod() {
@@ -665,6 +667,7 @@
                     csrfToken,
                     onChangeRestPeriod,
                     onStartTimer,
+                    plotDataNotes,
                     restPeriod,
                     timer,
                 };

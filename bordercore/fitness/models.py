@@ -96,7 +96,7 @@ class Exercise(models.Model):
         return {
             "labels": json.dumps(labels[::-1]),
             "plotdata": json.dumps(plotdata),
-            "notes": json.dumps(notes[::-1]),
+            "notes": notes[::-1],
             "initial_plot_type": initial_plot_type,
             "paginator": json.dumps({
                 "page_number": page_number,

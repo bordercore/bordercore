@@ -168,7 +168,7 @@
                                     const meta = chartInstance.chart.getDatasetMeta(i);
                                     meta.data.forEach(function(bar, index) {
                                         const data = dataset.data[index];
-                                        const note = notes[index];
+                                        const note = notes.value[index];
                                         ctx.fillText(data + (note ? "\n*" : ""), bar.x, bar.y + 30);
                                     });
                                 });
@@ -195,7 +195,7 @@
                                     },
                                     title(tooltipItem) {
                                         const data = plotdata.value[currentPlotType.value][tooltipItem[0].dataIndex];
-                                        const note = notes[tooltipItem[0].dataIndex];
+                                        const note = notes.value[tooltipItem[0].dataIndex];
                                         return `${capitalizeFirstLetter(currentPlotType.value)}: ${data}` + (note ? `\nNote: ${note}` : "");
                                     },
                                 },
