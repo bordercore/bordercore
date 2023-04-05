@@ -134,10 +134,10 @@
                     :data-col-number="colIndex"
                     :disabled="!editLayout"
                     class="position-relative"
-                    :item-key="colIndex.toString()"
+                    item-key="uuid"
                 >
                     <template #item="{element, index}">
-                        <div class="position-relative" :style="'z-index: ' + (2*10 - colIndex - index)">
+                        <div class="position-relative" :style="'z-index: ' + (300 - (colIndex*100) - index)">
                             <div v-if="element.type === 'collection'">
                                 <collection-object-list
                                     node-uuid="{{ object.uuid }}"
