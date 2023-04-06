@@ -3,7 +3,7 @@
         <div v-if="textAreaValue || isEditingNote" :class="extraClass" class="editable-textarea position-relative">
             <slot name="title" />
             <Transition name="fade" mode="out-in" @after-enter="onAfterEnterTransition" @enter="onEnterTransition">
-                <label v-if="!isEditingNote" ref="noteLabel" class="w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote(false)" v-html="textAreaMarkdown" />
+                <label v-if="!isEditingNote" ref="noteLabel" class="w-100 text-break" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote(false)" v-html="textAreaMarkdown" />
                 <textarea v-else ref="textarea" v-model="textAreaValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" />
             </Transition>
         </div>
