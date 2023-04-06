@@ -16,26 +16,22 @@
 
                 <div>
 
-                    {% if request.GET and search_results %}
+                    {% if results %}
 
-                        {% if search_results.hits.hits %}
+                        <h4 class="border-bottom pb-2">
+                            Blob Type
+                        </h4>
 
-                            <h4 class="border-bottom pb-2">
-                                Blob Type
-                            </h4>
-
-                            {% for doctype in aggregations %}
-                                <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="getDoctypeClass('{{ doctype.doctype }}')" @click.prevent="onClick" data-doctype="{{ doctype.doctype }}">
-                                    <div>{{ doctype.doctype|title }}</div>
-                                    <div class="ms-auto">
-                                        <span class="px-2 badge rounded-pill">
-                                            {{ doctype.count }}
-                                        </span>
-                                    </div>
+                        {% for doctype in aggregations %}
+                            <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="getDoctypeClass('{{ doctype.doctype }}')" @click.prevent="onClick" data-doctype="{{ doctype.doctype }}">
+                                <div>{{ doctype.doctype|title }}</div>
+                                <div class="ms-auto">
+                                    <span class="px-2 badge rounded-pill">
+                                        {{ doctype.count }}
+                                    </span>
                                 </div>
-                            {% endfor %}
-
-                        {% endif %}
+                            </div>
+                        {% endfor %}
 
                     {% endif %}
                 </div>
@@ -59,7 +55,7 @@
 
                                 <font-awesome-icon icon="search"></font-awesome-icon>
 
-                                <input id="search" ref="searchInput" name="search" value="{{ request.GET.search|safe|escapejs }}" placeholder="Search" autocomplete="off" autofocus class="default-input form-control" />
+                                <input id="search" ref="searchInput" name="search" :value="searchTerm" placeholder="Search" autocomplete="off" autofocus class="default-input form-control" />
 
                             </div>
                         </div>
@@ -111,7 +107,7 @@
 
                 {% if request.GET %}
 
-                    {% if not search_results.hits.hits and not messages %}
+                    {% if not results and not messages %}
 
                         <search-no-result class="ms-2 me-2 pb-2">
                             <template v-slot:message>
@@ -121,181 +117,156 @@
                     {% else %}
 
                         <h4 class="search-result-header ms-4">
-                            Total matches: <strong>{{ object_list.hits.total.value }}</strong>
+                            Total matches: <strong>{{ count }}</strong>
                         </h4>
 
                         <ul class="list-unstyled">
 
-                            {% for match in search_results.hits.hits %}
+                            <li v-for="match in results" :class="{'important': match.source.important === 10 }" class="search-result mx-2" v-cloak>
 
-                                <li class="search-result{% if match.source.importance == 10 %} important{% endif %} mx-2" v-cloak>
+                                <div class="d-flex my-1">
 
-                                    <div class="d-flex my-1">
+                                    <search-result
+                                        v-if="match.source.doctype === 'drill'"
+                                        icon="graduation-cap"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.question"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                    </search-result>
 
-                                    {% if match.source.doctype == "drill" %}
+                                    <search-result
+                                        v-else-if="match.source.doctype === 'todo'"
+                                        icon="tasks"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.name"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                    </search-result>
 
-                                        <search-result
-                                            icon="graduation-cap"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.question|safe }}"
-                                            url="{% url 'drill:detail' match.source.uuid %}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                        </search-result>
-
-                                    {% elif match.source.doctype == "todo" %}
-
-                                        <search-result
-                                            icon="tasks"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.name|safe }}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                        </search-result>
-
-                                    {% elif match.source.doctype == "bookmark" %}
-
-                                        <search-result
-                                            icon="bookmark"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.name|safe }}"
-                                            url="{{ match.source.url }}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                            <template #extra>
-                                                <div class="d-flex ms-2 align-items-center text-primary">
-                                                    <img :src="'https://www.bordercore.com/favicons/{{ match.source.url|domain }}.ico'" width="32" height="32">
-                                                    <div class="ms-2">
-                                                        {{ match.source.url|domain }}
-                                                    </div>
+                                    <search-result
+                                        v-else-if="match.source.doctype === 'bookmark'"
+                                        icon="bookmark"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.name"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                        <template #extra>
+                                            <div class="d-flex ms-2 align-items-center text-primary">
+                                                <img :src=`https://www.bordercore.com/favicons/${match.source.domain}.ico` width="32" height="32">
+                                                <div class="ms-2" v-html="match.source.domain">
                                                 </div>
-                                            </template>
-                                        </search-result>
+                                            </div>
+                                        </template>
+                                    </search-result>
 
-                                    {% elif match.source.doctype == "note" %}
+                                    <search-result
+                                        v-else-if="match.source.doctype === 'note'"
+                                        icon="sticky-note"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.name"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                        <template #extra>
+                                            <h5 v-if="match.highlight" class="ms-2" v-html="match.highlight.contents[0]">
+                                            </h5>
+                                        </template>
+                                    </search-result>
 
-                                        <search-result
-                                            icon="sticky-note"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.name|escape|safe }}"
-                                            url="{% url 'blob:detail' match.source.uuid %}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                            <template #extra>
-                                                <h5 v-pre class="ms-2">
-                                                    {{ match.highlight.contents.0|escape|unescape_em|safe }}
-                                                </h5>
-                                            </template>
-                                        </search-result>
+                                    <search-result
+                                        v-else-if="match.source.doctype === 'document'"
+                                        icon="copy"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.name"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                        <template #extra>
+                                            <h5 v-if="match.highlight" class="ms-2" v-html="match.highlight.contents[0]">
+                                            </h5>
+                                            <div v-if="match.source.creators" class="ms-2 text-secondary">
+                                                <small v-html="match.source.creators"></small>
+                                            </div>
+                                        </template>
+                                    </search-result>
 
-                                    {% elif match.source.doctype == "document" %}
+                                    <search-result
+                                        v-else-if="match.source.doctype === 'song'"
+                                        icon="music"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.title"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                        <template #image>
+                                            <div class="mx-2">
+                                                <img :src="'{{ IMAGES_URL }}artist_images/' + match.source.artist_uuid" class="search-result-music" />
+                                            </div>
+                                        </template>
+                                        <template #extra>
+                                            <h5 class="ms-2" v-html="match.source.artist">
+                                            </h5>
+                                        </template>
+                                    </search-result>
 
-                                        <search-result
-                                            icon="copy"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.name|escape|safe }}"
-                                            url="{% url 'blob:detail' match.source.uuid %}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                            <template #extra>
-                                                <h5 v-pre class="ms-2">
-                                                    {{ match.highlight.contents.0|escape|unescape_em|safe }}
-                                                </h5>
-                                                {% if match.source.creators %}
-                                                    <div class="ms-2 text-secondary">
-                                                        <small>{{ match.source.creators }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </template>
-                                        </search-result>
+                                    <search-result
+                                        v-else-if="match.source.doctype === 'album'"
+                                        icon="music"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.title"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                        <template #image>
+                                            <div class="mx-2">
+                                                <img :src="'{{ IMAGES_URL }}album_artwork/' + match.source.uuid" height="150" width="150" />
+                                            </div>
+                                        </template>
+                                        <template #extra>
+                                            <h5 class="ms-2" v-html="match.source.artist">
+                                            </h5>
+                                        </template>
+                                    </search-result>
 
-                                    {% elif match.source.doctype == "song" %}
+                                    <search-result
+                                        v-else
+                                        icon="book"
+                                        :importance="match.source.importance || 1"
+                                        :title="match.source.name"
+                                        :url="match.source.url"
+                                        :tags="JSON.parse(match.tags_json)"
+                                        tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    >
+                                        <template #image>
+                                            <div class="mx-2">
+                                                <img :src="match.source.cover_url" />
+                                            </div>
+                                        </template>
+                                        <template #extra>
+                                            <h5 v-if="match.highlight && match.highlight.attachment_content" class="ms-2" v-html="match.highlight.attachment_content[0]">
+                                            </h5>
+                                            <div v-if="match.source.creators" class="ms-2 text-secondary">
+                                                <small v-html="match.source.creators"></small>
+                                            </div>
+                                        </template>
+                                    </search-result>
 
-                                        <search-result
-                                            icon="music"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.title|safe }}"
-                                            url="{{ match.source.url }}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                            <template #image>
-                                                <div class="mx-2">
-                                                    <img src="{{ IMAGES_URL }}artist_images/{{ match.source.artist_uuid }}" class="search-result-music" />
-                                                </div>
-                                            </template>
-                                            <template #extra>
-                                                <h5 class="ms-2">
-                                                    {{ match.source.artist }}
-                                                </h5>
-                                            </template>
-                                        </search-result>
-
-                                    {% elif match.source.doctype == "album" %}
-
-                                        <search-result
-                                            icon="music"
-                                            :importance={{ match.source.importance|default:1 }}
-                                            title="{{ match.source.title|safe }}"
-                                            url="{% url 'music:album_detail' match.source.uuid %}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                            <template #image>
-                                                <div class="mx-2">
-                                                    <img src="{{ IMAGES_URL }}album_artwork/{{ match.source.uuid }}" height="150" width="150" />
-                                                </div>
-                                            </template>
-                                            <template #extra>
-                                                <h5 class="ms-2">
-                                                    {{ match.source.artist }}
-                                                </h5>
-                                            </template>
-                                        </search-result>
-
-                                    {% else %}
-
-                                        <search-result
-                                            icon="book"
-                                            :importance={{ match.source.importance|default:1 }}
-                                                  title="{{ match.source.name|safe }}"
-                                            url="{% url 'blob:detail' match.source.uuid %}"
-                                            :tags="JSON.parse('{{ match.tags_json|escapejs }}')"
-                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                        >
-                                            <template #image>
-                                                <div class="mx-2">
-                                                    <img src="{{ match.source.cover_url }}" />
-                                                </div>
-                                            </template>
-                                            <template #extra>
-                                                <h5 v-pre class="ms-2">
-                                                    {{ match.highlight.attachment_content.0|escape|unescape_em|safe }}
-                                                </h5>
-                                                {% if match.source.creators %}
-                                                    <div class="ms-2 text-secondary">
-                                                        <small>{{ match.source.creators }}</small>
-                                                    </div>
-                                                {% endif %}
-                                            </template>
-                                        </search-result>
-
-                                    {% endif %}
-
-                                    <div class="search-result-date text-nowrap ms-auto pe-4">
-                                        {{ match.source.date }}
+                                    <div class="search-result-date text-nowrap ms-auto pe-4" v-html="match.source.date">
                                     </div>
 
                                     </div>
 
                                 </li>
-
-                            {% endfor %}
 
                         </ul>
 
@@ -303,7 +274,7 @@
 
                             <pagination
                                 :paginator="JSON.parse('{{ paginator|escapejs }}')"
-                                :num-objects={{ search_results.hits.total.value }}
+                                :num-objects={{ count }}
                             >
                             </pagination>
 
@@ -325,6 +296,9 @@
 
     {{ block.super }}
 
+    {{ results|json_script:"results" }}
+    {{ request.GET.search|json_script:"searchTerm" }}
+
     <script type="text/javascript" charset="utf-8">
 
         const app = createApp({
@@ -336,6 +310,8 @@
                 SearchResult,
             },
             setup() {
+                const results = JSON.parse(document.getElementById("results").textContent);
+                const searchTerm = JSON.parse(document.getElementById("searchTerm").textContent);
                 const searchInput = ref(null);
 
                 function onClick(evt) {
@@ -374,7 +350,9 @@
                 return {
                     getDoctypeClass,
                     onClick,
+                    results,
                     searchInput,
+                    searchTerm,
                     select,
                 };
             },

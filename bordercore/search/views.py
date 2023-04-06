@@ -52,6 +52,7 @@ class SearchListView(ListView):
     template_name = "search/search.html"
     context_object_name = "search_results"
     RESULT_COUNT_PER_PAGE = 10
+    is_notes_search = False
 
     def get_paginator(self, page, num_results):
 
@@ -88,6 +89,9 @@ class SearchListView(ListView):
         return aggregations
 
     def get_queryset(self):
+
+        if "search" not in self.request.GET and not self.is_notes_search:
+            return
 
         # Store the "sort" field in the user's session
         self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
@@ -245,23 +249,24 @@ class SearchListView(ListView):
                         match["source"]["filename"],
                         size="small"
                     )
-                if match["source"]["doctype"] == "song":
-                    if "album_uuid" in match["source"]:
-                        match["source"]["url"] = reverse("music:album_detail", args=[match["source"]["album_uuid"]])
-                    else:
-                        match["source"]["url"] = reverse("music:artist_detail", args=[match["source"]["artist_uuid"]])
+                match["source"]["url"] = get_link(match["source"]["doctype"], match["source"])
                 match["tags_json"] = json.dumps(match["source"]["tags"]) \
                     if "tags" in match["source"] \
                     else []
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
             page = int(self.request.GET.get("page", 1))
-
             context["paginator"] = json.dumps(
                 self.get_paginator(page, context["search_results"]["hits"]["total"]["value"])
             )
 
+            context["count"] = context["search_results"]["hits"]["total"]["value"]
+            context["results"] = context["search_results"]["hits"]["hits"]
+
+            context["object_list"].pop("hits")
+
         context["title"] = "Search"
+
         return context
 
 
@@ -270,6 +275,7 @@ class NoteListView(SearchListView):
 
     template_name = "blob/note_list.html"
     RESULT_COUNT_PER_PAGE = 10
+    is_notes_search = True
 
     def refine_search(self, search_object):
 
@@ -302,16 +308,16 @@ class NoteListView(SearchListView):
 
         context = super().get_context_data(**kwargs)
 
-        page = int(self.request.GET.get("page", 1))
-        context["paginator"] = json.dumps(
-            self.get_paginator(page, context["search_results"]["hits"]["total"]["value"])
-        )
-
         if "search" not in self.request.GET:
             context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("usernote__sort_order")
 
-        if context["search_results"]:
-            context["search_results"] = context["search_results"]["hits"]["hits"]
+        if context["results"]:
+            page = int(self.request.GET.get("page", 1))
+
+            context["paginator"] = json.dumps(
+                self.get_paginator(page, context["count"])
+            )
+
         return context
 
 
@@ -462,7 +468,7 @@ class SearchTagDetailView(ListView):
                 result["album_artwork_url"] = f"{settings.IMAGES_URL}album_artwork/{match['_source']['uuid']}"
             result["favicon_url"] = favicon_url(result["url"])
             result["url_domain"] = urlparse(result["url"]).netloc
-            result["object_url"] = get_link(get_doctype(match), match["_source"])
+            result["object_url"] = get_link(get_doctype(match).lower(), match["_source"])
             results.setdefault(match["_source"]["doctype"], []).append(result)
 
         context["search_results"]["matches"] = results
@@ -553,20 +559,20 @@ def sort_results(matches):
 
 def get_link(doc_type, match):
 
-    if doc_type == "Bookmark":
+    if doc_type == "bookmark":
         return match["url"]
-    if doc_type == "Song":
+    if doc_type == "song":
         if "album_uuid" in match:
             return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
         else:
             return reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
-    if doc_type == "Album":
+    if doc_type == "album":
         return reverse("music:album_detail", kwargs={"uuid": match["uuid"]})
-    if doc_type == "Artist":
+    if doc_type == "artist":
         return reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
-    if doc_type in ("Blob", "Book", "Document", "Note"):
+    if doc_type in ("blob", "book", "document", "note"):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
-    if doc_type == "Drill":
+    if doc_type == "drill":
         return reverse("drill:detail", kwargs={"uuid": match["uuid"]})
 
     return ""
@@ -954,7 +960,7 @@ def search_names_es(user, search_term, doc_types):
                     "id": match["_source"].get("uuid"),
                     "important": match["_source"].get("importance"),
                     "url": match["_source"].get("url", None),
-                    "link": get_link(doc_type_pretty, match["_source"]),
+                    "link": get_link(doc_type_pretty.lower(), match["_source"]),
                     "score": match["_score"]
                 }
             )

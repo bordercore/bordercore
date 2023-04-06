@@ -38,12 +38,12 @@
             <div v-if="'{{ request.GET.search }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
 
                 <div class="h3">
-                    {{ object_list.hits.total.value }} Note{{ object_list.hits.total.value|pluralize:"s" }} Found
+                    {{ count }} Note{{ count|pluralize:"s" }} Found
                 </div>
 
                 <div class="d-flex flex-column">
                     <ul class="note-search-result list-unstyled" v-cloak>
-                        <li v-for="note in notes" class="px-2 py-3 d-flex flex-column" :class="{'selected': note.source.uuid === selectedNoteUuid}" @click="selectedNoteUuid = note.source.uuid">
+                        <li v-for="note in results" class="px-2 py-3 d-flex flex-column" :class="{'selected': note.source.uuid === selectedNoteUuid}" @click="selectedNoteUuid = note.source.uuid">
                             <h4 class="text-primary fw-bold">
                                 [[ note.source.name || "Note" ]]
                             </h4>
@@ -67,10 +67,7 @@
 
                     <div class="d-flex justify-content-center">
 
-                        <pagination
-                            :paginator="paginator"
-                            :num-objects="notes.length"
-                        >
+                        <pagination :paginator="JSON.parse('{{ paginator|escapejs }}')">
                         </pagination>
 
                     </div>
@@ -83,7 +80,7 @@
 
         <div class="col-lg-9 h-100 scrollable-panel d-flex flex-column">
 
-            <div v-for="(note,index) in notes" :class="{'d-none': isSearchResult && note.source.uuid !== selectedNoteUuid}" class="position-relative">
+            <div v-for="(note, index) in results" :class="{'d-none': isSearchResult && note.source.uuid !== selectedNoteUuid}" class="position-relative">
                 <card :title="note.source.name" class="me-0">
                     <template v-slot:title-slot>
                         <div v-if="index === 0" class="position-absolute end-0" v-cloak>
@@ -120,7 +117,7 @@
                 </card>
             </div>
 
-            <div v-if="notes.length === 0" class="card-grid" v-cloak>
+            <div v-if="results.length === 0" class="card-grid" v-cloak>
                 <search-no-result>
                     <template v-slot:message>
                         No notes found matching search criteria.
@@ -141,7 +138,7 @@
 
     {{ block.super }}
 
-    {{ search_results|json_script:"searchResults" }}
+    {{ results|json_script:"results" }}
 
     <script type="text/javascript" id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -173,8 +170,8 @@
             },
             setup() {
                 const isSearchResult = {% if request.GET.search %}true{% else %}false{% endif %};
-                const notes = ref(JSON.parse(document.getElementById("searchResults").textContent));
-                const selectedNoteUuid = ref("{{ object_list.hits.hits.0.source.uuid }}");
+                const results = ref(JSON.parse(document.getElementById("results").textContent));
+                const selectedNoteUuid = ref("{{ results.0.source.uuid }}");
                 const pinnedNotes = ref([
                     {% for note in pinned_notes %}
                     {
@@ -184,7 +181,6 @@
                     },
                     {% endfor %}
                 ]);
-                const paginator = ref(JSON.parse("{{ paginator|escapejs }}"));
 
                 const expander = ref(null);
                 const noteElements = ref(null);
@@ -233,7 +229,7 @@
                     }
                     for (const [index, element] of noteElements.value.entries()) {
                         if (element.clientHeight < NOTE_MAX_HEIGHT || isSearchResult) {
-                            notes.value[index].isExpanded = true;
+                            results.value[index].isExpanded = true;
                         }
                     }
                 });
@@ -242,11 +238,10 @@
                     expander,
                     getContent,
                     isSearchResult,
-                    notes,
                     noteElements,
                     onChange,
-                    paginator,
                     pinnedNotes,
+                    results,
                     selectedNoteUuid,
                 };
             },
