@@ -132,8 +132,8 @@
                     </template>
                     <template v-slot:content>
                         <ul class="list-group list-group-horizontal text-center list-unstyled justify-content-center">
-                            <li class="mx-3" v-for="blob in blobList" :key="blob.id">
-                                <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
+                            <li class="mx-3" v-for="blob in blobList" :key="blob.uuid">
+                                <a :href="blob.url"><img :src="blob.cover_url" /></a>
                             </li>
                         </ul>
                     </template>
@@ -219,6 +219,8 @@
 
     {{ block.super }}
 
+    {{ default_collection.blob_list|json_script:"blobList" }}
+
     <script type="text/javascript">
 
         const app = createApp({
@@ -233,19 +235,7 @@
                 const message = ref("Retrieving...");
                 const waiting = ref(true);
 
-                const blobList = [
-                    {% for blob in default_collection.blob_list %}
-                    {
-                        id: {{ blob.id }},
-                        cover_url: "{{ blob.cover_url}}",
-                        uuid: "{{ blob.uuid }}",
-                        name: "{{ blob.name|safe }}",
-                        collection_note: "{{ blob.collection_note }}",
-                        url: "{% url 'blob:detail' blob.uuid %}",
-                        cover_url: "{{ blob.cover_url }}",
-                    },
-                    {% endfor %}
-                ];
+                const blobList = JSON.parse(document.getElementById("blobList").textContent);
 
                 onMounted(() => {
                     axios.get("{% url 'homepage:get_calendar_events' %}")

@@ -210,7 +210,7 @@
                     },
                     setup() {
 
-                        const initialMessages = JSON.parse('{{ json_messages|safe|escapejs }}');
+                        const initialMessages = JSON.parse('{{ json_messages|escapejs }}');
 
                         return {
                             initialMessages
