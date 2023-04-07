@@ -57,7 +57,29 @@ export default function() {
                 }
             },
         );
-    }
+    };
+
+    function handleRowMouseLeave(event) {
+        for (const el of event.currentTarget.querySelectorAll(".rating")) {
+            el.classList.remove("rating-star-hovered");
+        }
+    };
+
+    function handleRowMouseOver(event) {
+        for (const el of event.currentTarget.querySelectorAll(".rating")) {
+            if (!el.classList.contains("rating-star-selected")) {
+                el.classList.add("rating-star-hovered");
+            }
+        }
+    };
+
+    onMounted(() => {
+        for (const el of document.getElementsByClassName("song")) {
+            el.addEventListener("mouseover", handleRowMouseOver);
+            el.addEventListener("mouseleave", handleRowMouseLeave);
+        }
+    });
+
 
     return {
         handleRatingMouseOver,
