@@ -124,28 +124,35 @@
         </create-update-todo>
 
         <div class="d-flex g-0 h-100 mx-2">
-
-            <div v-for="(column, colIndex) in layout" class="node-column">
-                <draggable
-                    drag-class="draggable-chosen-class"
-                    @change="onLayoutChange"
-                    :list="layout[colIndex]"
-                    group="object"
-                    :data-col-number="colIndex"
-                    :disabled="!editLayout"
-                    class="position-relative"
-                    item-key="uuid"
+            <div
+                v-for="(column, colIndex) in layout"
+                :key="colIndex"
+                class="node-column"
+            >
+                <slick-list
+                    v-model:list="layout[colIndex]"
+                    :distance="1"
+                    @update:list="handleLayoutChange"
+                    @sort:start="handleSortStart"
+                    axis="xy"
+                    group="node_column"
+                    helper-class="slicklist-helper"
                 >
-                    <template #item="{element, index}">
-                        <div class="position-relative" :style="'z-index: ' + (300 - (colIndex*100) - index)">
-                            <div v-if="element.type === 'collection'">
+                    <slick-item
+                        v-for="(row, rowIndex) in layout[colIndex]"
+                        :key="row.uuid"
+                        :index="rowIndex"
+                        :disabled="!editLayout"
+                    >
+                        <div class="slicklist-list-item-inner position-relative" :style="'z-index: ' + (300 - (colIndex*100) - rowIndex)">
+                            <div v-if="row.type === 'collection'">
                                 <collection-object-list
                                     node-uuid="{{ object.uuid }}"
-                                    :uuid="element.uuid"
-                                    :collection-object-list-initial="element"
+                                    :uuid="row.uuid"
+                                    :collection-object-list-initial="row"
                                     update-collection-url="{% url "node:update_collection" %}"
                                     update-object-note-url="{% url "collection:update_object_note" %}"
-                                    :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', element.uuid)"
+                                    :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.uuid)"
                                     remove-object-url="{% url "collection:remove_object" %}"
                                     sort-objects-url="{% url "collection:sort_objects" %}"
                                     delete-collection-url="{% url "node:delete_collection" %}"
@@ -156,11 +163,11 @@
                                 >
                                 </collection-object-list>
                             </div>
-                            <div v-if="element.type === 'note'" :draggable="editLayout">
+                            <div v-if="row.type === 'note'">
                                 <node-note
                                     node-uuid="{{ object.uuid }}"
-                                    :node-note-initial="element"
-                                    :note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', element.uuid)"
+                                    :node-note-initial="row"
+                                    :note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.uuid)"
                                     set-note-color-url="{% url "node:set_note_color" %}"
                                     delete-note-url="{% url 'node:delete_note' %}"
                                     @open-note-metadata-modal="openModalNoteUpdate"
@@ -168,7 +175,7 @@
                                 >
                                 </node-note>
                             </div>
-                            <div v-else-if="element.type === 'todo'" :draggable="editLayout">
+                            <div v-else-if="row.type === 'todo'">
                                 <node-todo-list
                                     ref="todoList"
                                     node-uuid="{{ object.uuid }}"
@@ -182,23 +189,23 @@
                                 >
                                 </node-todo-list>
                             </div>
-                            <div v-else-if="element.type === 'image'" :draggable="editLayout">
+                            <div v-else-if="row.type === 'image'">
                                 <node-image
                                     node-uuid="{{ object.uuid }}"
-                                    :image-uuid="element.uuid"
-                                    :image-title="element.image_title"
-                                    :image-url="element.image_url"
+                                    :image-uuid="row.uuid"
+                                    :image-title="row.image_title"
+                                    :image-url="row.image_url"
                                     remove-image-url="{% url 'node:remove_image' %}"
                                     @open-modal-note-image="openModalNoteImage"
                                     @update-layout="onUpdateLayout"
                                 >
                                 </node-image>
                             </div>
-                            <div v-else-if="element.type === 'quote'" :draggable="editLayout">
+                            <div v-else-if="row.type === 'quote'">
                                 <node-quote
                                     ref="quote"
                                     node-uuid="{{ object.uuid }}"
-                                    :node-quote-initial="element"
+                                    :node-quote-initial="row"
                                     get-quote-url="{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}"
                                     get-and-set-quote-url="{% url 'node:get_quote' %}"
                                     remove-quote-url="{% url 'node:remove_quote' %}"
@@ -209,8 +216,8 @@
                                 </node-quote>
                             </div>
                         </div>
-                    </template>
-                </draggable>
+                    </slick-item>
+                </slick-list>
             </div>
 
             <collection-object-list-modal
@@ -275,7 +282,6 @@
                 CollectionObjectListModal,
                 CreateUpdateTodo,
                 FontAwesomeIcon,
-                draggable,
                 DropDownMenu,
                 NodeImage,
                 NodeImageModal,
@@ -285,6 +291,8 @@
                 NodeQuoteModal,
                 NodeTodoList,
                 ObjectSelect,
+                SlickItem,
+                SlickList,
             },
             setup() {
                 const editLayout = ref(false);
@@ -300,6 +308,8 @@
                 const objectSelectImage = ref(null);
                 const todoList = ref(null);
                 const updateTodo = ref(null);
+
+                let layoutCache = cloneDeep(layout.value);
 
                 const editLayoutDropDownItemValue = computed(() => {
                     return editLayout.value ? "Disable Edit Layout" : "Enable Edit Layout";
@@ -333,6 +343,26 @@
                         },
                         "Note added",
                     );
+                };
+
+                function handleLayoutChange(evt) {
+                    if (isEqual(layoutCache, layout.value)) {
+                        return;
+                    }
+                    doPost(
+                        "{% url "node:change_layout" %}",
+                        {
+                            "node_uuid": nodeUuid.value,
+                            "layout": JSON.stringify(layout.value),
+                        },
+                        (response) => {
+                            layoutCache = cloneDeep(layout.value);
+                        },
+                    );
+                };
+
+                function handleSortStart() {
+                    layoutCache = layout.value;
                 };
 
                 function handleTodoUpdate() {
@@ -380,18 +410,6 @@
                             modal.hide();
                         },
                         "Node updated",
-                    );
-                };
-
-                function onLayoutChange(evt) {
-                    doPost(
-                        "{% url "node:change_layout" %}",
-                        {
-                            "node_uuid": nodeUuid.value,
-                            "layout": JSON.stringify(layout.value),
-                        },
-                        (response) => {
-                        },
                     );
                 };
 
@@ -497,6 +515,8 @@
                     collectionUpdate,
                     editLayout,
                     editLayoutDropDownItemValue,
+                    handleLayoutChange,
+                    handleSortStart,
                     handleTodoUpdate,
                     hasTodoList,
                     layout,
@@ -506,7 +526,6 @@
                     onAddQuote,
                     onAddTodoList,
                     onClickUpdateNode,
-                    onLayoutChange,
                     onUpdateNode,
                     openAddNoteModal,
                     openCollectionModal,
@@ -536,6 +555,7 @@
                 sortIcon: "caret-up",
             },
         });
+        app.use(Slicksort);
         app.mount("#vue-app");
 
     </script>

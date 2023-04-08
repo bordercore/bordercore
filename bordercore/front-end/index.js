@@ -1,3 +1,8 @@
+import {plugin as Slicksort} from "vue-slicksort";
+window.Slicksort = Slicksort;
+import {SlickList, SlickItem} from "vue-slicksort";
+window.SlickList = SlickList;
+window.SlickItem = SlickItem;
 
 import {computed, createApp, h, nextTick, onMounted, reactive, ref, watch} from "vue";
 window.computed = computed;
@@ -126,6 +131,10 @@ window.FontAwesomeIcon = FontAwesomeIcon;
 
 import {format} from "date-fns";
 window.format = format;
+
+import {cloneDeep, isEqual} from "lodash";
+window.cloneDeep = cloneDeep;
+window.isEqual = isEqual;
 
 import markdownit from "markdown-it";
 window.markdown = markdownit();

@@ -109,10 +109,6 @@ div.sphere {
   }
 }
 
-//
-// Drag and Drop
-//
-
 div.drag-target {
   transition: all 1s;
 
@@ -2422,6 +2418,16 @@ tr.hover-target:hover {
 
 .v3dp__datepicker .selected {
   background-color: var(--vdp-bg-color) !important;
+}
+
+// vue-slicksort
+
+.slicklist-list-item-inner {
+  transition: background 0.2s, transform 0.2s;
+}
+
+.slicklist-helper .slicklist-list-item-inner {
+  transform: rotate(2deg);
 }
 
 // Sidebar
