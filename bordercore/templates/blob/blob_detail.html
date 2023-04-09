@@ -391,7 +391,7 @@
             setup() {
                 const backReferences = JSON.parse(document.getElementById("backReferences").textContent);
                 const collectionList = ref(JSON.parse(document.getElementById("collectionList").textContent));
-                const elasticsearchInfo = JSON.parse(document.getElementById("elasticsearchInfo").textContent);
+                let elasticsearchInfo = JSON.parse(document.getElementById("elasticsearchInfo").textContent);
                 const isPinnedNote = ref({{ is_pinned_note|yesno:"true,false" }});
                 const getBlobInfoAttemptIntervals = [1000, 3000, 6000];
                 let getBlobInfoAttempts = 0;
@@ -423,7 +423,7 @@
                         "{% url 'blob:get_elasticsearch_info' blob.uuid %}",
                         (response) => {
                             if (Object.keys(response.data.info).length !== 0) {
-                                elasticsearchInfo.value = response.data.info;
+                                elasticsearchInfo = response.data.info;
                             } else {
                                 // Keep trying to retrieve the blob's info until we run out of attempts
                                 if (getBlobInfoAttempts <= getBlobInfoAttemptIntervals.length) {
