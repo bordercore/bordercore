@@ -2426,6 +2426,11 @@ tr.hover-target:hover {
 
 // vue-slicksort
 
+.slicklist-helper {
+  position: relative;
+  z-index: 300;
+}
+
 .slicklist-list-item-inner {
   transition: background 0.2s, transform 0.2s;
 }

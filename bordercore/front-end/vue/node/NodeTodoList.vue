@@ -35,38 +35,49 @@
             <template #content>
                 <hr class="divider">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="todoList" draggable=".draggable" :component-data="{type:'transition-group'}" item-key="todo.uuid" chosen-class="node-draggable" ghost-class="node-draggable" drag-class="node-draggable" @change="handleTodoSort">
-                        <template #item="{element}">
-                            <li v-cloak :key="element.uuid" class="hover-target draggable list-group-item pe-0" :data-uuid="element.uuid">
-                                <div class="dropdown-height d-flex align-items-start">
-                                    <div>
-                                        <a :href="element.url">{{ element.name }}</a>
-                                        <div v-if="element.url" class="node-url">
-                                            <a :href="element.url">Link</a>
+                    <slick-list
+                        v-model:list="todoList"
+                        :distance="1"
+                        helper-class="slicklist-helper"
+                        @sort-end="handleSort"
+                    >
+                        <slick-item
+                            v-for="(element, index) in todoList"
+                            :key="element.uuid"
+                            :index="index"
+                        >
+                            <div class="slicklist-list-item-inner">
+                                <li v-cloak :key="element.uuid" class="hover-target list-group-item pe-0" :data-uuid="element.uuid">
+                                    <div class="dropdown-height d-flex align-items-start">
+                                        <div>
+                                            <a :href="element.url">{{ element.name }}</a>
+                                            <div v-if="element.url" class="node-url">
+                                                <a :href="element.url">Link</a>
+                                            </div>
+                                            <div v-if="element.note" class="node-object-note">
+                                                {{ element.note }}
+                                            </div>
                                         </div>
-                                        <div v-if="element.note" class="node-object-note">
-                                            {{ element.note }}
-                                        </div>
-                                    </div>
 
-                                    <drop-down-menu :show-on-hover="true">
-                                        <template #dropdown>
-                                            <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="handleTodoUpdate(element)">
-                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="handleTodoRemove(element.uuid)">
-                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
-                                                </a>
-                                            </li>
-                                        </template>
-                                    </drop-down-menu>
-                                </div>
-                            </li>
-                        </template>
-                    </draggable>
+                                        <drop-down-menu :show-on-hover="true">
+                                            <template #dropdown>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="handleTodoUpdate(element)">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="handleTodoRemove(element.uuid)">
+                                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </drop-down-menu>
+                                    </div>
+                                </li>
+                            </div>
+                        </slick-item>
+                    </slick-list>
                     <div v-if="todoList.length == 0" v-cloak :key="1" class="text-muted">
                         No tasks
                     </div>
@@ -79,16 +90,17 @@
 <script>
 
     import Card from "/front-end/vue/common/Card.vue";
-    import draggable from "vuedraggable";
     import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
         components: {
             Card,
-            draggable,
             DropDownMenu,
             FontAwesomeIcon,
+            SlickItem,
+            SlickList,
         },
         props: {
             nodeUuid: {
@@ -182,12 +194,15 @@
                     });
             };
 
-            function handleTodoSort(evt) {
-                const todoUuid = evt.moved.element.uuid;
+            function handleSort(event) {
+                if (event.oldIndex === event.newIndex) {
+                    return;
+                }
+                const todoUuid = todoList.value[event.oldIndex].uuid;
 
                 // The backend expects the ordering to begin
                 // with 1, not 0, so add 1.
-                const newPosition = evt.moved.newIndex + 1;
+                const newPosition = event.newIndex + 1;
 
                 doPost(
                     props.sortNodeTodosUrl,
@@ -207,7 +222,7 @@
             return {
                 addNodeTodo,
                 getTodoList,
-                handleTodoSort,
+                handleSort,
                 handleTodoCreate,
                 handleTodoRemove,
                 onDeleteTodoList,
