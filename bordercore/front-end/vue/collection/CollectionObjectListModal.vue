@@ -51,7 +51,7 @@
                                                     {{ props.option.name }}
                                                 </div>
                                                 <div class="text-secondary lh-1">
-                                                    <small>{{ props.option.num_blobs }} blobs</small>
+                                                    <small>{{ props.option.num_objects }} objects</small>
                                                 </div>
                                                 <div v-if="props.option_blob" class="text-warning ms-auto">
                                                     Added

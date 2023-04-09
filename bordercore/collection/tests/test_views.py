@@ -152,7 +152,7 @@ def test_search(auto_login_user, collection, blob_image_factory, blob_pdf_factor
     assert len(payload) == 1
 
     assert payload[0]["name"] == collection[1].name
-    assert payload[0]["num_blobs"] == 1
+    assert payload[0]["num_objects"] == 1
 
 
 def test_collection_object_list(auto_login_user, collection, blob_image_factory, blob_pdf_factory):

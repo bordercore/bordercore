@@ -209,6 +209,8 @@ def search(request):
 
     query = Collection.objects.filter(user=request.user)
 
+    query = query.annotate(num_objects=Count("collectionobject"))
+
     if "query" in request.GET:
         query = query.filter(name__icontains=request.GET.get("query"))
 
@@ -220,8 +222,6 @@ def search(request):
                                           .filter(collectionobject__blob__uuid__in=[request.GET.get("exclude_blob_uuid")])
         query = query.annotate(contains_blob=Exists(contains_blob))
 
-    query = query.annotate(num_blobs=Count("collectionobject__blob"))
-
     collection_list = query.order_by("-modified")
 
     return JsonResponse(
@@ -229,7 +229,7 @@ def search(request):
             {
                 "name": x.name,
                 "uuid": x.uuid,
-                "num_blobs": x.num_blobs,
+                "num_objects": x.num_objects,
                 "url": reverse("collection:detail", kwargs={"collection_uuid": x.uuid}),
                 "cover_url": f"{settings.COVER_URL}collections/{x.uuid}.jpg",
                 "contains_blob": getattr(x, "contains_blob", None)

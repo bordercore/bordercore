@@ -27,7 +27,7 @@
                                             {{ props.option.name }}
                                         </div>
                                         <div class="text-primary mx-1">
-                                            <small>{{ props.option.num_blobs }} blobs</small>
+                                            <small>{{ props.option.num_objects }} blobs</small>
                                         </div>
                                         <div v-if="props.option.contains_blob" class="text-warning ms-auto">
                                             Added
