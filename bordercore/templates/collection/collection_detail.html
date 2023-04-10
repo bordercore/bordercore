@@ -97,36 +97,47 @@
                     <hr class="divider" />
 
                     <div class="d-flex ms-2">
-                        <div>
-                            <div id="collection-list" @drop.prevent="handleBlobAdd($event)" @dragover.prevent="handleBlobDragOver($event)" @dragleave.prevent="handleBlobDragLeave($event)" @dragenter.prevent>
-                                <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
-                                    <draggable v-model="blobList" @change="handleSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true" item-key="id">
-                                        <template #item="{element}">
-                                        <li :key="element.id" class="collection-item hoverable cursor-pointer float-start p-3">
-                                            <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(element.uuid)">
-                                            </button>
-                                            <div class="d-flex flex-column h-100" @click="handleBlobRemove(element.url)">
-                                                <a :href="element.url">
-                                                    <div v-if="element.type === 'blob'">
-                                                        <img :src="element.cover_url" />
+                        <div id="collection-list" @drop.prevent="handleBlobAdd($event)" @dragover.prevent="handleBlobDragOver($event)" @dragleave.prevent="handleBlobDragLeave($event)" @dragenter.prevent>
+                            <ul class="_list-group _list-group-horizontal text-center list-unstyled collection-sortable">
+                                <slick-list
+                                    v-model:list="blobList"
+                                    :distance="1"
+                                    axis="xy"
+                                    helper-class="slicklist-helper"
+                                    class="d-flex flex-wrap w-100"
+                                    @sort-end="handleSort"
+                                >
+                                    <slick-item
+                                        v-for="(element, index) in blobList"
+                                        :key="element.uuid"
+                                        :index="index"
+                                    >
+                                        <div class="slicklist-list-item-inner">
+                                            <li :key="element.uuid" class="collection-item list-group-item hoverable cursor-pointer p-3">
+                                                <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(element.uuid)">
+                                                </button>
+                                                <div class="d-flex flex-column h-100" @click="handleBlobRemove(element.url)">
+                                                    <a :href="element.url">
+                                                        <div v-if="element.type === 'blob'">
+                                                            <img :src="element.cover_url" />
+                                                        </div>
+                                                        <div v-else>
+                                                            <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
+                                                        </div>
+                                                    </a>
+                                                    <div class="collection-item-name mt-auto">
+                                                       [[ element.name ]]
                                                     </div>
-                                                    <div v-else>
-                                                        <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
-                                                    </div>
-                                                </a>
-                                                <div class="collection-item-name mt-auto">
-                                                    [[ element.name ]]
                                                 </div>
-                                            </div>
-                                        </li>
-                                        </template>
-                                    </draggable>
-                                </ul>
-                            </div>
-                            <h5 v-if="!blobList" class="text-secondary">
-                                This collection is empty.
-                            </h5>
+                                            </li>
+                                        </div>
+                                    </slick-item>
+                                </slick-list>
+                            </ul>
                         </div>
+                        <h5 v-if="!blobList" class="text-secondary">
+                            This collection is empty.
+                        </h5>
 
                         <h5 v-if="needsPagination" class="d-flex mb-0 me-1 pt-3">
                             <div>
@@ -346,9 +357,10 @@
             delimiters: ["[[", "]]"],
             components: {
                 Card,
-                draggable,
                 DropDownMenu,
                 FontAwesomeIcon,
+                SlickItem,
+                SlickList,
                 TagsInput,
             },
             setup() {
@@ -560,21 +572,21 @@
                     document.getElementById("collection-list").classList.remove("collection-drag-over");
                 };
 
-                function handleSort(evt) {
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    const newPosition = evt.moved.newIndex + 1;
+                function handleSort(event) {
+                    if (event.oldIndex === event.newIndex) {
+                        return;
+                    }
+                    // The backend expects the ordering to begin with 1, not 0, so add 1.
+                    const newPosition = event.newIndex + 1;
 
                     doPost(
                         "{% url "collection:sort_objects" %}",
                         {
                             "collection_uuid": "{{ collection.uuid }}",
-                            "object_uuid": evt.moved.element.uuid,
+                            "object_uuid": blobList.value[event.oldIndex].uuid,
                             "new_position": newPosition,
                         },
                         () => {},
-                        "",
-                        "",
                     );
                 };
 
@@ -593,7 +605,6 @@
                             getBlobList();
                         },
                         "Blob removed from collection",
-                        "",
                     );
                 };
 
