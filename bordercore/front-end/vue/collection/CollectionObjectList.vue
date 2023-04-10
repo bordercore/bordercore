@@ -54,43 +54,54 @@
                     <span v-else class="text-muted">No objects</span>
                 </div>
                 <ul v-else class="list-group list-group-flush interior-borders">
-                    <draggable v-model="limitedObjectList" :component-data="{type:'transition-group'}" item-key="uuid" chosen-class="node-draggable" ghost-class="node-draggable" drag-class="node-draggable" @change="handleSort">
-                        <template #item="{element}">
-                            <li v-cloak :key="element.uuid" class="hover-target list-group-item pe-0" :data-uuid="element.uuid">
-                                <div class="dropdown-height d-flex align-items-start">
-                                    <div v-if="element.type === 'blob'" class="pe-2">
-                                        <img :src="element.cover_url" height="75" width="70">
-                                    </div>
-                                    <div v-else class="pe-2" v-html="element.favicon_url" />
+                    <slick-list
+                        v-model:list="limitedObjectList"
+                        :distance="1"
+                        helper-class="slicklist-helper"
+                        @sort-end="handleSort"
+                    >
+                        <slick-item
+                            v-for="(element, index) in limitedObjectList"
+                            :key="element.uuid"
+                            :index="index"
+                        >
+                            <div class="slicklist-list-item-inner">
+                                <li v-cloak :key="element.uuid" class="hover-target list-group-item pe-0" :data-uuid="element.uuid">
+                                    <div class="dropdown-height d-flex align-items-start">
+                                        <div v-if="element.type === 'blob'" class="pe-2">
+                                            <img :src="element.cover_url" height="75" width="70">
+                                        </div>
+                                        <div v-else class="pe-2" v-html="element.favicon_url" />
 
-                                    <div>
-                                        <a :href="element.url">{{ element.name }}</a>
-                                        <Transition name="fade" mode="out-in" @after-enter="handleAfterEnterTransition">
-                                            <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true" v-html="getNote(element.note)" />
-                                            <span v-else>
-                                                <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
-                                            </span>
-                                        </Transition>
-                                    </div>
+                                        <div>
+                                            <a :href="element.url">{{ element.name }}</a>
+                                            <Transition name="fade" mode="out-in" @after-enter="handleAfterEnterTransition">
+                                                <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true" v-html="getNote(element.note)" />
+                                                <span v-else>
+                                                    <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
+                                                </span>
+                                            </Transition>
+                                        </div>
 
-                                    <drop-down-menu :show-on-hover="true">
-                                        <template #dropdown>
-                                            <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element.uuid)">
-                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="element.noteIsEditable = true">
-                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="element.note">Edit</span><span v-else>Add</span> Note
-                                                </a>
-                                            </li>
-                                        </template>
-                                    </drop-down-menu>
-                                </div>
-                            </li>
-                        </template>
-                    </draggable>
+                                        <drop-down-menu :show-on-hover="true">
+                                            <template #dropdown>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element.uuid)">
+                                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="element.noteIsEditable = true">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="element.note">Edit</span><span v-else>Add</span> Note
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </drop-down-menu>
+                                    </div>
+                                </li>
+                            </div>
+                        </slick-item>
+                    </slick-list>
                     <div v-if="objectList.length == 0" v-cloak :key="1" class="text-muted">
                         No objects
                     </div>
@@ -103,17 +114,18 @@
 <script>
 
     import Card from "/front-end/vue/common/Card.vue";
-    import draggable from "vuedraggable";
     import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
         name: "CollectionObjectList",
         components: {
             Card,
-            draggable,
             DropDownMenu,
             FontAwesomeIcon,
+            SlickItem,
+            SlickList,
         },
         props: {
             nodeUuid: {
@@ -271,12 +283,15 @@
                 );
             };
 
-            function handleSort(evt) {
-                const uuid = evt.moved.element.uuid;
+            function handleSort(event) {
+                if (event.oldIndex === event.newIndex) {
+                    return;
+                }
+                const uuid = objectList.value[event.oldIndex].uuid;
 
                 // The backend expects the ordering to begin
                 // with 1, not 0, so add 1.
-                const newPosition = evt.moved.newIndex + 1;
+                const newPosition = event.newIndex + 1;
 
                 doPost(
                     props.sortObjectsUrl,
@@ -332,8 +347,6 @@
             };
 
             const limitedObjectList = computed({
-                // We need to define a getter and setter since it needs to be
-                // writable by the draggable component.
                 get() {
                     return collectionObjectList.value.limit ? objectList.value.slice(0, collectionObjectList.value.limit) : objectList.value;
                 },
