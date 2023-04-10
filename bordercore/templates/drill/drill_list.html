@@ -223,21 +223,32 @@
                                     </select-value>
                                 </div>
                             </div>
-                            <ul class="list-unstyled p-2 mb-0 wide-list">
-                                <draggable v-model="tagList" @change="onDrag" :component-data="{type:'transition-group'}" item-key="name">
-                                    <template #item="{element}">
-                                        <li :key="element.name" class="px-2 py-1">
-                                            <div class="d-flex">
-                                                <div>
-                                                    [[ element.name ]]
+                            <ul id="drill-pinned-tags" class="interior-borders p-2 mb-0 wide-list">
+                                <slick-list
+                                    v-model:list="tagList"
+                                    :distance="1"
+                                    helper-class="slicklist-helper"
+                                    @sort-end="handleSort"
+                                >
+                                    <slick-item
+                                        v-for="(element, index) in tagList"
+                                        :key="element.uuid"
+                                        :index="index"
+                                    >
+                                        <div class="slicklist-list-item-inner">
+                                            <li :key="element.name" class="list-group-item px-2 py-1">
+                                                <div class="d-flex">
+                                                    <div>
+                                                        [[ element.name ]]
+                                                    </div>
+                                                    <div class="ms-auto my-auto">
+                                                        <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(element.name)" />
+                                                    </div>
                                                 </div>
-                                                <div class="ms-auto my-auto">
-                                                    <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(element.name)" />
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </template>
-                                </draggable>
+                                            </li>
+                                        </div>
+                                    </slick-item>
+                                </slick-list>
                             </ul>
                         </div>
                         <div class="modal-footer justify-content-start">
@@ -339,11 +350,12 @@
             delimiters: ["[[", "]]"],
             components: {
                 Card,
-                draggable,
                 DrillTagProgress,
                 DropDownMenu,
                 FontAwesomeIcon,
                 SelectValue,
+                SlickItem,
+                SlickList,
                 TagsInput,
             },
             setup() {
@@ -385,7 +397,27 @@
                     );
                 };
 
-                 function onClickDelete(tagName) {
+                function handleSort(event) {
+                    if (event.oldIndex === event.newIndex) {
+                        return;
+                    }
+                    const tagName = tagList.value[event.oldIndex].name;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    const newPosition = event.newIndex + 1;
+
+                    doPost(
+                        "{% url "drill:sort_pinned_tags" %}",
+                        {
+                            "tag_name": tagName,
+                            "new_position": newPosition,
+                        },
+                        () => {},
+                    );
+                };
+
+                function onClickDelete(tagName) {
                     doPost(
                         url = "{% url "drill:unpin_tag" %}",
                         {
@@ -421,23 +453,6 @@
                     }
                 };
 
-                function onDrag(evt) {
-                    const tagName = evt.moved.element.name;
-
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    const newPosition = evt.moved.newIndex + 1;
-
-                    doPost(
-                        "{% url "drill:sort_pinned_tags" %}",
-                        {
-                            "tag_name": tagName,
-                            "new_position": newPosition,
-                        },
-                        () => {},
-                    );
-                };
-
                 function onTagSearch() {
                     showFeaturedTagInput.value = true;
                     setTimeout( () => {
@@ -467,9 +482,9 @@
                     chooseTag,
                     featuredTag,
                     getTagList,
+                    handleSort,
                     onClickDelete,
                     onClickStudy,
-                    onDrag,
                     onTagSearch,
                     selectFeaturedTag,
                     selectPinnedTag,

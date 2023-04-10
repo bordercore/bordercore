@@ -1993,6 +1993,14 @@ div #dateapp {
 // Drill
 //
 
+#drill-pinned-tags .list-group-item {
+  background-color: unset;
+
+  &:hover {
+    background-color: var(--hover-bg);
+  }
+}
+
 #icon-list {
   padding-right: 2.25rem;
 }
@@ -2428,7 +2436,7 @@ tr.hover-target:hover {
 
 .slicklist-helper {
   position: relative;
-  z-index: 300;
+  z-index: 1200;
 }
 
 .slicklist-list-item-inner {
