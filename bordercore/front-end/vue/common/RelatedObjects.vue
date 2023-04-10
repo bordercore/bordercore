@@ -28,48 +28,59 @@
                 <template #content>
                     <hr class="divider">
                     <ul class="list-group list-group-flush interior-borders">
-                        <draggable v-model="objectList" draggable=".draggable" item-key="uuid" :component-data="{type:'transition-group'}" chosen-class="related-draggable" ghost-class="related-draggable" drag-class="related-draggable" @change="handleSort">
-                            <template #item="{element}">
-                                <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable px-0" :data-uuid="element.uuid">
-                                    <div class="dropdown-height d-flex align-items-start">
-                                        <div class="d-flex flex-column">
-                                            <div v-if="element.type === 'bookmark'" class="pe-2">
-                                                <img :src="element.cover_url" width="120" height="67">
-                                            </div>
-                                            <div v-else-if="element.type === 'blob'" class="pe-2">
-                                                <img :src="element.cover_url">
-                                            </div>
-                                            <div>
-                                                <a :href="element.url">{{ element.name }}</a>
-                                            </div>
-                                            <Transition name="fade" mode="out-in" @after-enter="handleInputTransition">
-                                                <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true">
-                                                    {{ element.note }}
+                        <slick-list
+                            v-model:list="objectList"
+                            :distance="1"
+                            helper-class="slicklist-helper"
+                            @sort-end="handleSort"
+                        >
+                            <slick-item
+                                v-for="(element, index) in objectList"
+                                :key="element.uuid"
+                                :index="index"
+                            >
+                                <div class="slicklist-list-item-inner">
+                                    <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary px-0" :data-uuid="element.uuid">
+                                        <div class="dropdown-height d-flex align-items-start">
+                                            <div class="d-flex flex-column">
+                                                <div v-if="element.type === 'bookmark'" class="pe-2">
+                                                    <img :src="element.cover_url" width="120" height="67">
                                                 </div>
-                                                <div v-else>
-                                                    <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" autocomplete="off" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
+                                                <div v-else-if="element.type === 'blob'" class="pe-2">
+                                                    <img :src="element.cover_url">
                                                 </div>
-                                            </Transition>
+                                                <div>
+                                                    <a :href="element.url">{{ element.name }}</a>
+                                                </div>
+                                                <Transition name="fade" mode="out-in" @after-enter="handleInputTransition">
+                                                    <div v-if="!element.noteIsEditable" class="node-object-note" @click="element.noteIsEditable = true">
+                                                        {{ element.note }}
+                                                    </div>
+                                                    <div v-else>
+                                                        <input ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" autocomplete="off" @blur="handleEditNote(element, $event.target.value)" @keydown.enter="handleEditNote(element, $event.target.value)">
+                                                    </div>
+                                                </Transition>
+                                            </div>
+                                            <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
+                                                <template #dropdown>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element)">
+                                                            <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
+                                                        </a>
+                                                        <a class="dropdown-item" :href="element.edit_url">
+                                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit <span>{{ element.type }}</span>
+                                                        </a>
+                                                        <a class="dropdown-item" href="#" @click.prevent="element.noteIsEditable = true">
+                                                            <font-awesome-icon :icon="element.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ element.note ? 'Edit' : 'Add' }} note
+                                                        </a>
+                                                    </li>
+                                                </template>
+                                            </drop-down-menu>
                                         </div>
-                                        <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
-                                            <template #dropdown>
-                                                <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element)">
-                                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
-                                                    </a>
-                                                    <a class="dropdown-item" :href="element.edit_url">
-                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit <span>{{ element.type }}</span>
-                                                    </a>
-                                                    <a class="dropdown-item" href="#" @click.prevent="element.noteIsEditable = true">
-                                                        <font-awesome-icon :icon="element.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ element.note ? 'Edit' : 'Add' }} note
-                                                    </a>
-                                                </li>
-                                            </template>
-                                        </drop-down-menu>
-                                    </div>
-                                </li>
-                            </template>
-                        </draggable>
+                                    </li>
+                                </div>
+                            </slick-item>
+                        </slick-list>
                         <div v-cloak v-if="objectList.length == 0" :key="1" class="text-muted">
                             No related objects
                         </div>
@@ -83,16 +94,17 @@
 <script>
 
     import Card from "/front-end/vue/common/Card.vue";
-    import draggable from "vuedraggable";
     import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
         components: {
             Card,
-            draggable,
             DropDownMenu,
             FontAwesomeIcon,
+            SlickItem,
+            SlickList,
         },
         props: {
             objectUuid: {
@@ -226,12 +238,13 @@
                 );
             };
 
-            function handleSort(evt) {
-                const blobUuid = evt.moved.element.uuid;
-
-                // The backend expects the ordering to begin
-                // with 1, not 0, so add 1.
-                const newPosition = evt.moved.newIndex + 1;
+            function handleSort(event) {
+                if (event.oldIndex === event.newIndex) {
+                    return;
+                }
+                const blobUuid = objectList.value[event.oldIndex].uuid;
+                // The backend expects the ordering to begin with 1, not 0, so add 1.
+                const newPosition = event.newIndex + 1;
 
                 if (props.newObject) {
                     return;
