@@ -19,13 +19,24 @@
 
                     <template v-slot:content>
                         <ul class="list-group list-group-flush interior-borders">
-                            <draggable v-model="pinnedNotes" @change="onChange" :component-data={type:"transition-group"} item-key="uuid" chosen-class="node-draggable" ghost-class="node-draggable" drag-class="node-draggable">
-                                <template #item="{element}">
-                                    <li class="list-group-item" :data-uuid="element.uuid" :key="element.uuid">
-                                        <a :href="element.url">[[ element.name ]]</a>
-                                    </li>
-                                </template>
-                            </draggable>
+                            <slick-list
+                                v-model:list="pinnedNotes"
+                                :distance="1"
+                                helper-class="slicklist-helper"
+                                @sort-end="handleSort"
+                            >
+                                <slick-item
+                                    v-for="(element, index) in pinnedNotes"
+                                    :key="element.uuid"
+                                    :index="index"
+                                >
+                                    <div class="slicklist-list-item-inner">
+                                        <li class="list-group-item" :data-uuid="element.uuid" :key="element.uuid">
+                                            <a :href="element.url">[[ element.name ]]</a>
+                                        </li>
+                                    </div>
+                                </slick-item>
+                            </slick-list>
                         </ul>
                         <div v-if="pinnedNotes.length === 0">
                             No notes found to pin.
@@ -163,10 +174,11 @@
             delimiters: ["[[", "]]"],
             components: {
                 Card,
-                draggable,
                 FontAwesomeIcon,
                 Pagination,
                 SearchNoResult,
+                SlickItem,
+                SlickList,
             },
             setup() {
                 const isSearchResult = {% if request.GET.search %}true{% else %}false{% endif %};
@@ -185,12 +197,14 @@
                 const expander = ref(null);
                 const noteElements = ref(null);
 
-                function onChange(evt) {
-                    const noteUuid = evt.moved.element.uuid;
+                function handleSort(event) {
+                    if (event.oldIndex === event.newIndex) {
+                        return;
+                    }
+                    const noteUuid = pinnedNotes.value[event.oldIndex].uuid;
 
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    const newPosition = evt.moved.newIndex + 1;
+                    // The backend expects the ordering to begin with 1, not 0, so add 1.
+                    const newPosition = event.newIndex + 1;
 
                     const bodyFormData = new URLSearchParams();
                     bodyFormData.append("note_uuid", noteUuid);
@@ -237,9 +251,9 @@
                 return {
                     expander,
                     getContent,
+                    handleSort,
                     isSearchResult,
                     noteElements,
-                    onChange,
                     pinnedNotes,
                     results,
                     selectedNoteUuid,
