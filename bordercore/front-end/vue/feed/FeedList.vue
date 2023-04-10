@@ -1,15 +1,26 @@
 <template>
     <ul>
-        <draggable v-model="localFeedList" animation="500" item-key="id" draggable=".draggable" chosen-class="feed-draggable" ghost-class="feed-draggable" drag-class="feed-draggable" @change="handleSort">
-            <template #item="{element}">
-                <li v-cloak :key="element.id" :class="{'selected rounded-sm': element.id === $store.state.currentFeed.id}" class="draggable ps-2">
-                    <a href="#" :data-id="element.id" @click.prevent="onClick(element)">
-                        {{ element.name }}
-                    </a>
-                    <small v-if="element.lastResponse !== 'OK'" class="text-danger ms-2">{{ element.lastResponse }}</small>
-                </li>
-            </template>
-        </draggable>
+        <slick-list
+            v-model:list="localFeedList"
+            :distance="1"
+            helper-class="slicklist-helper"
+            @sort-end="handleSort"
+        >
+            <slick-item
+                v-for="(element, index) in localFeedList"
+                :key="element.uuid"
+                :index="index"
+            >
+                <div class="slicklist-list-item-inner">
+                    <li v-cloak :key="element.id" :class="{'selected rounded-sm': element.id === $store.state.currentFeed.id}" class="ps-2">
+                        <a href="#" :data-id="element.id" @click.prevent="onClick(element)">
+                            {{ element.name }}
+                        </a>
+                        <small v-if="element.lastResponse !== 'OK'" class="text-danger ms-2">{{ element.lastResponse }}</small>
+                    </li>
+                </div>
+            </slick-item>
+        </slick-list>
         <div v-if="feedList.length === 0" v-cloak class="text-secondary">
             No feeds found. <a href="#" @click.prevent="handleUpdateFeed('Update')">Add one here.</a>
         </div>
@@ -18,11 +29,12 @@
 
 <script>
 
-    import draggable from "vuedraggable";
+    import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
         components: {
-            draggable,
+            SlickItem,
+            SlickList,
         },
         props: {
             feedList: {
@@ -59,12 +71,11 @@
                 localFeedList.value.unshift(feedInfo);
             };
 
-            function handleSort(evt) {
-                const feedId = evt.moved.element.id;
+            function handleSort(event) {
+                const feedId = localFeedList.value[event.oldIndex].id;
 
-                // The backend expects the ordering to begin
-                // with 1, not 0, so add 1.
-                const newPosition = evt.moved.newIndex + 1;
+                // The backend expects the ordering to begin with 1, not 0, so add 1.
+                const newPosition = event.newIndex + 1;
 
                 doPost(
                     props.feedSortUrl,
