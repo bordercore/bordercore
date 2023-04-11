@@ -205,6 +205,7 @@
                     ref="relatedObjectsList"
                     object-uuid="{{ object.uuid }}"
                     node-type="blob"
+                    :show-empty-list="false"
                     related-objects-url="{% url 'blob:related_objects' '00000000-0000-0000-0000-000000000000' %}"
                     add-object-url="{% url 'blob:add_related_object' %}"
                     remove-object-url="{% url 'blob:remove_related_object' %}"
@@ -241,6 +242,13 @@
                                 <a class="dropdown-item" href="#" @click.prevent="handleAddToCollection()">
                                     <span>
                                         <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to Collection
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="openObjectSelectModal">
+                                    <span>
+                                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add Related Object
                                     </span>
                                 </a>
                             </li>
