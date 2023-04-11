@@ -6,30 +6,42 @@
         <hr class="divider">
         <ul v-cloak class="list-group flex-column w-100">
             <div id="tag-list">
-                <draggable v-model="tags" item-key="id" :component-data="{type:'transtion-group'}" @change="onSortTags">
-                    <template #item="{element}">
-                        <li
-                            :key="element.id"
-                            class="list-with-counts rounded d-flex ps-2 py-1 pr-1"
-                            :class="{ 'selected': element.name === selectedTagName, draggable: element.isDraggable }"
-                            :data-tag="element.name"
-                            :data-id="element.id"
-                            @click.prevent="onClickTag"
-                            @dragover="onDragOverTag($event)"
-                            @dragleave="onDragLeaveTag($event)"
-                            @drop="onAddTagToBookmark($event, element)"
-                        >
-                            <div class="ps-2 text-truncate">
-                                {{ element.name }}
-                            </div>
-                            <div v-if="element.bookmark_count" class="ms-auto pe-2">
-                                <span class="px-2 badge rounded-pill">
-                                    {{ element.bookmark_count }}
-                                </span>
-                            </div>
-                        </li>
-                    </template>
-                </draggable>
+                <slick-list
+                    v-model:list="tags"
+                    :distance="1"
+                    helper-class="slicklist-helper"
+                    @sort-end="handleSort"
+                >
+                    <slick-item
+                        v-for="(element, index) in tags"
+                        :key="element.uuid"
+                        :index="index"
+                        :disabled="element.name === 'Untagged'"
+                    >
+                        <div class="slicklist-list-item-inner">
+                            <li
+                                :key="element.id"
+                                class="list-with-counts rounded d-flex ps-2 py-1 pr-1"
+                                :class="{ 'selected': element.name === selectedTagName }"
+                                :data-tag="element.name"
+                                :data-id="element.id"
+                                @click.prevent="onClickTag"
+                                @dragover="onDragOverTag($event)"
+                                @dragleave="onDragLeaveTag($event)"
+                                @drop="onAddTagToBookmark($event, element)"
+                            >
+                                <div class="ps-2 text-truncate">
+                                    {{ element.name }}
+                                </div>
+                                <div v-if="element.bookmark_count" class="ms-auto pe-2">
+                                    <span class="px-2 badge rounded-pill">
+                                        {{ element.bookmark_count }}
+                                    </span>
+                                </div>
+                            </li>
+                        </div>
+                    </slick-item>
+                </slick-list>
             </div>
         </ul>
     </div>
@@ -37,11 +49,12 @@
 
 <script>
 
-    import draggable from "vuedraggable";
+    import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
         components: {
-            draggable,
+            SlickItem,
+            SlickList,
         },
         props: {
             addTagUrl: {
@@ -68,7 +81,6 @@
                     {
                         id: -1,
                         name: "Untagged",
-                        isDraggable: false,
                         count: untaggedCount,
                     },
                 );
@@ -137,17 +149,20 @@
                 }
             };
 
-            function onSortTags(evt) {
-                if (evt.added) {
+            function handleSort(event) {
+                if (event.oldIndex === event.newIndex) {
                     return;
                 }
-                const tagId = evt.moved.element.id;
+                if (event.added) {
+                    return;
+                }
+                const tagId = tags.value[event.oldIndex].id;
 
                 doPost(
                     props.sortTagsUrl,
                     {
                         "tag_id": tagId,
-                        "new_position": evt.moved.newIndex,
+                        "new_position": event.newIndex,
                     },
                     () => {},
                     "",
@@ -156,11 +171,11 @@
             };
 
             return {
+                handleSort,
                 onClickTag,
                 onDragOverTag,
                 onDragLeaveTag,
                 onAddTagToBookmark,
-                onSortTags,
                 selectedTagName,
                 setTags,
                 tags,

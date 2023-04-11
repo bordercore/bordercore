@@ -1276,22 +1276,18 @@ blockquote > p {
   @extend .hoverable-cells;
 
   .date {
+    width: 10rem;
     text-align: right;
     vertical-align: text-bottom;
     white-space: nowrap;
   }
 
-  .favicon {
+  .thumbnail {
     vertical-align: text-bottom;
   }
 
   .link {
     vertical-align: text-bottom;
-  }
-
-  .yt-hover-target {
-    right: 0.3rem;
-    bottom: 0.3rem;
   }
 }
 

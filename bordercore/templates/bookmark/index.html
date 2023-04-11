@@ -102,62 +102,74 @@
             </div>
 
             <div class="card-grid ms-2">
-
                 <div class="interior-borders scrollable-panel-scrollbar-hover vh-100">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <table class="w-100">
-                                <tbody>
-                                    <draggable id="bookmark-list" v-model="bookmarkList" @change="onSortBookmarks"
-                                        :component-data="{type:'transition-group'}" item-key="uuid" handle=".handle">
-                                        <template #item="{element}">
-                                            <tr :data-uuid="element.uuid" :key="element.uuid" class="dropdown-height hover-target bookmark-list w-100" v-cloak @dragstart="onDragStartBookmark($event, element)" @click="onClickBookmark(element.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
-                                                <td class="date p-2 align-top">
-                                                    <span>[[ element.created ]]</span>
-                                                </td>
-                                                <td v-if="viewType !== 'compact'" class="favicon handle p-2">
-                                                    <img width="120" height="67" :src="element.thumbnail_url + '?foo=bar'" />
-                                                </td>
-                                                <td class="favicon handle p-2 align-top">
-                                                    <span v-html="element.favicon_url"></span>
-                                                </td>
-                                                <td class="link handle w-100 p-2 align-top position-relative text-break">
-                                                    <a :href="element.url" :id="element.linkId" target="_blank">[[ unescapeHtml(element.name) ]]</a>
-                                                    <a v-for="tag in filteredTags(element)" class="tag ms-2 d-inline-block" @click.prevent="searchTag(tag)" href="#">[[ tag ]]</a>
-                                                    <div v-if="element.note != null && element.note != ''" class="table-note" v-html="getNote(element.note)">
-                                                    </div>
-                                                    <div class="yt-hover-target text-secondary position-absolute d-none" v-if="element.url.startsWith('https://www.youtube.com/watch') && viewType === 'normal'">
-                                                        Duration: [[ element.video_duration ]]
-                                                    </div>
-                                                </td>
-                                                <td class="align-middle">
-                                                    <drop-down-menu :show-on-hover="true" class="me-4">
-                                                        <template #dropdown>
-                                                            <li>
-                                                                <a class="dropdown-item" href="#" @click.prevent="onClickUpdateBookmark(element.uuid)">
-                                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item" href="#" @click.prevent="onClickDeleteBookmark(element.uuid)">
-                                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
-                                                                </a>
-                                                            </li>
-                                                        </template>
-                                                    </drop-down-menu>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </draggable>
-                                </tbody>
-                            </table>
-
-                            <div v-if="bookmarkList.length === 0" v-cloak>
-                                <div class="text-center pt-3">
-                                    No bookmarks found.
+                    <ul id="bookmark-list" class="list-group list-group-flush interior-borders">
+                        <slick-list
+                            v-model:list="bookmarkList"
+                            :distance="1"
+                            helper-class="slicklist-helper"
+                            @sort-end="handleBookmarkSort"
+                        >
+                            <slick-item
+                                v-for="(element, index) in bookmarkList"
+                                :key="element.uuid"
+                                :index="index"
+                            >
+                                <div class="slicklist-list-item-inner">
+                                    <li
+                                        :data-uuid="element.uuid"
+                                        :key="element.uuid"
+                                        class="dropdown-height hover-target bookmark-list list-group-item w-100"
+                                        v-cloak
+                                        @click="onClickBookmark(element.uuid)"
+                                        @dragstart="onDragStartBookmark($event, element)"
+                                        @mouseenter="onMouseEnterLeave"
+                                        @mouseleave="onMouseEnterLeave"
+                                    >
+                                        <div class="d-flex">
+                                            <div class="date flex-grow-0 flex-shrink-0 me-2 align-top">
+                                                [[ element.created ]]
+                                            </div>
+                                            <div v-if="viewType !== 'compact'" class="thumbnail handle p-2">
+                                                <img width="120" height="67" :src="element.thumbnail_url + '?foo=bar'" />
+                                            </div>
+                                            <div class="mx-2" v-html="element.favicon_url">
+                                            </div>
+                                            <div class="position-relative">
+                                                <a class="me-2" :href="element.url" :id="element.linkId" target="_blank">[[ unescapeHtml(element.name) ]]</a>
+                                                <a v-for="tag in filteredTags(element)" class="tag ms-2 d-inline-block" @click.prevent="searchTag(tag)" href="#">[[ tag ]]</a>
+                                                <span class="yt-hover-target text-secondary d-none"
+                                                    v-if="element.url.startsWith('https://www.youtube.com/watch') && viewType === 'normal'">
+                                                    [[ element.video_duration ]]
+                                                </span>
+                                                <div v-if="element.note != null && element.note != ''" class="table-note" v-html="getNote(element.note)">
+                                                </div>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <drop-down-menu :show-on-hover="true" class="me-4">
+                                                    <template #dropdown>
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" @click.prevent="onClickUpdateBookmark(element.uuid)">
+                                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" @click.prevent="onClickDeleteBookmark(element.uuid)">
+                                                                <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                                            </a>
+                                                        </li>
+                                                    </template>
+                                                </drop-down-menu>
+                                            </div>
+                                        </div>
+                                    </li>
                                 </div>
-                            </div>
-
+                            </slick-item>
+                        </slick-list>
+                    </ul>
+                    <div v-if="bookmarkList.length === 0" v-cloak>
+                        <div class="text-center pt-3">
+                            No bookmarks found.
                         </div>
                     </div>
                 </div>
@@ -225,16 +237,17 @@
         const app = createApp({
             name: "BookmarkList",
             components: {
-                draggable,
                 DropDownMenu,
                 FontAwesomeIcon,
                 PinnedTags,
                 SelectValue,
+                SlickItem,
+                SlickList,
             },
             delimiters: ["[[", "]]"],
             setup() {
                 const bookmarkList = ref([]);
-                const intervalId = ref();
+                let intervalId = null;
                 const pagination = ref({});
                 const searchTerm = ref();
                 const selectedBookmarkUuid = ref();
@@ -290,7 +303,7 @@
                                 break;
                             case "escape":
                                 selectedBookmarkUuid.value = null;
-                                document.querySelectorAll("#bookmark-list tr").forEach(row => {
+                                document.querySelectorAll("#bookmark-list li").forEach(row => {
                                     row.classList.remove("selected");
                                 });
                                 break;
@@ -343,8 +356,8 @@
 
                                 if (pagination.value === "" || pagination.value.page_number === 1) {
                                     // First clear any existing timeouts, if necessary
-                                    clearTimeout(intervalId.value);
-                                    intervalId.value = window.setTimeout(getBookmarkList, 60000, { pageNumber: pageNumber });
+                                    clearTimeout(intervalId);
+                                    intervalId = window.setTimeout(getBookmarkList, 60000, { pageNumber: pageNumber });
                                 }
                             }
                          })
@@ -365,7 +378,7 @@
                 };
 
                 function getPage(pageNumber) {
-                    clearTimeout(intervalId.value);
+                    clearTimeout(intervalId);
                     getBookmarkList({ pageNumber: pageNumber });
                 };
 
@@ -435,17 +448,18 @@
                     }
                 };
 
-                function onSortBookmarks(evt) {
-                    // Ignore this event if we're not filtering
-                    //  on a tag.
+                function handleBookmarkSort(event) {
+                    if (event.oldIndex === event.newIndex) {
+                        return;
+                    }
+                    // Ignore this event if we're not filtering on a tag.
                     if (!pinnedTags.value.selectedTagName || pinnedTags.value.selectedTagName === "Untagged") {
                         return false;
                     }
-                    const bookmarkUuid = evt.moved.element.uuid;
+                    const bookmarkUuid = bookmarkList.value[event.oldIndex].uuid;
 
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    const newPosition = evt.moved.newIndex + 1;
+                    // The backend expects the ordering to begin with 1, not 0, so add 1.
+                    const newPosition = event.newIndex + 1;
 
                     doPost(
                         "{% url "bookmark:sort" %}",
@@ -479,7 +493,7 @@
 
                 function searchTag(tagName) {
                     // Clear any timeouts to prevent the list from refreshing
-                    clearTimeout(intervalId.value);
+                    clearTimeout(intervalId);
 
                     if (tagName == "Untagged") {
                         getBookmarkList({ pageNumber:1 });
@@ -489,11 +503,11 @@
                 };
 
                 function selectBookmark() {
-                    document.querySelectorAll("#bookmark-list tr").forEach(row => {
+                    document.querySelectorAll("#bookmark-list li").forEach(row => {
                         row.classList.remove("selected");
                     });
 
-                    document.querySelector("#bookmark-list tr[data-uuid='" + selectedBookmarkUuid.value + "']").classList.add("selected");
+                    document.querySelector("#bookmark-list li[data-uuid='" + selectedBookmarkUuid.value + "']").classList.add("selected");
                 };
 
                 function selectTag(tagInfo) {
@@ -511,8 +525,6 @@
                             "bookmark_view_type": type
                         },
                         (response) => {},
-                        "",
-                        ""
                     );
                 };
 
@@ -536,8 +548,8 @@
                     filteredTags,
                     getBookmarkList,
                     getPage,
+                    handleBookmarkSort,
                     handleSearch,
-                    intervalId,
                     onClickBookmark,
                     onClickDeleteBookmark,
                     onClickUpdateBookmark,
@@ -548,7 +560,6 @@
                     getPreviousBookmark,
                     onDragStartBookmark,
                     onMouseEnterLeave,
-                    onSortBookmarks,
                     onTogglePinStatus,
                     pinnedTags,
                     removeFilter,
@@ -567,7 +578,7 @@
         });
         app.mount("#vue-app");
 
-        </script>
+    </script>
 
 {% endblock %}
 
