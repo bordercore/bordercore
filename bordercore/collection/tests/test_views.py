@@ -7,6 +7,8 @@ from django import urls
 from django.conf import settings
 
 from blob.tests.factories import BlobFactory
+from bookmark.models import Bookmark
+from bookmark.tests.factories import BookmarkFactory
 from collection.models import Collection, CollectionObject
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
@@ -243,3 +245,45 @@ def test_remove_object(auto_login_user, collection, blob_image_factory):
     })
 
     assert resp.status_code == 200
+
+
+def test_add_new_bookmark(monkeypatch_bookmark, auto_login_user, collection, blob_image_factory):
+
+    user, client = auto_login_user()
+
+    url = faker.image_url()
+    bookmark = BookmarkFactory(user=user, url=url)
+
+    # Adding an exist bookmark
+    url = urls.reverse("collection:add_new_bookmark")
+    resp = client.post(url, {
+        "collection_uuid": collection[0].uuid,
+        "url": bookmark.url
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "OK"
+    assert CollectionObject.objects.filter(collection=collection[0], bookmark=bookmark).exists()
+
+    # Adding a new bookmark
+    bookmark_url = faker.image_url()
+    url = urls.reverse("collection:add_new_bookmark")
+    resp = client.post(url, {
+        "collection_uuid": collection[0].uuid,
+        "url": bookmark_url
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "OK"
+    bookmark = Bookmark.objects.get(url=bookmark_url)
+    assert CollectionObject.objects.filter(collection=collection[0], bookmark=bookmark).exists()
+
+    # Adding a duplicate bookmark
+    url = urls.reverse("collection:add_new_bookmark")
+    resp = client.post(url, {
+        "collection_uuid": collection[0].uuid,
+        "url": bookmark.url
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "Error"

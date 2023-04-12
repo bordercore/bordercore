@@ -109,7 +109,7 @@ div.sphere {
   }
 }
 
-div.drag-target {
+div.drag-target-blob {
   transition: all 1s;
 
   img {
@@ -122,6 +122,10 @@ div.drag-target {
       filter: drop-shadow(0.12rem 0.12rem 0.3rem var(--drag-color));
     }
   }
+}
+
+.drag-target {
+  border-radius: 0.6rem;
 }
 
 // Override default Sortable classes

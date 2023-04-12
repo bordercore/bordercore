@@ -1,5 +1,5 @@
 <template>
-    <div class="hover-reveal-target" @mouseover="isHovered = true" @mouseleave="isHovered = false">
+    <div class="hover-reveal-target" @mouseover="isHovered = true" @mouseleave="isHovered = false" @dragleave.prevent="handleObjectDragLeave" @dragover.prevent="handleObjectDragOver" @drop.prevent="handleObjectDrop" @dragenter.prevent>
         <card title="" class="backdrop-filter node-color-1 position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
@@ -49,11 +49,11 @@
 
             <template #content>
                 <hr class="divider">
-                <div v-if="collectionObjectList.display === 'individual'">
+                <div v-if="collectionObjectList.display === 'individual'" class="drag-target">
                     <img v-if="currentObjectIndex !== null && objectList.length > 0" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="handleObjectClick()">
                     <span v-else class="text-muted">No objects</span>
                 </div>
-                <ul v-else class="list-group list-group-flush interior-borders">
+                <ul v-else class="drag-target list-group list-group-flush interior-borders">
                     <slick-list
                         v-model:list="limitedObjectList"
                         :distance="1"
@@ -140,6 +140,10 @@
                 type: String,
                 default: "",
             },
+            addNewBookmarkUrl: {
+                type: String,
+                default: "",
+            },
             updateCollectionUrl: {
                 type: String,
                 default: "",
@@ -196,6 +200,30 @@
                     (response) => {
                         getObjectList();
                     },
+                );
+            };
+
+            function handleObjectDragLeave(event) {
+                event.currentTarget.querySelector(".drag-target").classList.remove("collection-drag-over");
+            };
+
+            function handleObjectDragOver(event) {
+                event.currentTarget.querySelector(".drag-target").classList.add("collection-drag-over");
+            };
+
+            function handleObjectDrop(event) {
+                event.currentTarget.querySelector(".drag-target").classList.remove("collection-drag-over");
+                const url = event.dataTransfer.getData("URL");
+                doPost(
+                    props.addNewBookmarkUrl,
+                    {
+                        "collection_uuid": props.uuid,
+                        "url": url,
+                    },
+                    (response) => {
+                        getObjectList();
+                    },
+                    "Bookmark added",
                 );
             };
 
@@ -384,6 +412,9 @@
                 handleDeleteCollection,
                 handleEditNote,
                 handleObjectClick,
+                handleObjectDragOver,
+                handleObjectDrop,
+                handleObjectDragLeave,
                 handleRemoveObject,
                 handleUpdateCollection,
                 handleUpdateCollectionModal,

@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Exists, OuterRef, Q
 from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponseRedirect, JsonResponse
@@ -23,6 +24,7 @@ from collection.forms import CollectionForm
 from collection.models import Collection, CollectionObject
 from lib.exceptions import DuplicateObjectError
 from lib.mixins import FormRequestMixin
+from lib.util import parse_title_from_url
 from tag.models import Tag
 
 
@@ -388,5 +390,46 @@ def update_object_note(request):
     response = {
         "status": "OK",
     }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_new_bookmark(request):
+
+    collection_uuid = request.POST["collection_uuid"]
+    url = request.POST["url"]
+
+    bookmark = None
+    try:
+        bookmark = Bookmark.objects.get(user=request.user, url=url)
+    except ObjectDoesNotExist:
+        pass
+
+    if not bookmark:
+        title = parse_title_from_url(url)[1]
+
+        bookmark = Bookmark.objects.create(
+            user=request.user,
+            name=title,
+            url=url
+        )
+        bookmark.index_bookmark()
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+
+    if CollectionObject.objects.filter(
+            collection=collection,
+            bookmark=bookmark
+    ).exists():
+        response = {
+            "status": "Error",
+            "message": "This bookmark is already a member of the collection."
+        }
+    else:
+        collection.add_object(bookmark)
+        response = {
+            "status": "OK"
+        }
 
     return JsonResponse(response)

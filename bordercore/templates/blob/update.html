@@ -36,7 +36,7 @@
                 @dragenter.prevent
                 @dragleave.prevent="isOver = false"
                 @drop="isOver = false"
-                class="card-body backdrop-filter drag-target flex-grow-1"
+                class="card-body backdrop-filter drag-target-blob flex-grow-1"
                 :class="{over: isOver}"
             >
                 {% if object and object.sha1sum %}
@@ -302,7 +302,7 @@
 
                         <div id="section-file" class="tab-pane col-lg-12 fade">
                             <div
-                                class="drag-target d-flex flex-column align-items-center"
+                                class="drag-target-blob d-flex flex-column align-items-center"
                                 @drop.prevent="onFileDrop($event.dataTransfer.files[0])"
                                 @dragover.prevent="isOver = true"
                                 @dragenter.prevent

@@ -75,4 +75,9 @@ urlpatterns = [
         view=views.update_object_note,
         name="update_object_note"
     ),
+    path(
+        route="add/bookmark",
+        view=views.add_new_bookmark,
+        name="add_new_bookmark"
+    ),
 ]
