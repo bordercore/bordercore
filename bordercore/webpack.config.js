@@ -1,6 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
-const CompressionPlugin = require("compression-webpack-plugin");
+const BundleTracker = require("webpack-bundle-tracker");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const RemoveEmptyScriptsPlugin = require("webpack-remove-empty-scripts");
 const StylelintPlugin = require("stylelint-webpack-plugin");
@@ -34,7 +34,7 @@ module.exports = (env, argv) => {
             .filter(filterEntries)
             .reduce((a, [name, entry]) => Object.assign(a, {[name]: entry}), {}),
         output: {
-            filename: "[name]-bundle.min.js",
+            filename: "[name]-bundle-[contenthash].min.js",
             path: path.resolve(__dirname, "./static"),
         },
         mode: "production",
@@ -58,7 +58,7 @@ module.exports = (env, argv) => {
 
             // Extract generated CSS into separate files
             new MiniCssExtractPlugin({
-                filename: devMode ? "[name].css" : "[name].min.css",
+                filename: devMode ? "[name].css" : "[name]-[contenthash].min.css",
             }),
 
             // Define these to improve tree-shaking and muffle browser warnings
@@ -70,6 +70,12 @@ module.exports = (env, argv) => {
             // Responsible for cloning any other rules you have defined and applying them
             //  to the corresponding language blocks in .vue files
             new VueLoaderPlugin(),
+
+            // Generate stats about the webpack compilation process to a file, which
+            //  will be later read by Django
+            new BundleTracker({
+                filename: "./webpack-stats.json",
+            }),
         ],
         module: {
             rules: [
@@ -115,19 +121,15 @@ module.exports = (env, argv) => {
 
     if (devMode) {
         config.output.filename = "[name]-bundle.js";
+    } else {
+        config.output.clean = {
+            keep: /^(css|fonts|img|public|scss)/,
+        };
     }
 
     if (process.env.ANALYZER) {
         const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
         config.plugins.push(new BundleAnalyzerPlugin({analyzerPort: 9999}));
-    } else {
-        // Compress the JavaScript bundles.
-        //  We include this here because it is not compatible
-        //  with the "webpack-bundle-analyzer" plugin.
-        config.plugins.push(new CompressionPlugin({
-            test: /\.js$/i,
-            deleteOriginalAssets: true,
-        }));
     }
 
     return config;

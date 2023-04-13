@@ -1,4 +1,5 @@
 {% load is_in_group %}
+{% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html color-mode="{{ request.user.userprofile.theme }}">
@@ -10,8 +11,8 @@
 
         {% if debug %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/bordercore.css" />
-        {% else %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.min.css" />
+            {% else %}
+        {% render_bundle "dist/css/bordercore" %}
         {% endif %}
 
         {% block extra_head %}{% endblock %}
@@ -163,9 +164,9 @@
         {% block javascript %}
 
             {% if debug %}
-                <script type="text/javascript" src="{{ STATIC_URL }}dist/js/javascript-bundle.js.gz"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}dist/js/javascript-bundle.js"></script>
             {% else %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
+                {% render_bundle "dist/js/javascript" %}
             {% endif %}
 
             {{ recent_blobs|json_script:"recent_blobs" }}

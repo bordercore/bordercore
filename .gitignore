@@ -21,7 +21,4 @@ bordercore/aws/index_blobs/lib/*
 bordercore/aws/create_bookmark_thumbnail/lib/*
 bordercore/aws/create_collection_thumbnail/lib/*
 
-**/css/bordercore.css
-**/css/bordercore.min.css
-**/javascript-bundle.js.gz
-**/javascript-bundle.min.js.gz
+**/static/dist

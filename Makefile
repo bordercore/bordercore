@@ -21,10 +21,9 @@ webpack_build: check-env
 
 webpack_aws: check-env
 	cd $(BORDERCORE_HOME)
-	aws s3 cp static/dist/css/bordercore.min.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
-	aws s3 cp static/dist/css/vue-sidebar-menu.min.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
-	aws s3 cp static/dist/js/javascript-bundle.js.gz $(S3)/js/ --cache-control max-age=$(MAX_AGE) --content-encoding gzip &&
-	aws s3 cp static/dist/js/javascript-bundle.min.js.gz $(S3)/js/ --cache-control max-age=$(MAX_AGE) --content-encoding gzip
+	aws s3 cp static/dist/css/ $(S3)/dist/css/ --cache-control max-age=$(MAX_AGE) --recursive --exclude "*" --include "*.css" &&
+	aws s3 cp static/dist/css/vue-sidebar-menu.min.css $(S3)/dist/css/ --cache-control max-age=$(MAX_AGE) &&
+	aws s3 cp static/dist/js/ $(S3)/dist/js/ --cache-control max-age=$(MAX_AGE) --recursive --exclude "*" --include "*.js"
 
 check-env:
 ifndef BORDERCORE_HOME

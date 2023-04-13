@@ -8,7 +8,7 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "webpack --mode development",
+        "dev": "webpack --mode development --watch",
         "dev-analyzer": "ANALYZER=1 webpack --mode development",
         "dev-css": "WEBPACK_CSS_ONLY=1 webpack --mode development",
         "build": "webpack"
@@ -51,7 +51,6 @@
         "babel-plugin-prismjs": "^2.1.0",
         "bootstrap": "^5.2.0",
         "chart.js": "^3.7.0",
-        "compression-webpack-plugin": "^6.0.2",
         "date-fns": "^1.9.0",
         "floating-vue": "^2.0.0-beta.1",
         "hotkeys-js": "^3.8.7",
@@ -79,6 +78,7 @@
         "vue3-datepicker": "^0.3.4",
         "vuedraggable": "^4.1.0",
         "vuex": "^4.1.0",
+        "webpack-bundle-tracker": "^1.8.1",
         "webpack-remove-empty-scripts": "^1.0.1"
     },
     "overrides": {
