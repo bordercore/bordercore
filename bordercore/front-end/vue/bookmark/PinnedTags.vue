@@ -8,7 +8,7 @@
             <div id="tag-list">
                 <slick-list
                     v-model:list="tags"
-                    :distance="1"
+                    :distance="3"
                     helper-class="slicklist-helper"
                     @sort-end="handleSort"
                 >

@@ -30,7 +30,7 @@
                     <ul class="list-group list-group-flush interior-borders">
                         <slick-list
                             v-model:list="objectList"
-                            :distance="1"
+                            :distance="3"
                             helper-class="slicklist-helper"
                             @sort-end="handleSort"
                         >

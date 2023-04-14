@@ -2,7 +2,7 @@
     <ul>
         <slick-list
             v-model:list="localFeedList"
-            :distance="1"
+            :distance="3"
             helper-class="slicklist-helper"
             @sort-end="handleSort"
         >

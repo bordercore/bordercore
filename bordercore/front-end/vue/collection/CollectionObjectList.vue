@@ -56,7 +56,7 @@
                 <ul v-else class="drag-target list-group list-group-flush interior-borders">
                     <slick-list
                         v-model:list="limitedObjectList"
-                        :distance="1"
+                        :distance="3"
                         helper-class="slicklist-helper"
                         @sort-end="handleSort"
                     >

@@ -37,7 +37,7 @@
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <slick-list
                         v-model:list="todoList"
-                        :distance="1"
+                        :distance="3"
                         helper-class="slicklist-helper"
                         @sort-end="handleSort"
                     >
