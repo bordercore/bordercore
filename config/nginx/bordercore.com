@@ -26,6 +26,10 @@ server {
         root /var/www/html;
     }
 
+    location /static {
+        root /var/www/django;
+    }
+
     location /favicons {
 
         proxy_pass https://bordercore-blobs.s3.amazonaws.com/django/img/favicons;

@@ -67,8 +67,6 @@ GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 USE_S3 = True
 AWS_STORAGE_BUCKET_NAME = "bordercore-blobs"
 AWS_BUCKET_NAME_MUSIC = "bordercore-music"
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-AWS_LOCATION = "django"
 INDEX_BLOB_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:IndexBlob"
 CREATE_COLLECTION_THUMBNAIL_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:CreateCollectionThumbnail"
 SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:chromda"
@@ -80,13 +78,11 @@ AWS_DEFAULT_ACL = None
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
 # Absolute path to the directory static files should be collected to.
 STATIC_ROOT = ""
 
 # URL prefix for static files.
-STATIC_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_LOCATION}/"
+STATIC_URL = "https://www.bordercore.com/static/"
 
 # Additional locations of static files
 STATICFILES_DIRS = (

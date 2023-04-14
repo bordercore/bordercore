@@ -22,3 +22,4 @@ bordercore/aws/create_bookmark_thumbnail/lib/*
 bordercore/aws/create_collection_thumbnail/lib/*
 
 **/static/dist
+bordercore/webpack-stats.json

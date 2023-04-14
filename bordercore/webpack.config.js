@@ -75,6 +75,7 @@ module.exports = (env, argv) => {
             //  will be later read by Django
             new BundleTracker({
                 filename: "./webpack-stats.json",
+                publicPath: "https://www.bordercore.com/static/",
             }),
         ],
         module: {

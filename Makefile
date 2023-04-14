@@ -1,4 +1,4 @@
-S3=s3://bordercore-blobs/django
+EC2=ec2:/var/www/django/static/
 MAX_AGE=2592000
 ELASTICSEARCH_INDEX_TEST=bordercore_test
 ELASTICSEARCH_ENDPOINT_TEST=http://localhost:9201
@@ -12,18 +12,17 @@ install:
 
 .ONESHELL:
 .SILENT:
-webpack: webpack_build webpack_aws
+webpack: webpack_build webpack_ec2
 
 webpack_build: check-env
 	cd $(BORDERCORE_HOME)
 	npm run dev &&
 	npm run build
 
-webpack_aws: check-env
+webpack_ec2: check-env
 	cd $(BORDERCORE_HOME)
-	aws s3 cp static/dist/css/ $(S3)/dist/css/ --cache-control max-age=$(MAX_AGE) --recursive --exclude "*" --include "*.css" &&
-	aws s3 cp static/dist/css/vue-sidebar-menu.min.css $(S3)/dist/css/ --cache-control max-age=$(MAX_AGE) &&
-	aws s3 cp static/dist/js/ $(S3)/dist/js/ --cache-control max-age=$(MAX_AGE) --recursive --exclude "*" --include "*.js"
+	rsync -azv --delete static/ $(EC2)
+	scp ./webpack-stats.json $(EC2)../bordercore/bordercore
 
 check-env:
 ifndef BORDERCORE_HOME
