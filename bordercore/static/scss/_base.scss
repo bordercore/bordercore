@@ -2429,9 +2429,13 @@ tr.hover-target:hover {
 
 // vue-slicksort
 
-.slicklist-helper {
+.slicklist-helper, .slicklist-helper-bare {
   position: relative;
   z-index: 1200;
+
+  .slicklist-list-item-inner {
+    transform: rotate(2deg);
+  }
 }
 
 .slicklist-list-item-inner {
@@ -2439,6 +2443,10 @@ tr.hover-target:hover {
 }
 
 .slicklist-helper .slicklist-list-item-inner {
+  border: 0.05rem solid var(--text2);
+  background-color: var(--surface1);
+  border-radius: var(--border-radius1);
+  box-shadow: 0.06rem 0.06rem 0.31rem var(--surface4), -0.06rem -0.06rem 0.31rem var(--surface4);
   transform: rotate(2deg);
 }
 
