@@ -31,16 +31,18 @@
 
         <div class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
             <div
-                @drop.prevent="onImageDrop($event)"
-                @dragover.prevent="isOver = true"
-                @dragenter.prevent
-                @dragleave.prevent="isOver = false"
-                @drop="isOver = false"
-                class="card-body backdrop-filter drag-target-blob flex-grow-1"
-                :class="{over: isOver}"
+                class="card-body backdrop-filter flex-grow-1"
             >
                 {% if object and object.sha1sum %}
-                    <div>
+                    <div
+                        @drop.prevent="onImageDrop($event)"
+                        @dragover.prevent="isOverCoverImage = true"
+                        @dragenter.prevent
+                        @dragleave.prevent="isOverCoverImage = false"
+                        @drop="isOverCoverImage = false"
+                        class="drag-target-blob"
+                        :class="{over: isOverCoverImage}"
+                    >
                         <img id="coverImage" src="{{ cover_url }}" width="400" class="mw-100 mb-3" />
                     </div>
                 {% endif %}
@@ -304,11 +306,11 @@
                             <div
                                 class="drag-target-blob d-flex flex-column align-items-center"
                                 @drop.prevent="onFileDrop($event.dataTransfer.files[0])"
-                                @dragover.prevent="isOver = true"
+                                @dragover.prevent="isOverFile = true"
                                 @dragenter.prevent
-                                @dragleave.prevent="isOver = false"
-                                @drop="isOver = false"
-                                :class="{over: isOver}"
+                                @dragleave.prevent="isOverFile = false"
+                                @drop="isOverFile = false"
+                                :class="{over: isOverFile}"
                             >
                                 <h3 id="file-upload" class="d-flex flex-column align-items-center">
 
@@ -463,7 +465,8 @@
                 ]);
                 const fileName = ref("{{ form.filename.value|default:""|escapejs }}");
                 const fileObject = ref();
-                const isOver = ref(false);
+                const isOverCoverImage = ref(false);
+                const isOverFile = ref(false);
                 const showRelatedTags = ref(false);
                 const metadata = ref(JSON.parse(document.getElementById("metadata").textContent))
                 const metadataJson = computed(() => {
@@ -728,7 +731,8 @@
                     fileName,
                     fileObject,
                     getCoverImage,
-                    isOver,
+                    isOverCoverImage,
+                    isOverFile,
                     mdEditor,
                     metadata,
                     metadataJson,
