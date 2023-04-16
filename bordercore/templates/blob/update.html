@@ -706,13 +706,8 @@
                 })
 
                 onMounted(() => {
-                    // document.getElementById("id_date").addEventListener("paste", onPasteDate);
+                    document.getElementById("id_date").addEventListener("paste", onPasteDate);
 
-                    /* const found = date.value.match(/^(\d\d\d\d)T00:00$/);
-* if (found) {
-*     date.value = found[1];
-*     dateFormat.value = "year";
-* } */
                     mdEditor.value.insert((selected) => {
                         return {
                             text: "{{ form.content.value|default:""|escapejs }}",
