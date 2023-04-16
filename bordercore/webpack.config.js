@@ -71,6 +71,12 @@ module.exports = (env, argv) => {
             //  to the corresponding language blocks in .vue files
             new VueLoaderPlugin(),
 
+            // Create source maps for minified .js and .css files
+            new webpack.SourceMapDevToolPlugin({
+                filename: "[file].map",
+                test: new RegExp("\.[js|css].*"),
+            }),
+
             // Generate stats about the webpack compilation process to a file, which
             //  will be later read by Django
             new BundleTracker({
@@ -123,6 +129,7 @@ module.exports = (env, argv) => {
     if (devMode) {
         config.output.filename = "[name]-bundle.js";
     } else {
+        config.devtool = "source-map";
         config.output.clean = {
             keep: /^(css|fonts|img|public|scss)/,
         };
