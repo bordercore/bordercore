@@ -109,11 +109,13 @@
                             :distance="3"
                             helper-class="slicklist-helper"
                             @sort-end="handleBookmarkSort"
+                            :use-drag-handle="true"
                         >
                             <slick-item
                                 v-for="(element, index) in bookmarkList"
                                 :key="element.uuid"
                                 :index="index"
+                                class="hover-reveal-target"
                             >
                                 <div class="slicklist-list-item-inner">
                                     <li
@@ -127,6 +129,11 @@
                                         @mouseleave="onMouseEnterLeave"
                                     >
                                         <div class="d-flex">
+                                            <div class="drag-handle d-flex flex-grow-0 flex-shrink-0 align-items-center">
+                                                <drag-handle class="hover-reveal-object d-none">
+                                                    <font-awesome-icon icon="bars"></font-awesome-icon>
+                                                </drag-handle>
+                                            </div>
                                             <div class="date flex-grow-0 flex-shrink-0 me-2 align-top">
                                                 [[ element.created ]]
                                             </div>
@@ -237,6 +244,7 @@
         const app = createApp({
             name: "BookmarkList",
             components: {
+                DragHandle,
                 DropDownMenu,
                 FontAwesomeIcon,
                 PinnedTags,

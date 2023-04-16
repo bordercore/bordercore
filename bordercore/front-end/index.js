@@ -1,6 +1,7 @@
 import {plugin as Slicksort} from "vue-slicksort";
 window.Slicksort = Slicksort;
-import {SlickList, SlickItem} from "vue-slicksort";
+import {DragHandle, SlickList, SlickItem} from "vue-slicksort";
+window.DragHandle = DragHandle;
 window.SlickList = SlickList;
 window.SlickItem = SlickItem;
 

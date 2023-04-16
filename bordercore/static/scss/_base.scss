@@ -1279,6 +1279,12 @@ blockquote > p {
 .bookmark-list {
   @extend .hoverable-cells;
 
+  .drag-handle {
+    width: 1rem;
+    color: var(--text2);
+    cursor: grab;
+  };
+
   .date {
     width: 10rem;
     text-align: right;
