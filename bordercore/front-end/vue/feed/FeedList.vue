@@ -10,6 +10,7 @@
                 v-for="(element, index) in localFeedList"
                 :key="element.uuid"
                 :index="index"
+                class="slicklist-item"
             >
                 <div class="slicklist-list-item-inner">
                     <li v-cloak :key="element.id" :class="{'selected rounded-sm': element.id === $store.state.currentFeed.id}" class="ps-2">

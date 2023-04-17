@@ -2434,10 +2434,13 @@ tr.hover-target:hover {
 }
 
 // vue-slicksort
-
-.slicklist-helper, .slicklist-helper-bare {
+.slicklist-item {
   position: relative;
   z-index: 1200;
+};
+
+.slicklist-helper, .slicklist-helper-bare {
+  @extend .slicklist-item;
 
   .slicklist-list-item-inner {
     transform: rotate(2deg);

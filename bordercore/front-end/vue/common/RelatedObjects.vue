@@ -38,6 +38,7 @@
                                 v-for="(element, index) in objectList"
                                 :key="element.uuid"
                                 :index="index"
+                                class="slicklist-item"
                             >
                                 <div class="slicklist-list-item-inner">
                                     <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary px-0" :data-uuid="element.uuid">

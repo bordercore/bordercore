@@ -17,6 +17,7 @@
                         :key="element.uuid"
                         :index="index"
                         :disabled="element.name === 'Untagged'"
+                        class="slicklist-item"
                     >
                         <div class="slicklist-list-item-inner">
                             <li
