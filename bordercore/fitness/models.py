@@ -55,7 +55,11 @@ class Exercise(models.Model):
         ).first()
 
         if not workout:
-            return {}
+            return {
+                "latest_duration": [],
+                "latest_reps": [],
+                "latest_weight": [],
+            }
 
         recent_data = workout.data_set.all()
 
