@@ -27,7 +27,7 @@ from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
 
-from collection.models import Collection, CollectionObject
+from collection.models import CollectionObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
 from lib.util import (get_elasticsearch_connection, is_audio, is_image, is_pdf,
@@ -452,20 +452,22 @@ class Blob(TimeStampedModel):
     def get_collections(self):
         collection_list = []
 
-        for x in Collection.objects.filter(
-            user=self.user,
+        for x in CollectionObject.objects.filter(
+                blob=self,
+                collection__user=self.user
         ).annotate(
-            num_objects=Count("collectionobject")
-        ).filter(
-            collectionobject__blob__in=[self]
+            num_objects=Count("collection__collectionobject")
+        ).prefetch_related(
+            "collection"
         ):
             collection_list.append(
                 {
-                    "name": x.name,
-                    "uuid": x.uuid,
-                    "url": x.get_absolute_url(),
+                    "name": x.collection.name,
+                    "uuid": x.collection.uuid,
+                    "url": x.collection.get_absolute_url(),
                     "num_objects": x.num_objects,
-                    "cover_url": x.cover_url,
+                    "cover_url": x.collection.cover_url,
+                    "note": x.note
                 }
             )
 

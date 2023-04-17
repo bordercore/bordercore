@@ -191,7 +191,14 @@
                                     <img :src="collection.cover_url" class="mw-100">
                                 </a>
                             </div>
-                            <div class="d-flex flex-column align-items-center mt-2 mb-2">
+                            <div class="d-flex flex-column align-items-center position-relative mt-2 mb-2">
+                                <div
+                                    v-if="collection.note"
+                                    v-tooltip="{ content: collection.note, html: true }"
+                                    class="blob-collection-note"
+                                >
+                                    <font-awesome-icon icon="sticky-note"></font-awesome-icon>
+                                </div>
                                 <h5 class="text5 mb-0">[[ collection.name ]]</h5>
                                 <div class="fw-bold me-1">
                                     <strong class="me-1">[[ collection.num_objects ]]</strong> [[ pluralize("Object", collection.num_objects) ]]
@@ -391,6 +398,7 @@
                 BlobDetailCover,
                 Card,
                 DropDownMenu,
+                FloatingVue,
                 FontAwesomeIcon,
                 ObjectSelect,
                 RelatedObjects,
@@ -574,6 +582,7 @@
                 };
             },
         });
+        app.use(FloatingVue);
         app.use(Oruga, {
             iconComponent: "font-awesome-icon",
             iconPack: "fa",

@@ -1528,6 +1528,13 @@ blockquote > p {
   }
 }
 
+.blob-collection-note {
+  position: absolute;
+  bottom: 0rem;
+  left: 1rem;
+  color: var(--text4);
+}
+
 #blob-name {
   color: var(--text4);
 }
@@ -1973,8 +1980,8 @@ div #dateapp {
 }
 
 .node-object-note {
-  color: var(--text3);
-  font-size: small;
+  color: var(--text2);
+  font-size: 0.75rem;
 }
 
 .node-url a {
