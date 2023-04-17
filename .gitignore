@@ -1,6 +1,7 @@
 *.ipynb
 *.pyc
 .#*
+bordercore/static/admin/
 bordercore/static/docs/
 bordercore/static/img/favicons/*
 !bordercore/static/img/favicons/README
