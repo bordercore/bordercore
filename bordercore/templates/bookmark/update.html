@@ -92,9 +92,9 @@
                                 {% elif field.label == "Important" %}
                                     <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
                                 {% elif field.label == "Is pinned" %}
-                                    <o-switch v-model="isPinned" name="is_pinned" value="{{ field.value }}"></o-switch>
+                                    <o-switch v-model="isPinned" name="is_pinned" value="{{ field.value }}" :native-value="is_pinned"></o-switch>
                                 {% elif field.label == "Daily" %}
-                                    <o-switch v-model="daily" name="daily" value="{{ field.value }}"></o-switch>
+                                    <o-switch v-model="daily" name="daily" value="{{ field.value }}" :native-value="daily"></o-switch>
                                 {% else %}
                                     {{ field }}
                                 {% endif %}
