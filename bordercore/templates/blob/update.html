@@ -276,8 +276,8 @@
                                                 ref="tagsInput"
                                                 search-url="{% url 'tag:search' %}?query="
                                                 @tags-changed="onTagsChanged"
-                                                @blur="showRelatedTags = false"
-                                                @focus="showRelatedTags = true"
+                                                @close="showRelatedTags = false"
+                                                @open="showRelatedTags = true"
                                             >
                                             </tags-input>
                                         </div>

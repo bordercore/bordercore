@@ -2316,7 +2316,12 @@ tr.hover-target:hover {
   &::before {
     content: none !important;
   }
-};
+}
+
+.multiselect--disabled .multiselect__current, .multiselect--disabled .multiselect__select {
+  background: none !important;
+  color: #a6a6a6;
+}
 
 .multiselect__content-wrapper {
   border: 0 !important;
@@ -2334,8 +2339,16 @@ tr.hover-target:hover {
   }
 }
 
+// Draw a border around the results, but only after results have
+//  been found. Without the complicated CSS selector a border
+//  would be shown around empty content.
+.multiselect__content:has(li.multiselect__element:nth-child(2)) {
+  border: 0.1rem solid var(--text6);
+  border-radius: $border-radius !important;
+}
+
 .multiselect__option {
-  background-color: var(--surface2) !important;
+  background-color: var(--surface1) !important;
   color: var(--text2) !important;
 
   &:has(.search-splitter) {
@@ -2346,12 +2359,6 @@ tr.hover-target:hover {
 
 .multiselect__option--highlight {
   background-color: var(--hover-bg) !important;
-}
-
-.multiselect--disabled {
-  background-color: transparent !important;
-  cursor: not-allowed !important;
-  pointer-events: auto !important;
 }
 
 .multiselect__element#null-0 {
@@ -2369,6 +2376,25 @@ tr.hover-target:hover {
 
 .multiselect:focus {
   background-color: var(--form-bg-focus) !important;
+}
+
+// Custom multiselect for tags input
+.multiselect.tags-input {
+  .multiselect__tags {
+    display: flex !important;
+    padding-top: 0 !important;
+
+    input {
+      padding-top: 0 !important;
+    }
+  }
+  .multiselect__placeholder {
+    padding-top: 0.125rem !important;
+  }
+  // The "caret" icon
+  .multiselect__select {
+    height: auto !important; // Fix the rotated position
+  }
 }
 
 .multiselect__tags {
@@ -2392,43 +2418,34 @@ tr.hover-target:hover {
     background-color: var(--form-bg) !important;
     color: var(--form-color) !important;
   }
+
   &:hover {
     border: 0.06rem solid var(--text3) !important;
   }
-}
 
-// Vue Select
-
-.vs__dropdown-toggle {
-  background-color: var(--form-bg) !important;
-
-  &:hover {
-    border-color: var(--form-border-color-hover);
+  .multiselect__tags-wrap {
+    display: flex !important;
+    align-items: center !important;
   }
 
-  // When the child input element gets focus
-  &:focus-within {
-    border-color: var(--form-border-color-hover) !important;
-    background-color: var(--form-bg-focus) !important;
-    box-shadow: $input-btn-focus-box-shadow !important;
-    color: var(--text4) !important;
-    // This transition mimics Bootstrap behavior
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out !important;
+  .multiselect__tag {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    border: 0.06rem solid var(--form-bg) !important;
+    margin-right: 0.37rem !important;
+    margin-bottom: 0 !important;
+    background-color: var(--vms-selected-bg) !important;
+    border-radius: $border-radius !important;
+    color: var(--vms-selected-color) !important;
+
+    .multiselect__tag-icon::after {
+      color: var(--vms-controls-color) !important;
+    }
+
+    .multiselect__tag-icon:hover::after {
+      color: var(--vms-controls-color-hover) !important;
+    }
   }
-}
-
-.vs--disabled {
-  background-color: var(--form-bg-disabled) !important;
-  border-radius: var(--border-radius1);
-
-  .vs__dropdown-toggle {
-    background-color: var(--form-bg-disabled) !important;
-  }
-}
-
-// The dropdown caret
-.vs__open-indicator {
-  color: var(--text1);
 }
 
 // vuejs-datepicker

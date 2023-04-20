@@ -176,9 +176,6 @@ window.TopSearch = TopSearch;
 import OverdueTasks from "./vue/todo/OverdueTasks.vue";
 window.OverdueTasks = OverdueTasks;
 
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
-
 import TagsInput from "./vue/common/TagsInput.vue";
 window.TagsInput = TagsInput;
 

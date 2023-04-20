@@ -1,34 +1,41 @@
 <template>
     <div :class="classList">
-        <v-select
-            ref="tagsInputComponent"
-            v-model="tags"
-            multiple
-            taggable
-            :autofocus="autofocus"
-            :placeholder="placeHolder"
-            :options="options"
-            :dropdown-should-open="({search, open}) => open && search.length > 2"
+        <multiselect
+            ref="multiselect"
+            v-model="value"
+            :searchable="searchable"
             :disabled="disabled"
-            :create-option="createTag"
-            :selectable="() => maxTags ? tags.length < maxTags : true"
-            @search="fetchOptions"
-            @option:selected="tagsChanged"
-            @option:deselected="tagsChanged"
-            @search:blur="onBlur"
-            @search:focus="onFocus"
+            class="tags-input"
+            label="label"
+            track-by="label"
+            :taggable="true"
+            :options="options"
+            :show-no-options="false"
+            :internal-search="true"
+            :multiple="true"
+            select-label=""
+            deselect-label=""
+            :value="initialValue"
+            :max-height="600"
+            :min-length="2"
+            :options-limit="optionsLimit"
+            :placeholder="placeHolder"
+            tag-placeholder=""
+            autocomplete="off"
+            @blur="handleBlur"
+            @close="handleClose"
+            @open="handleOpen"
+            @remove="handleTagSelect"
+            @search-change="onSearchChange"
+            @select="handleTagSelect"
+            @tag="handleTagAdd"
         >
-            <template #no-options="{ search, searching }">
-                <div v-if="notFound">
-                    No tags found!
-                </div>
-            </template>
-            <template #open-indicator="{ attributes }">
-                <div class="vs__open-indicator me-2">
+            <template #caret>
+                <div class="multiselect__select mt-1">
                     <font-awesome-icon icon="angle-down" class="align-middle" />
                 </div>
             </template>
-        </v-select>
+        </multiselect>
         <input type="hidden" :name="name" :value="tagsCommaSeparated">
     </div>
 </template>
@@ -36,15 +43,40 @@
 <script>
 
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-    import vSelect from "vue-select";
+    import Multiselect from "vue-multiselect";
+    import debouncer from "../../debounce.js";
 
     export default {
 
         components: {
             FontAwesomeIcon,
-            vSelect,
+            Multiselect,
         },
         props: {
+            initialValue: {
+                type: Object,
+                default: function() {},
+            },
+            minLength: {
+                default: 2,
+                type: Number,
+            },
+            optionsLimit: {
+                default: 20,
+                type: Number,
+            },
+            searchUrl: {
+                type: String,
+                default: "search-url",
+            },
+            placeHolder: {
+                type: String,
+                default: "",
+            },
+            name: {
+                type: String,
+                default: "tags",
+            },
             autofocus: {
                 type: Boolean,
                 default: false,
@@ -52,18 +84,6 @@
             classList: {
                 type: String,
                 default: "w-100",
-            },
-            searchUrl: {
-                default: "search-url",
-                type: String,
-            },
-            name: {
-                default: "tags",
-                type: String,
-            },
-            placeHolder: {
-                default: "",
-                type: String,
             },
             disabled: {
                 default: false,
@@ -74,105 +94,110 @@
                 type: Number,
             },
         },
-        emits: [
-            "blur",
-            "focus",
-            "option:created",
-            "tags-changed",
-        ],
+        emits: ["blur", "close", "open", "search-change", "tags-changed"],
         setup(props, ctx) {
-            const notFound = ref(false);
             const options = ref([]);
             const tags = ref([]);
+            const value = ref([]);
+            const {debounce} = debouncer();
 
-            const tagsInputComponent = ref(null);
+            const multiselect = ref(null);
 
-            function addTag(tagName) {
-                tags.value.push({"label": tagName, "value": tagName});
-            };
-
-            function createTag(tagName) {
-                const newTag = {"label": tagName, "value": tagName};
-                ctx.emit("option:created", newTag);
-                return newTag;
-            };
-
-            function fetchOptions(search, loading) {
-                // Set a minimum character count to trigger the ajax call
-                if (search.length < 3) return;
-
-                return doGet(
-                    props.searchUrl + search,
-                    (response) => {
-                        options.value = response.data.map((a) => {
-                            return {
-                                "label": a.label,
-                                "value": a.value ? a.value : a.label,
-                            };
-                        });
-                    },
-                );
-            };
-
-            function onBlur(evt) {
-                ctx.emit("blur", evt);
-            };
-
-            function onFocus(evt) {
-                ctx.emit("focus", evt);
-            };
-
-            function setTags(tagList) {
-                tags.value = tagList.map( (x) => ({"label": x, "value": x}) );
-            };
-
-            function tagsChanged() {
-                // Enforce lowercase for all tag names
-                tags.value.forEach(function(element, index, tagList) {
-                    tagList[index] = {
-                        "label": element.label.toLowerCase(),
-                        "value": element.value.toLowerCase(),
-                    };
-                });
-
-                ctx.emit("tags-changed", tags.value.map( (x) => x.value ));
-                options.value = [];
-                nextTick(() => {
-                    tagsInputComponent.value.$refs.search.focus();
-                });
-            };
+            const searchable = computed(() => {
+                return !props.maxTags || value.value.length <= props.maxTags - 1;
+            });
 
             const tagsCommaSeparated = computed(() => {
-                return tags.value.map((x) => x.value).join(",");
+                return value.value.map((x) => x.label).join(",");
             });
+
+            function addTag(tagName) {
+                value.value.push({"label": tagName});
+            };
+
+            function clearOptions() {
+                options.value = [];
+                value.value = null;
+            };
+
+            function focus() {
+                const input = multiselect.value.$el.querySelector("input");
+                if (input) {
+                    input.focus();
+                }
+            };
+
+            function handleTagAdd(tagName) {
+                addTag(tagName);
+            };
+
+            function handleBlur(event) {
+                ctx.emit("blur", event);
+            };
+
+            function handleClose(event) {
+                ctx.emit("close", event);
+            };
+
+            function handleOpen(event) {
+                ctx.emit("open", event);
+            };
+
+            function handleTagSelect() {
+                ctx.emit("tags-changed", value.value.map( (x) => x.label ));
+                options.value = [];
+                nextTick(() => {
+                    focus();
+                });
+            };
+
+            function onSearchChange(query) {
+                ctx.emit("search-change", query);
+                if (multiselect.value.search.length <= props.minLength) {
+                    options.value = [];
+                    return;
+                }
+
+                try {
+                    debounce(() => {
+                        return axios.get(props.searchUrl + query)
+                            .then((response) => {
+                                options.value = response.data.map((a) => {
+                                    return {label: a.label};
+                                });
+                            });
+                    });
+                } catch (error) {
+                    console.log(`Error: ${error}`);
+                }
+            };
 
             onMounted(() => {
                 const initialTags = document.getElementById("initial-tags");
-                if (initialTags) {
-                    const tagsJson = JSON.parse(initialTags.textContent);
-                    if (Array.isArray(tagsJson)) {
-                        tags.value = tagsJson.map( (x) => ({"label": x, "value": x}) );
-                    }
+                if (initialTags && initialTags.textContent !== "\"\"") {
+                    value.value = JSON.parse(initialTags.textContent).map( (x) => ({label: x}) );
                 }
 
                 if (props.autofocus) {
-                    tagsInputComponent.value.$refs.search.focus();
+                    focus();
                 }
             });
 
             return {
                 addTag,
-                createTag,
-                fetchOptions,
-                onBlur,
-                onFocus,
+                clearOptions,
+                handleTagAdd,
+                handleBlur,
+                handleClose,
+                handleOpen,
+                handleTagSelect,
+                multiselect,
+                onSearchChange,
                 options,
-                notFound,
-                setTags,
+                searchable,
                 tags,
-                tagsChanged,
                 tagsCommaSeparated,
-                tagsInputComponent,
+                value,
             };
         },
     };

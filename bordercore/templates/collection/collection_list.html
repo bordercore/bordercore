@@ -170,7 +170,6 @@
                 function onClickCreate(evt) {
                     document.getElementById("id_name").value = "";
                     document.getElementById("id_description").value = "";
-                    tagsInput.value.setTags([]);
                     document.getElementById("btn-action").value = "Create";
                     document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:create' %}");
                     const modal = new Modal("#modalAdd");

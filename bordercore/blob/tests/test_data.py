@@ -72,7 +72,7 @@ def test_books_with_tags(es):
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)['hits']
 
-    assert found['total']['value'] == 0, f"{found}['total']['value'] books found without tags, uuid={found['hits'][0]['_id']}"
+    assert found['total']['value'] == 0, f"{found['total']['value']} books found without tags, uuid={found['hits'][0]['_id']}"
 
 
 def test_documents_and_notes_with_dates(es):

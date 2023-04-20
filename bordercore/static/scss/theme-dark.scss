@@ -121,20 +121,11 @@
   --oruga-table-hoverable-background-color: var(--hover-bg);
   --oruga-table-td-border: var(--text1);
 
-  // Vue Select
-  --vs-border-radius: var(--border-radius1);
-  --vs-controls-color: var(--text2);
-  --vs-dropdown-bg: var(--surface2);
-  --vs-dropdown-option--active-bg: var(--surface3);
-  --vs-search-input-color: var(--text4);
-  --vs-selected-bg: var(--surface2);
-  --vs-selected-color: var(--text4);
-  --vs-state-disabled-bg: var(--form-bg-disabled);
-  --vs-state-disabled-color: var(--text-disabled);
-
-  // Vue Select custom
-  --vs-deselect-fill: var(--text2);
-  --vs-deselect-hover-fill: var(--text1);
+  // Vue MultiSelect
+  --vms-controls-color: var(--text2);
+  --vms-controls-color-hover: var(--text1);
+  --vms-selected-bg: var(--surface2);
+  --vms-selected-color: var(--text4);
 
   // Vue 3 Datepicker
   --vdp-bg-color: var(--surface1);

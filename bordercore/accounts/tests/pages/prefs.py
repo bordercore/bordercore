@@ -24,7 +24,7 @@ class PrefsPage:
     PINNED_TAGS_INPUT = (By.CSS_SELECTOR, "div#id_pinned_tags input")
     PREFS_UPDATED_MESSAGE = (By.CSS_SELECTOR, "div[class='alert alert-success']")
     DEFAULT_COLLECTION_SELECTED = (By.CSS_SELECTOR, "select#id_homepage_default_collection option")
-    PINNED_TAGS = (By.CSS_SELECTOR, "div#id_pinned_tags span.vs__selected")
+    PINNED_TAGS = (By.CSS_SELECTOR, "div#id_pinned_tags")
 
     def __init__(self, browser):
         self.browser = browser
