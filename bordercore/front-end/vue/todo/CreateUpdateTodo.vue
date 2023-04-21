@@ -187,7 +187,7 @@
             };
 
             function setTags(tagList) {
-                tagsInput.value.setTags(tagList);
+                tagsInput.value.setTagList(tagList);
             };
 
             onMounted(() => {

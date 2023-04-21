@@ -172,6 +172,10 @@
                 }
             };
 
+            function setTagList(tagList) {
+                value.value = tagList.map( (x) => ({"label": x}) );
+            };
+
             onMounted(() => {
                 const initialTags = document.getElementById("initial-tags");
                 if (initialTags && initialTags.textContent !== "\"\"") {
@@ -195,6 +199,7 @@
                 onSearchChange,
                 options,
                 searchable,
+                setTagList,
                 tags,
                 tagsCommaSeparated,
                 value,
