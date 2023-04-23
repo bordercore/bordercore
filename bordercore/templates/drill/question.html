@@ -181,7 +181,7 @@
 
             </div>
 
-            <div class="card-body me-2" :class="{'d-none': !this.$store.state.showPythonConsole}">
+            <div class="card-body me-2" :class="{'d-none': !showPythonConsole}">
                 <python-console
                     ref="pythonConsole"
                 >
@@ -261,7 +261,6 @@
                 };
             },
         });
-        navApp.use(drillStore);
         navApp.mount("#vue-nav");
 
         const app = createApp({
@@ -284,6 +283,7 @@
                 const objectSelect = ref(null);
                 const pythonConsole = ref(null);
                 const relatedObjectsList = ref(null);
+                const showPythonConsole = ref(false);
 
                 function onMouseOutResponse(response) {
                     intervalString.value = "";
@@ -319,7 +319,7 @@
 
                 onMounted(() => {
                     EventBus.$on("show-python-console", () => {
-                        drillStore.commit("updateShowPythonConsole", true);
+                        showPythonConsole.value = true;
                         pythonConsole.value.initialize();
                     });
 
@@ -385,10 +385,10 @@
                     relatedObjectsList,
                     selectObject,
                     setMode,
+                    showPythonConsole,
                 };
             },
         });
-        app.use(drillStore);
         app.use(Oruga, {
             iconComponent: "font-awesome-icon",
             iconPack: "fa",

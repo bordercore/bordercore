@@ -76,7 +76,6 @@
         "vue-slicksort": "^2.0.5",
         "vue3-datepicker": "^0.3.4",
         "vuedraggable": "^4.1.0",
-        "vuex": "^4.1.0",
         "webpack-bundle-tracker": "^1.8.1",
         "webpack-remove-empty-scripts": "^1.0.1"
     },

@@ -30,18 +30,21 @@ const EventBus = {
 };
 window.EventBus = EventBus;
 
+// Pinia state management
+import {createPinia} from "pinia";
+window.createPinia = createPinia;
+import {useBaseStore} from "./vue/stores/BaseStore.js";
+window.useBaseStore = useBaseStore;
+import {useBookmarkStore} from "./vue/stores/BookmarkStore.js";
+window.useBookmarkStore = useBookmarkStore;
+import {useFeedStore} from "./vue/stores/FeedStore.js";
+window.useFeedStore = useFeedStore;
+
 import draggable from "vuedraggable";
 window.draggable = draggable;
 
 import Sortable from "sortablejs";
 window.Sortable = Sortable;
-
-import {defineStore} from "pinia";
-window.defineStore = defineStore;
-
-import {createStore, useStore} from "vuex";
-window.createStore = createStore;
-window.useStore = useStore;
 
 import Datepicker from "vue3-datepicker";
 window.Datepicker = Datepicker;
@@ -202,8 +205,6 @@ window.RelatedObjects = RelatedObjects;
 
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 window.DrillTagProgress = DrillTagProgress;
-import drillStore from "./vue/drill/store.js";
-window.drillStore = drillStore;
 
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
 window.DropDownMenu = DropDownMenu;
@@ -238,8 +239,6 @@ import FeedItemList from "./vue/feed/FeedItemList.vue";
 window.FeedItemList = FeedItemList;
 import FeedList from "./vue/feed/FeedList.vue";
 window.FeedList = FeedList;
-import feedStore from "./vue/feed/store.js";
-window.feedStore = feedStore;
 
 import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
 window.CreateUpdateTodo = CreateUpdateTodo;

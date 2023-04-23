@@ -52,7 +52,7 @@
                         <div id="top-bar" class="row">
 
                             <div class="col-lg-7 card-grid my-auto text-truncate ps-4" id="top-title" v-cloak>
-                                <span v-if="collapsed">Bordercore :: </span>{% block title %} {% endblock %}
+                                <span v-if="baseStore.sidebarCollapsed">Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
                             <div class="col-lg-5 my-auto d-flex justify-content-end align-items-center">
@@ -133,7 +133,7 @@
 
             <div id="sidebar">
                 <sidebar-menu @update:collapsed="onToggleCollapse" @item-click="onItemClick" :menu="menu"
-                    :collapsed="collapsed">
+                    :collapsed="baseStore.sidebarCollapsed">
                     <template #toggle-icon>
                         <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
                     </template>
@@ -177,22 +177,6 @@
 
             <script type="text/javascript">
 
-                // Use the name 'storeBase' to avoid conflict with stores in child templates
-                const storeBase = createStore({
-                    state () {
-                        return {
-                            collapsed: {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %}
-                        }
-                    },
-                    mutations: {
-                        toggleCollapsed(state) {
-                            state.collapsed = !state.collapsed;
-                        }
-                    }
-                });
-
-                const timestamp = new Date().getTime()
-
                 {% if user.userprofile.sidebar_image %}
                 const sidebar = document.getElementById("sidebar");
                 sidebar.style.backgroundImage = "url('https://bordercore-blobs.s3.amazonaws.com/sidebar/{{ user.userprofile.uuid }}/{{ user.userprofile.sidebar_image }}')";
@@ -204,13 +188,12 @@
                 {% endif %}
 
                 const appToast = createApp({
-                    name: "ToastApp",
+                    name: "Toasts",
                     components: {
-                        "Toast": Toast,
-                        "font-awesome-icon": FontAwesomeIcon,
+                        FontAwesomeIcon,
+                        Toast,
                     },
                     setup() {
-
                         const initialMessages = JSON.parse('{{ json_messages|escapejs }}');
 
                         return {
@@ -231,6 +214,8 @@
                     },
                     delimiters: ["[[", "]]"],
                     setup() {
+                        const baseStore = useBaseStore();
+                        baseStore.sidebarCollapsed = {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %};
 
                         const failed_test_count = ref({{ failed_test_count }});
                         const userMenuItems = ref([
@@ -267,9 +252,6 @@
                         const overdueTasks = JSON.parse(document.getElementById("overdue_tasks").textContent);
                         const recentSearches = JSON.parse(document.getElementById("recent_searches").textContent);
 
-                        const store = useStore();
-                        const collapsed = computed(() => store.state.collapsed);
-
                         function showHelp(evt) {
                             const helpText = document.getElementById("help-text").innerHTML;
                             document.getElementById("modal-body-help").innerHTML = markdown.render(helpText);
@@ -296,8 +278,7 @@
 
                         return {
                             failed_test_count,
-                            collapsed,
-                            storeBase,
+                            baseStore,
                             userMenuItems,
                             recentBlobs,
                             overdueTasks,
@@ -309,70 +290,65 @@
 
                     }
                 });
-
-                appTopBar.use(storeBase);
+                appTopBar.use(createPinia());
                 appTopBar.mount("#top-bar");
 
                 const appSideBar = createApp({
-                    name: "SidebarApp",
+                    name: "Sidebar",
                     components: {
                         SidebarMenu,
                     },
                     setup() {
+                        const currentTime = new Date().getTime()
+                        const baseStore = useBaseStore();
 
                         onMounted(() => {
-                            window.setInterval(this.getUntaggedBookmarkCount, 60000);
+                            window.setInterval(getUntaggedBookmarkCount, 60000);
 
                             const ps = new PerfectScrollbar(".vsm--scroll-wrapper");
                             // Save this so that we can update the scrollbar when expanding items in the sidebar
-                            storeBase.ps = ps;
+                            baseStore.ps = ps;
                         })
 
-                        const store = useStore();
-                        const collapsed = computed(() => store.state.collapsed);
-
-                        return {
-                            collapsed,
-                            storeBase,
-                            menu: [
-                                {
-                                    header: "Bordercore",
-                                    hiddenOnCollapse: true,
-                                    class: "sidebar-header text-center"
-                                },
-                                {
-                                    href: "{% url 'homepage:homepage' %}",
-                                    title: "Home",
-                                    class: "first-item",
-                                    icon: {
-                                        element: "font-awesome-icon",
-                                        attributes: {
-                                            icon: "home",
-                                        },
-                                        class: "fa-xs sidebar-icon-1"
-                                    }
-                                },
-                                {
-                                    href: "{% url 'search:search' %}",
-                                    title: "Search",
-                                    alias: "/search/search*",
-                                    icon: {
-                                        element: "font-awesome-icon",
-                                        attributes: {
-                                            icon: "search",
-                                        },
-                                        class: "sidebar-icon-2"
-                                    }
-                                },
-                                {
-                                    href: "{% url 'bookmark:overview' %}",
-                                    title: "Bookmarks",
-                                    alias: "/bookmark/*",
-                                    icon: {
-                                        element: "font-awesome-icon",
-                                        attributes: {
-                                            icon: "bookmark",
-                                        },
+                        const menu = [
+                            {
+                                header: "Bordercore",
+                                hiddenOnCollapse: true,
+                                class: "sidebar-header text-center"
+                            },
+                            {
+                                href: "{% url 'homepage:homepage' %}",
+                                title: "Home",
+                                class: "first-item",
+                                icon: {
+                                    element: "font-awesome-icon",
+                                    attributes: {
+                                        icon: "home",
+                                    },
+                                    class: "fa-xs sidebar-icon-1"
+                                }
+                            },
+                            {
+                                href: "{% url 'search:search' %}",
+                                title: "Search",
+                                alias: "/search/search*",
+                                icon: {
+                                    element: "font-awesome-icon",
+                                    attributes: {
+                                        icon: "search",
+                                    },
+                                    class: "sidebar-icon-2"
+                                }
+                            },
+                            {
+                                href: "{% url 'bookmark:overview' %}",
+                                title: "Bookmarks",
+                                alias: "/bookmark/*",
+                                icon: {
+                                    element: "font-awesome-icon",
+                                    attributes: {
+                                        icon: "bookmark",
+                                    },
                                         class: "sidebar-icon-3"
                                     },
                                     badge: {
@@ -522,12 +498,27 @@
                                     }
                                     {% endif %}
                                 },
-                            ],
-                        }
-                    },
-                    methods: {
-                        onToggleCollapse(collapsed) {
-                            storeBase.commit("toggleCollapsed");
+                        ];
+
+                        function getUntaggedBookmarkCount() {
+                            doGet(
+                                "{% url "bookmark:get_new_bookmarks_count" 666 %}".replace(/666/, currentTime),
+                                (response) => {
+                                    const count = response.data.count;
+                                    const item = menu.find(item => item.title === "Bookmarks");
+                                    item.badge.text = count;
+                                    item.badge.class = count === 0 ? "d-none" : "vsm--badge_default";
+                                },
+                                "Error getting new bookmarks count"
+                            );
+                        };
+
+                        function onItemClick(event, item, node) {
+                            baseStore.ps.update();
+                        };
+
+                        function onToggleCollapse(collapsed) {
+                            baseStore.sidebarCollapsed = !baseStore.sidebarCollapsed;
                             const wrapper = document.querySelector(".wrapper");
                             if (collapsed) {
                                 wrapper.classList.add("collapsed");
@@ -539,36 +530,19 @@
                                 "{% url "accounts:store_in_session" %}",
                                 {
                                     "show_sidebar": !collapsed
-                                }
-                                ,
-                                (response) => {},
-                                "",
-                                ""
-                            );
-
-                        },
-                        onItemClick(event, item, node) {
-                            storeBase.ps.update();
-                        },
-                        getUntaggedBookmarkCount() {
-
-                            let self = this;
-                            doGet(
-                                self,
-                                "{% url "bookmark:get_new_bookmarks_count" 666 %}".replace(/666/, timestamp),
-                                (response) => {
-                                    count = response.data.count;
-                                    const item = self.menu.find(item => item.title === "Bookmarks");
-                                    item.badge.text = count;
-                                    item.badge.class = count === 0 ? "d-none" : "vsm--badge_default";
                                 },
-                                "Error getting new bookmarks count"
+                                (response) => {},
                             );
+                        };
+
+                        return {
+                            baseStore,
+                            menu,
+                            onItemClick,
+                            onToggleCollapse,
                         }
                     },
                 });
-
-                appSideBar.use(storeBase);
                 appSideBar.component("font-awesome-icon", FontAwesomeIcon);
                 appSideBar.component("RouterLink", RouterLink);
                 appSideBar.mount("#sidebar");
@@ -579,7 +553,7 @@
                 appHelp.component("font-awesome-icon", FontAwesomeIcon);
                 appHelp.mount("#modalHelp");
 
-                </script>
+            </script>
 
         {% endblock %}
 

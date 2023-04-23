@@ -8,7 +8,7 @@
         </template>
         <template #content>
             <div>
-                <strong>Updated</strong>: {{ store.state.currentFeed.lastCheck }}
+                <strong>Updated</strong>: {{ feedStore.currentFeed.lastCheck }}
             </div>
             <div>
                 <strong>Status</strong>: <font-awesome-icon class="ms-1" :class="status.class" :icon="status.font" />
@@ -24,9 +24,8 @@
 
 <script>
 
-    import store from "./store.js";
-
     import Card from "/front-end/vue/common/Card.vue";
+    import {useFeedStore} from "/front-end/vue/stores/FeedStore.js";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
     export default {
@@ -42,8 +41,9 @@
         },
         emits: ["create-feed"],
         setup(props, ctx) {
+            const feedStore = useFeedStore();
             const status = computed(() => {
-                if (store.state.currentFeed.lastResponse === "OK") {
+                if (feedStore.currentFeed.lastResponse === "OK") {
                     return {
                         "class": "text-success",
                         "font": "check",
@@ -61,14 +61,14 @@
             }
 
             function showFeed(feed) {
-                store.commit("updateCurrentFeed", feed);
+                feedStore.currentFeed = feed;
             };
 
             return {
+                feedStore,
                 onCreateFeed,
                 showFeed,
                 status,
-                store,
             };
         },
     };

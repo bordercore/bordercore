@@ -23,7 +23,7 @@
                             <li
                                 :key="element.id"
                                 class="list-with-counts rounded d-flex ps-2 py-1 pr-1"
-                                :class="{ 'selected': element.name === selectedTagName }"
+                                :class="{ 'selected': element.name === bookmarkStore.selectedTagName }"
                                 :data-tag="element.name"
                                 :data-id="element.id"
                                 @click.prevent="onClickTag"
@@ -50,6 +50,7 @@
 
 <script>
 
+    import {useBookmarkStore} from "/front-end/vue/stores/BookmarkStore.js";
     import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
@@ -73,7 +74,7 @@
         },
         emits: ["getPage", "searchTag"],
         setup(props, ctx) {
-            const selectedTagName = ref("Untagged");
+            const bookmarkStore = useBookmarkStore();
             const tags = ref([]);
 
             function setTags(tagsParam, untaggedCount) {
@@ -105,7 +106,7 @@
 
                 // Ignore if we're dragging a bookmark from a tag list
                 //  onto the same tag.
-                if (tag.name === selectedTagName.value) {
+                if (tag.name === bookmarkStore.selectedTagName) {
                     return;
                 }
 
@@ -125,11 +126,11 @@
                     doPost(
                         props.removeTagUrl,
                         {
-                            "tag_name": selectedTagName.value,
+                            "tag_name": bookmarkStore.selectedTagName,
                             "bookmark_uuid": bookmarkUuid,
                         },
                         (response) => {
-                            ctx.emit("searchTag", selectedTagName.value);
+                            ctx.emit("searchTag", bookmarkStore.selectedTagName);
                         },
                         "",
                         "Error removing tag",
@@ -172,12 +173,12 @@
             };
 
             return {
+                bookmarkStore,
                 handleSort,
                 onClickTag,
                 onDragOverTag,
                 onDragLeaveTag,
                 onAddTagToBookmark,
-                selectedTagName,
                 setTags,
                 tags,
             };

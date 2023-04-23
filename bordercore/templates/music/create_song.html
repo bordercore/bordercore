@@ -12,11 +12,11 @@
             <div class="w-100" v-cloak>
 
                 <transition name="fade">
-                    <div v-if="this.$store.state.dupeSongs.length > 0" class="card-body">
+                    <div v-if="songInfo.dupeSongs.length > 0" class="card-body">
                         <h6 class="text-warning mb-2 text-center">
                             Possible duplicate songs found
                         </h6>
-                        <div v-for="dupe in this.$store.state.dupeSongs" class="my-2">
+                        <div v-for="dupe in songInfo.dupeSongs" class="my-2">
                             <hr class="divider" />
                             <div class="d-flex">
                                 <font-awesome-icon icon="music" class="text-secondary mt-2"></font-awesome-icon>
@@ -34,14 +34,14 @@
                     </div>
                 </transition>
 
-                <card v-if="this.$store.state.songLength !== null" title="Song Info" class="backdrop-filter ms-3">
+                <card v-if="songInfo.songLength !== null" title="Song Info" class="backdrop-filter ms-3">
                     <template v-slot:content>
                         <ul>
-                            <li>Song Length <span class="ms-1 text-primary">[[ this.$store.state.songLengthPretty ]]</span></li>
+                            <li>Song Length <span class="ms-1 text-primary">[[ songInfo.songLengthPretty ]]</span></li>
                             {% if action == "Create" %}
-                                <li>Song Size <span class="ms-1 text-primary">[[ this.$store.state.songSize ]]</span></li>
-                                <li>Sample Rate <span class="ms-1 text-primary">[[ this.$store.state.sampleRate ]]</span></li>
-                                <li>Bit Rate <span class="ms-1 text-primary">[[ this.$store.state.bitRate ]]</span></li>
+                                <li>Song Size <span class="ms-1 text-primary">[[ songInfo.songSize ]]</span></li>
+                                <li>Sample Rate <span class="ms-1 text-primary">[[ songInfo.sampleRate ]]</span></li>
+                                <li>Bit Rate <span class="ms-1 text-primary">[[ songInfo.bitRate ]]</span></li>
                             {% endif %}
                         </ul>
                     </template>
@@ -70,7 +70,7 @@
             </div>
 
             {% if action == "Create" %}
-                <div v-if="this.$store.state.songLength === null" class="flex-shrink-0">
+                <div v-if="songInfo.songLength === null" class="flex-shrink-0">
                     <card title="" class="flex-shrink-0 backdrop-filter ms-3">
                         <template v-slot:content>
                             <div>
@@ -261,23 +261,6 @@
 
     <script type="text/javascript">
 
-        const store = createStore({
-            state: {
-                {% if action == "Create" %}
-                songLength: null,
-                songLengthPretty: null,
-                {% else %}
-                songUuid: "{{ song.uuid }}",
-                songLength: {{ song.length }},
-                songLengthPretty: "{{ song_length_pretty }}",
-                {% endif %}
-                songSize: null,
-                sampleRate: null,
-                bitRate: null,
-                dupeSongs: [],
-            },
-        });
-
         const app = createApp({
             name: "SongForm",
             components: {
@@ -293,6 +276,21 @@
                 const isCompilation = ref(false);
                 const uuid = "{{ song.uuid }}";
 
+                const songInfo = ref({
+                    {% if action == "Create" %}
+                    songLength: null,
+                    songLengthPretty: null,
+                    {% else %}
+                    songUuid: "{{ song.uuid }}",
+                    songLength: {{ song.length }},
+                    songLengthPretty: "{{ song_length_pretty }}",
+                    {% endif %}
+                    songSize: null,
+                    sampleRate: null,
+                    bitRate: null,
+                    dupeSongs: [],
+                });
+
                 const artistName = JSON.parse(document.getElementById("artistName").textContent);
                 const { handleRatingMouseLeave, handleRatingMouseOver } = mouseRating();
 
@@ -300,7 +298,7 @@
                 const tagsInput = ref(null);
 
                 const songLength = computed(() => {
-                    return store.state.songLength;
+                    return songInfo.value.songLength;
                 });
 
                 function handleTagClick(tagName) {
@@ -322,10 +320,10 @@
                         "{% url 'music:dupe_song_checker' %}?artist=" + artist + "&title=" + title,
                         (response) => {
                             let dupes = response.data.dupes;
-                            if (store.state.songUuid) {
-                                store.state.dupeSongs = dupes.filter((x) => x.uuid !== store.state.songUuid);
+                            if (songInfo.value.songUuid) {
+                                songInfo.value.dupeSongs = dupes.filter((x) => x.uuid !== songInfo.value.songUuid);
                             } else {
-                                store.state.dupeSongs = dupes;
+                                songInfo.value.dupeSongs = dupes;
                             }
                         },
                         "Error checking for duplicate songs",
@@ -357,11 +355,11 @@
                                 }
                             }
                         });
-                        store.state.songLength = response.data.length;
-                        store.state.songLengthPretty = response.data.length_pretty;
-                        store.state.songSize = response.data.filesize;
-                        store.state.sampleRate = response.data.sample_rate;
-                        store.state.bitRate = response.data.bit_rate;
+                        songInfo.value.songLength = response.data.length;
+                        songInfo.value.songLengthPretty = response.data.length_pretty;
+                        songInfo.value.songSize = response.data.filesize;
+                        songInfo.value.sampleRate = response.data.sample_rate;
+                        songInfo.value.bitRate = response.data.bit_rate;
 
                         // Wait a tiny amount before closing the modal. If the song upload happens
                         //  really fast, then "hide" could be called too quickly after "show",
@@ -430,6 +428,7 @@
                     isCompilation,
                     selectValue,
                     setRating,
+                    songInfo,
                     songLength,
                     tagsInput,
                 }
@@ -442,7 +441,6 @@
                 sortIcon: "caret-up",
             },
         });
-        app.use(store);
         app.mount("#vue-app");
 
 </script>

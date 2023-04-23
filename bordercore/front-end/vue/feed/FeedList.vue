@@ -13,7 +13,7 @@
                 class="slicklist-item"
             >
                 <div class="slicklist-list-item-inner">
-                    <li v-cloak :key="element.id" :class="{'selected rounded-sm': element.id === $store.state.currentFeed.id}" class="ps-2">
+                    <li v-cloak :key="element.id" :class="{'selected rounded-sm': element.id === feedStore.currentFeed.id}" class="ps-2">
                         <a href="#" :data-id="element.id" @click.prevent="onClick(element)">
                             {{ element.name }}
                         </a>
@@ -30,6 +30,7 @@
 
 <script>
 
+    import {useFeedStore} from "/front-end/vue/stores/FeedStore.js";
     import {SlickList, SlickItem} from "vue-slicksort";
 
     export default {
@@ -53,7 +54,7 @@
         },
         emits: ["show-feed"],
         setup(props, ctx) {
-            const store = useStore();
+            const feedStore = useFeedStore();
             const localFeedList = ref(props.feedList.slice());
 
             function deleteFeed(feedUuid) {
@@ -65,7 +66,7 @@
 
                 // Now that the current feed is deleted, we need to select a
                 //  different current feed. Select the first in the list.
-                store.commit("updateCurrentFeed", localFeedList.value[0]);
+                feedStore.currentFeed = localFeedList.value[0];
             };
 
             function addFeed(feedInfo) {
@@ -103,6 +104,7 @@
             return {
                 addFeed,
                 deleteFeed,
+                feedStore,
                 handleSort,
                 localFeedList,
                 onClick,

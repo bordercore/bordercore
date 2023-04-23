@@ -99,6 +99,7 @@
             },
             setup() {
                 const feedList = JSON.parse(document.getElementById("feed_list").textContent);
+                const feedStore = useFeedStore();
 
                 const feedInfo = ref(null);
                 const feedItemList = ref(null);
@@ -106,7 +107,7 @@
                 const updateFeed = ref(null);
 
                 function handleDeleteFeedConfirmation() {
-                    axios.delete("{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", feedStore.state.currentFeed.uuid))
+                    axios.delete("{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", feedStore.currentFeed.uuid))
                         .then((response) => {
                             EventBus.$emit(
                                 "toast",
@@ -114,7 +115,7 @@
                                     "body": "Feed deleted",
                                 },
                             );
-                            feedListRef.value.deleteFeed(feedStore.state.currentFeed.uuid);
+                            feedListRef.value.deleteFeed(feedStore.currentFeed.uuid);
                             const modal = Modal.getInstance(document.getElementById("modalDeleteFeed"));
                             modal.hide();
                         }, (error) => {
@@ -143,7 +144,7 @@
 
                 onMounted(() => {
                     const currentFeed = JSON.parse(document.getElementById("current_feed").textContent);
-                    feedStore.commit("updateCurrentFeed", currentFeed);
+                    feedStore.currentFeed = currentFeed;
                     nextTick(() => {
                         showFeed(currentFeed);
                     });
@@ -163,7 +164,7 @@
                 };
             },
         });
-        app.use(feedStore);
+        app.use(createPinia());
         app.mount("#vue-app");
 
     </script>

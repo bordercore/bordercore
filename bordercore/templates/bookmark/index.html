@@ -26,7 +26,7 @@
                     <div class="d-flex">
                         <form class="form-inline" role="form" method="get" @submit.prevent>
                             {% csrf_token %}
-                            <input :value="pinnedTags && pinnedTags.selectedTagName" type="hidden" name="tag" />
+                            <input :value="pinnedTags && bookmarkStore.selectedTagName" type="hidden" name="tag" />
                             <div class="position-relative" v-cloak>
                                 <div ref="search">
                                     <select-value
@@ -78,7 +78,7 @@
                         <div class="d-flex mt-1 ms-3">
 
                             <div v-if="tagIsSelected" id="bookmark-search-filter" class="tag d-flex align-items-center">
-                                <div>Tag: <strong>[[ pinnedTags.selectedTagName ]]</strong></div>
+                                <div>Tag: <strong>[[ bookmarkStore.selectedTagName ]]</strong></div>
                                 <div>
                                     <a class="ms-1" href="#" @click.prevent="removeFilter">
                                         <font-awesome-icon icon="times" class="text-primary" />
@@ -115,6 +115,7 @@
                                 v-for="(element, index) in bookmarkList"
                                 :key="element.uuid"
                                 :index="index"
+                                :disabled="bookmarkStore.selectedTagName === 'Untagged'"
                                 class="hover-reveal-target"
                             >
                                 <div class="slicklist-list-item-inner">
@@ -255,6 +256,7 @@
             delimiters: ["[[", "]]"],
             setup() {
                 const bookmarkList = ref([]);
+                const bookmarkStore = useBookmarkStore();
                 let intervalId = null;
                 const pagination = ref({});
                 const searchTerm = ref();
@@ -320,7 +322,7 @@
                 });
 
                 function filteredTags(bookmark) {
-                    return bookmark.tags.filter((x) => x !== pinnedTags.value.selectedTagName);
+                    return bookmark.tags.filter((x) => x !== bookmarkStore.selectedTagName);
                 }
 
                 function getBookmarkList({ pageNumber = 1, searchTermParam = null, searchTag = null } = {}) {
@@ -356,11 +358,11 @@
                             if (searchTag !== null) {
                                 // Only update the tagFilter here, *after* we have a new set of
                                 // updated bookmarks that's appropriate for this tagFilter
-                                pinnedTags.value.selectedTagName = searchTag;
+                                bookmarkStore.selectedTagName = searchTag;
                             } else if (searchTermParam !== null) {
-                                pinnedTags.value.selectedTagName = null;
+                                bookmarkStore.selectedTagName = null;
                             } else {
-                                pinnedTags.value.selectedTagName = "Untagged";
+                                bookmarkStore.selectedTagName = "Untagged";
 
                                 if (pagination.value === "" || pagination.value.page_number === 1) {
                                     // First clear any existing timeouts, if necessary
@@ -392,7 +394,7 @@
 
                 function getPinnedMenuItem() {
                     return !pinnedTags.value.tags.find(
-                        element => element.name == pinnedTags.value.selectedTagName
+                        element => element.name == bookmarkStore.selectedTagName
                     ) ? "Pin" : "Unpin";
                 };
 
@@ -422,11 +424,11 @@
                                 },
                             );
 
-                            if (pinnedTags.value.selectedTagName) {
-                                if (pinnedTags.value.selectedTagName === "Untagged") {
+                            if (bookmarkStore.selectedTagName) {
+                                if (bookmarkStore.selectedTagName === "Untagged") {
                                     getBookmarkList({ pageNumber: pagination.value.page_number });
                                 } else
-                                    getBookmarkList({ searchTag: pinnedTags.value.selectedTagName });
+                                    getBookmarkList({ searchTag: bookmarkStore.selectedTagName });
                             } else {
                                 getBookmarkList({ pageNumber: pagination.value.page_number });
                             }
@@ -461,7 +463,7 @@
                         return;
                     }
                     // Ignore this event if we're not filtering on a tag.
-                    if (!pinnedTags.value.selectedTagName || pinnedTags.value.selectedTagName === "Untagged") {
+                    if (bookmarkStore.selectedTagName === "Untagged") {
                         return false;
                     }
                     const bookmarkUuid = bookmarkList.value[event.oldIndex].uuid;
@@ -472,7 +474,7 @@
                     doPost(
                         "{% url "bookmark:sort" %}",
                         {
-                            "tag": pinnedTags.value.selectedTagName,
+                            "tag": bookmarkStore.selectedTagName,
                             "bookmark_uuid": bookmarkUuid,
                             "position": newPosition
                         },
@@ -546,13 +548,12 @@
                 };
 
                 const tagIsSelected = computed(() => {
-                    return pinnedTags.value &&
-                           pinnedTags.value.selectedTagName &&
-                           pinnedTags.value.selectedTagName !== "Untagged";
+                    return pinnedTags.value && bookmarkStore.selectedTagName !== "Untagged";
                 });
 
                 return {
                     bookmarkList,
+                    bookmarkStore,
                     filteredTags,
                     getBookmarkList,
                     getPage,
@@ -584,6 +585,7 @@
                 }
             },
         });
+        app.use(createPinia());
         app.mount("#vue-app");
 
     </script>
