@@ -16,7 +16,6 @@ webpack: webpack_build webpack_ec2
 
 webpack_build: check-env
 	cd $(BORDERCORE_HOME)
-	npm run dev &&
 	npm run build
 
 webpack_ec2: check-env
