@@ -21,8 +21,7 @@ from tag.models import Tag
 
 from .managers import DrillManager
 
-# Default intervals
-INTERVALS = [1, 2, 3, 5, 8, 13, 21, 30]
+INTERVALS_DEFAULT = [1, 2, 3, 5, 8, 13, 21, 30]
 
 
 class Question(TimeStampedModel):
@@ -61,8 +60,8 @@ class Question(TimeStampedModel):
         Get the interval changes based on a question response of "good"
         """
 
-        if self.interval_index + 1 < len(INTERVALS):
-            new_interval = timedelta(days=INTERVALS[self.interval_index + 1])
+        if self.interval_index + 1 < len(self.user.userprofile.drill_intervals):
+            new_interval = timedelta(days=self.user.userprofile.drill_intervals[self.interval_index + 1])
             return {
                 "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
                 "interval": new_interval,
@@ -80,8 +79,8 @@ class Question(TimeStampedModel):
         Get the interval changes based on a question response of "easy"
         """
 
-        if self.interval_index + 2 < len(INTERVALS):
-            new_interval = timedelta(days=INTERVALS[self.interval_index + 2])
+        if self.interval_index + 2 < len(self.user.userprofile.drill_intervals):
+            new_interval = timedelta(days=self.user.userprofile.drill_intervals[self.interval_index + 2])
             return {
                 "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
                 "interval": new_interval,
@@ -100,7 +99,7 @@ class Question(TimeStampedModel):
         """
 
         if self.interval_index > 1:
-            new_interval = timedelta(days=INTERVALS[self.interval_index - 2])
+            new_interval = timedelta(days=self.user.userprofile.drill_intervals[self.interval_index - 2])
             return {
                 "description": f"Decrease interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
                 "interval": new_interval,

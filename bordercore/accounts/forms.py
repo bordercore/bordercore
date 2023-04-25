@@ -25,7 +25,7 @@ class UserProfileForm(ModelForm):
             to_field_name="name")
         self.initial["pinned_tags"] = self.instance.get_tags()
         self.fields["pinned_tags"].widget.attrs["class"] = "form-control"
-
+        self.fields["drill_intervals"].widget.attrs["class"] = "form-control"
         self.fields["nytimes_api_key"].label = "NYTimes API key"
         self.fields["nytimes_api_key"].required = False
 
@@ -60,6 +60,7 @@ class UserProfileForm(ModelForm):
             "pinned_tags",
             "homepage_default_collection",
             "homepage_image_collection",
+            "drill_intervals",
             "nytimes_api_key",
             "instagram_credentials",
             "google_calendar"

@@ -1,6 +1,9 @@
 import uuid
 
+from feed.models import Feed
+
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save, pre_delete
@@ -8,7 +11,7 @@ from django.dispatch import receiver
 
 from blob.models import Blob
 from collection.models import Collection
-from feed.models import Feed
+from drill.models import INTERVALS_DEFAULT
 from lib.mixins import SortOrderMixin
 from tag.models import Tag
 
@@ -27,6 +30,7 @@ class UserProfile(models.Model):
     homepage_image_collection = models.OneToOneField(Collection, related_name="image_collection", null=True, on_delete=models.PROTECT)
     sidebar_image = models.TextField(blank=True, null=True)
     background_image = models.TextField(blank=True, null=True)
+    drill_intervals = ArrayField(models.IntegerField(default=INTERVALS_DEFAULT))
 
     THEMES = [
         ("light", "light"),

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import signals
 
 from accounts.models import UserProfile
+from drill.models import INTERVALS_DEFAULT
 
 faker = FakerFactory.create()
 
@@ -30,6 +31,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         userprofile, _ = UserProfile.objects.get_or_create(
             user=obj,
             theme="light",
+            drill_intervals=INTERVALS_DEFAULT
         )
         userprofile.instagram_credentials = {
             "username": faker.text(max_nb_chars=20),
