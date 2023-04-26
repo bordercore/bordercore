@@ -2048,7 +2048,7 @@ div #dateapp {
   }
 
   #study-random-count {
-    width: 4rem;
+    width: 5rem;
   }
 
   #search-term {
@@ -2235,8 +2235,12 @@ tr.hover-target:hover {
   }
 }
 
-.v-md-editor {
+.v-md-editor-tall .v-md-editor {
   height: 70vh;
+}
+
+.v-md-editor {
+  height: 100%;
   background-color: var(--form-bg) !important;
   color: var(--text1) !important;
   font-size: 1rem !important;
@@ -2318,7 +2322,7 @@ tr.hover-target:hover {
   }
 }
 
-.multiselect--disabled .multiselect__current, .multiselect--disabled .multiselect__select {
+.multiselect--disabled, .multiselect--disabled .multiselect__current, .multiselect--disabled .multiselect__select {
   background: none !important;
   color: #a6a6a6;
 }

@@ -61,17 +61,17 @@
 
         <div class="col-lg-9">
 
-            <form @submit.prevent id="question-form" action="{{ request.path }}" method="post">
+            <form @submit.prevent id="question-form" action="{{ request.path }}" method="post" class="d-flex flex-column h-100">
                 <input type="hidden" name="related-objects" />
                 <input type="hidden" name="return_url" value="{% firstof request.GET.return_url request.POST.return_url %}" />
 
                 {% csrf_token %}
 
-                <div class="{% if form.question.errors %}error {% endif %}row mb-3">
+                <div class="{% if form.question.errors %}error {% endif %}row flex-grow-1 mb-3">
                     <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">
                         Question
                     </label>
-                    <div class="col-lg-7">
+                    <div class="col-lg-9 h-100">
                         <v-md-editor
                             ref="mdEditorQuestion"
                             mode="edit"
@@ -86,11 +86,11 @@
                     </div>
                 </div>
 
-                <div class="{% if form.answer.errors %}error {% endif %}row mb-3">
+                <div class="{% if form.answer.errors %}error {% endif %}row flex-grow-1 mb-3">
                     <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">
                         Answer
                     </label>
-                    <div class="col-lg-7">
+                    <div class="col-lg-9 h-100">
                         <v-md-editor
                             ref="mdEditorAnswer"
                             mode="edit"
@@ -107,7 +107,7 @@
 
                 <div class="{% if forms.tags.errors %}error {% endif %}row mb-3">
                     <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">Tags</label>
-                    <div class="col-lg-7">
+                    <div class="col-lg-9">
                         <tags-input id="id_tags" ref="tagsInput" search-url="{% url 'tag:search' %}?query=">
                         </tags-input>
                         {% for error in form.tags.errors %}
@@ -117,7 +117,7 @@
                 </div>
 
                 <div>
-                    <div class="col-lg-7 offset-lg-2" id="button-wrapper">
+                    <div class="col-lg-9 offset-lg-2" id="button-wrapper">
                         <input class="btn btn-primary ms-1" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
                         <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary ms-3" type="submit" name="Go"
                                value="Delete" />

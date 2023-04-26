@@ -258,7 +258,7 @@
 
                                     {% elif field.label == 'Content' %}
 
-                                        <div class="col-lg-10 col-sm-10 align-self-center">
+                                        <div class="v-md-editor-tall col-lg-10 col-sm-10 align-self-center">
                                             <v-md-editor
                                                 ref="mdEditor"
                                                 mode="edit"
@@ -266,7 +266,6 @@
                                                 left-toolbar="undo redo | h bold italic strikethrough quote | ul ol table hr | link image code"
                                                 v-model="content"
                                             ></v-md-editor>
-
                                         </div>
 
                                     {% elif field.label == 'Tags' %}
