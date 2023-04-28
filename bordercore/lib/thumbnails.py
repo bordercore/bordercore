@@ -1,7 +1,6 @@
 import logging
 import subprocess
 
-import fitz
 from PIL import Image
 
 from .util import is_image, is_pdf, is_video
@@ -37,6 +36,10 @@ def create_thumbnail_from_image(infile, outdir):
 
 
 def create_thumbnail_from_pdf(infile, outdir, page_number=1):
+
+    # Put the import here so that AWS lambdas that use other functions in this
+    # module don't need to install the PyMuPDF package, which provides fitz
+    import fitz
 
     page_number = page_number - 1
     cover_large = f"{outdir}-cover-large.jpg"
