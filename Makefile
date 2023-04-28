@@ -20,7 +20,7 @@ webpack_build: check-env
 
 webpack_ec2: check-env
 	cd $(BORDERCORE_HOME)
-	rsync -azv --delete static/ $(EC2)
+	rsync -azv --delete --exclude=/rest_framework static/ $(EC2)
 	scp ./webpack-stats.json $(EC2)../bordercore/bordercore
 
 check-env:
