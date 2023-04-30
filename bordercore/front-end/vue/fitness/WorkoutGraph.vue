@@ -54,18 +54,6 @@
                 default: "",
                 type: String,
             },
-            latestDuration: {
-                default: () => [],
-                type: Array,
-            },
-            latestReps: {
-                default: () => [],
-                type: Array,
-            },
-            latestWeight: {
-                default: () => [],
-                type: Array,
-            },
             initialPlotType: {
                 default: "",
                 type: String,
@@ -244,60 +232,6 @@
                             size: 14,
                         },
                     },
-                });
-
-                const sets = Array.apply(0, Array(props.latestWeight.length)).map(function(_, b) {
-                    return b + 1;
-                });
-                const labels = sets.map((x) => `Set ${x}`);
-
-                const ctxLastWorkout = document.getElementById("last_workout_weights").getContext("2d");
-                new Chart(ctxLastWorkout, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: props.latestWeight,
-                                label: "Weight",
-                            },
-                        ],
-                    },
-                    options: getRecentWorkoutGraphOptions("Weight"),
-                });
-
-                const ctxLastWorkoutReps = document.getElementById("last_workout_reps").getContext("2d");
-                new Chart(ctxLastWorkoutReps, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: props.latestReps,
-                                label: "Reps",
-                            },
-                        ],
-                    },
-                    options: getRecentWorkoutGraphOptions("Reps"),
-
-                });
-
-                const ctxLastWorkoutDuration = document.getElementById("last_workout_duration").getContext("2d");
-                new Chart(ctxLastWorkoutDuration, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: props.latestDuration,
-                                label: "Duration",
-                            },
-                        ],
-                    },
-                    options: getRecentWorkoutGraphOptions("Duration"),
                 });
             });
 

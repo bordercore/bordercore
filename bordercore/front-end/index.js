@@ -288,6 +288,8 @@ window.Pagination = Pagination;
 import PythonConsole from "./vue/common/PythonConsole.vue";
 window.PythonConsole = PythonConsole;
 
+import LastWorkout from "./vue/fitness/LastWorkout.vue";
+window.LastWorkout = LastWorkout;
 import AddWorkoutForm from "./vue/fitness/AddWorkoutForm.vue";
 window.AddWorkoutForm = AddWorkoutForm;
 import WorkoutGraph from "./vue/fitness/WorkoutGraph.vue";
