@@ -97,7 +97,7 @@
                     props.getWorkoutDataUrl + pageNumber,
                     (response) => {
                         plotdata.value = JSON.parse(response.data.workout_data.plotdata);
-                        notes.value = JSON.parse(response.data.workout_data.notes);
+                        notes.value = response.data.workout_data.notes;
                         myChart.data.labels = JSON.parse(response.data.workout_data.labels);
                         myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata)[currentPlotType.value].map(firstSet);
                         myChart.update();
