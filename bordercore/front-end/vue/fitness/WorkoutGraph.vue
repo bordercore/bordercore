@@ -88,6 +88,31 @@
                 return notes.value.filter((x) => x !== null).length > 0;
             });
 
+            function firstSet(workoutData) {
+                return workoutData[0];
+            }
+
+            function getGradient(numberOfItems) {
+                const styles = getComputedStyle(document.body);
+
+                if (numberOfItems <= 1) {
+                    return;
+                }
+
+                // The Rainbow object is from the RainbowVis-JS package
+                const rainbow = new Rainbow();
+                rainbow.setNumberRange(1, numberOfItems);
+                // Use trim() to remove the whitespace preceding the CSS property value
+                rainbow.setSpectrum(styles.getPropertyValue("--chart-gradient-start").trim(), styles.getPropertyValue("--chart-gradient-end").trim());
+
+                const colorArray = [];
+                for (let i = 1; i <= numberOfItems; i++) {
+                    const hexColour = rainbow.colourAt(i);
+                    colorArray.push(`#${hexColour}`);
+                }
+                return colorArray;
+            };
+
             function paginate(direction) {
                 const pageNumber = direction === "prev" ?
                     paginator.value.previous_page_number :

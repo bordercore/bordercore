@@ -39,6 +39,8 @@ import {useBookmarkStore} from "./vue/stores/BookmarkStore.js";
 window.useBookmarkStore = useBookmarkStore;
 import {useFeedStore} from "./vue/stores/FeedStore.js";
 window.useFeedStore = useFeedStore;
+import {useExerciseStore} from "./vue/stores/ExerciseStore.js";
+window.useExerciseStore = useExerciseStore;
 
 import draggable from "vuedraggable";
 window.draggable = draggable;
@@ -288,6 +290,8 @@ window.Pagination = Pagination;
 import PythonConsole from "./vue/common/PythonConsole.vue";
 window.PythonConsole = PythonConsole;
 
+import Frequency from "./vue/fitness/Frequency.vue";
+window.Frequency = Frequency;
 import LastWorkout from "./vue/fitness/LastWorkout.vue";
 window.LastWorkout = LastWorkout;
 import AddWorkoutForm from "./vue/fitness/AddWorkoutForm.vue";

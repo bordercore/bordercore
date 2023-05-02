@@ -147,8 +147,58 @@
                             },
                         ],
                     },
-                    options: getRecentWorkoutGraphOptions(label),
+                    options: getGraphOptions(label),
                 });
+            };
+
+            function getGraphOptions(label) {
+                const styles = getComputedStyle(document.body);
+
+                return {
+                    events: [], // Disable 'on-hover' events
+                    borderRadius: "10",
+                    animation: {
+                        onComplete: function(chartInstance) {
+                            const ctx = this.ctx;
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "bottom";
+                            ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
+                            ctx.font = "bold 24px Arial";
+                            this.data.datasets.forEach(function(dataset, i) {
+                                const meta = chartInstance.chart.getDatasetMeta(i);
+                                meta.data.forEach(function(bar, index) {
+                                    const data = dataset.data[index];
+                                    ctx.fillText(data, bar.x, bar.y + 40);
+                                });
+                            });
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        title: {
+                            display: true,
+                            text: label,
+                            color: styles.getPropertyValue("--chart-title-color"),
+                            font: {
+                                size: "16px",
+                            },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: styles.getPropertyValue("--chart-tick-color"),
+                            },
+                        },
+                        y: {
+                            ticks: {
+                                color: styles.getPropertyValue("--chart-tick-color"),
+                            },
+                        },
+                    },
+                };
             };
 
             function handleNoteAdd() {

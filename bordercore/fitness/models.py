@@ -10,6 +10,8 @@ from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import F, Max
 
+from lib.time_utils import get_relative_date_from_date
+
 
 class MuscleGroup(models.Model):
     name = models.TextField(unique=True)
@@ -181,3 +183,10 @@ class ExerciseUser(models.Model):
 
     def __str__(self):
         return self.exercise.name
+
+    def activity_info(self):
+        return {
+            "frequency": self.frequency.days,
+            "relative_date": get_relative_date_from_date(self.started),
+            "started": self.started.strftime("%b %d, %Y")
+        }

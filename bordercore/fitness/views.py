@@ -39,16 +39,20 @@ class ExerciseDetailView(DetailView):
             } for x in self.object.get_related_exercises()
         ]
 
+        active = ExerciseUser.objects.filter(
+            user=self.request.user,
+            exercise__id=self.object.id
+        ).first()
+
+        if active:
+            context["activity_info"] = active.activity_info()
+
         return {
             **context,
             **last_workout,
             "plotdata": plot_data,
             "title": f"Exercise Detail :: {self.object.name}",
             "related_exercises": related_exercises,
-            "activity_info": ExerciseUser.objects.filter(
-                user=self.request.user,
-                exercise__id=self.object.id
-            )
         }
 
 
@@ -93,17 +97,19 @@ def fitness_summary(request):
 def change_active_status(request):
 
     uuid = request.POST["uuid"]
-    remove = request.POST.get("remove", False)
+    remove = request.POST.get("remove", "false")
 
-    if remove:
+    if remove == "true":
         eu = ExerciseUser.objects.get(user=request.user, exercise__uuid=uuid)
         eu.delete()
+        info = {}
     else:
         exercise = Exercise.objects.get(uuid=uuid)
         eu = ExerciseUser(user=request.user, exercise=exercise)
         eu.save()
+        info = eu.activity_info()
 
-    return JsonResponse({"status": "OK"}, safe=False)
+    return JsonResponse({"info": info, "status": "OK"}, safe=False)
 
 
 @login_required

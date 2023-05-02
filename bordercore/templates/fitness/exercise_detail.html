@@ -28,72 +28,14 @@
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
-            <div {% if activity_info %}class="hover-target"{% endif %}>
-                <card title="" class="z-index-positive flex-grow-0 position-relative backdrop-filter">
-                    <template #content>
-                        <div class="d-flex flex-column">
-                            <div v-if="showHistoryMessage" class="mb-2 d-flex flex-column">
-                                <div class="d-flex flex-column">
-                                {% if activity_info %}
-                                    <div class="d-flex">
-                                        <div class="item-name">
-                                            Started
-                                        </div>
-                                        <div class="item-value d-flex flex-column ms-2">
-                                            <div>
-                                                <strong>
-                                                    {{ activity_info.0.started|date:"N j, Y" }}
-                                                </strong>
-                                            </div>
-                                            <div>
-                                                <span class="text-small ms-1">
-                                                    {{ activity_info.0.started|relative_date }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <drop-down-menu :show-on-hover="true">
-                                            <template #dropdown>
-                                                <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="onClickSwitchExercise()">
-                                                        <font-awesome-icon icon="exchange-alt" class="text-primary me-3"></font-awesome-icon>Switch Exercise
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="onClickChangeFrequency()">
-                                                        <font-awesome-icon icon="calendar-alt" class="text-primary me-3"></font-awesome-icon>Change Frequency
-                                                    </a>
-                                                </li>
-                                            </template>
-                                        </drop-down-menu>
-                                    </div>
-                                    <hr class="m-2" />
-                                    <div class="d-flex">
-                                        <div class="item-name">
-                                            Frequency
-                                        </div>
-                                        <div class="item-value ms-2">
-                                            <strong>
-                                                every [[ frequency ]] days
-                                            </strong>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                                </div>
-                            </div>
-                            <div v-else>
-                                Exercise not active.
-                            </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
-                                    <font-awesome-icon v-if="isActiveExercise" icon="check" class="me-2"></font-awesome-icon>[[ activeButtonValue ]]
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </card>
-            </div>
+            <frequency
+                change-active-status-url="{% url 'fitness:change_active_status' %}"
+                exercise-name="{{ object.name }}"
+                update-frequency-url="{% url 'fitness:update_frequency' %}"
+            >
+            </frequency>
 
-            <last-workout
+           <last-workout
                 date="{{ recent_data.0.date|date:" N j, Y" }}"
                 :description="description"
                 exercise-uuid="{{ object.uuid }}"
@@ -111,66 +53,6 @@
                         <div class="modal-body d-flex align-items-center">
                             <h4 class="mb-0">Timer done!</h4>
                             <input type="button" class="btn btn-primary ms-auto" value="Close" data-bs-dismiss="modal" aria-label="Close" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="modalSwitchExercise" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 id="myModalLabel" class="modal-title">
-                                Switch Exercise
-                            </h4>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3 text-primary">
-                                <small>
-                                    Selecting an exercise from the list below will make it <em>active</em> and make the exercise <strong>{{ object.name }}</strong> <em>inactive</em>.
-                                </small>
-                            </div>
-                            <o-table
-                                :data="relatedExercises"
-                                :columns="relatedExercisesFields"
-                                hoverable
-                                @click="onSelectRelatedExercise"
-                            >
-                                <template #empty>
-                                    <div class="text-center">No related exercises</div>
-                                </template>
-                            </o-table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="modalChangeFrequency" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 id="myModalLabel" class="modal-title">
-                                Change Exercise Frequency
-                            </h4>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                            </button>
-                        </div>
-                        <div class="modal-body">
-
-                            <div class="d-flex align-items-center">
-                                <div>Workout every</div>
-                                <div class="ms-3 w-20">
-                                    <input id="frequency" class="form-control" type="number" min="1" :value="frequency" autocomplete="off" />
-                                </div>
-                                <div class="ms-3">days</div>
-                                <div class="ms-3">
-                                    <button type="button" class="btn btn-primary" @click="changeFrequency()">
-                                        Change
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -253,6 +135,7 @@
 
     {{ block.super }}
 
+    {{ activity_info|json_script:"activity_info" }}
     {{ plotdata.notes|json_script:"plotDataNotes" }}
     {{ related_exercises|json_script:"related_exercises" }}
 
@@ -264,134 +147,26 @@
             components: {
                 Card,
                 DropDownMenu,
+                Frequency,
                 FontAwesomeIcon,
                 LastWorkout,
             },
             setup() {
-                const isActiveExercise = ref({% if activity_info %}true{% else %}false{% endif %});
                 const description = markdown.render("{{ object.description|default:"No description"|escapejs }}");
-                const showHistoryMessage = ref({% if activity_info %}true{% else %} false{% endif %});
                 const note = "{{ object.note|escapejs }}";
+                const activityInfo = JSON.parse(document.getElementById("activity_info").textContent);
                 const relatedExercises = ref(JSON.parse(document.getElementById("related_exercises").textContent));
-                const relatedExercisesFields = [
-                    {
-                        field: "name",
-                        label: "Exercise",
-                    },
-                    {
-                        field: "last_active",
-                        label: "Last Active",
-                    },
-                ];
-                const frequency = ref({% if activity_info %} {{ activity_info.0.frequency.days }} {% else %} null{% endif %});
+                const frequency = ref(null);
 
-                function onClick(evt) {
-                    payload = {
-                        "uuid": "{{ object.uuid }}",
-                    };
-                    if (isActiveExercise.value) {
-                        payload.remove = true;
-                    } else {
-                        showHistoryMessage.value = false;
-                    }
-                    doPost(
-                        url = "{% url "fitness:change_active_status" %}",
-                        payload,
-                        (response) => {
-                            isActiveExercise.value = !isActiveExercise.value;
-                        },
-                    );
-                };
-
-                function onClickSwitchExercise(evt) {
-                    const modal = new Modal("#modalSwitchExercise");
-                    modal.show();
-                };
-
-                function onClickChangeFrequency(evt) {
-                    const modal = new Modal("#modalChangeFrequency");
-                    modal.show();
-                };
-
-                function changeFrequency(evt) {
-                    const frequencyNew = document.getElementById("frequency").value;
-                    doPost(
-                        url = "{% url "fitness:update_frequency" %}",
-                        {
-                            "uuid": "{{ object.uuid }}",
-                            "frequency": frequencyNew,
-                        }
-                        ,
-                        (response) => {
-                            frequency.value = frequencyNew;
-                            const modal = Modal.getInstance(document.getElementById("modalChangeFrequency"));
-                            modal.hide();
-                            EventBus.$emit(
-                                "toast",
-                                {
-                                    "body": `Exercise frequency changed to ${this.frequency}`,
-                                },
-                            );
-                        },
-                    );
-                };
-
-                function onSelectRelatedExercise(evt) {
-                    const uuid = evt.uuid;
-                    const name = evt.name;
-                    doPost(
-                        "{% url "fitness:change_active_status" %}",
-                        {
-                            "uuid": uuid,
-                        },
-                        (response) => {
-                            const modal = Modal.getInstance(document.getElementById("modalSwitchExercise"));
-                            modal.hide();
-                            EventBus.$emit(
-                                "toast",
-                                {
-                                    "body": `Exercise '${name}' added to active list`,
-                                },
-                            );
-
-                            doPost(
-                                "{% url "fitness:change_active_status" %}",
-                                {
-                                    "uuid": "{{ object.uuid }}",
-                                    "remove": true,
-                                },
-                                (response) => {
-                                    isActiveExercise.value = false;
-                                    EventBus.$emit(
-                                        "toast",
-                                        {
-                                            "body": "Exercise '{{ object.name }}' is now inactive",
-                                        },
-                                    );
-                                },
-                            );
-                        },
-                    );
-                };
-
-                const activeButtonValue = computed(() => {
-                    return isActiveExercise.value ? "Active" : "Activate Exercise";
-                });
+                const exerciseStore = useExerciseStore();
+                exerciseStore.uuid = "{{ object.uuid }}";
+                exerciseStore.relatedExercises = relatedExercises;
+                exerciseStore.activityInfo = activityInfo;
 
                 return {
-                    activeButtonValue,
-                    changeFrequency,
                     description,
                     frequency,
-                    isActiveExercise,
                     note,
-                    onClick,
-                    onClickChangeFrequency,
-                    onClickSwitchExercise,
-                    onSelectRelatedExercise,
-                    relatedExercises,
-                    relatedExercisesFields,
-                    showHistoryMessage,
                 };
             },
         });
@@ -402,100 +177,8 @@
                 sortIcon: "caret-up",
             },
         });
+        appLeft.use(createPinia());
         appLeft.mount("#vue-app-left");
-
-        /**
-         * Get the first workout data from a workout set
-         * @param {Array.<number>} an array of workout data
-         */
-        function firstSet(workoutData) {
-            return workoutData[0];
-        }
-
-        function getGradient(numberOfItems) {
-            const styles = getComputedStyle(document.body);
-
-            if (numberOfItems <= 1) {
-                return;
-            }
-
-            // The Rainbow object is from the RainbowVis-JS package
-            const rainbow = new Rainbow();
-            rainbow.setNumberRange(1, numberOfItems);
-            // Use trim() to remove the whitespace preceding the CSS property value
-            rainbow.setSpectrum(styles.getPropertyValue("--chart-gradient-start").trim(), styles.getPropertyValue("--chart-gradient-end").trim());
-
-            let colorArray = [];
-            for (let i = 1; i <= numberOfItems; i++) {
-                const hexColour = rainbow.colourAt(i);
-                colorArray.push(`#${hexColour}`);
-            }
-            return colorArray;
-        }
-
-        function showGraphValues(ctx, chartInstance, data, color) {
-            ctx.textAlign = "center";
-            ctx.textBaseline = "bottom";
-            ctx.fillStyle = color;
-            ctx.font = "bold 24px Arial";
-            data.datasets.forEach(function(dataset, i) {
-                const meta = chartInstance.chart.getDatasetMeta(i);
-                meta.data.forEach(function(bar, index) {
-                    const data = dataset.data[index];
-                    ctx.fillText(data, bar.x, bar.y + 40);
-                });
-            });
-        }
-
-        function getRecentWorkoutGraphOptions(label) {
-            const styles = getComputedStyle(document.body);
-
-            return {
-                events: [], // Disable 'on-hover' events
-                borderRadius: "10",
-                animation: {
-                    onComplete: function(chartInstance) {
-                        const ctx = this.ctx;
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "bottom";
-                        ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
-                        ctx.font = "bold 24px Arial";
-                        this.data.datasets.forEach(function(dataset, i) {
-                            const meta = chartInstance.chart.getDatasetMeta(i);
-                            meta.data.forEach(function(bar, index) {
-                                const data = dataset.data[index];
-                                ctx.fillText(data, bar.x, bar.y + 40);
-                            });
-                        });
-                    },
-                },
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    title: {
-                        display: true,
-                        text: label,
-                        color: styles.getPropertyValue("--chart-title-color"),
-                        font: {
-                            size: "16px",
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            color: styles.getPropertyValue("--chart-tick-color"),
-                        },
-                    },
-                    y: {
-                        ticks: {
-                            color: styles.getPropertyValue("--chart-tick-color"),
-                        },
-                    },
-                },
-            };
-        }
 
         const appRight = createApp({
             name: "RightPanel",
@@ -507,13 +190,13 @@
             },
             setup() {
                 const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-                const restPeriod = ref({% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %}null{% endif %});
+                const restPeriod = ref({% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %} null{% endif %});
                 const plotDataNotes = JSON.parse(document.getElementById("plotDataNotes").textContent);
                 const timer = ref({});
 
                 function onChangeRestPeriod() {
                     doPost(
-                        url = "{% url "fitness:update_rest_period" %}",
+                        "{% url "fitness:update_rest_period" %}",
                         {
                             "uuid": "{{ object.uuid }}",
                             "rest_period": restPeriod.value,
