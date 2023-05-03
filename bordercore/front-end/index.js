@@ -169,6 +169,9 @@ import SelectValue from "./vue/common/SelectValue.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
 window.SelectValue = SelectValue;
 
+import DrillPinnedTags from "./vue/drill/DrillPinnedTags.vue";
+window.DrillPinnedTags = DrillPinnedTags;
+
 import SearchResult from "./vue/search/SearchResult.vue";
 window.SearchResult = SearchResult;
 

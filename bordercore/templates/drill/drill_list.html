@@ -120,51 +120,15 @@
             </card>
         </div>
 
-        <div class="hover-target col-lg-3 d-flex flex-column">
-
-            <card
-                title="Pinned Tags"
-                class="backdrop-filter"
-                id="vue-app-pinned-tags"
+        <div class="col-lg-3 d-flex flex-column">
+            <drill-pinned-tags
+                get-pinned-tags-url="{% url 'drill:get_pinned_tags' %}"
+                pin-tag-url="{% url 'drill:pin_tag' %}"
+                unpin-tag-url="{% url 'drill:unpin_tag' %}"
+                sort-pinned-tags-url="{% url 'drill:sort_pinned_tags' %}"
+                tag-search-url="{% url 'tag:search' %}"
             >
-                <template v-slot:title-slot>
-
-                    <div class="card-title d-flex align-items-center">
-                        <div>
-                            Pinned Tags
-                        </div>
-                        <drop-down-menu :show-on-hover="true">
-                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <template #dropdown>
-                                <li>
-                                    <a class="dropdown-item" href="#" @click="chooseTag()">
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
-                                            Pinned Tags
-                                    </a>
-                                </li>
-                            </template>
-                        </drop-down-menu>
-                    </div>
-                </template>
-
-                <template v-slot:content>
-                    <hr class="divider" />
-                    <ul class="list-unstyled">
-                        <li v-for="tag in tagList" class="d-flex px-2">
-                            <div class="item-name flex-fill">
-                                <a :href="tag.url">[[ tag.name ]]</a>
-                            </div>
-                            <div class="item-value">
-                                [[ tag.progress ]]%
-                            </div>
-                        </li>
-                        <li v-if="!tagList.length">
-                            <a href="#" @click="chooseTag()">Add a tag</a>
-                        </li>
-                    </ul>
-                </template>
-            </card>
-
+            </drill-pinned-tags>
             <card class="backdrop-filter flex-grow-1">
                 <template v-slot:title-slot>
                     <div class="d-flex">
@@ -203,61 +167,6 @@
                     </div>
                 </template>
             </card>
-
-            <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Pinned Tags</h4>
-                            <button type="button" class="close-button btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-row align-items-center">
-                                <div class="form-row mx-1 w-100">
-                                    <select-value
-                                        ref="selectValuePinnedTag"
-                                        search-url="{% url 'tag:search' %}?doctype=drill&query="
-                                        place-holder="Add Tag"
-                                        @select="selectPinnedTag"
-                                    >
-                                    </select-value>
-                                </div>
-                            </div>
-                            <ul id="drill-pinned-tags" class="interior-borders p-2 mb-0 wide-list">
-                                <slick-list
-                                    v-model:list="tagList"
-                                    :distance="3"
-                                    helper-class="slicklist-helper"
-                                    @sort-end="handleSort"
-                                >
-                                    <slick-item
-                                        v-for="(element, index) in tagList"
-                                        :key="element.uuid"
-                                        :index="index"
-                                    >
-                                        <div class="slicklist-list-item-inner">
-                                            <li :key="element.name" class="list-group-item px-2 py-1">
-                                                <div class="d-flex">
-                                                    <div>
-                                                        [[ element.name ]]
-                                                    </div>
-                                                    <div class="ms-auto my-auto">
-                                                        <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(element.name)" />
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </div>
-                                    </slick-item>
-                                </slick-list>
-                            </ul>
-                        </div>
-                        <div class="modal-footer justify-content-start">
-                            <input class="btn btn-primary" type="button" value="Done" data-bs-dismiss="modal" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <div class="modal fade" id="modal-study" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -349,84 +258,18 @@
             delimiters: ["[[", "]]"],
             components: {
                 Card,
+                DrillPinnedTags,
                 DrillTagProgress,
-                DropDownMenu,
                 FontAwesomeIcon,
                 SelectValue,
-                SlickItem,
-                SlickList,
                 TagsInput,
             },
             setup() {
                 const featuredTag = JSON.parse(document.getElementById("featuredTag").textContent);
                 const showFeaturedTagInput = ref(false);
                 const studyMethod = ref("all");
-                const tagList = ref([]);
 
                 const selectValueFeaturedTag = ref(null);
-                const selectValuePinnedTag = ref(null);
-
-                function getTagList() {
-                    doGet(
-                        "{% url "drill:get_pinned_tags" %}",
-                        (response) => {
-                            tagList.value = response.data.tag_list;
-                        },
-                        "Error getting pinned tags",
-                    );
-                };
-
-                function chooseTag() {
-                    const modal = new Modal("#modalAddTag");
-                    modal.show();
-                    setTimeout(() => {
-                        selectValuePinnedTag.value.focus();
-                    }, 500);
-                };
-
-                function addTag(tag) {
-                    doPost(
-                        "{% url "drill:pin_tag" %}",
-                        {
-                            "tag": tag,
-                        },
-                        (response) => {
-                            getTagList();
-                        },
-                    );
-                };
-
-                function handleSort(event) {
-                    if (event.oldIndex === event.newIndex) {
-                        return;
-                    }
-                    const tagName = tagList.value[event.oldIndex].name;
-
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    const newPosition = event.newIndex + 1;
-
-                    doPost(
-                        "{% url "drill:sort_pinned_tags" %}",
-                        {
-                            "tag_name": tagName,
-                            "new_position": newPosition,
-                        },
-                        () => {},
-                    );
-                };
-
-                function onClickDelete(tagName) {
-                    doPost(
-                        url = "{% url "drill:unpin_tag" %}",
-                        {
-                            "tag": tagName,
-                        },
-                        (response) => {
-                            getTagList();
-                        },
-                    );
-                 };
 
                 function onClickStudy() {
                     const filter = document.getElementById("question-filter").value;
@@ -459,39 +302,19 @@
                     }, 500);
                 };
 
-                function selectPinnedTag(selection) {
-                    addTag(payload);
-
-                    nextTick(() => {
-                         selectValuePinnedTag.value.clearOptions();
-                     });
-                };
-
                 function selectFeaturedTag(tagInfo) {
                     showFeaturedTagInput.value = false;
                     featuredTag = tagInfo.info;
                 };
 
-                onMounted(() => {
-                    getTagList();
-                });
-
                 return {
-                    addTag,
-                    chooseTag,
                     featuredTag,
-                    getTagList,
-                    handleSort,
-                    onClickDelete,
                     onClickStudy,
                     onTagSearch,
                     selectFeaturedTag,
-                    selectPinnedTag,
                     selectValueFeaturedTag,
-                    selectValuePinnedTag,
                     showFeaturedTagInput,
                     studyMethod,
-                    tagList,
                 };
             },
         });
