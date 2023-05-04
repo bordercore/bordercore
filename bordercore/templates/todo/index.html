@@ -180,10 +180,9 @@
                 const filterPriority = ref("{{ filter.todo_filter_priority|default:'' }}");
                 const filterTime = ref("{{ filter.todo_filter_time|default:'' }}");
                 const filterSearch = ref("");
-                const filterCache = ref({});
+                let filterCache = null;
                 const items = ref([]);
-                const draggingRow = ref();
-                const draggingRowIndex = ref();
+                let draggingRow = null;
                 const filterPriorityOptions = ref();
                 const filterTimeOptions = ref();
 
@@ -225,8 +224,7 @@
 
                 function onDragStart(payload) {
                     payload.event.currentTarget.classList.add("dragging");
-                    draggingRow.value = payload.row;
-                    draggingRowIndex.value = payload.index;
+                    draggingRow = payload.row;
                     payload.event.dataTransfer.effectAllowed = "move";
                 };
 
@@ -249,7 +247,7 @@
                         return;
                     }
 
-                    const todoUuid = draggingRow.value.uuid;
+                    const todoUuid = draggingRow.uuid;
                     const newIndex = payload.index;
 
                     const bodyFormData = new URLSearchParams();
@@ -343,13 +341,13 @@
                 function search() {
                     if (filterSearch.value === "") {
                         currentSearchFilter.value = "";
-                        filterPriority.value = filterCache.value.priority;
-                        filterTag.value = filterCache.value.tag;
-                        filterTime.value = filterCache.value.time;
-                        filterCache.value = {};
+                        filterPriority.value = filterCache.priority;
+                        filterTag.value = filterCache.tag;
+                        filterTime.value = filterCache.time;
+                        filterCache = {};
                     } else {
                         currentSearchFilter.value = filterSearch.value;
-                        filterCache.value = {
+                        filterCache = {
                             "priority": filterPriority.value,
                             "tag": filterTag.value,
                             "time": filterTime.value,
@@ -359,10 +357,6 @@
                         filterTime.value = "";
                     }
                     getTodoList();
-                };
-
-                function getNote(note) {
-                    return markdown.render(note);
                 };
 
                 function onClickUpdate(todoInfo) {
@@ -403,10 +397,6 @@
                     return markdown.render(todo.note);
                 };
 
-                const isFiltered = computed(() => {
-                    return filterPriority.value !== "" || filterTime.value !== "";
-                });
-
                 const title = computed(() => {
                     let title = [];
                     if (currentSearchFilter.value) {
@@ -437,18 +427,12 @@
                     filterPriority,
                     filterTime,
                     filterSearch,
-                    filterCache,
                     getDate,
-                    getNote,
-                    getPrettyTime,
                     getPriorityClass,
                     getTagClass,
                     getTimeClass,
                     getTodoList,
-                    isFiltered,
                     items,
-                    draggingRow,
-                    draggingRowIndex,
                     filterPriorityOptions,
                     filterTimeOptions,
                     handleCreateTodo,
