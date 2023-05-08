@@ -117,7 +117,7 @@
 
             function clearOptions() {
                 options.value = [];
-                value.value = null;
+                value.value = [];
             };
 
             function focus() {
