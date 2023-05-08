@@ -926,6 +926,16 @@ class BCObject(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
 
+class BlobTemplate(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.TextField()
+    template = JSONField()
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.name
+
+
 @receiver(pre_delete, sender=BlobToObject)
 def remove_relationship(sender, instance, **kwargs):
     instance.handle_delete()

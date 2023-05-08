@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
-from blob.models import Blob, BlobToObject
+from blob.models import Blob, BlobTemplate, BlobToObject
 from blob.tests.factories import BlobFactory
 from blob.views import handle_linked_collection, handle_metadata
 from collection.models import Collection
@@ -524,3 +524,26 @@ def test_blob_update_related_object_note(auto_login_user):
 
     related_object = BlobToObject.objects.get(node=blob_1, blob=blob_2)
     assert related_object.note == note
+
+
+def test_blob_get_template(auto_login_user):
+
+    user, client = auto_login_user()
+
+    name = faker.text(max_nb_chars=10)
+    content = faker.text(max_nb_chars=20)
+    tags = ["django"]
+    template = {
+        "content": content,
+        "tags": tags
+    }
+    obj = BlobTemplate.objects.create(name=name, template=template, user=user)
+
+    url = urls.reverse("blob:get_template") + f"?uuid={obj.uuid}"
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    payload = resp.json()
+    assert payload["template"]["content"] == content
+    assert payload["template"]["tags"] == tags

@@ -17,7 +17,8 @@ from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
-from blob.models import Blob, BlobToObject, MetaData, RecentlyViewedBlob
+from blob.models import (Blob, BlobTemplate, BlobToObject, MetaData,
+                         RecentlyViewedBlob)
 from blob.services import import_blob
 from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
@@ -129,6 +130,14 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
         if "collection_uuid" in self.request.GET:
             context["collection_info"] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
 
+        context["template_list"] = [
+            {
+                "uuid": x.uuid,
+                "name": x.name,
+                "template": x.template,
+            } for x in
+            BlobTemplate.objects.filter(user=self.request.user)
+        ]
         context["title"] = "Create Blob"
 
         return context
@@ -552,6 +561,25 @@ def update_page_number(request):
 
     response = {
         "message": "Cover image will be updated soon",
+        "status": "OK"
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_template(request):
+
+    template_uuid = request.GET["uuid"]
+    blob_template = BlobTemplate.objects.filter(uuid=template_uuid, user=request.user).first()
+
+    if not blob_template:
+        return {
+            "error": "Template not found"
+        }
+
+    response = {
+        "template": blob_template.template,
         "status": "OK"
     }
 

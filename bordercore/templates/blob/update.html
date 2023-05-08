@@ -65,6 +65,7 @@
                     >
                     </icon-button>
                     <icon-button
+                        ref="bookButton"
                         label="Book"
                         icon="book"
                         :initial-enabled="{% if is_book == True %}true{% else %}false{% endif %}"
@@ -91,6 +92,14 @@
                     <div class="mt-3">
                         <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClickUppercaseFirst" />
                     </div>
+                    {% if not blob %}
+                    <div class="mt-3">
+                        <select v-model="template" class="form-control" @change="getTemplate">
+                            <option value="-1">Use Template</option>
+                            <option v-for="template in templateList" :value="template.uuid">[[ template.name ]]</option>
+                        </select>
+                    </div>
+                    {% endif %}
                 </div>
 
                 {% if collection_info %}
@@ -417,6 +426,7 @@
 
     {{ metadata|json_script:"metadata" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
+    {{ template_list|json_script:"templateList" }}
 
     <script type="text/javascript">
 
@@ -471,11 +481,15 @@
                 const metadataJson = computed(() => {
                     return JSON.stringify(metadata.value);
                 });
+                const templateList = JSON.parse(document.getElementById("templateList").textContent);
 
+                const bookButton = ref(null);
                 const mdEditor = ref(null);
                 const relatedTags = ref(null);
                 const selectValue = ref(null);
                 const tagsInput = ref(null);
+
+                const template = ref(-1);
 
                 // Set the initial date format menu values
                 updateDateFormatMenu(dateFormat.value);
@@ -519,6 +533,38 @@
                     const url = new URL(document.getElementById("coverImage").src);
                     url.searchParams.set("nocache", new Date().getTime());
                     document.getElementById("coverImage").src = url;
+                };
+
+                function getTemplate() {
+                    doGet(
+                        "{% url 'blob:get_template' %}?uuid=" + template.value,
+                        (response) => {
+                            template.value = "-1";
+
+                            // Reset everything first
+                            tagsInput.value.clearOptions();
+                            mdEditor.value.clear();
+                            bookButton.value.setValue(false);
+
+                            if (response.data.template.tags) {
+                                for (const tag of response.data.template.tags) {
+                                    tagsInput.value.addTag(tag);
+                                }
+                            }
+                            if (response.data.template.content) {
+                                mdEditor.value.insert(() => {
+                                    return {
+                                        text: response.data.template.content,
+                                        selected: "",
+                                    };
+                                });
+                            }
+                            if (response.data.template.is_book) {
+                                bookButton.value.setValue(true);
+                            }
+                        },
+                        "Error getting template",
+                    );
                 };
 
                 function onClickCleanupFilename(evt) {
@@ -717,6 +763,7 @@
 
                 return {
                     addMetadata,
+                    bookButton,
                     content,
                     date,
                     dateFormat,
@@ -725,6 +772,7 @@
                     fileName,
                     fileObject,
                     getCoverImage,
+                    getTemplate,
                     isOverCoverImage,
                     isOverFile,
                     mdEditor,
@@ -747,6 +795,8 @@
                     updateFormValue,
                     relatedTags,
                     tagsInput,
+                    template,
+                    templateList,
                     uploadCoverImage,
                 };
             },

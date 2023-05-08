@@ -85,4 +85,9 @@ urlpatterns = [
         view=views.update_related_object_note,
         name="update_related_object_note"
     ),
+    path(
+        route="template",
+        view=views.get_template,
+        name="get_template"
+    ),
 ]
