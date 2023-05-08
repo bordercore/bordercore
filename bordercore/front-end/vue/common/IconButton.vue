@@ -46,9 +46,15 @@
                 ctx.emit("enable-option", props.formName, enabled.value);
             };
 
+            function setValue(value) {
+                enabled.value = value;
+                ctx.emit("enable-option", props.formName, enabled.value);
+            };
+
             return {
                 enabled,
                 handleEnable,
+                setValue,
             };
         },
     };
