@@ -1,5 +1,8 @@
 <template>
     <div class="mt-3">
+        <div class="text5 text-center text-truncate mx-2">
+            {{ currentTitle }}
+        </div>
         <div>
             <media-controller v-pre audio class="w-100">
                 <audio
@@ -44,16 +47,15 @@
         },
         emits: ["current-song"],
         setup(props, ctx) {
-            let currentSongUuid = "";
-
             const continuousPlay = ref(false);
+            const currentSongUuid = ref();
 
             function getIndex() {
-                return props.trackList.findIndex((x) => x.uuid === currentSongUuid);
-            }
+                return props.trackList.findIndex((x) => x.uuid === currentSongUuid.value);
+            };
 
             function playTrack(songUuid, selectRow=false) {
-                currentSongUuid = songUuid;
+                currentSongUuid.value = songUuid;
 
                 const el = document.getElementById("player");
                 el.src = props.songUrl + songUuid;
@@ -63,15 +65,15 @@
                     ctx.emit("current-song", getIndex());
                 }
                 setTimeout(markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
-            }
+            };
 
             function playNextTrack() {
                 // If continous play is enabled, find the next song in the list to play
                 const newIndex = getIndex() + 1;
 
                 if (continuousPlay.value && newIndex < props.trackList.length) {
-                    currentSongUuid = props.trackList[newIndex].uuid;
-                    playTrack(currentSongUuid, true);
+                    currentSongUuid.value = props.trackList[newIndex].uuid;
+                    playTrack(currentSongUuid.value, true);
                 } else {
                     // Let the parent know that the last song has played by
                     //  passing in a row index of -1
@@ -81,10 +83,15 @@
 
             function markSongAsListenedTo() {
                 doGet(
-                    props.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, currentSongUuid),
+                    props.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, currentSongUuid.value),
                     () => {},
                 );
             };
+
+            const currentTitle = computed(() => {
+                const song = props.trackList.find((x) => x.uuid === currentSongUuid.value);
+                return song ? song.title : "";
+            });
 
             onMounted(() => {
                 document.getElementById("player").onended = function(evt) {
@@ -94,6 +101,7 @@
 
             return {
                 continuousPlay,
+                currentTitle,
                 playTrack,
             };
         },
