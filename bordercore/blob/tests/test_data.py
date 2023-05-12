@@ -9,7 +9,7 @@ from botocore.errorfactory import ClientError
 import django
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Max, Min, Q
+from django.db.models import Q
 
 from lib.util import (get_elasticsearch_connection, get_missing_blob_ids,
                       get_missing_metadata_ids, is_image)
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.data_quality
 
 django.setup()
 
-from blob.models import Blob, ILLEGAL_FILENAMES, MetaData, RecentlyViewedBlob   # isort:skip
+from blob.models import Blob, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from drill.models import Question  # isort:skip
 from tag.models import Tag  # isort:skip
 
@@ -729,45 +729,6 @@ def test_questions_no_tags():
     "Assert that all drill questions have at least one tag"
     t = Question.objects.filter(Q(tags__isnull=True))
     assert len(t) == 0, f"{len(t)} questions have no tags; example: {t.first().question}"
-
-
-def test_recently_viewed_blob_sort_order():
-    """
-    This test checks for three things for the RecentlyViewedBlob model
-
-    min(sort_order) = 1
-    max(sort_order) should equal the total count
-    No duplicate sort_order values
-    """
-
-    # Get a list of all distinct users...
-    blobs = RecentlyViewedBlob.objects.all().only("blob__user").distinct("blob__user")
-
-    # ...and loop through them, checking for integrity constaint violations
-    for blob in blobs:
-        count = RecentlyViewedBlob.objects.filter(blob__user=blob.blob.user).count()
-        max_sort_order = RecentlyViewedBlob.objects.filter(blob__user=blob.blob.user).aggregate(
-            Max("sort_order")
-        )
-        assert max_sort_order["sort_order__max"] == count, \
-            f"Max(sort_order) != total count for user {blob.blob.user} in recently viewed blobs"
-
-        min_sort_order = RecentlyViewedBlob.objects.filter(blob__user=blob.blob.user).aggregate(
-            Min("sort_order")
-        )
-        assert min_sort_order["sort_order__min"] == 1, \
-            f"Min(sort_order) != 1 for user {blob.blob.user} in recently viewed blobs"
-
-    duplicates = RecentlyViewedBlob.objects.values(
-        "sort_order",
-        "blob__user"
-    ).order_by().annotate(
-        dcount=Count("sort_order")
-    ).filter(
-        dcount__gt=1
-    )
-
-    assert len(duplicates) == 0, f"Multiple sort_order values found in recently viewed blobs: {duplicates[0]}"
 
 
 def test_no_test_data_in_elasticsearch(es):

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
-from blob.services import get_recent_media
+from blob.services import get_recent_media, get_recently_viewed
 from bookmark.models import Bookmark
 from bookmark.services import get_recent_bookmarks
 from fitness.services import get_overdue_exercises
@@ -57,8 +57,8 @@ def get_recent_objects(request):
 
     recent_blobs, doctypes = get_recent_blobs_service(request.user, skip_content=skip_content)
     recent_media = get_recent_media(request.user)
-
     recent_bookmarks = get_recent_bookmarks(request.user)
+    recently_viewed_blobs = get_recently_viewed(request.user)
 
     return {
         "recent_blobs": {
@@ -70,6 +70,9 @@ def get_recent_objects(request):
         },
         "recent_media": {
             "mediaList": recent_media
+        },
+        "recently_viewed": {
+            "blobList": recently_viewed_blobs
         }
     }
 

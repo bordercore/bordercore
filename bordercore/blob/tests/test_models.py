@@ -15,8 +15,9 @@ from collection.models import Collection
 
 django.setup()
 
-from blob.models import Blob, BlobToObject  # isort:skip
+from blob.models import Blob, BlobToObject, RecentlyViewedBlob  # isort:skip
 from blob.tests.factories import BlobFactory
+from node.tests.factories import NodeFactory
 
 faker = FakerFactory.create()
 
@@ -309,3 +310,31 @@ def test_parse_nodes(blob_text_factory):
     assert tree[2]["nodes"][0]["id"] == 8
     assert tree[2]["nodes"][0]["label"] == "Subnode 3a"
     assert tree[2]["nodes"][0]["nodes"] == []
+
+
+def test_recently_viewed_blob_add(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+    blob_2 = BlobFactory.create(user=user)
+    node_1 = NodeFactory.create(user=user)
+
+    RecentlyViewedBlob.add(user=user, blob=blob_1)
+
+    assert RecentlyViewedBlob.objects.all().count() == 1
+    assert RecentlyViewedBlob.objects.all().first().blob == blob_1
+
+    RecentlyViewedBlob.add(user=user, blob=blob_2)
+    assert RecentlyViewedBlob.objects.all().count() == 2
+
+    # Dupe check
+    RecentlyViewedBlob.add(user=user, blob=blob_2)
+    assert RecentlyViewedBlob.objects.all().count() == 2
+
+    RecentlyViewedBlob.add(user=user, node=node_1)
+    assert RecentlyViewedBlob.objects.all().count() == 3
+
+    # Dupe check
+    RecentlyViewedBlob.add(user=user, node=node_1)
+    assert RecentlyViewedBlob.objects.all().count() == 3

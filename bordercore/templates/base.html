@@ -76,6 +76,7 @@
 
                                 <recent-blobs
                                     :blob-list-info="recentBlobs"
+                                    :recently-viewed="recentlyViewed"
                                     blob-detail-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
                                 >
                                 </recent-blobs>
@@ -174,6 +175,7 @@
             {{ recent_media|json_script:"recent_media" }}
             {{ overdue_tasks|json_script:"overdue_tasks" }}
             {{ recent_searches|json_script:"recent_searches" }}
+            {{ recently_viewed|json_script:"recently_viewed" }}
 
             <script type="text/javascript">
 
@@ -251,6 +253,7 @@
                         const recentBlobs = JSON.parse(document.getElementById("recent_blobs").textContent);
                         const overdueTasks = JSON.parse(document.getElementById("overdue_tasks").textContent);
                         const recentSearches = JSON.parse(document.getElementById("recent_searches").textContent);
+                        const recentlyViewed = JSON.parse(document.getElementById("recently_viewed").textContent);
 
                         function showHelp(evt) {
                             const helpText = document.getElementById("help-text").innerHTML;
@@ -281,6 +284,7 @@
                             baseStore,
                             userMenuItems,
                             recentBlobs,
+                            recentlyViewed,
                             overdueTasks,
                             recentSearches,
                             showHelp,

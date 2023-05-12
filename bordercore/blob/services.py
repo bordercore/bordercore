@@ -21,7 +21,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
-from blob.models import Blob, MetaData
+from blob.models import Blob, MetaData, RecentlyViewedBlob
 from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
 
 
@@ -129,6 +129,45 @@ def get_recent_media(user, limit=10):
     cache.set("recent_media", returned_image_list)
 
     return returned_image_list
+
+
+def get_recently_viewed(user):
+    """
+    Get a list of recently viewed blobs and nodes
+    """
+
+    objects = RecentlyViewedBlob.objects.filter(
+        Q(blob__user=user) | Q(node__user=user)
+    ).order_by(
+        "-created"
+    ).select_related(
+        "blob"
+    )
+
+    object_list = []
+    for x in objects:
+        if x.blob:
+            object_list.append(
+                {
+                    "url": reverse("blob:detail", kwargs={"uuid": x.blob.uuid}),
+                    "cover_url": x.blob.get_cover_url(size="large"),
+                    "cover_url_small": x.blob.get_cover_url(size="small"),
+                    "doctype": x.blob.doctype.capitalize(),
+                    "name": x.blob.name or "No name",
+                    "uuid": x.blob.uuid
+                }
+            )
+        else:
+            object_list.append(
+                {
+                    "url": reverse("node:detail", kwargs={"uuid": x.node.uuid}),
+                    "doctype": "Node",
+                    "name": x.node.name,
+                    "uuid": x.node.uuid
+                }
+            )
+
+    return object_list
 
 
 def get_blob_sizes(blob_list):

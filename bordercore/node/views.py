@@ -10,6 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin
 from django.views.generic.list import ListView
 
+from blob.models import RecentlyViewedBlob
 from collection.models import Collection
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
@@ -45,6 +46,8 @@ class NodeDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
+
+        RecentlyViewedBlob.add(self.request.user, node=self.object)
 
         self.object.populate_names()
         self.object.populate_image_info()

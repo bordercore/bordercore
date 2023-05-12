@@ -20,8 +20,8 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.db import models, transaction
-from django.db.models import Count, F, JSONField, Q
+from django.db import models
+from django.db.models import Count, JSONField, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
@@ -820,76 +820,39 @@ class MetaData(TimeStampedModel):
 
 class RecentlyViewedBlob(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
-    sort_order = models.IntegerField(default=1)
+    blob = models.ForeignKey(Blob, null=True, on_delete=models.CASCADE)
+    node = models.ForeignKey("node.Node", null=True, on_delete=models.CASCADE)
 
-    MAX_SIZE = 10
+    MAX_SIZE = 20
 
     def __str__(self):
-        return self.blob.name or ""
+        return self.blob.name or self.node.name or ""
 
     class Meta:
         unique_together = (
-            ("blob", "sort_order")
+            ("blob", "node")
         )
 
     @staticmethod
-    def add(user, blob):
+    def add(user, blob=None, node=None):
 
-        # Delete any previous rows containing this blob to avoid duplicates
-        exists = RecentlyViewedBlob.objects.filter(blob=blob).first()
-        if exists:
-            blobs = RecentlyViewedBlob.objects.filter(blob=blob).delete()
+        # Delete any previous rows containing this object to avoid duplicates
+        RecentlyViewedBlob.objects.filter(blob=blob, node=None).delete()
+        RecentlyViewedBlob.objects.filter(node=node, blob=None).delete()
 
-            # Re-order all blobs *after* the deleted one by reducing their sort_order by one
-            RecentlyViewedBlob.objects.filter(
-                blob__user=user,
-                sort_order__gt=exists.sort_order
-            ).update(
-                sort_order=F("sort_order") - 1
-            )
-
-        # Update the sort order so that the new blob is first
-        with transaction.atomic():
-
-            RecentlyViewedBlob.objects.filter(
-                blob__user=user
-            ).update(
-                sort_order=F("sort_order") + 1
-            )
-
-            obj = RecentlyViewedBlob(blob=blob)
-            obj.save()
+        RecentlyViewedBlob.objects.create(blob=blob, node=node)
 
         # Insure that only MAX_SIZE blobs exist per user
-        blobs = RecentlyViewedBlob.objects.filter(
-            blob__user=user
+        objects = RecentlyViewedBlob.objects.filter(
+            Q(blob__user=user) | Q(node__user=user)
         ).only(
             "id"
         ).order_by(
             "-created"
         )[RecentlyViewedBlob.MAX_SIZE:]
 
-        if blobs:
-            RecentlyViewedBlob.objects.filter(id__in=[x.id for x in blobs]).delete()
-
-
-@receiver(pre_delete, sender=Blob)
-def remove_recently_viewed_blob(sender, instance, **kwargs):
-    """
-    Re-order all blobs *after* the deleted one by reducing their sort_order by one
-    """
-
-    recent_blob = instance.recentlyviewedblob_set.first()
-
-    if recent_blob:
-        sort_order = recent_blob.sort_order
-        RecentlyViewedBlob.objects.filter(
-            blob__user=instance.user,
-            sort_order__gt=sort_order
-        ).update(
-            sort_order=F("sort_order") - 1
-        )
+        if objects:
+            RecentlyViewedBlob.objects.filter(id__in=[x.id for x in objects]).delete()
 
 
 class BlobToObject(SortOrderMixin):

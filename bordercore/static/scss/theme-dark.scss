@@ -12,7 +12,12 @@
   --text3-lightness: 69%;
   --text3: hsl(var(--text3-hue), var(--text3-saturation), var(--text3-lightness));
 
-  --text4: #6ea6e0;
+  --text4-hue: 211;
+  --text4-saturation: 65%;
+  --text4-lightness: 65%;
+  --text4: hsl(var(--text4-hue), var(--text4-saturation), var(--text4-lightness));
+  --text4-1: hsl(var(--text4-hue), calc(var(--text4-saturation) + 20%), calc(var(--text4-lightness) + 20%));
+  --text4-2: hsl(var(--text4-hue), calc(var(--text4-saturation) - 20%), calc(var(--text4-lightness) - 20%));
 
   // "on hover" links
   --text5: #10ff00;

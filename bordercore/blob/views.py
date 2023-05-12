@@ -174,7 +174,7 @@ class BlobDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        RecentlyViewedBlob.add(self.request.user, self.object)
+        RecentlyViewedBlob.add(self.request.user, blob=self.object)
 
         context["metadata"], context["urls"] = self.object.get_metadata()
 

@@ -6,7 +6,14 @@
   --text1: #ffffff;
   --text2: #ffffff;
   --text3: #ffffff;
-  --text4: #dbb3ed;
+
+  --text4-hue: 281;
+  --text4-saturation: 62%;
+  --text4-lightness: 82%;
+  --text4: hsl(var(--text4-hue), var(--text4-saturation), var(--text4-lightness));
+  --text4-1: hsl(var(--text4-hue), calc(var(--text4-saturation) + 20%), calc(var(--text4-lightness) + 20%));
+  --text4-2: hsl(var(--text4-hue), calc(var(--text4-saturation) - 20%), calc(var(--text4-lightness) - 20%));
+
   --text5: #8ce2ee;
   --text6: #999999;
 

@@ -1688,10 +1688,28 @@ blockquote > p {
 }
 
 .recent-blobs {
+  min-width: 32rem;
   .icon {
     width: 4rem;
     height: 4rem;
     color: var(--text3);
+  }
+
+  li {
+    div:first-child {
+      width: 5rem;
+      color: var(--text4);
+    }
+    div:first-child.recent-doctype-node {
+      color: var(--text4-1);
+    }
+    div:first-child.recent-doctype-note {
+      color: var(--text4-2);
+    }
+  }
+
+  li:hover, a:hover {
+    background-color: var(--surface3) !important;
   }
 }
 
