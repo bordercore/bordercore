@@ -131,7 +131,7 @@ module.exports = (env, argv) => {
     } else {
         config.devtool = "source-map";
         config.output.clean = {
-            keep: /^(admin|css|fonts|img|public|rest_framework|scss)/,
+            keep: /^(admin|css|fonts|img|public|rest_framework|scss|dist\/css\/bordercore.css|dist\/css\/bordercore.css.map|dist\/js\/javascript-bundle.js|dist\/js\/javascript-bundle.js.map)/,
         };
     }
 
