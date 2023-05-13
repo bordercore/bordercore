@@ -58,7 +58,7 @@ def test_bookmarks_in_db_exist_in_elasticsearch(es):
         if found["hits"]["total"]["value"] != batch_size:
             missing_uuids = get_missing_bookmark_ids(bookmarks[batch:batch + step], found)
             uuid_list = "\nuuid:".join(x for x in missing_uuids)
-            assert False, f"bookmarks found in the database but not in Elasticsearch, \nuuid:{uuid_list}"
+            assert False, f"bookmarks found in the database but not in Elasticsearch, uuid:{uuid_list}"
 
 
 def test_bookmark_tags_match_elasticsearch(es):
@@ -133,7 +133,7 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
             missing_uuids.append(bookmark["_source"]["uuid"])
     if missing_uuids:
         uuid_list = "\nuuid:".join(x for x in missing_uuids)
-        assert False, f"bookmarks exist in Elasticsearch but not in database, \nuuid:{uuid_list}"
+        assert False, f"bookmarks exist in Elasticsearch but not in database, uuid:{uuid_list}"
 
 
 def test_bookmark_fields_are_trimmed():
@@ -173,4 +173,4 @@ def test_bookmark_thumbnails_in_s3_exist_in_db():
 
     if missing_uuids:
         uuid_list = "\nuuid:".join(x for x in missing_uuids)
-        assert False, f"bookmark thumbnails found in S3 but not in DB, \nuuid:{uuid_list}"
+        assert False, f"bookmark thumbnails found in S3 but not in DB, uuid:{uuid_list}"
