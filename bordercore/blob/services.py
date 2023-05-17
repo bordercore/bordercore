@@ -141,7 +141,10 @@ def get_recently_viewed(user):
     ).order_by(
         "-created"
     ).select_related(
-        "blob"
+        "blob",
+        "node"
+    ).prefetch_related(
+        "blob__metadata"
     )
 
     object_list = []
