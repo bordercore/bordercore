@@ -13,11 +13,19 @@
                         <drop-down-menu :show-on-hover="true">
                             <template #dropdown>
                                 <li>
+                                    <a class="dropdown-item" :href="imageDetailUrl" target="_blank">
+                                        <span>
+                                            <font-awesome-icon icon="external-link-alt" class="text-primary me-3" />
+                                        </span>
+                                        Media detail
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onRemoveImage()">
                                         <span>
                                             <font-awesome-icon icon="times" class="text-primary me-3" />
                                         </span>
-                                        Remove image
+                                        Remove media
                                     </a>
                                 </li>
                             </template>
@@ -54,6 +62,10 @@
                 default: "",
             },
             imageTitle: {
+                type: String,
+                default: "",
+            },
+            imageDetailUrl: {
                 type: String,
                 default: "",
             },

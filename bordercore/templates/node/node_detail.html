@@ -196,6 +196,7 @@
                                     :image-uuid="row.uuid"
                                     :image-title="row.image_title"
                                     :image-url="row.image_url"
+                                    :image-detail-url="'{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.uuid)"
                                     remove-image-url="{% url 'node:remove_image' %}"
                                     @open-modal-note-image="openModalNoteImage"
                                     @update-layout="onUpdateLayout"
