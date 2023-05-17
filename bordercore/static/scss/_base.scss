@@ -341,6 +341,10 @@ span {
   @extend .hoverable-cells;
 }
 
+.text4 {
+  color: var(--text4);
+}
+
 .text5 {
   color: var(--text5);
 }
@@ -2185,6 +2189,26 @@ hr.collection-list-divider {
 //
 // Music
 //
+
+// Create album
+#create-album-container {
+  padding: 1rem;
+  border: 0.06rem solid #000;
+  margin: 0 3rem;
+  background-color: var(--surface5);
+  background-image: radial-gradient(50% 50% at 50% 50%, rgba(68, 9, 45,.48) 0%, rgba(68, 9, 45,0) 100%);
+  border-radius: 1rem;
+  transition: all 2s;
+
+  .input-group label.btn {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  #id_tags {
+    width: 15rem !important;
+  }
+}
 
 // Audio player controls
 .media-control-bar {

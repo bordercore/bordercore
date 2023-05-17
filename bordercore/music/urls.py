@@ -135,4 +135,19 @@ urlpatterns = [
         view=views.set_song_rating,
         name="set_song_rating"
     ),
+    path(
+        route="create_album",
+        view=views.CreateAlbumView.as_view(),
+        name="create_album"
+    ),
+    path(
+        route="scan_album_from_zipfile",
+        view=views.scan_album_from_zipfile,
+        name="scan_album_from_zipfile"
+    ),
+    path(
+        route="add_album_from_zipfile",
+        view=views.add_album_from_zipfile,
+        name="add_album_from_zipfile"
+    ),
 ]

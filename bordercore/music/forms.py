@@ -42,7 +42,7 @@ class SongForm(ModelForm):
         self.fields["compilation"].required = False
 
         # Use the song source stored in the user's session
-        song_source = self.request.session.get("song_source", "Amazon")
+        song_source = self.request.session.get("song_source", SongSource.DEFAULT)
         self.fields["source"].initial = SongSource.objects.get(name=song_source).id
 
         # If this form has a model attached, get the tags and display them separated by commas

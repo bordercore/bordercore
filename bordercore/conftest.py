@@ -544,7 +544,7 @@ def s3_bucket(s3_resource):
 @pytest.fixture()
 def song_source(auto_login_user):
 
-    song_source, _ = SongSource.objects.get_or_create(name="Amazon")
+    song_source, _ = SongSource.objects.get_or_create(name=SongSource.DEFAULT)
     return song_source
 
 

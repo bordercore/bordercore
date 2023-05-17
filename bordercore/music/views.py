@@ -7,7 +7,6 @@ from datetime import timedelta
 
 import boto3
 import humanize
-from mutagen.mp3 import MP3
 
 from django.conf import settings
 from django.contrib import messages
@@ -15,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
@@ -26,11 +25,10 @@ from django.views.generic.list import ListView
 
 from lib.mixins import FormRequestMixin
 from lib.time_utils import convert_seconds
-from lib.util import remove_non_ascii_characters
 from music.services import search as search_service
 
 from .forms import AlbumForm, PlaylistForm, SongForm
-from .models import Album, Artist, Playlist, PlaylistItem, Song
+from .models import Album, Artist, Playlist, PlaylistItem, Song, SongSource
 from .services import (get_artist_counts, get_playlist_counts,
                        get_playlist_songs)
 from .services import get_recent_albums as get_recent_albums_service
@@ -84,7 +82,7 @@ class ArtistDetailView(TemplateView):
 
         artist_uuid = self.kwargs.get("artist_uuid")
 
-        artist = Artist.objects.get(uuid=artist_uuid)
+        artist = get_object_or_404(Artist, uuid=artist_uuid)
 
         # Get all albums by this artist
         albums = Album.objects.filter(
@@ -342,7 +340,7 @@ class SongCreateView(FormRequestMixin, CreateView):
 
     def form_valid(self, form):
 
-        album_info = Song.get_album_info(self.request.user, form.cleaned_data)
+        album = Song.get_or_create_album(self.request.user, form.cleaned_data)
 
         song = form.save(commit=False)
         song.user = self.request.user
@@ -352,13 +350,13 @@ class SongCreateView(FormRequestMixin, CreateView):
         form.save_m2m()
 
         # If an album name was specified, associate it with the song
-        if album_info:
-            song.album = album_info
+        if album:
+            song.album = album
 
         song.save()
 
         # Upload the song and its artwork to S3
-        handle_s3(song, self.request.FILES["song"].read())
+        Song.handle_s3(song, self.request.FILES["song"].read())
 
         # Save the song source in the session
         self.request.session["song_source"] = form.cleaned_data["source"].name
@@ -385,44 +383,6 @@ class MusicDeleteView(DeleteView):
     def get_object(self, queryset=None):
         song = Song.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         return song
-
-
-def handle_s3(song_model, song_blob):
-
-    s3_client = boto3.client("s3")
-
-    key = f"songs/{song_model.uuid}"
-    fo = io.BytesIO(song_blob)
-
-    # Note: S3 Metadata cannot contain non ASCII characters
-    s3_client.upload_fileobj(
-        fo,
-        settings.AWS_BUCKET_NAME_MUSIC,
-        key,
-        ExtraArgs={
-            "Metadata": {
-                "artist": remove_non_ascii_characters(song_model.artist.name, default="Artist"),
-                "title": remove_non_ascii_characters(song_model.title, default="Title")
-            }
-        }
-    )
-
-    if not song_model.album:
-        return
-
-    fo = io.BytesIO(song_blob)
-    audio = MP3(fileobj=fo)
-
-    if audio:
-        artwork = audio.tags.getall("APIC")
-        if artwork:
-            key = f"album_artwork/{song_model.album.uuid}"
-            s3_client.upload_fileobj(
-                io.BytesIO(artwork[0].data),
-                settings.AWS_BUCKET_NAME_MUSIC,
-                key,
-                ExtraArgs={"ContentType": "image/jpeg"}
-            )
 
 
 @login_required
@@ -500,7 +460,7 @@ def mark_song_as_listened_to(request, uuid):
 def get_song_id3_info(request):
 
     song = request.FILES["song"].read()
-    id3_info = Song.get_id3_info(request, messages, song)
+    id3_info = Song.get_id3_info(song)
     return JsonResponse({**id3_info})
 
 
@@ -678,6 +638,69 @@ class PlaylistDeleteView(DeleteView):
             messages.INFO, f"Playlist <strong>{self.object.name}</strong> deleted",
         )
         return reverse("music:list")
+
+
+@method_decorator(login_required, name="dispatch")
+class CreateAlbumView(TemplateView):
+
+    template_name = "music/create_album.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        song_sources = [
+            {
+                "id": x.id,
+                "name": x.name,
+            }
+            for x in SongSource.objects.all()
+        ]
+
+        return {
+            **context,
+            "song_source_default": self.request.session.get("song_source", SongSource.DEFAULT),
+            "song_sources": json.dumps({"info": song_sources})
+        }
+
+
+@login_required
+def scan_album_from_zipfile(request):
+
+    zipfile_obj = request.FILES["zipfile"].read()
+    info = Album.scan_zipfile(zipfile_obj)
+
+    response = {
+        **info,
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_album_from_zipfile(request):
+
+    zipfile_obj = request.FILES["zipfile"].read()
+
+    try:
+        album_uuid = Album.create_album_from_zipfile(
+            zipfile_obj,
+            request.POST["source"],
+            request.POST.get("tags", None),
+            request.user
+        )
+    except Exception as e:
+        return JsonResponse({"status": "Error", "error": e})
+
+    # Save the song source in the session
+    request.session["song_source"] = SongSource.objects.get(id=request.POST["source"]).name
+
+    response = {
+        "status": "OK",
+        "url": reverse("music:album_detail", kwargs={"uuid": album_uuid}),
+    }
+
+    return JsonResponse(response)
 
 
 @login_required
@@ -865,7 +888,7 @@ def missing_artist_images(request):
     return render(request, "music/index.html")
 
 
-# @login_required
+@login_required
 def recent_albums(request, page_number):
     """
     Get a list of recently added albums

@@ -1,5 +1,4 @@
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -20,16 +19,12 @@ def test_listen_to(auto_login_user, song):
 
 def test_get_id3_info(auto_login_user, song):
 
-    mock_request = MagicMock()
-    mock_request.session = {}
-    mock_request.session["song_source"] = "Amazon"
-
     song_path = Path(__file__).parent / "resources/Mysterious Lights.mp3"
 
     with open(song_path, "rb") as f:
         song_file = f.read()
 
-    song_info = Song.get_id3_info(mock_request, {}, song_file)
+    song_info = Song.get_id3_info(song_file)
 
     # A song with an album
     assert song_info["artist"] == "Bryan Teoh"

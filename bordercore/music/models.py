@@ -1,4 +1,6 @@
+import io
 import uuid
+import zipfile
 from datetime import datetime, timedelta
 from io import BytesIO
 
@@ -22,7 +24,7 @@ from django.utils.translation import gettext_lazy as _
 
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import convert_seconds
-from lib.util import get_elasticsearch_connection
+from lib.util import get_elasticsearch_connection, remove_non_ascii_characters
 from tag.models import Tag
 
 
@@ -125,10 +127,80 @@ class Album(TimeStampedModel):
 
         super().delete()
 
+    @staticmethod
+    def scan_zipfile(zipfile_obj, include_song_data=False):
+
+        song_info = []
+        artist = set()
+        album = None
+
+        with zipfile.ZipFile(BytesIO(zipfile_obj), mode="r") as archive:
+            for file in archive.infolist():
+                if file.filename.endswith("mp3"):
+                    with archive.open(file.filename) as myfile:
+                        song_data = myfile.read()
+                        id3_info = Song.get_id3_info(song_data)
+                        if include_song_data:
+                            id3_info["data"] = song_data
+                        song_info.append(id3_info)
+                        artist.add(id3_info["artist"])
+                        album = id3_info["album_name"]
+
+        return {
+            "album": album,
+            "artist": [x for x in artist],
+            "song_info": song_info,
+        }
+
+    @staticmethod
+    def create_album_from_zipfile(zipfile_obj, song_source, tags, user):
+        info = Album.scan_zipfile(zipfile_obj, include_song_data=True)
+
+        # Get the artist and album from the first song, and apply to all
+        artist, _ = Artist.objects.get_or_create(name=info["song_info"][0]["artist"], user=user)
+
+        album = Song.get_or_create_album(
+            user,
+            {
+                "album_name": info["song_info"][0]["album_name"],
+                "artist": artist,
+                "compilation": False,
+                "year": info["song_info"][0]["year"],
+            }
+        )
+
+        for song_info in info["song_info"]:
+            song = Song.objects.create(
+                artist=artist,
+                album=album,
+                length=song_info["length"],
+                source_id=song_source,
+                title=song_info["title"],
+                track=song_info["track"],
+                user=user,
+                year=song_info["year"],
+            )
+
+            if tags:
+                song.tags.set(
+                    [
+                        Tag.objects.get_or_create(name=tag, user=user)[0]
+                        for tag in
+                        tags.split(",")
+                    ]
+                )
+
+            # Upload the song and its artwork to S3
+            Song.handle_s3(song, song_info["data"])
+
+        return album.uuid
+
 
 class SongSource(TimeStampedModel):
     name = models.TextField()
     description = models.TextField()
+
+    DEFAULT = "Amazon"
 
     def __str__(self):
         return self.name
@@ -251,7 +323,7 @@ class Song(TimeStampedModel):
         Listen(song=self, user=self.user).save()
 
     @staticmethod
-    def get_id3_info(request, messages, song):
+    def get_id3_info(song):
         """
         Read a song's ID3 information
         """
@@ -281,7 +353,7 @@ class Song(TimeStampedModel):
         return data
 
     @staticmethod
-    def get_album_info(user, song_info):
+    def get_or_create_album(user, song_info):
 
         # If an album was specified, check if we have the album
         if song_info["album_name"]:
@@ -324,6 +396,44 @@ class Song(TimeStampedModel):
             key=lambda s: s["count"],
             reverse=True
         )
+
+    @staticmethod
+    def handle_s3(song, song_bytes):
+
+        s3_client = boto3.client("s3")
+
+        key = f"songs/{song.uuid}"
+        fo = io.BytesIO(song_bytes)
+
+        # Note: S3 Metadata cannot contain non ASCII characters
+        s3_client.upload_fileobj(
+            fo,
+            settings.AWS_BUCKET_NAME_MUSIC,
+            key,
+            ExtraArgs={
+                "Metadata": {
+                    "artist": remove_non_ascii_characters(song.artist.name, default="Artist"),
+                    "title": remove_non_ascii_characters(song.title, default="Title")
+                }
+            }
+        )
+
+        if not song.album:
+            return
+
+        fo = io.BytesIO(song_bytes)
+        audio = MP3(fileobj=fo)
+
+        if audio:
+            artwork = audio.tags.getall("APIC")
+            if artwork:
+                key = f"album_artwork/{song.album.uuid}"
+                s3_client.upload_fileobj(
+                    io.BytesIO(artwork[0].data),
+                    settings.AWS_BUCKET_NAME_MUSIC,
+                    key,
+                    ExtraArgs={"ContentType": "image/jpeg"}
+                )
 
 
 class Playlist(TimeStampedModel):

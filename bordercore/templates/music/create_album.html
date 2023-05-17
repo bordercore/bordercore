@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %} Music {% endblock %}
+
+{% block content %}
+
+    <div id="vue-app">
+        <h1 class="text-center">Upload Album</h1>
+        <div id="create-album-container">
+            <div>
+                <label for="id_file" class="form-label">Upload album zipfile</label>
+                <input class="form-control form-control-lg" id="id_file" type="file" @change="handleAlbumUpload">
+            </div>
+            <div v-cloak class="d-flex justify-content-evenly mt-2" v-if="songList.length > 0">
+                <div>
+                    <div class="text4 fw-bold text-center me-3">ARTIST</div>
+                    <div v-cloak class="text-center me-3">[[ artist ]]</div>
+                </div>
+                <div>
+                    <div class="text4 fw-bold text-center me-3">ALBUM</div>
+                    <div v-cloak class="text-center me-3">[[ album ]]</div>
+                </div>
+                <div>
+                    <div class="text4 fw-bold text-center me-3">SONG COUNT</div>
+                    <div v-cloak class="text-center me-3">[[ songList.length ]]</div>
+                </div>
+            </div>
+            <div v-cloak v-if="songList.length > 0" class="mt-2">
+                <hr class="divider" />
+                <div class="d-flex justify-content-evenly">
+                    <div class="d-flex">
+                        <div class="text-nowrap me-3">Song Source</div>
+                        <select v-model="songSource" class="form-control form-select" id="id_source">
+                            <option v-for="source in songSources" :value="source.id">[[ source.name ]]</option>
+                        </select>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-nowrap me-3">Tags</div>
+                        <tags-input
+                            ref="tagsInput"
+                            id="id_tags"
+                            search-url="{% url 'tag:search' %}?query="
+                        >
+                        </tags-input>
+                    </div>
+                </div>
+            </div>
+            <div v-if="songList.length" class="d-flex justify-content-center mt-2">
+                <input type="button" class="btn btn-primary btn-lg" @click="handleAlbumAdd" value="Add" />
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" charset="utf-8">
+
+        const app = createApp({
+            name: "CreateAlbum",
+            delimiters: ["[[", "]]"],
+            components: {
+                TagsInput,
+            },
+            setup() {
+                const album = ref("");
+                const artist = ref("");
+                let fileData = null;
+                const songList = ref([]);
+                const songSources = {{ song_sources|safe }}.info;
+                const songSource = ref(songSources.filter(x => x.name === "{{ song_source_default }}")[0].id);
+                const tagsInput = ref(null);
+
+                function handleAlbumAdd(evt) {
+                    const formData = new FormData();
+                    formData.append("zipfile", fileData);
+                    formData.append("source", songSource.value);
+                    formData.append("tags", tagsInput.value.tagsCommaSeparated);
+                    axios.post(
+                        "{% url 'music:add_album_from_zipfile' %}",
+                        formData,
+                        {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                    }).then((response) => {
+                        if (response.data.status !== "OK") {
+                            EventBus.$emit(
+                                "toast",
+                                {
+                                    "body": response.data.error,
+                                    "variant": "danger",
+                                    "autoHide": false,
+                                },
+                            );
+                        } else {
+                            window.location.replace(response.data.url);
+                        }
+                    });
+                };
+
+                function handleAlbumUpload(evt) {
+                    const formData = new FormData();
+                    fileData = evt.target.files[0];
+                    if (!fileData) {
+                        return;
+                    }
+                    formData.append("zipfile", fileData);
+                    axios.post(
+                        "{% url 'music:scan_album_from_zipfile' %}",
+                        formData,
+                        {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }).then((response) => {
+                        album.value = response.data.album,
+                        artist.value = response.data.artist[0];
+                        songList.value = response.data.song_info;
+                    });
+                };
+
+                return {
+                    album,
+                    artist,
+                    handleAlbumAdd,
+                    handleAlbumUpload,
+                    songList,
+                    songSource,
+                    songSources,
+                    tagsInput,
+                };
+            },
+        });
+        app.mount("#vue-app");
+
+    </script>
+
+{% endblock %}
