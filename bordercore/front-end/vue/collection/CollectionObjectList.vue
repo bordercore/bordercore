@@ -13,12 +13,20 @@
                     <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <template #dropdown>
-                                <li>
-                                    <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="openObjectSelectModal">
+                                <li v-if="collectionObjectList.collection_type === 'ad-hoc'">
+                                    <a class="dropdown-item" href="#" @click.prevent="openObjectSelectModal">
                                         <span>
                                             <font-awesome-icon icon="plus" class="text-primary me-3" />
                                         </span>
                                         Add Object
+                                    </a>
+                                </li>
+                                <li v-if="collectionObjectList.collection_type !== 'ad-hoc'">
+                                    <a class="dropdown-item" :href="collectionDetailUrl" target="_blank">
+                                        <span>
+                                            <font-awesome-icon icon="external-link-alt" class="text-primary me-3" />
+                                        </span>
+                                        Collection Detail
                                     </a>
                                 </li>
                                 <li>
@@ -142,6 +150,10 @@
                 default: "",
             },
             addNewBookmarkUrl: {
+                type: String,
+                default: "",
+            },
+            collectionDetailUrl: {
                 type: String,
                 default: "",
             },

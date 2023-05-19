@@ -151,6 +151,7 @@
                                     :uuid="row.uuid"
                                     :collection-object-list-initial="row"
                                     add-new-bookmark-url="{% url "collection:add_new_bookmark" %}"
+                                    :collection-detail-url="'{% url "collection:detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.uuid)"
                                     update-collection-url="{% url "node:update_collection" %}"
                                     update-object-note-url="{% url "collection:update_object_note" %}"
                                     :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.uuid)"
