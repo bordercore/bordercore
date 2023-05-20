@@ -685,12 +685,14 @@ def add_album_from_zipfile(request):
     try:
         album_uuid = Album.create_album_from_zipfile(
             zipfile_obj,
+            request.POST["artist"],
             request.POST["source"],
             request.POST.get("tags", None),
-            request.user
+            request.user,
+            json.loads(request.POST.get("songListChanges", "{}"))
         )
     except Exception as e:
-        return JsonResponse({"status": "Error", "error": e})
+        return JsonResponse({"status": "Error", "error": str(e)})
 
     # Save the song source in the session
     request.session["song_source"] = SongSource.objects.get(id=request.POST["source"]).name

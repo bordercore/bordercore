@@ -153,11 +153,11 @@ class Album(TimeStampedModel):
         }
 
     @staticmethod
-    def create_album_from_zipfile(zipfile_obj, song_source, tags, user):
+    def create_album_from_zipfile(zipfile_obj, artist_name, song_source, tags, user, changes):
+
         info = Album.scan_zipfile(zipfile_obj, include_song_data=True)
 
-        # Get the artist and album from the first song, and apply to all
-        artist, _ = Artist.objects.get_or_create(name=info["song_info"][0]["artist"], user=user)
+        artist, _ = Artist.objects.get_or_create(name=artist_name, user=user)
 
         album = Song.get_or_create_album(
             user,
@@ -170,7 +170,7 @@ class Album(TimeStampedModel):
         )
 
         for song_info in info["song_info"]:
-            song = Song.objects.create(
+            song = Song(
                 artist=artist,
                 album=album,
                 length=song_info["length"],
@@ -180,6 +180,15 @@ class Album(TimeStampedModel):
                 user=user,
                 year=song_info["year"],
             )
+            # Edit the title and add a note if the user made any changes
+            if changes.keys():
+                note = changes[str(song_info["track"])].get("note", None)
+                if note:
+                    song.note = note
+                title_edited = changes[str(song_info["track"])].get("title", None)
+                if title_edited:
+                    song.title = title_edited
+            song.save()
 
             if tags:
                 song.tags.set(
