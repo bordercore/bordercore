@@ -22,8 +22,13 @@
                     </div>
                 </div>
                 <div v-else-if="docType === 'todo'">
-                    <div class="col-lg-12">
-                        {{ match.name }} <span class="search-todo-date">{{ match.last_modified }}</span>`
+                    <div class="col-lg-12 d-flex flex-column">
+                        <div>
+                            {{ match.name }}
+                        </div>
+                        <div class="search-todo-date ms-2">
+                            {{ match.date }}
+                        </div>
                     </div>
                 </div>
                 <div v-else-if="docType === 'album'" class="d-flex flex-column">
