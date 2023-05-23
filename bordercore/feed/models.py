@@ -1,6 +1,6 @@
+import html
 import logging
 import uuid
-import xml.sax.saxutils as saxutils
 from datetime import datetime
 
 import feedparser
@@ -49,13 +49,20 @@ class Feed(TimeStampedModel):
 
             for x in feed_list:
 
+                # We need to unescape some titles twice, notably those from
+                # Hacker News, since their RSS feed generates titles like this:
+                #
+                #   Microtiming in Metallica&amp;#x27;s “Master of Puppets” (2014)
+                #
+                # We need to first unescape '&amp;' to get a '&', then unescape again
+                # to translate '&#x26;' to a single apostrophe ''' character.
                 try:
                     title = x.title.replace("\n", "") or "No Title"
                     link = x.link or ""
                     FeedItem.objects.create(
                         feed=self,
-                        title=saxutils.unescape(title),
-                        link=saxutils.unescape(link)
+                        title=html.unescape(html.unescape(title)),
+                        link=html.unescape(link)
                     )
                 except AttributeError as e:
                     log.error(f"feed_uuid={self.uuid} Missing data in feed item: {e}")
