@@ -1,123 +1,74 @@
 {% extends "base.html" %}
 
-{% load domain %}
-
-{% load get_doctype %}
-
-{% load favicon %}
-
 {% block title %} Search :: Tag Detail {% endblock %}
 
 {% block content %}
 
-    <div id="vue-app">
-
-        <div class="row g-0 mx-2">
-            <div class="col-lg-12 me-3">
-                <div class="card-body mb-3 pb-4 me-2">
-
-                    <form id="tag-filter-form" class="form-inline align-items-start" action="{% url 'search:kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                        <div class="row">
-
-                            <tags-input
-                                name="tag-search"
-                                class-list="col-lg-6"
-                                :autofocus=true
-                                place-holder="Tag"
-                                search-url="{% url 'tag:search' %}?query="
-                                tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                @tags-changed="handleTagSearch"
+    <div id="vue-app" class="row g-0 h-100 mx-2">
+        <div class="col-lg-3 d-flex flex-column">
+            <div class="card-body flex-grow-1">
+                <div v-cloak v-if="doctypeCounts.length > 0">
+                    <h4 class="text4 border-bottom pb-2">
+                        Doctypes
+                    </h4>
+                    <ul class="nav nav-tabs nav-vertical flex-column">
+                        <li class="nav-item">
+                            <div
+                                :id=`${doctype[0]}-tab`
+                                v-for="doctype in doctypeCounts"
+                                class="list-with-counts ps-2 py-1 pe-1 d-flex"
+                                :class="{'selected active rounded-sm':doctype[0] === selectedDoctype}"
+                                @click.prevent="handleDoctypeSelect(doctype[0])"
+                                data-bs-toggle="tab"
+                                :data-bs-target=`#${doctype[0]}`
                             >
-                            </tags-input>
-
-                           {% if tag_counts %}
-                               <div class="col-lg-3">
-                                   <div>
-                                       <select class="form-control form-select" @change="onChange">
-                                           <option value="-1">Related tags</option>
-                                           {% for tag, count in tag_counts %}
-                                               <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
-                                           {% endfor %}
-                                       </select>
-                                   </div>
-                               </div>
-                           {% endif %}
-                           <div>
-                           {% for tag in meta_tags %}
-                           {% if forloop.first %}
-                               <label class="ms-3 mt-2">Meta Tags: </label>
-                           {% endif %}
-                           <span class="ms-2"><a class="meta_tag tag" href="" @click="onClickMetaTag">{{ tag }}</a></span>
-                           {% endfor %}
-                           </div>
-                    </form>
+                                <div>
+                                    [[ doctype[2] ]]
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="px-2 badge rounded-pill">
+                                        [[ doctype[1] ]]
+                                    </span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-
-        <br />
-
-        <ul class="nav nav-tabs mx-3">
-            {% for doctype in doctype_counts %}
-                <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClickDoctype">
-                    <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
-                        {{ doctype_mapping|get_doctype:doctype.0 }}
-                        <span class="badge align-middle ms-2">
-                            {{ doctype.1 }}
-                        </span>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <div class="tab-content ps-3 h-100 mb-3">
-            <tag-search-result
-                doc-type="blob"
-                :matches="searchResults.matches.blob"
+        <div class="col-lg-9">
+            <search-bar
+                ref="searchBar"
+                exact-match-initial="{{ request.GET.exact_match }}"
+                search-url="{% url 'tag:search' %}?query="
+                sort-by-initial="{{ request.session.search_sort_by|default:'' }}"
+                :tag-counts="tagCounts"
+                tag-search-url="{% url 'tag:search' %}?query="
+                tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                term-search-url="{% url 'search:search' %}"
             >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="book"
-                :matches="searchResults.matches.book"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="bookmark"
-                :matches="searchResults.matches.bookmark"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="document"
-                :matches="searchResults.matches.document"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="note"
-                :matches="searchResults.matches.note"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="drill"
-                :matches="searchResults.matches.drill"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="song"
-                :matches="searchResults.matches.song"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="todo"
-                :matches="searchResults.matches.todo"
-            >
-            </tag-search-result>
-            <tag-search-result
-                doc-type="album"
-                :matches="searchResults.matches.album"
-            >
-            </tag-search-result>
+            </search-bar>
+            <div class="tab-content ps-3 h-100 mb-3">
+                <tag-search-result doc-type="blob" :matches="searchResults.matches.blob">
+                </tag-search-result>
+                <tag-search-result doc-type="book" :matches="searchResults.matches.book">
+                </tag-search-result>
+                <tag-search-result doc-type="bookmark" :matches="searchResults.matches.bookmark">
+                </tag-search-result>
+                <tag-search-result doc-type="document" :matches="searchResults.matches.document">
+                </tag-search-result>
+                <tag-search-result doc-type="note" :matches="searchResults.matches.note">
+                </tag-search-result>
+                <tag-search-result doc-type="drill" :matches="searchResults.matches.drill">
+                </tag-search-result>
+                <tag-search-result doc-type="song" :matches="searchResults.matches.song">
+                </tag-search-result>
+                <tag-search-result doc-type="todo" :matches="searchResults.matches.todo">
+                </tag-search-result>
+                <tag-search-result doc-type="album" :matches="searchResults.matches.album">
+                </tag-search-result>
+            </div>
         </div>
-
     </div>
 
 {% endblock %}
@@ -126,85 +77,81 @@
 
     {{ block.super }}
 
+    {{ doctype_counts|json_script:"doctypeCounts" }}
+    {{ tag_counts|json_script:"tagCounts" }}
     {{ search_results|json_script:"searchResults" }}
     {{ tag_list|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript">
 
-        function getTagListString() {
-            initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-            return initialTags.join(",");
-        }
-
         const app = createApp({
             delimiters: ["[[", "]]"],
             components: {
                 FontAwesomeIcon,
+                SearchBar,
                 TagSearchResult,
                 TagsInput,
             },
             setup() {
+                const doctypeCounts = JSON.parse(document.getElementById("doctypeCounts").textContent);
+                const tagCounts = JSON.parse(document.getElementById("tagCounts").textContent);
                 const searchResults = JSON.parse(document.getElementById("searchResults").textContent);
-                function handleTagSearch(tagList) {
-                    const tagsChangedUrl = "{% url 'search:kb_search_tag_detail' 666 %}";
-                    window.location = tagsChangedUrl.replace("666", tagList.join(",")).replace("//", "/");
+                const searchBar = ref(null);
+                const selectedDoctype = ref("");
+
+                const doctypeMapping = {
+                    "album": "Albums",
+                    "blob": "Blobs",
+                    "book": "Books",
+                    "drill": "Drill",
+                    "note": "Notes",
+                    "bookmark": "Bookmarks",
+                    "todo": "Todo Items",
+                    "song": "Songs",
+                    "document": "Documents",
                 };
 
-                function onChange(evt) {
-                    const tagList = getTagListString() + "," + evt.srcElement.value;
-                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace("666", tagList);
-                };
+                for (doctype of doctypeCounts) {
+                    doctype[2] = doctypeMapping[doctype[0]]
+                }
 
-                function onClickDoctype(evt) {
+                function handleDoctypeSelect(doctype) {
+                    selectedDoctype.value = doctype;
+
                     doPost(
                         "{% url "accounts:store_in_session" %}",
                         {
-                            "kb_tag_detail_current_tab": evt.srcElement.parentElement.getAttribute("data-type"),
+                            "search_tag_detail_current_tab": doctype,
                         },
-                        (response) => {
-                            evt.preventDefault();
-                        },
+                        () => {},
                     );
                 };
 
-                function onClickMetaTag(evt) {
-                    evt.preventDefault();
-                    const tagList = getTagListString() + "," + evt.srcElement.innerHTML;
-                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tagList);
-                };
-
                 onMounted(() => {
-                    const triggerTabList = [].slice.call(document.querySelectorAll(".nav a"));
-                    triggerTabList.forEach(function(triggerEl) {
-                        const tabTrigger = new Tab(triggerEl);
-
-                        triggerEl.addEventListener("click", function(event) {
-                            event.preventDefault();
-                            tabTrigger.show();
-                        });
-                    });
-
-                    {% if kb_tag_detail_current_tab and kb_tag_detail_current_tab in doctypes %}
-                    const triggerFirstTabEl = document.querySelector("li[data-type='{{ kb_tag_detail_current_tab }}'] a");
-                    Tab.getInstance(triggerFirstTabEl).show();
-
+                    {% if search_tag_detail_current_tab and search_tag_detail_current_tab in doctypes %}
+                    selectedDoctype.value = "{{ search_tag_detail_current_tab }}";
+                    const triggerFirstTabEl = document.querySelector(`div#${selectedDoctype.value}-tab`);
                     {% else %}
                     // If the tab stored in the session doesn't match any current tab categories,
                     //  select the first tab.
-                    const triggerFirstTabEl = document.querySelector(".nav li:first-child a");
+                    const triggerFirstTabEl = document.querySelector(".nav div:first-child");
+                    {% endif %}
                     if (triggerFirstTabEl != undefined) {
-                        Tab.getInstance(triggerFirstTabEl).show();
+                        const tabTrigger = new Tab(triggerFirstTabEl);
+                        tabTrigger.show();
                     }
 
-                    {% endif %}
+                    searchBar.value.focusTagSearch();
                 });
 
                 return {
-                    handleTagSearch,
-                    onChange,
-                    onClickDoctype,
-                    onClickMetaTag,
+                    doctypeCounts,
+                    doctypeMapping,
+                    handleDoctypeSelect,
+                    searchBar,
                     searchResults,
+                    selectedDoctype,
+                    tagCounts,
                 };
             },
         });

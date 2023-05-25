@@ -252,7 +252,7 @@ class SearchListView(ListView):
                 match["source"]["url"] = get_link(match["source"]["doctype"], match["source"])
                 match["tags_json"] = json.dumps(match["source"]["tags"]) \
                     if "tags" in match["source"] \
-                    else []
+                    else "[]"
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
             page = int(self.request.GET.get("page", 1))
@@ -496,7 +496,7 @@ class SearchTagDetailView(ListView):
 
         context["doctypes"] = [x[0] for x in context["doctype_counts"]]
 
-        context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
+        context["search_tag_detail_current_tab"] = self.request.session.get("search_tag_detail_current_tab", "")
 
         context["tag_list"] = tag_list
         if context["tag_list"]:

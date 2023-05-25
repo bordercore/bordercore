@@ -50,7 +50,7 @@
                     <div v-if="docType === 'blob' || docType === 'book'">
                         <img :src="match.cover_url">
                     </div>
-                    <div class="d-flex flex-column ms-2">
+                    <div class="d-flex flex-column ms-3">
                         <h4>
                             <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite" />
                             <a :href="match.object_url">

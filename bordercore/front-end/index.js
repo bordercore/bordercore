@@ -173,6 +173,9 @@ window.SelectValue = SelectValue;
 import DrillPinnedTags from "./vue/drill/DrillPinnedTags.vue";
 window.DrillPinnedTags = DrillPinnedTags;
 
+import SearchBar from "./vue/search/SearchBar.vue";
+window.SearchBar = SearchBar;
+
 import SearchResult from "./vue/search/SearchResult.vue";
 window.SearchResult = SearchResult;
 

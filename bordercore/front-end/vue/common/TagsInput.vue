@@ -190,6 +190,7 @@
             return {
                 addTag,
                 clearOptions,
+                focus,
                 handleTagAdd,
                 handleBlur,
                 handleClose,

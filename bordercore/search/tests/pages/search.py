@@ -7,7 +7,7 @@ except ModuleNotFoundError:
 
 class SearchPage:
 
-    SEARCH_INPUT = (By.CSS_SELECTOR, "input#search")
+    SEARCH_INPUT = (By.CSS_SELECTOR, "input#search-bar")
     SUBMIT_BUTTON = (By.CSS_SELECTOR, "input[type='submit']")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "h4[class^='search-result-header'] strong")
     SEARCH_RESULT_NAME = (By.CSS_SELECTOR, "li[class*='search-result'] h4 a")

@@ -286,7 +286,6 @@ hr {
   }
 
   :not(.active):hover {
-    // border-color: var(--surface1);
     transform: translateY(-0.06rem);
   }
 
@@ -1104,8 +1103,12 @@ table.b-table th {
 .nav-tabs, .nav {
   border-bottom-color: var(--surface5);
 
-  &:hover, &:focus {
+  &:not(.nav-vertical):hover, &:focus {
     color: var(--text5);
+  }
+
+  &.nav-vertical {
+    border: none;
   }
 
   .nav-link {
@@ -1381,6 +1384,9 @@ blockquote > p {
 //
 // Search
 //
+.tag-search {
+  width: 25rem;
+}
 
 // Use this for cancel icons inside search input fields
 .search-input-cancel {
@@ -1394,7 +1400,7 @@ blockquote > p {
 }
 
 .search-input {
-  width: 25rem;
+  width: 10rem;
 }
 
 .search-result {
@@ -1481,10 +1487,6 @@ blockquote > p {
 
 .bookmark-dropdown {
   width: 2.5rem;
-}
-
-#tag-filter-form select {
-  line-height: 2rem;
 }
 
 .search-suggestion {
