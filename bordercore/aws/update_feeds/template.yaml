@@ -20,7 +20,7 @@ Resources:
             FunctionName: UpdateFeeds
             Handler: update_feeds_lambda.handler
             MemorySize: 128
-            Runtime: python3.7
+            Runtime: python3.10
             Role: !GetAtt UpdateFeedsLambdaRole.Arn
             Environment:
                 Variables:
