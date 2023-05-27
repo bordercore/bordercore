@@ -2146,6 +2146,7 @@ div #dateapp {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
+
   .collection-item-delete {
     position: absolute;
     top: 0.35rem;
@@ -2162,7 +2163,6 @@ div #dateapp {
 
 .collection-sortable li {
   width: 12.5rem;
-  height: 12.5rem;
 }
 
 hr.collection-list-divider {

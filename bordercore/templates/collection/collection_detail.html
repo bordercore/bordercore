@@ -112,11 +112,11 @@
                                         :key="element.uuid"
                                         :index="index"
                                     >
-                                        <div class="slicklist-list-item-inner">
-                                            <li :key="element.uuid" class="collection-item list-group-item hoverable cursor-pointer p-3">
+                                        <div class="slicklist-list-item-inner h-100">
+                                            <li :key="element.uuid" class="collection-item list-group-item hoverable cursor-pointer h-100 p-3">
                                                 <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(element.uuid)">
                                                 </button>
-                                                <div class="d-flex flex-column h-100" @click="handleBlobRemove(element.url)">
+                                                <div class="d-flex flex-column justify-content-center h-100" @click="handleBlobRemove(element.url)">
                                                     <a :href="element.url">
                                                         <div v-if="element.type === 'blob'">
                                                             <img :src="element.cover_url" />
@@ -125,7 +125,7 @@
                                                             <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
                                                         </div>
                                                     </a>
-                                                    <div class="collection-item-name mt-auto">
+                                                    <div class="collection-item-name" v-tooltip="{delay: 1000, content: element.name}">
                                                        [[ element.name ]]
                                                     </div>
                                                 </div>
@@ -678,6 +678,7 @@
                 };
             },
         });
+        app.use(FloatingVue);
         app.use(Oruga, {
             iconComponent: "font-awesome-icon",
             iconPack: "fa",
