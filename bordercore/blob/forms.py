@@ -103,7 +103,17 @@ class BlobForm(ModelForm):
         fields = ("file", "name", "filename", "file_modified", "date", "tags", "content", "note", "importance", "is_note", "id", "math_support")
         widgets = {
             "content": Textarea(attrs={"rows": 5, "class": "form-control"}),
-            "note": Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "note": Textarea(
+                attrs={
+                    "rows": 3,
+                    "class": "form-control",
+                    ":class": "{'drag-over': isDragOver.note}",
+                    "@dragover.prevent": "isDragOver.note = true",
+                    "@dragleave.prevent": "isDragOver.note = false",
+                    "@drop": "isDragOver.note = false",
+                    "@drop.prevent": "handleLinkDrop"
+                }
+            ),
             "name": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "importance": CheckboxInput(),
         }

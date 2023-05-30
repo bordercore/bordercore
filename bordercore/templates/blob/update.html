@@ -36,12 +36,12 @@
                 {% if object and object.sha1sum %}
                     <div
                         @drop.prevent="onImageDrop($event)"
-                        @dragover.prevent="isOverCoverImage = true"
+                        @dragover.prevent="isDragOver.coverImage = true"
                         @dragenter.prevent
-                        @dragleave.prevent="isOverCoverImage = false"
-                        @drop="isOverCoverImage = false"
+                        @dragleave.prevent="isDragOver.coverImage = false"
+                        @drop="isDragOver.coverImage = false"
                         class="drag-target-blob"
-                        :class="{over: isOverCoverImage}"
+                        :class="{'drag-over': isDragOver.coverImage}"
                     >
                         <img id="coverImage" src="{{ cover_url }}" width="400" class="mw-100 mb-3" />
                     </div>
@@ -267,7 +267,14 @@
 
                                     {% elif field.label == 'Content' %}
 
-                                        <div class="v-md-editor-tall col-lg-10 col-sm-10 align-self-center">
+                                        <div
+                                            class="v-md-editor-tall col-lg-10 col-sm-10 align-self-center"
+                                            :class="{'drag-over': isDragOver.contentFile}"
+                                            @dragover.prevent="isDragOver.contentFile = true"
+                                            @dragleave.prevent="isDragOver.contentFile = false"
+                                            @drop="isDragOver.contentFile = false"
+                                            @drop.prevent="handleLinkDrop"
+                                        >
                                             <v-md-editor
                                                 ref="mdEditor"
                                                 mode="edit"
@@ -314,11 +321,11 @@
                             <div
                                 class="drag-target-blob d-flex flex-column align-items-center"
                                 @drop.prevent="onFileDrop($event.dataTransfer.files[0])"
-                                @dragover.prevent="isOverFile = true"
+                                @dragover.prevent="isDragOver.fileFile = true"
                                 @dragenter.prevent
-                                @dragleave.prevent="isOverFile = false"
-                                @drop="isOverFile = false"
-                                :class="{over: isOverFile}"
+                                @dragleave.prevent="isDragOver.fileFile = false"
+                                @drop="isDragOver.fileFile = false"
+                                :class="{'drag-over': isDragOver.fileFile}"
                             >
                                 <h3 id="file-upload" class="d-flex flex-column align-items-center">
 
@@ -474,8 +481,7 @@
                 ]);
                 const fileName = ref("{{ form.filename.value|default:""|escapejs }}");
                 const fileObject = ref();
-                const isOverCoverImage = ref(false);
-                const isOverFile = ref(false);
+                const isDragOver = reactive({content: false, coverImage: false, file: false, note: false});
                 const showRelatedTags = ref(false);
                 const metadata = ref(JSON.parse(document.getElementById("metadata").textContent))
                 const metadataJson = computed(() => {
@@ -565,6 +571,24 @@
                         },
                         "Error getting template",
                     );
+                };
+
+                function handleLinkDrop(event) {
+                    if (event.target.id === "id_note") {
+                        // The "Note" field
+                        const link = `[link](${event.dataTransfer.getData("URL")})`;
+                        event.target.value = `${event.target.value}${link}`;
+                        const index = event.target.value.indexOf(link);
+                        event.target.setSelectionRange(index + 1, index + 5);
+                    } else {
+                        // Assume it's the "Content" field
+                        mdEditor.value.insert(() => {
+                            return {
+                                text: `[link](${event.dataTransfer.getData("URL")})`,
+                                selected: "link",
+                            };
+                        });
+                    }
                 };
 
                 function onClickCleanupFilename(evt) {
@@ -771,10 +795,10 @@
                     deleteMetadata,
                     fileName,
                     fileObject,
+                    handleLinkDrop,
                     getCoverImage,
                     getTemplate,
-                    isOverCoverImage,
-                    isOverFile,
+                    isDragOver,
                     mdEditor,
                     metadata,
                     metadataJson,

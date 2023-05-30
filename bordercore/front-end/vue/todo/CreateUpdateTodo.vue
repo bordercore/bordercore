@@ -30,7 +30,14 @@
                                 </div>
                                 <div class="row mb-3">
                                     <label class="fw-bold col-lg-3 col-form-label text-end" for="inputNote">Note</label>
-                                    <div class="col-lg-9">
+                                    <div
+                                        class="col-lg-9"
+                                        :class="{over: isDragOver}"
+                                        @dragover.prevent="isDragOver = true"
+                                        @dragleave.prevent="isDragOver = false"
+                                        @drop="isDragOver = false"
+                                        @drop.prevent="handleLinkDrop"
+                                    >
                                         <textarea id="id_note" v-model="todoInfo.note" name="note" cols="40" rows="2" class="form-control" />
                                     </div>
                                 </div>
@@ -116,6 +123,7 @@
         emits: ["add", "update"],
         setup(props, ctx) {
             const action = ref("Update");
+            const isDragOver = ref(false);
             const todoInfo = ref({
                 priority: 2,
                 tags: [],
@@ -124,6 +132,15 @@
             let modal = null;
 
             const tagsInput = ref(null);
+
+            function handleLinkDrop(event) {
+                // The "Note" field
+                const link = `[link](${event.dataTransfer.getData("URL")})`;
+                event.target.value = `${event.target.value}${link}`;
+                const index = event.target.value.indexOf(link);
+                event.target.setSelectionRange(index + 1, index + 5);
+                todoInfo.value.note = event.target.value;
+            };
 
             function handleSubmit() {
                 const dueDate = document.getElementsByName("due_date")[0].value;
@@ -196,8 +213,10 @@
 
             return {
                 action,
+                handleLinkDrop,
                 handleTagsChanged,
                 handleSubmit,
+                isDragOver,
                 openModal,
                 setAction,
                 setTags,

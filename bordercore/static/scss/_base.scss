@@ -125,6 +125,11 @@ div.drag-target-blob {
   }
 }
 
+.drag-over {
+  filter: drop-shadow(0.12rem 0.12rem 0.3rem var(--text3)) drop-shadow(-0.12rem -0.12rem 0.3rem var(--text3));
+  transition: all 1s;
+}
+
 .drag-target {
   border-radius: 0.6rem;
 }
