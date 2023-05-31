@@ -38,7 +38,15 @@
                                         @drop="isDragOver = false"
                                         @drop.prevent="handleLinkDrop"
                                     >
-                                        <textarea id="id_note" v-model="todoInfo.note" name="note" cols="40" rows="2" class="form-control" />
+                                        <textarea
+                                            id="id_note"
+                                            v-model="todoInfo.note"
+                                            name="note"
+                                            cols="40"
+                                            rows="3"
+                                            class="form-control"
+                                            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 3 + 'px'"
+                                        />
                                     </div>
                                 </div>
                                 <div class="row mb-3">
