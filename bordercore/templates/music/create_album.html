@@ -159,6 +159,9 @@
                 };
 
                 function handleAlbumUpload(evt) {
+                    const modal = new Modal("#modalProcessing");
+                    modal.show();
+
                     const formData = new FormData();
                     fileData = evt.target.files[0];
                     if (!fileData) {
@@ -173,6 +176,9 @@
                             "Content-Type": "multipart/form-data",
                         },
                     }).then((response) => {
+                        setTimeout(() => {
+                            modal.hide();
+                        }, 500);
                         album.value = response.data.album;
                         artist.value = response.data.artist[0];
                         songList.value = response.data.song_info;
