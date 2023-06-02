@@ -84,7 +84,7 @@
 
                 <o-table
                     :data="items"
-                    default-sort="sort_order"
+                    :default-sort="[defaultSort.field, defaultSort.direction]"
                     draggable
                     hoverable
                     :row-class="() => 'hover-target'"
@@ -92,6 +92,7 @@
                     @dragend="onDragEnd"
                     @dragover="onDragOver"
                     @dragstart="onDragStart"
+                    @sort="handleSort"
                 >
                     <o-table-column field="sort_order" label="Manual" :td-attrs="()=> ({ class: 'todo-col-manual-sorting text-center' })" sortable v-slot="props">
                         <font-awesome-icon icon="bars"></font-awesome-icon>
@@ -187,6 +188,8 @@
                 const filterTimeOptions = ref();
 
                 const updateTodo = ref(null);
+
+                const defaultSort = JSON.parse("{{ request.session.todo_sort|escapejs|default:'{\"field\":\"sort_order\", \"direction\":\"asc\"}' }}");
 
                 function getPrettyTime(time) {
                     for (option of filterTimeOptions.value) {
@@ -338,6 +341,17 @@
                     return getFormattedDate(date);
                 };
 
+                function handleSort(field, direction, event) {
+                    const sort = {field: field, direction: direction};
+                    doPost(
+                        "{% url "accounts:store_in_session" %}",
+                        {
+                            "todo_sort": JSON.stringify(sort),
+                        },
+                        () => {},
+                    );
+                };
+
                 function search() {
                     if (filterSearch.value === "") {
                         currentSearchFilter.value = "";
@@ -423,6 +437,7 @@
 
                 return {
                     currentSearchFilter,
+                    defaultSort,
                     filterTag,
                     filterPriority,
                     filterTime,
@@ -432,6 +447,7 @@
                     getTagClass,
                     getTimeClass,
                     getTodoList,
+                    handleSort,
                     items,
                     filterPriorityOptions,
                     filterTimeOptions,
