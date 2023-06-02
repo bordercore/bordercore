@@ -22,8 +22,9 @@
             </media-controller>
         </div>
         <div class="d-flex align-items-center ms-4">
-            <o-switch id="continuous_play" v-model="continuousPlay" />
-            <label for="continuous_play" class="ms-2">Continous Play</label>
+            <o-switch id="continuous_play" v-model="continuousPlay">
+                Continous Play
+            </o-switch>
         </div>
     </div>
 </template>
