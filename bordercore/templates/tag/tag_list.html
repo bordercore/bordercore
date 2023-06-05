@@ -10,7 +10,7 @@
 
         <div class="col-lg-3 d-flex flex-column flex-grow-last">
 
-            <div class="card-body backdrop-filter">
+            <div class="card-body backdrop-filter" v-cloak>
 
                 <div class="d-flex position-relative">
                     <h4>
@@ -34,7 +34,7 @@
                     <strong class="text-primary">[[ tagInfo.name ]]</strong>
                 </h4>
 
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column" :class="{'d-none': dataLoading}">
 
                     <div class="list-header-border mb-2 pb-2 mt-4">
                         Objects using this tag
@@ -200,6 +200,7 @@
                 SelectValue,
             },
             setup() {
+                const dataLoading = ref(true);
                 const filterSearch = ref("");
                 const items = ref([]);
                 const addAliasTagName = ref("");
@@ -230,6 +231,7 @@
                         url,
                         (response) => {
                             tagInfo.value = response.data.info;
+                            dataLoading.value = false;
                         },
                         "Error retrieving tag alias list",
                     );
@@ -314,6 +316,7 @@
                     addAliasTagName,
                     addAliasAliasName,
                     addAliasMessage,
+                    dataLoading,
                     filterSearch,
                     getTagAliasList,
                     getTagClass,

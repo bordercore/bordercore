@@ -7,7 +7,7 @@
     <div class="d-flex mb-3 me-3" id="vue-nav">
 
         <div class="me-auto align-self-center">
-            <ul class="breadcrumb mb-0 pt-0 pb-0">
+            <ul class="breadcrumb mb-0 pt-0 pb-0" v-cloak>
                 <li class="breadcrumb-item">
                     <a href="{% url 'drill:list' %}">
                         <font-awesome-icon icon="home" class="icon-hover glow"></font-awesome-icon>
@@ -119,7 +119,7 @@
 
         <div class="col-lg-9">
 
-            <div class="hover-reveal-target card-body me-2">
+            <div class="hover-reveal-target card-body me-2" v-cloak>
 
                 <div class="d-flex">
                     <h3 class="drill-text table-borders table-colors markdown mw-100 w-100" v-html="getQuestion()">
@@ -154,7 +154,7 @@
                      </div>
                  </div>
                  <transition name="fade">
-                     <div v-if="mode === 'answer'">
+                     <div v-if="mode === 'answer'" v-cloak>
                          <div>
                              <hr class="divider mt-3" />
                              <h3 class="drill-text table-borders table-colors markdown" v-html="getAnswer()">
@@ -181,7 +181,7 @@
 
             </div>
 
-            <div class="card-body me-2" :class="{'d-none': !showPythonConsole}">
+            <div class="card-body me-2" :class="{'d-none': !showPythonConsole}" v-cloak>
                 <python-console
                     ref="pythonConsole"
                 >

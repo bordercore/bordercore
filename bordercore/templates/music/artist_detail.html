@@ -5,8 +5,8 @@
 {% block nav %}
 
     <div class="d-flex mb-3" id="vue-nav">
-        <div class="me-auto align-self-center">
-            <ul class="breadcrumb mb-0 pt-0 pb-0">
+        <div class="music-nav me-auto align-self-center">
+            <ul class="breadcrumb mb-0 pt-0 pb-0" v-cloak>
                 <li class="breadcrumb-item">
                     <a href="{% url 'music:list' %}">
                         <font-awesome-icon icon="home" class="glow"></font-awesome-icon>

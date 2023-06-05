@@ -12,9 +12,9 @@
 
         <div class="d-flex mb-3">
             <div class="flex-grow-1 me-auto align-self-center">
-                <ul class="breadcrumb mb-0 pt-0 pb-0">
+                <ul class="breadcrumb mb-0 pt-0 pb-0" v-cloak>
                     <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
-                    <li class="breadcrumb-item active" v-cloak>[[ nodeName ]]</li>
+                    <li class="breadcrumb-item active">[[ nodeName ]]</li>
                 </ul>
             </div>
             <Transition name="fade" v-cloak>

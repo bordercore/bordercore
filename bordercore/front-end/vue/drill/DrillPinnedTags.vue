@@ -79,7 +79,10 @@
             </template>
             <template #content>
                 <hr class="divider">
-                <ul class="list-unstyled">
+                <div v-if="dataLoading" class="text-secondary">
+                    Data Loading...
+                </div>
+                <ul v-else class="list-unstyled">
                     <li v-for="tag in tagList" :key="tag.name" class="d-flex px-2">
                         <div class="item-name flex-fill">
                             <a :href="tag.url">{{ tag.name }}</a>
@@ -137,6 +140,7 @@
             },
         },
         setup(props) {
+            const dataLoading = ref(true);
             const selectValuePinnedTag = ref(null);
             const tagList = ref([]);
 
@@ -165,6 +169,7 @@
                     props.getPinnedTagsUrl,
                     (response) => {
                         tagList.value = response.data.tag_list;
+                        dataLoading.value = false;
                     },
                     "Error getting pinned tags",
                 );
@@ -215,6 +220,7 @@
             });
 
             return {
+                dataLoading,
                 handleSort,
                 handleTagDelete,
                 handleTagSelect,

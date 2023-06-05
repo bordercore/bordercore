@@ -57,7 +57,7 @@
                                 <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.num_blobs)">
                                 </div>
                             </div>
-                            <div class="text-truncate">
+                            <div class="text-truncate" v-cloak>
                                 <a :href="collection.url">[[ collection.name ]]</a>
                             </div>
                         </div>

@@ -58,8 +58,8 @@
                     <div v-if="blob.doctype === 'note' || blob.doctype === 'document'" class="blob-content" v-html="getContent(blob)"></div>
 
                     <div class="blob-info d-flex justify-content-between mt-auto">
-                        <div class="text-primary me-auto">[[ getDeltaDays(blob.delta_days) ]]</div>
-                        <div class="text-center">
+                        <div class="text-primary me-auto" v-cloak>[[ getDeltaDays(blob.delta_days) ]]</div>
+                        <div class="text-center" v-cloak>
                             <span v-if="blob.content_size !== '0 Bytes'">Size: <span class="text-primary">[[ blob.content_size ]]</span></span>
                         </div>
                     </div>

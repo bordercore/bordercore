@@ -29,14 +29,14 @@
                     <h3 class="mb-3">{{ collection.description }}</h3>
                 {% endif %}
 
-                <div class="mb-3" v-cloak>
+                <div class="d-flex mb-3">
                     <strong>Count</strong>
-                    <span v-if="paginator" class="text-primary ms-1">
-                        [[ paginator.count ]] [[ pluralize("blob", paginator.count) ]]
+                    <span class="text-primary ms-1">
+                        {{ collection.collectionobject_set.count }}
                     </span>
                 </div>
 
-                <div class="mb-3">
+                <div class="d-flex mb-3">
                     <strong>Updated</strong>
                     <span class="text-primary ms-1">
                         {{ collection.modified|date:"F j, Y" }}
