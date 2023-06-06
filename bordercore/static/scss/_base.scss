@@ -2620,7 +2620,7 @@ tr.hover-target:hover {
 
 .v-sidebar-menu {
   z-index: 100 !important;
-  background-color: var(--sidebar-bg) !important;
+  background: linear-gradient(180deg, var(--sidebar-gradient-start) 29%, var(--sidebar-gradient-end) 90%);
 
   &.vsm_collapsed {
     .first-item {
@@ -2686,7 +2686,6 @@ tr.hover-target:hover {
   }
 
   .vsm--item {
-    background-color: var(--sidebar-bg) !important;
     color: var(--sidebar-color) !important;
   }
 
