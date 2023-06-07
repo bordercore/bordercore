@@ -179,7 +179,7 @@
                         "frequency": frequency.value,
                     }
                     ,
-                    (response) => {
+                    () => {
                         const modal = Modal.getInstance(document.getElementById("modalChangeFrequency"));
                         modal.hide();
                         EventBus.$emit(
@@ -201,7 +201,7 @@
                         "uuid": uuid,
                         "remove": false,
                     },
-                    (response) => {
+                    () => {
                         const modal = Modal.getInstance(document.getElementById("modalSwitchExercise"));
                         modal.hide();
                         EventBus.$emit(
@@ -217,12 +217,12 @@
                                 "uuid": exerciseStore.uuid,
                                 "remove": true,
                             },
-                            (response) => {
+                            () => {
                                 isActive.value = false;
                                 EventBus.$emit(
                                     "toast",
                                     {
-                                        "body": "Exercise '`${props.exerciseName`' is now inactive",
+                                        "body": "Exercise '`${props.exerciseName}`' is now inactive",
                                     },
                                 );
                             },
