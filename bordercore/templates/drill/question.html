@@ -88,6 +88,12 @@
             </object-select>
 
             <card title="Tag Progress" class="backdrop-filter">
+                <template #title-slot>
+                    <div class="card-title d-flex align-items-center mb-3">
+                        <font-awesome-icon icon="tags" class="text-primary me-3 mt-1"></font-awesome-icon>
+                        Tag Progress
+                    </div>
+                </template>
                 <template v-slot:content>
                     <hr class="divider" />
                     <div class="d-flex flex-column justify-content-center">
