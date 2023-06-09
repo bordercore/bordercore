@@ -1,3 +1,5 @@
+{% load render_bundle from webpack_loader %}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html class="h-100" color-mode="dark">
 
@@ -9,7 +11,7 @@
         {% if debug %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/bordercore.css" />
         {% else %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.min.css" />
+            {% render_bundle "dist/css/bordercore" %}
         {% endif %}
 
     </head>
@@ -71,7 +73,7 @@
         {% if debug %}
             <script type="text/javascript" src="{{ STATIC_URL }}dist/js/javascript-bundle.js.gz"></script>
         {% else %}
-            <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
+            {% render_bundle "dist/js/javascript" %}
         {% endif %}
 
         <script>

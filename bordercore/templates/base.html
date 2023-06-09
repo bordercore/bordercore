@@ -11,8 +11,8 @@
 
         {% if debug %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/bordercore.css" />
-            {% else %}
-        {% render_bundle "dist/css/bordercore" %}
+        {% else %}
+            {% render_bundle "dist/css/bordercore" %}
         {% endif %}
 
         {% block extra_head %}{% endblock %}
