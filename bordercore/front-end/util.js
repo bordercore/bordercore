@@ -223,7 +223,9 @@ export function addCopyButton() {
         button.setAttribute("type", "button");
         button.addEventListener("click", function(evt) {
             if (navigator.clipboard) {
-                navigator.clipboard.writeText(code.textContent);
+                // Remove any leading "$" prompts
+                const textContent = code.textContent.replaceAll(/^\$ /igm, "");
+                navigator.clipboard.writeText(textContent);
                 linkSpan.textContent = "Copied!";
                 setTimeout(resetCopyButton.bind(null, evt.currentTarget), 5000);
             }
