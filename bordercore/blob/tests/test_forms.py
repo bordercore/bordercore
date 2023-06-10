@@ -59,10 +59,7 @@ def test_blob_form_add(auto_login_user, blob_pdf_factory):
     # Test adding a duplicate blob file.
     # This is the same blob used in the blob_pdf_factory fixture,
     #  which should generate a form error.
-    file_path = Path(__file__).parent / "resources/test_blob.pdf"
-    with open(file_path, "rb") as fh:
-        file_blob = fh.read()
-    file_upload = SimpleUploadedFile(file_path.name, file_blob)
+    file_upload = SimpleUploadedFile(blob_pdf_factory[0].file.name, blob_pdf_factory[0].file.read())
 
     form_data = {
         "date": faker.date(),

@@ -9,6 +9,9 @@ import boto3
 import factory
 import pytest
 from faker import Factory as FakerFactory
+from faker_file.providers.pdf_file import PdfFileProvider
+from faker_file.providers.pdf_file.generators.reportlab_generator import \
+    ReportlabPdfGenerator
 from PIL import Image
 
 from django import urls
@@ -30,6 +33,7 @@ except ModuleNotFoundError:
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 faker = FakerFactory.create()
+faker.add_provider(PdfFileProvider)
 
 
 def mock(*args, **kwargs):
@@ -156,7 +160,7 @@ def test_blob_delete(monkeypatch_blob, auto_login_user, blob_text_factory):
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory):
+def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory, blob_pdf_factory):
 
     _, client = auto_login_user()
 
@@ -169,14 +173,12 @@ def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory):
     assert resp.status_code == 200
 
     # The submitted form
-    file_path = Path(__file__).parent / "resources/test_blob.pdf"
-    with open(file_path, "rb") as f:
-        file_blob = f.read()
-    file_upload = SimpleUploadedFile(file_path.name, file_blob)
+    file = faker.pdf_file(pdf_generator_cls=ReportlabPdfGenerator)
+    file_upload = SimpleUploadedFile(file.data["filename"], bytes(file.data["content"], "utf-8"))
     url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
     resp = client.post(url, {
         "file": file_upload,
-        "filename": file_path.name,
+        "filename": blob_pdf_factory[0].file.name,
         "importance": 1,
         "name": "Name Changed",
         "note": "Note Changed",

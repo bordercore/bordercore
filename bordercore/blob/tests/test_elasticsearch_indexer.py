@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 import responses
 from elasticsearch_dsl import Range
@@ -81,11 +79,6 @@ def test_get_range_from_date():
     assert get_range_from_date(date) == Range(gte=date1, lte=date2)
 
 
-def test_get_num_pages():
+def test_get_num_pages(blob_pdf_factory):
 
-    filepath = Path(__file__).parent / "resources/test_blob.pdf"
-
-    with open(filepath, "rb") as fh:
-        contents = fh.read()
-
-    assert get_num_pages(contents) == 18
+    assert get_num_pages(blob_pdf_factory[0].file.read()) == 2

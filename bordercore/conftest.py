@@ -13,6 +13,9 @@ import botocore
 import fitz
 import pytest
 from faker import Factory as FakerFactory
+from faker_file.providers.pdf_file import PdfFileProvider
+from faker_file.providers.pdf_file.generators.reportlab_generator import \
+    ReportlabPdfGenerator
 from PIL import Image
 
 import django
@@ -74,6 +77,8 @@ GECKO_DRIVER_LOGFILE = f"/tmp/geckodriver-{getpass.getuser()}.log"
 os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 
 faker = FakerFactory.create()
+faker.add_provider(PdfFileProvider)
+
 
 @pytest.fixture()
 def temp_blob_directory():
@@ -188,8 +193,9 @@ def blob_note(temp_blob_directory, db, s3_resource, s3_bucket):
 @pytest.fixture()
 def blob_pdf_factory(temp_blob_directory, db, s3_resource, s3_bucket):
 
-    filepath = Path(__file__).parent / "blob/tests/resources/test_blob.pdf"
-    with open(filepath, "rb") as fh:
+    file = faker.pdf_file(pdf_generator_cls=ReportlabPdfGenerator)
+
+    with open(file.data["filename"], "rb") as fh:
         file_contents = fh.read()
 
     yield _create_blob(file_contents=file_contents, extension="pdf")
