@@ -199,7 +199,7 @@
                     }
                 };
 
-                function getTodoList() {
+                function getTodoList(uuid) {
                     doGet(
                         "{% url 'todo:get_tasks' %}" +
                         `?tag=${filterTag.value}` +
@@ -210,6 +210,11 @@
                             items.value = response.data.todo_list;
                             filterPriorityOptions.value = response.data.priority_counts;
                             filterTimeOptions.value = response.data.created_counts;
+                            if (uuid) {
+                                // If a uuid is given, open the modal dialog for that todo task
+                                const todo = items.value.find(x => x.uuid === uuid);
+                                onClickUpdate(todo);
+                            }
                         },
                         "Error getting todo list",
                     );
@@ -432,7 +437,7 @@
                 });
 
                 onMounted(() => {
-                    getTodoList();
+                    getTodoList("{{ uuid }}");
                 });
 
                 return {

@@ -24,5 +24,10 @@ urlpatterns = [
         route="reschedule_task",
         view=views.reschedule_task,
         name="reschedule_task"
-    )
+    ),
+    path(
+        route="<uuid:uuid>",
+        view=views.TodoListView.as_view(),
+        name="detail"
+    ),
 ]

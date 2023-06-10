@@ -21,21 +21,30 @@ class TodoListView(ListView):
     template_name = "todo/index.html"
     context_object_name = "info"
 
-    def get_filter(self):
+    def get_filter(self, tag=None):
 
         return {
             "todo_filter_priority": self.request.session.get("todo_filter_priority", ""),
             "todo_filter_time": self.request.session.get("todo_filter_time", ""),
-            "todo_filter_tag": self.request.session.get("todo_filter_tag", ""),
+            "todo_filter_tag": tag or self.request.session.get("todo_filter_tag", ""),
         }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        filter = self.get_filter()
+
+        # If a uuid is given in the url, store the associated
+        #  task and set one of its tags to be the filter.
+        if "uuid" in self.kwargs:
+            context["uuid"] = self.kwargs["uuid"]
+            todo = Todo.objects.get(uuid=self.kwargs["uuid"])
+            filter["todo_filter_tag"] = todo.tags.first()
+
         return {
             **context,
             "tags": Todo.get_todo_counts(self.request.user),
-            "filter": self.get_filter(),
+            "filter": filter,
             "priority_list": json.dumps(Todo.PRIORITY_CHOICES),
         }
 

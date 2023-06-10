@@ -574,6 +574,8 @@ def get_link(doc_type, match):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
     if doc_type == "drill":
         return reverse("drill:detail", kwargs={"uuid": match["uuid"]})
+    if doc_type == "todo":
+        return reverse("todo:detail", kwargs={"uuid": match["uuid"]})
 
     return ""
 
