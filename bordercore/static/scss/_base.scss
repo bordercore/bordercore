@@ -2729,6 +2729,32 @@ pre[class^="language-"] {
   }
 }
 
+//
+// Effects
+//
+
+.animated-gradient-box {
+  border: 3px solid #0000;
+  animation: 8s rotate linear infinite;
+  background: linear-gradient(#131219, #131219) padding-box, linear-gradient(
+    var(--angle),
+    #070707,
+    #687aff
+  ) border-box;
+  border-radius: 12px;
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: "<angle>";
+}
 
 // Gallery
 #gallery {
