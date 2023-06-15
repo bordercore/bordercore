@@ -172,21 +172,18 @@
                 const background_image_filename = ref("{{ object.background_image|default:"" }}");
                 const deleteSidebar = ref(false);
 
-                onMounted(() => {
-                    const el = document.getElementById("id_theme");
-                    el.addEventListener("change", onSelectTheme, false);
-                });
+                useEvent("click", onSelectTheme, {id: "id_theme"});
 
-                function onChangeBackgroundImage(evt) {
-                    background_image_filename.value = evt.target.files[0].name;
+                function onChangeBackgroundImage(event) {
+                    background_image_filename.value = event.target.files[0].name;
                 };
 
-                function onChangeSidebarImage(evt) {
-                    filename.value = evt.target.files[0].name;
+                function onChangeSidebarImage(event) {
+                    filename.value = event.target.files[0].name;
                 };
 
-                function onSelectTheme(evt) {
-                    const theme = evt.target.value;
+                function onSelectTheme(event) {
+                    const theme = event.target.value;
                     document.documentElement.setAttribute("color-mode", theme);
                 };
 

@@ -774,9 +774,9 @@
                     updateDateFormatMenu(newFormat);
                 })
 
-                onMounted(() => {
-                    document.getElementById("id_date").addEventListener("paste", onPasteDate);
+                useEvent("paste", onPasteDate, {id: "id_date"});
 
+                onMounted(() => {
                     mdEditor.value.insert((selected) => {
                         return {
                             text: "{{ form.content.value|default:""|escapejs }}",

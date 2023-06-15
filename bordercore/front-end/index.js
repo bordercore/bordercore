@@ -16,6 +16,9 @@ window.ref = ref;
 window.watch = watch;
 
 // Vue composables
+import useEvent from "./useEvent.js";
+window.useEvent = useEvent;
+
 import mouseRating from "./useMouseRating.js";
 window.mouseRating = mouseRating;
 

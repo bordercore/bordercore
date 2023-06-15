@@ -83,6 +83,7 @@
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
     import {boldenOption} from "/front-end/util.js";
     import SelectValue from "../common/SelectValue.vue";
+    import useEvent from "/front-end/useEvent.js";
 
     export default {
         components: {
@@ -157,6 +158,9 @@
                 },
             ]);
 
+            useEvent("click", handleClick, {});
+            useEvent("keydown", handleKeyDown, {});
+
             function focusSearch() {
                 selectValue.value.focus();
             }
@@ -168,6 +172,15 @@
                 return filter.length > 0 ? filter[0].name : "";
             };
 
+            function handleKeyDown(event) {
+                if (event.key === "s" && event.altKey) {
+                    showSearchWindow.value = true;
+                    setTimeout(() => {
+                        focusSearch();
+                    }, 200);
+                }
+            };
+
             function handleFilter(filter) {
                 searchFilter.value = searchFilter.value === filter ? "" : filter;
                 saveSearchFilter(searchFilter);
@@ -175,6 +188,25 @@
 
             function handleRecentSearch(searchTerm) {
                 window.location=props.querySearchUrl + "?search=" + searchTerm.search_text;
+            };
+
+            // If a click was detected outside this component, *and*
+            //  the click wasn't on the "Search icon", *and* the click
+            //  wasn't on the filter close button, then hide the component.
+            function handleClick(event) {
+                const specifiedElement = document.getElementById("top-search");
+                if (!specifiedElement) {
+                    return;
+                }
+                const isClickInside = specifiedElement.contains(event.target) || specifiedElement.contains(event.target.parentElement);
+                if (!isClickInside &&
+                    !event.target.classList.contains("fa-search") &&
+                    !event.target.classList.contains("fa-times") &&
+                    !event.target.parentElement.classList.contains("fa-times") &&
+                    !event.target.parentElement.classList.contains("fa-search")
+                ) {
+                    showSearchWindow.value = false;
+                }
             };
 
             function onKeyDown(evt) {
@@ -239,36 +271,6 @@
                 }
                 form.submit();
             };
-
-            onMounted(() => {
-                document.addEventListener("keydown", function(evt) {
-                    if (evt.key === "s" && evt.altKey) {
-                        showSearchWindow.value = true;
-                        setTimeout(() => {
-                            focusSearch();
-                        }, 200);
-                    }
-                } );
-
-                // If a click was detected outside this component, *and*
-                //  the click wasn't on the "Search icon", *and* the click
-                //  wasn't on the filter close button, then hide the component.
-                document.addEventListener("click", function(event) {
-                    const specifiedElement = document.getElementById("top-search");
-                    if (!specifiedElement) {
-                        return;
-                    }
-                    const isClickInside = specifiedElement.contains(event.target) || specifiedElement.contains(event.target.parentElement);
-                    if (!isClickInside &&
-                        !event.target.classList.contains("fa-search") &&
-                        !event.target.classList.contains("fa-times") &&
-                        !event.target.parentElement.classList.contains("fa-times") &&
-                        !event.target.parentElement.classList.contains("fa-search")
-                    ) {
-                        showSearchWindow.value = false;
-                    }
-                });
-            });
 
             return {
                 searchUrl,
