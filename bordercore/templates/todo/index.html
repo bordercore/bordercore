@@ -83,6 +83,7 @@
                 </div>
 
                 <o-table
+                    ref="table"
                     :data="items"
                     :default-sort="[defaultSort.field, defaultSort.direction]"
                     draggable
@@ -186,7 +187,7 @@
                 let draggingRow = null;
                 const filterPriorityOptions = ref();
                 const filterTimeOptions = ref();
-
+                const table = ref(null);
                 const updateTodo = ref(null);
 
                 const defaultSort = JSON.parse("{{ request.session.todo_sort|escapejs|default:'{\"field\":\"sort_order\", \"direction\":\"asc\"}' }}");
@@ -248,7 +249,20 @@
                             "toast",
                             {
                                 "title": "Error",
-                                "body": "Drag and drop is only supported if only a tag filter is applied",
+                                "body": "Sorting is only supported if only a tag filter is applied",
+                                "variant": "danger",
+                            },
+                        );
+                        return;
+                    }
+                    if (table.value.currentSortColumn.field !== "sort_order" ||
+                        !table.value.isAsc) {
+                        return;
+                        EventBus.$emit(
+                            "toast",
+                            {
+                                "title": "Error",
+                                "body": "Sorting is only supported if data is sorted by the 'Manual' column, ascending",
                                 "variant": "danger",
                             },
                         );
@@ -469,12 +483,11 @@
                     onShowNote,
                     removeSearchFilter,
                     search,
+                    table,
                     title,
                     updateTodo,
                 };
             },
-            methods: {
-           },
         });
         app.use(FloatingVue);
         app.use(Oruga, {
