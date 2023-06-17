@@ -125,7 +125,7 @@
 
         <div class="col-lg-9">
 
-            <div class="hover-reveal-target card-body me-2" v-cloak>
+            <div id="question" class="hover-reveal-target card-body d-none me-2" v-cloak>
 
                 <div class="d-flex">
                     <h3 class="drill-text table-borders table-colors markdown mw-100 w-100" v-html="getQuestion()">
@@ -376,6 +376,11 @@
                                 break;
                         }
                     });
+
+                    // Reveal the question after a short delay to avoid layout shift caused by markdown rendered as HTML
+                    setTimeout(() => {
+                        document.getElementById("question").classList.remove("d-none");
+                    }, 10);
                 });
 
                 return {
