@@ -23,7 +23,7 @@
             </template>
         </card>
         <div class="hover-target flex-grow-1 mb-3">
-            <card title="" class="z-index-positive position-relative h-100 backdrop-filter">
+            <card id="description" title="" class="z-index-positive position-relative h-100 backdrop-filter">
                 <template #content>
                     <div class="d-flex flex-column">
                         <div class="d-flex flex-column">
@@ -226,6 +226,12 @@
                 createChart("last_workout_weights", props.weight, "Weight");
                 createChart("last_workout_reps", props.reps, "Reps");
                 createChart("last_workout_duration", props.duration, "Duration");
+
+                // Notify the user if a note exists
+                if (note.value) {
+                    const element = document.querySelector("#description");
+                    element.classList.add("animate__animated", "animate__wobble", "animate__delay-1s");
+                }
             });
 
             return {
