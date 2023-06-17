@@ -378,7 +378,7 @@
                                             <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end">[[ m.name ]]</label>
                                             <div class="col-lg-10 col-sm-10">
                                                 <div class="input-group">
-                                                    <input type="text" :value="m.value" class="form-control" autocomplete="off" />
+                                                    <input type="text" v-model="m.value" class="form-control" autocomplete="off" />
                                                     <span class="input-group-append">
                                                         <button class="btn btn-danger btn-remove" type="button" @click="deleteMetadata(index)">
                                                             <span>
@@ -483,7 +483,7 @@
                 const fileObject = ref();
                 const isDragOver = reactive({content: false, coverImage: false, file: false, note: false});
                 const showRelatedTags = ref(false);
-                const metadata = ref(JSON.parse(document.getElementById("metadata").textContent))
+                const metadata = ref(JSON.parse(document.getElementById("metadata").textContent));
                 const metadataJson = computed(() => {
                     return JSON.stringify(metadata.value);
                 });
