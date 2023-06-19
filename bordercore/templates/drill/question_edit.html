@@ -112,15 +112,21 @@
                         </tags-input>
                         {% for error in form.tags.errors %}
                             <span class="form-error">Error: {{ error }}</span>
-                        {% endfor %}
+                            {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">Reversible</label>
+                    <div class="col-lg-9 d-flex">
+                        <o-switch v-model="isReversible" name="is_reversible" :native-value="is_reversible" />
                     </div>
                 </div>
 
                 <div>
                     <div class="col-lg-9 offset-lg-2" id="button-wrapper">
                         <input class="btn btn-primary ms-1" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
-                        <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary ms-3" type="submit" name="Go"
-                               value="Delete" />
+                        <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary ms-3" type="submit" name="Go" value="Delete" />
                         <a class="ms-3"
                            href="{% if request.GET.return_url %}{{ request.GET.return_url }}{% else %}{% url 'drill:list' %}{% endif %}">Cancel</a>
                     </div>
@@ -153,6 +159,7 @@
                 const newQuestion = ref({% if action == "Add" %} true{% else %} false{% endif %});
                 const answer = ref("{{ object.answer|default:form.answer.value|default_if_none:""|escapejs }}");
                 const question = ref("{{ object.question|default:form.question.value|default_if_none:""|escapejs }}");
+                const isReversible = ref({{ form.is_reversible.value|yesno:"true,false" }});
 
                 const mdEditorAnswer = ref(null);
                 const mdEditorQuestion = ref(null);
@@ -238,6 +245,7 @@
                 return {
                     answer,
                     enableDeleteButton,
+                    isReversible,
                     mdEditorAnswer,
                     mdEditorQuestion,
                     newQuestion,

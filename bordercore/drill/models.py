@@ -38,6 +38,7 @@ class Question(TimeStampedModel):
     interval = models.DurationField(default=timedelta(days=1), blank=False, null=False)
     interval_index = models.IntegerField(default=0, null=False)
     is_favorite = models.BooleanField(default=False)
+    is_reversible = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bc_objects = models.ManyToManyField("drill.BCObject", through="drill.QuestionToObject", through_fields=("node", "bc_object"))
 

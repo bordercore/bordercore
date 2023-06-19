@@ -39,7 +39,7 @@ class QuestionForm(ModelForm):
 
     class Meta:
         model = Question
-        fields = ("question", "answer", "tags")
+        fields = ("question", "answer", "is_reversible", "tags")
         widgets = {
             # Add "v-pre" attribute in case the question or answer happens to contain
             #  any Vue mustache tags

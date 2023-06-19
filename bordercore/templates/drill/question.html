@@ -128,7 +128,7 @@
             <div id="question" class="hover-reveal-target card-body d-none me-2" v-cloak>
 
                 <div class="d-flex">
-                    <h3 class="drill-text table-borders table-colors markdown mw-100 w-100" v-html="getQuestion()">
+                    <h3 class="drill-text table-borders table-colors markdown mw-100 w-100" v-html="reverseQuestion ? getAnswer() : getQuestion()">
                     </h3>
                 </div>
 
@@ -163,7 +163,7 @@
                      <div v-if="mode === 'answer'" v-cloak>
                          <div>
                              <hr class="divider mt-3" />
-                             <h3 class="drill-text table-borders table-colors markdown" v-html="getAnswer()">
+                             <h3 class="drill-text table-borders table-colors markdown" v-html="reverseQuestion ? getQuestion() : getAnswer()">
                              </h3>
 
                             <div class="d-flex mt-5">
@@ -285,6 +285,7 @@
                 const intervalString = ref("");
                 const intervals = JSON.parse(document.getElementById("intervals").textContent);
                 const mode = ref("question");
+                const reverseQuestion = {{ reverse_question|yesno:"true,false" }};
 
                 const objectSelect = ref(null);
                 const pythonConsole = ref(null);
@@ -394,6 +395,7 @@
                     openObjectSelectModal,
                     pythonConsole,
                     relatedObjectsList,
+                    reverseQuestion,
                     selectObject,
                     setMode,
                     showPythonConsole,
