@@ -43,20 +43,22 @@ export default function() {
         nextTick(() => {
             animateCSS(evt.currentTarget, "heartBeat");
         });
-        doPost(
-            url,
-            {
-                "song_uuid": row.uuid,
-                "rating": rating,
-            },
-            (response) => {
-                for (const song of songList) {
-                    if (song.uuid === row.uuid) {
-                        song.rating = rating;
+        if (url) {
+            doPost(
+                url,
+                {
+                    "song_uuid": row.uuid,
+                    "rating": rating,
+                },
+                () => {
+                    for (const song of songList) {
+                        if (song.uuid === row.uuid) {
+                            song.rating = rating;
+                        }
                     }
-                }
-            },
-        );
+                },
+            );
+        }
     };
 
     function handleRowMouseLeave(event) {

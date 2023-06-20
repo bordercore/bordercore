@@ -590,7 +590,7 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
             parameters = {
                 x: self.request.POST[x]
                 for x in
-                ["start_year", "end_year", "exclude_recent"]
+                ["start_year", "end_year", "exclude_recent", "rating"]
                 if x in self.request.POST and self.request.POST[x] != ""
             }
             parameters["exclude_albums"] = exclude_albums

@@ -95,7 +95,6 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
-                                    <input type="hidden" name="rating" :value="rating">
                                     <input id="id_type_rating" v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="rating">
                                     <label class="from-check-label text-nowrap" for="id_type_rating">
                                         Rating
@@ -104,15 +103,15 @@
                             </div>
                             <div class="col-lg-8">
                                 <label class="form-check-label d-flex">
-                                    <div @mouseleave="onMouseLeaveRatingContainer">
+                                    <div class="rating-container d-flex" :class="{'d-none': rating === ''}" @mouseleave="handleRatingMouseLeave">
                                         <span
                                             v-for="starCount in Array(5).fill().map((x,i)=>i)"
                                             :key="starCount"
                                             class="rating me-1"
-                                            :class="getStarClass(starCount)"
+                                            :class="{'rating-star-selected': parseInt(rating, 10) > starCount}"
                                             :data-rating="starCount"
-                                            @click="setRating($event, starCount)"
-                                            @mouseover="onMouseOverRating(starCount)"
+                                            @click="handleSetRating($event, starCount)"
+                                            @mouseover="handleRatingMouseOver($event, starCount)"
                                         >
                                             <font-awesome-icon icon="star" />
                                         </span>
@@ -122,6 +121,7 @@
                         </div>
                     </div>
                     <input v-else type="hidden" name="type" :value="playlist.type">
+                    <input type="hidden" name="rating" :value="rating">
 
                     <transition name="fade">
                         <div v-if="smartType !== 'manual'">
@@ -176,6 +176,7 @@
 <script>
 
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import mouseRating from "/front-end/useMouseRating.js";
     import TagsInput from "/front-end/vue/common/TagsInput.vue";
 
     export default {
@@ -209,13 +210,15 @@
             const smartType = ref(getAttribute("type", "manual"));
             const startYear = ref(getAttribute("start_year", undefined));
 
+            const {handleRatingMouseLeave, handleRatingMouseOver, setRating} = mouseRating();
+
             const disabledCreateButton = computed(() => {
                 if (smartType === "tag" &&
                     (this.$refs.smartListTag && this.$refs.smartListTag.tags.length === 0)) {
                     return true;
                 } else if (smartType === "time" &&
-                           (!startYear || !endYear) ||
-                           parseInt(endYear) < parseInt(startYear)) {
+                    (!startYear || !endYear) ||
+                    parseInt(endYear) < parseInt(startYear)) {
                     return true;
                 }
                 return false;
@@ -232,12 +235,10 @@
                 return defaultValue;
             }
 
-            function getStarClass(rating) {
-                if (rating <= rating - 1) {
-                    return "rating-star-selected";
-                }
-                return "";
-            }
+            function handleSetRating(event, starCount) {
+                setRating(event, {rating: rating.value}, starCount);
+                rating.value = starCount + 1;
+            };
 
             function onClickCreate(evt) {
                 const modal = new Modal("#modalAdd");
@@ -247,59 +248,18 @@
                 }, 500);
             }
 
-            function onMouseLeaveRatingContainer() {
-                const els = document.querySelectorAll(".rating");
-                for (const el of els) {
-                    el.classList.remove("rating-star-hovered");
-                }
-            }
-
-            function onMouseOverRating(rating) {
-                if (smartType !== "rating") {
-                    return;
-                }
-                const els = document.querySelectorAll(".rating");
-                // Loop over each star rating. Add the "hovered" class if:
-                //  1) The rating is > the currently selected rating
-                //  2) The rating is < the currently "hovered" rating
-                for (const el of els) {
-                    if (!el.classList.contains("rating-star-selected") &&
-                        parseInt(el.getAttribute("data-rating"), 10) < rating + 1 ) {
-                        el.classList.add("rating-star-hovered");
-                    } else {
-                        el.classList.remove("rating-star-hovered");
-                    }
-                }
-            }
-
-            function setRating(evt, ratingParam) {
-                if (smartType === "rating") {
-                    if (ratingParam + 1 === rating.value) {
-                        // If we've selected the current rating, treat it
-                        // as if we've de-selected a rating entirely
-                        // and remove it.
-                        rating.value = "";
-                    } else {
-                        rating.value = rating.value + 1;
-                    }
-                    nextTick(() => {
-                        animateCSS(evt.currentTarget, "heartBeat");
-                    });
-                }
-            }
-
             return {
                 disabledCreateButton,
                 endYear,
                 excludeAlbums,
                 excludeRecent,
                 getAttribute,
-                getStarClass,
+                handleRatingMouseLeave,
+                handleRatingMouseOver,
+                handleSetRating,
                 name,
                 note,
                 onClickCreate,
-                onMouseLeaveRatingContainer,
-                onMouseOverRating,
                 rating,
                 setRating,
                 size,

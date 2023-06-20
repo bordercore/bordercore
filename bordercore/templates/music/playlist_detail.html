@@ -47,6 +47,15 @@
                         Manually created playlist
                     </div>
 
+                {% elif playlist.type == "rating" %}
+
+                    <div>
+                        Songs with a
+                        <strong class="text-primary">
+                            {{ playlist.parameters.rating }} star
+                        </strong>
+                        rating
+                    </div>
                 {% endif %}
 
                 {% if playlist.parameters.exclude_recent %}
