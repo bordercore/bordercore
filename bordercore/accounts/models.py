@@ -125,18 +125,6 @@ def remove_tag_for_drill(sender, instance, **kwargs):
     instance.handle_delete()
 
 
-def pinned_tags_has_changed(initial, form):
-    """
-    Check if the CSV list of pinned tags has been changed. Account
-    for spaces between the tags and the sort order.
-    """
-
-    initial_sorted = sorted(initial.replace(" ", "").split(","))
-    form_sorted = sorted(form.replace(" ", "").split(","))
-
-    return not set(initial_sorted) == set(form_sorted)
-
-
 @receiver(pre_delete, sender=UserNote)
 def remove_note(sender, instance, **kwargs):
     instance.handle_delete()

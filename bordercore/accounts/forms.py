@@ -3,8 +3,6 @@ from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
 
 from accounts.models import UserProfile
 from collection.models import Collection
-from lib.fields import ModelCommaSeparatedChoiceField
-from tag.models import Tag
 
 
 class UserProfileForm(ModelForm):
@@ -15,16 +13,6 @@ class UserProfileForm(ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        # Don't be alarmed by the Tag.objects.all() queryset. Django will
-        #  later filter this on just your pinned tags.
-        self.fields["pinned_tags"] = ModelCommaSeparatedChoiceField(
-            request=self.request,
-            required=False,
-            id="id_tags",
-            queryset=Tag.objects.filter(user=self.request.user),
-            to_field_name="name")
-        self.initial["pinned_tags"] = self.instance.get_tags()
-        self.fields["pinned_tags"].widget.attrs["class"] = "form-control"
         self.fields["drill_intervals"].widget.attrs["class"] = "form-control"
         self.fields["nytimes_api_key"].label = "NYTimes API key"
         self.fields["nytimes_api_key"].required = False
@@ -57,7 +45,6 @@ class UserProfileForm(ModelForm):
             "theme",
             "background_image",
             "sidebar_image",
-            "pinned_tags",
             "homepage_default_collection",
             "homepage_image_collection",
             "drill_intervals",

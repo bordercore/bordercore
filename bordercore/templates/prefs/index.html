@@ -110,14 +110,7 @@
                             <div class="{% if field.errors %} error{% endif %} row mb-3">
                                 <label class="fw-bold col-lg-3 col-sm-2 col-form-label text-end" for="inputTitle">{{ field.label }}</label>
                                 <div class="col-lg-7">
-                            {% if field.label == 'Pinned tags' %}
-                                <tags-input
-                                    id="id_pinned_tags"
-                                    search-url="{% url 'tag:search' %}?query="
-                                    name="pinned_tags"
-                                >
-                                </tags-input>
-                            {% elif field.name == 'instagram_credentials' %}
+                            {% if field.name == 'instagram_credentials' %}
                                 <div class="d-flex">
                                     <input type="text" name="instagram_username" value="{{ instagram_username }}" class="form-control me-2" placeholder="Username" autocomplete="off">
                                     <input type="password" name="instagram_password" value="{{ instagram_password }}" class="form-control ms-2" placeholder="Password" autocomplete="off">
@@ -157,14 +150,11 @@
 
     {{ block.super }}
 
-    {{ tags|json_script:"initial-tags"|default:"" }}
-
     <script type="text/javascript">
 
         const app = createApp({
             components: {
                 FontAwesomeIcon,
-                TagsInput,
             },
             setup() {
                 const deleteBackground = ref(false);

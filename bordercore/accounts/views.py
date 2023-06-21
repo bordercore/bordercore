@@ -10,7 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.contrib.auth.views import PasswordChangeView
-from django.db import transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -18,8 +17,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
-from accounts.models import (UserNote, UserProfile, UserTag,
-                             pinned_tags_has_changed)
+from accounts.models import UserNote, UserProfile
 from blob.models import Blob
 from lib.mixins import FormRequestMixin
 
@@ -35,7 +33,6 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         context["nav"] = "prefs"
         context["title"] = "Preferences"
         context["tags"] = [x.name for x in self.object.pinned_tags.all()[::-1]]
-
         if self.request.user.userprofile.instagram_credentials:
             context["instagram_username"] = self.request.user.userprofile.instagram_credentials.get("username", "")
             context["instagram_password"] = self.request.user.userprofile.instagram_credentials.get("password", "")
@@ -48,24 +45,6 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
     def form_valid(self, form):
         self.handle_sidebar(form)
         self.handle_background_image(form)
-
-        userprofile = form.instance
-
-        # Only update pinned tags if they've changed.
-        if pinned_tags_has_changed(form.initial["pinned_tags"], self.request.POST["pinned_tags"]):
-            with transaction.atomic():
-
-                for tag in userprofile.pinned_tags.all():
-                    s = UserTag.objects.get(userprofile=userprofile, tag=tag)
-                    s.delete()
-
-                # Delete all existing tags
-                userprofile.pinned_tags.clear()
-
-                # Then add the tags specified in the form
-                for tag in form.cleaned_data["pinned_tags"]:
-                    c = UserTag(userprofile=userprofile, tag=tag)
-                    c.save()
 
         object = form.save(commit=False)
 

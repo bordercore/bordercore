@@ -2,7 +2,7 @@ import pytest
 
 from django.contrib.auth.models import User
 
-from accounts.models import UserTag, pinned_tags_has_changed
+from accounts.models import UserTag
 from accounts.tests.factories import TEST_USERNAME
 
 pytestmark = pytest.mark.django_db
@@ -48,16 +48,3 @@ def test_reorder(sort_order_user_tag, tag):
     assert tags[0] == tag[1]
     assert tags[1] == tag[0]
     assert len(tags) == 2
-
-
-def test_pinned_tags_has_changed():
-
-    assert pinned_tags_has_changed("django", "django") is False
-    assert pinned_tags_has_changed("django ", "django") is False
-    assert pinned_tags_has_changed("django,linux", "django,linux") is False
-    assert pinned_tags_has_changed("django, linux", "django,linux") is False
-    assert pinned_tags_has_changed("linux,django", "django,linux") is False
-    assert pinned_tags_has_changed("linux, django", "django,linux") is False
-    assert pinned_tags_has_changed("linux, django,postgresql", "django,linux") is True
-    assert pinned_tags_has_changed("linux, django,postgresql", "") is True
-    assert pinned_tags_has_changed("", "linux, django,postgresql") is True

@@ -6,7 +6,6 @@ from django.urls import reverse
 
 try:
     from selenium.webdriver.common.by import By
-    from selenium.webdriver.common.keys import Keys
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
@@ -21,10 +20,8 @@ class PrefsPage:
     COLLECTION_ID = (By.ID, "id_homepage_default_collection")
     UPDATE_BUTTON = (By.CSS_SELECTOR, "input[value='Update']")
     THEME_SELECTED = (By.CSS_SELECTOR, "select#id_theme option")
-    PINNED_TAGS_INPUT = (By.CSS_SELECTOR, "div#id_pinned_tags input")
     PREFS_UPDATED_MESSAGE = (By.CSS_SELECTOR, "div[class='alert alert-success']")
     DEFAULT_COLLECTION_SELECTED = (By.CSS_SELECTOR, "select#id_homepage_default_collection option")
-    PINNED_TAGS = (By.CSS_SELECTOR, "div#id_pinned_tags")
 
     def __init__(self, browser):
         self.browser = browser
@@ -53,12 +50,6 @@ class PrefsPage:
         select = Select(self.browser.find_element(*self.COLLECTION_ID))
         select.select_by_visible_text(collection_name)
 
-    def add_pinned_tags(self, tag_name):
-        pinned_tags_input = self.browser.find_element(*self.PINNED_TAGS_INPUT)
-        pinned_tags_input.send_keys(tag_name + Keys.ENTER)
-        time.sleep(1)
-        pinned_tags_input.send_keys(Keys.ENTER)
-
     def selected_theme(self):
         options = self.browser.find_elements(*self.THEME_SELECTED)
         return [x for x in options if x.is_selected()][0].text
@@ -86,7 +77,3 @@ class PrefsPage:
         """
         message = self.browser.find_element(*self.PREFS_UPDATED_MESSAGE)
         return message.text
-
-    def pinned_tags(self):
-        selected_option = self.browser.find_element(*self.PINNED_TAGS)
-        return selected_option.text
