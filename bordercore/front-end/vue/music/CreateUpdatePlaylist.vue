@@ -161,6 +161,15 @@
                                     </label>
                                 </div>
                             </div>
+
+                            <div class="row mt-3">
+                                <div class="col-lg-12 d-flex align-items-center">
+                                    <o-switch v-model="refreshSongList" name="refresh_song_list" :native-value="refreshSongList" />
+                                    <label class="ms-2">
+                                        Refresh song list
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </transition>
                 </div>
@@ -209,6 +218,7 @@
             const size = ref(getAttribute("size", 20));
             const smartType = ref(getAttribute("type", "manual"));
             const startYear = ref(getAttribute("start_year", undefined));
+            const refreshSongList = ref(false);
 
             const {handleRatingMouseLeave, handleRatingMouseOver, setRating} = mouseRating();
 
@@ -261,6 +271,7 @@
                 note,
                 onClickCreate,
                 rating,
+                refreshSongList,
                 setRating,
                 size,
                 smartType,

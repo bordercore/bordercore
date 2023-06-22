@@ -585,6 +585,7 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
                "size" in form.changed_data
                or exclude_albums != playlist.parameters.get("exclude_albums", False)
                or self.request.POST.get("exclude_recent", "") != playlist.parameters.get("exclude_recent", "")
+               or self.request.POST.get("refresh_song_list", False)
            ):
 
             parameters = {
