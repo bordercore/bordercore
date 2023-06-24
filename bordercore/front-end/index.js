@@ -74,7 +74,7 @@ window.Modal = Modal;
 window.Tab = Tab;
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faExternalLinkAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faGripHorizontal, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faExternalLinkAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faComment, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faGripHorizontal, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faAws} from "@fortawesome/free-brands-svg-icons";
 import {faPython} from "@fortawesome/free-brands-svg-icons";
@@ -98,6 +98,7 @@ library.add(faChevronLeft);
 library.add(faChevronRight);
 library.add(faChevronUp);
 library.add(faClone);
+library.add(faComment);
 library.add(faCopy);
 library.add(faDownload);
 library.add(faEllipsisV);
@@ -165,6 +166,9 @@ window.doPost = doPost;
 window.doPut = doPut;
 window.getFormattedDate = getFormattedDate;
 window.animateCSS = animateCSS;
+
+import ChatBot from "./vue/blob/ChatBot.vue";
+window.ChatBot = ChatBot;
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
 window.EditableTextArea= EditableTextArea;

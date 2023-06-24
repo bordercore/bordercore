@@ -1,5 +1,7 @@
+
 import datetime
 import hashlib
+import json
 import os
 import re
 import urllib.request
@@ -9,6 +11,7 @@ from urllib.parse import urlparse
 
 import humanize
 import instaloader
+import openai
 import requests
 from instaloader import Post
 
@@ -460,3 +463,31 @@ def import_newyorktimes(user, url):
     blob.index_blob()
 
     return blob
+
+
+def chatbot(args):
+
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
+    messages = None
+
+    if "blob_uuid" in args:
+        blob_content = Blob.objects.get(uuid=args["blob_uuid"]).content
+        messages = [
+            {
+                "role": "user",
+                "content": f"{args['content']}: Follow all instructions and answer all questions solely based on the following text: {blob_content}"
+            }
+        ]
+    else:
+        chat_history = json.loads(args["chat_history"])
+        messages = [{k: v for k, v in d.items() if k != "id"} for d in chat_history]
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages
+    )
+
+    return {
+        "response": response["choices"][0]["message"]["content"],
+        "status": "OK"
+    }

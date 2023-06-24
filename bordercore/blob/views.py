@@ -19,7 +19,7 @@ from django.views.generic.list import ListView
 from blob.forms import BlobForm
 from blob.models import (Blob, BlobTemplate, BlobToObject, MetaData,
                          RecentlyViewedBlob)
-from blob.services import import_blob
+from blob.services import chatbot, import_blob
 from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
 from drill.models import Question
@@ -584,3 +584,17 @@ def get_template(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def chat(request):
+
+    try:
+        return_value = chatbot(request.POST)
+    except Exception as e:
+        return_value = {
+            "message": str(e),
+            "status": "Error"
+        }
+
+    return JsonResponse(return_value)

@@ -90,4 +90,9 @@ urlpatterns = [
         view=views.get_template,
         name="get_template"
     ),
+    path(
+        route="chat",
+        view=views.chat,
+        name="chat"
+    ),
 ]

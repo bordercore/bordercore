@@ -1766,7 +1766,6 @@ div #dateapp {
 }
 
 #section-cover-image {
-
   div div:nth-child(1) {
     padding-right: 8rem;
     font-size: 1.25rem;
@@ -1774,6 +1773,38 @@ div #dateapp {
 
   input {
     max-width: 4rem;
+  }
+}
+
+#chatbot {
+  position: fixed;
+  bottom: 1rem;
+
+  .chatbot-container {
+    background-color: var(--surface3);
+    border-radius: var(--border-radius1);
+  }
+
+  .chatbot-messages {
+    overflow: scroll;
+    height: 20rem;
+    background-color: var(--surface6);
+  }
+
+  .chatbot-mode {
+    width: 10rem;
+  };
+
+  .chatbot-user {
+    color: var(--text1);
+  }
+
+  .chatbot-assistant {
+    color: var(--text4);
+  }
+
+  .chatbot-waiting {
+    color: var(--text3);
   }
 }
 

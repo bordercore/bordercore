@@ -273,6 +273,13 @@
                                     </span>
                                 </a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="handleChatBot()">
+                                    <span>
+                                        <font-awesome-icon icon="comment" class="text-primary me-3"></font-awesome-icon>ChatBot
+                                    </span>
+                                </a>
+                            </li>
                             {% if blob.is_note %}
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onClickPinnedNote">
@@ -355,7 +362,12 @@
             </div>
 
         </div>
-
+        <chat-bot
+            v-if="showChatBot"
+            blob-uuid="{{ blob.uuid }}"
+            chat-url="{% url 'blob:chat' %}"
+        >
+        </chat-bot>
     </div>
 
 {% endblock %}
@@ -397,6 +409,7 @@
                 BackReferences,
                 BlobDetailCover,
                 Card,
+                ChatBot,
                 DropDownMenu,
                 FloatingVue,
                 FontAwesomeIcon,
@@ -413,6 +426,7 @@
                 let getBlobInfoAttempts = 0;
                 const tree = JSON.parse(document.getElementById("tree").textContent);
                 const metadataMisc = JSON.parse(document.getElementById("metadataMisc").textContent);
+                const showChatBot = ref(false);
 
                 const addToCollection = ref(null);
                 const objectSelect = ref(null);
@@ -457,6 +471,15 @@
                     const input = evt.querySelector("input");
                     if (input) {
                         input.focus();
+                    }
+                };
+
+                function handleChatBot() {
+                    showChatBot.value = !showChatBot.value;
+                    if (showChatBot.value) {
+                        nextTick(() => {
+                            document.querySelector("#chatbot input").focus();
+                        });
                     }
                 };
 
@@ -565,6 +588,7 @@
                     getNote,
                     getRelatedBlobNote,
                     handleAddToCollection,
+                    handleChatBot,
                     handleCopySha1sum,
                     handleDelete,
                     handleObjectAdd,
@@ -578,6 +602,7 @@
                     pinnedButtonValue,
                     pluralize,
                     relatedObjectsList,
+                    showChatBot,
                     tree,
                 };
             },
