@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 
 import requests
+from dotenv import load_dotenv
 
 from django.conf import settings
 
@@ -37,9 +38,8 @@ requests_log = logging.getLogger("requests").setLevel(logging.WARNING)
 
 def get_drf_token():
 
-    with open(f"{settings.BASE_DIR}/config/settings/secrets.json") as f:
-        secrets = json.loads(f.read())
-    return secrets["DRF_TOKEN_JERRELL"]
+    load_dotenv(f"{settings.BASE_DIR}/config/settings/secrets.env")
+    return os.environ["DRF_TOKEN_JERRELL"]
 
 
 def store_email(title, lines):
