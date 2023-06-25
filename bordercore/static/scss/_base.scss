@@ -1245,6 +1245,10 @@ blockquote > p {
   right: 0.25rem;
   width: 25rem;
   background-color: var(--surface2) !important;
+
+  .multiselect__tags {
+    box-shadow: #212529 1rem 1rem 3rem 1rem, #212529 -1rem -1rem 3rem 1rem;
+  }
 }
 
 #top-bar {
@@ -1252,6 +1256,10 @@ blockquote > p {
   margin: var(--grid-margin) var(--grid-margin) var(--grid-margin) var(--grid-margin);
   background-color: var(--surface1);
   border-radius: 0.4rem;
+
+  #top-search-bar {
+    right: 16rem;
+  }
 }
 
 //  Set the z-index to something above 50 to be visible if using

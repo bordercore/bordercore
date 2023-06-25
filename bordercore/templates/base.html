@@ -51,12 +51,12 @@
 
                         <div id="top-bar" class="row">
 
-                            <div class="col-lg-7 card-grid my-auto text-truncate ps-4" id="top-title">
+                            <div class="col-lg-9 card-grid my-auto text-truncate ps-4" id="top-title">
                                 <span v-if="baseStore.sidebarCollapsed">Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
-                            <div class="col-lg-5 my-auto d-flex justify-content-end align-items-center">
-                                <div class="position-relative">
+                            <div class="col-lg-3 my-auto d-flex justify-content-end align-items-center">
+                                <div id="top-search-bar" class="position-absolute">
                                     <top-search
                                         ref="topSearch"
                                         initial-search-filter="{{ request.session.top_search_filter }}"
