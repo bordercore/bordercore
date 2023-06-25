@@ -1,6 +1,6 @@
 <template>
     <div class="pagination-container">
-        <nav v-if="numObjects > 0 && paginator.num_pages > 1" class="mb-5 navigation">
+        <nav v-if="paginator.num_pages > 1" class="mb-5 navigation">
             <ul class="pagination justify-content-center">
                 <li class="page-item" :class="{'disabled': !hasPrevious()}">
                     <a class="page-link" :href="previousPage()">
@@ -43,10 +43,6 @@
             paginator: {
                 type: Object,
                 default: function() {},
-            },
-            numObjects: {
-                type: Number,
-                default: 0,
             },
         },
         setup(props) {
