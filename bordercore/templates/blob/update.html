@@ -40,7 +40,7 @@
                         @dragenter.prevent
                         @dragleave.prevent="isDragOver.coverImage = false"
                         @drop="isDragOver.coverImage = false"
-                        class="drag-target-blob"
+                        class="drag-target"
                         :class="{'drag-over': isDragOver.coverImage}"
                     >
                         <img id="coverImage" src="{{ cover_url }}" width="400" class="mw-100 mb-3" />
@@ -319,7 +319,7 @@
 
                         <div id="section-file" class="tab-pane col-lg-12 fade">
                             <div
-                                class="drag-target-blob d-flex flex-column align-items-center"
+                                class="drag-target d-flex flex-column align-items-center"
                                 @drop.prevent="onFileDrop($event.dataTransfer.files[0])"
                                 @dragover.prevent="isDragOver.fileFile = true"
                                 @dragenter.prevent

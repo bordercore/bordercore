@@ -28,7 +28,7 @@
 
             {% if artist_image %}
                 <div @drop.prevent="handleImageDrop($event)" @dragover.prevent="isOver = true" @dragenter.prevent
-                    @dragleave.prevent="isOver = false" @drop="isOver = false" class="drag-target" :class="{over: isOver}">
+                    @dragleave.prevent="isOver = false" @drop="isOver = false" class="drag-target" :class="{'drag-over': isOver}">
                     <img id="artist_image" src="{{ IMAGES_URL }}artist_images/{{ artist.uuid }}" class="mw-100" data-bs-toggle="modal" data-bs-target="#artistImageModal" />
                 </div>
             {% endif %}

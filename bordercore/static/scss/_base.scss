@@ -110,28 +110,17 @@ div.sphere {
   }
 }
 
-div.drag-target-blob {
+div.drag-target {
   transition: all 1s;
 
   img {
     border: 0.06rem solid rgba(0, 0, 0, 0);
-  }
-
-  &.over {
-    img, #file-upload {
-      border: 0.06rem solid var(--drag-color);
-      filter: drop-shadow(0.12rem 0.12rem 0.3rem var(--drag-color));
-    }
   }
 }
 
 .drag-over {
   filter: drop-shadow(0.12rem 0.12rem 0.3rem var(--text3)) drop-shadow(-0.12rem -0.12rem 0.3rem var(--text3));
   transition: all 1s;
-}
-
-.drag-target {
-  border-radius: 0.6rem;
 }
 
 // Override default Sortable classes
