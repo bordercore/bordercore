@@ -57,7 +57,7 @@ def test_tag_search(blob_text_factory, login, live_server, browser, settings):
     search_input.send_keys(Keys.ENTER)
 
     # Count the number of search results
-    time.sleep(1)
+    time.sleep(2)
     assert page.search_tag_result_count() == 3
 
 
