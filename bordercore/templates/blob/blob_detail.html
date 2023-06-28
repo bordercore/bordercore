@@ -144,6 +144,19 @@
                         </div>
                     {% endif %}
 
+                    {% if node_list %}
+                        <div class="mt-3">
+                            <strong>
+                                Nodes:
+                            </strong>
+                            {% for node in node_list %}
+                                <small>
+                                    <a href="{% url 'node:detail' node.uuid %}">{{ node.name }}</a>
+                                </small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
                     {% if blob.sha1sum %}
                         <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url }}" role="button">
                             <font-awesome-icon icon="download" class="text-emphasis" />

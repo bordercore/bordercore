@@ -434,6 +434,24 @@ class Blob(TimeStampedModel):
 
         return back_references
 
+    def get_nodes(self):
+
+        Node = apps.get_model("node", "Node")
+
+        node_list = []
+
+        for node in Node.objects.filter(user=self.user):
+            if str(self.uuid) in [
+                    val["uuid"]
+                    for sublist in node.layout
+                    for val in sublist
+                    if "uuid" in val
+                    and val["type"] in ["collection", "note"]
+            ]:
+                node_list.append(node)
+
+        return node_list
+
     def is_image(self):
         return is_image(self.file)
 

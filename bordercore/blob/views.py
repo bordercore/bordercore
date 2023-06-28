@@ -209,6 +209,7 @@ class BlobDetailView(DetailView):
 
         context["back_references"] = Blob.back_references(self.object.uuid)
         context["collection_list"] = self.object.get_collections()
+        context["node_list"] = self.object.get_nodes()
 
         context["show_metadata"] = "content_type" in context \
             or self.object.sha1sum \

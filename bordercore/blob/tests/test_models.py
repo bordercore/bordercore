@@ -147,6 +147,22 @@ def test_get_tags(blob_image_factory):
     assert blob_image_factory[0].get_tags() == "django, linux, video"
 
 
+def test_get_nodes(auto_login_user, blob_image_factory, monkeypatch):
+
+    def mock(*args, **kwargs):
+        pass
+
+    user, _ = auto_login_user()
+
+    monkeypatch.setattr(Blob, "index_blob", mock)
+    node = NodeFactory.create(user=user)
+    blob = node.add_note()
+
+    node_list = blob.get_nodes()
+    assert len(node_list) == 1
+    assert node in blob.get_nodes()
+
+
 def test_is_pinned_note(blob_note):
     assert blob_note[0].is_pinned_note() is False
 
