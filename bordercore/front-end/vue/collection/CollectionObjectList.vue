@@ -8,7 +8,7 @@
                         {{ collectionObjectList.name }}
                     </div>
                     <div class="text-secondary text-small text-nowrap ms-3">
-                        {{ objectList.length }} <span>{{ pluralize("object", objectList.length) }}</span>
+                        {{ objectCount }} <span>{{ pluralize("object", objectCount) }}</span>
                     </div>
                     <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
@@ -191,6 +191,7 @@
         setup(props, ctx) {
             const collectionObjectList = ref({});
             const currentObjectIndex = ref();
+            const objectCount = ref(0);
             const objectList = ref([]);
 
             const isHovered = ref(false);
@@ -245,6 +246,7 @@
                     `${props.getObjectListUrl}?random_order=${collectionObjectList.value.random_order}`,
                     (response) => {
                         objectList.value = response.data.object_list;
+                        objectCount.value = response.data.paginator.count;
                         currentObjectIndex.value = 0;
                         if (collectionObjectList.value.rotate !== null && collectionObjectList.value.rotate !== -1) {
                             setTimer();
@@ -432,6 +434,7 @@
                 handleUpdateCollection,
                 handleUpdateCollectionModal,
                 handleSort,
+                objectCount,
                 objectList,
                 openObjectSelectModal,
                 pluralize,
