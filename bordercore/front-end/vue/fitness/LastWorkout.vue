@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="d-flex flex-column h-100">
         <card title="" class="flex-grow-0 backdrop-filter">
             <template #title-slot>
                 <div class="card-title text-primary">
@@ -22,7 +22,7 @@
                 </div>
             </template>
         </card>
-        <div class="hover-target flex-grow-1 mb-3">
+        <div class="hover-target h-100 mb-3">
             <card id="description" title="" class="z-index-positive position-relative h-100 backdrop-filter">
                 <template #content>
                     <div class="d-flex flex-column">

@@ -62,7 +62,7 @@
                 :labels="JSON.parse('{{ plotdata.labels|escapejs }}')"
                 get-workout-data-url="{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=">
            </workout-graph>
-           <div class="d-flex flex-grow-1">
+           <div class="d-flex h-100">
                <add-workout-form
                    :csrf-token="csrfToken"
                    initial-weight="{% if recent_data %}{{ latest_weight|first|default:0 }}{% else %}0{% endif %}"
