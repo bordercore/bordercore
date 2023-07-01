@@ -39,6 +39,7 @@
                     song-url="{{ MEDIA_URL_MUSIC }}songs/"
                     mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
                     @current-song="onCurrentSong"
+                    @is-playing="handleIsPlaying"
                 >
                 </audio-player>
 
@@ -103,9 +104,18 @@
                                 @cell-click="onSongClicked"
                             >
 
-                                <o-table-column field="track" label="#" :td-attrs="() => ({ class: 'text-center' })"
-                                    :th-attrs="()=> ({ class: 'text-center' })" v-slot="props">
-                                    <span>[[ props.row.track ]]</span>
+                                <o-table-column
+                                    field="track"
+                                    label="#"
+                                    width="5rem"
+                                    :td-attrs="() => ({ class: 'text-center' })"
+                                    :th-attrs="() => ({ class: 'text-center' })"
+                                    v-slot="props"
+                                >
+                                    <span v-if="selectedSong.uuid === props.row.uuid">
+                                        <img id="isPlaying" src="{{ STATIC_URL }}img/equaliser-animated-green.gif" width="20" height="20" />
+                                    </span>
+                                    <span v-else>[[ props.row.track ]]</span>
                                 </o-table-column>
 
                                 <o-table-column field="title" label="Title" v-slot="props">
@@ -336,6 +346,17 @@
                     selectedSong.value = songList[songNumber];
                 }
 
+                function handleIsPlaying(isPlaying) {
+                    let src = null;
+                    if (isPlaying) {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green.gif";
+                    } else {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green-frozen.gif";
+                    }
+
+                    document.getElementById("isPlaying").src = src;
+                };
+
                 function onShowNote(song) {
                     return markdown.render(song.note);
                 }
@@ -385,6 +406,7 @@
                     handleDeleteAlbum,
                     handleRatingMouseLeave,
                     handleRatingMouseOver,
+                    handleIsPlaying,
                     handleUpdateAlbum,
                     onClickAddToPlaylist,
                     onClickUpdate,

@@ -40,6 +40,7 @@
                     song-url="{{ MEDIA_URL_MUSIC }}songs/"
                     mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
                     @current-song="onCurrentSong"
+                    @is-playing="handleIsPlaying"
                 >
                 </audio-player>
             {% endif %}
@@ -168,7 +169,14 @@
                                     @cell-click="onSongClicked"
                                 >
 
-                                    <o-table-column field="title" label="Title" sortable v-slot="props">
+                                    <o-table-column
+                                        field="title"
+                                        label="Title"
+                                        sortable v-slot="props"
+                                    >
+                                        <span v-if="selectedSong.uuid === props.row.uuid" class="me-2">
+                                            <img id="isPlaying" src="{{ STATIC_URL }}img/equaliser-animated-green.gif" width="20" height="20" />
+                                        </span>
                                         [[ props.row.title ]]
                                     </o-table-column>
 
@@ -355,6 +363,17 @@
                     selectedSong = songList[songNumber];
                 }
 
+                function handleIsPlaying(isPlaying) {
+                    let src = null;
+                    if (isPlaying) {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green.gif";
+                    } else {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green-frozen.gif";
+                    }
+
+                    document.getElementById("isPlaying").src = src;
+                };
+
                 function onShowNote(song) {
                     return markdown.render(song.note);
                 }
@@ -416,6 +435,7 @@
                     audioPlayer,
                     getStarClass,
                     handleImageDrop,
+                    handleIsPlaying,
                     handleRatingMouseLeave,
                     handleRatingMouseOver,
                     handleUpdateArtistImage,

@@ -12,7 +12,7 @@
                     type="audio/mpeg"
                 />
                 <media-control-bar class="media-control-bar">
-                    <media-play-button />
+                    <media-play-button id="media-play-button" />
                     <media-time-display show-duration />
                     <media-time-range />
                     <media-playback-rate-button />
@@ -31,6 +31,8 @@
 
 <script>
 
+    import useEvent from "/front-end/useEvent.js";
+
     export default {
         props: {
             songUrl: {
@@ -46,17 +48,26 @@
                 type: Array,
             },
         },
-        emits: ["current-song"],
+        emits: ["current-song", "is-playing"],
         setup(props, ctx) {
             const continuousPlay = ref(false);
             const currentSongUuid = ref();
+            const isPlaying = ref(false);
+
+            useEvent("click", handleClick, {id: "media-play-button"});
 
             function getIndex() {
                 return props.trackList.findIndex((x) => x.uuid === currentSongUuid.value);
             };
 
+            function handleClick(event) {
+                isPlaying.value = !isPlaying.value;
+                ctx.emit("is-playing", isPlaying.value);
+            };
+
             function playTrack(songUuid, selectRow=false) {
                 currentSongUuid.value = songUuid;
+                isPlaying.value = true;
 
                 const el = document.getElementById("player");
                 el.src = props.songUrl + songUuid;
@@ -103,6 +114,7 @@
             return {
                 continuousPlay,
                 currentTitle,
+                isPlaying,
                 playTrack,
             };
         },

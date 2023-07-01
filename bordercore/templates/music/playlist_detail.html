@@ -82,6 +82,7 @@
                 song-url="{{ MEDIA_URL_MUSIC }}songs/"
                 mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
                 @current-song="onCurrentSong"
+                @is-playing="handleIsPlaying"
             >
             </audio-player>
 
@@ -117,7 +118,7 @@
                         :default-sort="['sort_order']"
                         draggable
                         hoverable
-                        :selected.sync="selectedSong"
+                        v-model:selected.sync="selectedSong"
                         :row-class="() => 'song hover-target'"
                         @drop="onDrop"
                         @dragend="onDragEnd"
@@ -131,10 +132,14 @@
                             <o-table-column
                                 field="sort_order"
                                 label="#"
-                                :td-attrs="() => ({ class: 'cursor-grab' })"
-                                v-slot="props"
+                                width="5rem"
+                                :td-attrs="() => ({ class: 'cursor-grab' })" v-slot="props"
                             >
-                                <span>[[ props.row.sort_order ]]</span>
+                                <span v-if="selectedSong.uuid === props.row.uuid">
+                                    <img id="isPlaying" src="{{ STATIC_URL }}img/equaliser-animated-green
+.gif" width="20" height="20" />
+                                </span>
+                                <span v-else>[[ props.row.sort_order ]]</span>
                             </o-table-column>
                         {% endif %}
 
@@ -318,6 +323,17 @@
                     selectedSong.value = songList[songNumber];
                 }
 
+                function handleIsPlaying(isPlaying) {
+                    let src = null;
+                    if (isPlaying) {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green.gif";
+                    } else {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green-frozen.gif";
+                    }
+
+                    document.getElementById("isPlaying").src = src;
+                };
+
                 function onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
                     //  'on-hover' menu, which stores the song uuid
@@ -401,6 +417,7 @@
                 return {
                     audioPlayer,
                     getPlaylist,
+                    handleIsPlaying,
                     onCurrentSong,
                     onSongClicked,
                     onDragOver,

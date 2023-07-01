@@ -42,6 +42,7 @@
                     song-url="{{ MEDIA_URL_MUSIC }}songs/"
                     mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
                     @current-song="onCurrentSong"
+                    @is-playing="handleIsPlaying"
                 >
                 </audio-player>
 
@@ -130,6 +131,9 @@
                             >
 
                                 <o-table-column field="title" label="Title" sortable v-slot="props">
+                                    <span v-if="selectedSong.uuid === props.row.uuid" class="me-2">
+                                        <img id="isPlaying" src="{{ STATIC_URL }}img/equaliser-animated-green.gif" width="20" height="20" />
+                                    </span>
                                     <span>[[ props.row.title ]]</span>
                                 </o-table-column>
 
@@ -188,12 +192,24 @@
                     selectedSong.value = songList[songNumber];
                 };
 
+                function handleIsPlaying(isPlaying) {
+                    let src = null;
+                    if (isPlaying) {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green.gif";
+                    } else {
+                        src = "{{ STATIC_URL }}img/equaliser-animated-green-frozen.gif";
+                    }
+
+                    document.getElementById("isPlaying").src = src;
+                };
+
                 function handleSongSelect(row) {
                     audioPlayer.value.playTrack(row.uuid);
                 };
 
                 return {
                     audioPlayer,
+                    handleIsPlaying,
                     handleSongSelect,
                     onCurrentSong,
                     pluralize,
@@ -211,6 +227,6 @@
         });
         app.mount("#vue-app");
 
-</script>
+    </script>
 
 {% endblock %}
