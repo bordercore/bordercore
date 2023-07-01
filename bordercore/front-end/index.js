@@ -73,8 +73,11 @@ window.Dropdown = Dropdown;
 window.Modal = Modal;
 window.Tab = Tab;
 
-import {library} from "@fortawesome/fontawesome-svg-core";
+import {library, dom} from "@fortawesome/fontawesome-svg-core";
 import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faExternalLinkAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faComment, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faGripHorizontal, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser} from "@fortawesome/free-solid-svg-icons";
+import {fas} from "@fortawesome/free-solid-svg-icons";
+library.add(fas);
+dom.watch();
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faAws} from "@fortawesome/free-brands-svg-icons";
 import {faPython} from "@fortawesome/free-brands-svg-icons";
