@@ -1,32 +1,34 @@
 <template>
-    <div id="chatbot" class="d-flex flex-column align-items-center px-3">
-        <div class="chatbot-container w-75 p-3">
-            <div class="chatbot-messages d-flex flex-column-reverse mb-3">
-                <div>  <!-- Add empty div to reverse sort -->
-                    <div v-for="message in filteredChatHistory" :key="message.id" :class="'chatbot-' + message.role" class="d-flex px-3 mb-2">
-                        <div v-if="message.role === 'user'" class="fw-bold me-2">
-                            You
+    <div v-show="show" class="flex-column align-items-center px-3">
+        <div id="chatbot" class="d-flex flex-column align-items-center px-3">
+            <div class="chatbot-container w-75 p-3">
+                <div class="chatbot-messages d-flex flex-column-reverse mb-3">
+                    <div>  <!-- Add empty div to reverse sort -->
+                        <div v-for="message in filteredChatHistory" :key="message.id" :class="'chatbot-' + message.role" class="d-flex px-3 mb-2">
+                            <div v-if="message.role === 'user'" class="fw-bold me-2">
+                                You
+                            </div>
+                            <div v-else class="fw-bold me-2">
+                                AI
+                            </div>
+                            <div v-html="message.content" />
                         </div>
-                        <div v-else class="fw-bold me-2">
-                            AI
+                        <div v-if="isWaiting" class="chatbot-waiting ms-3">
+                            Waiting...
                         </div>
-                        <div v-html="message.content" />
-                    </div>
-                    <div v-if="isWaiting" class="chatbot-waiting ms-3">
-                        Waiting...
                     </div>
                 </div>
-            </div>
-            <div class="d-flex">
-                <input v-model="prompt" type="text" class="form-control me-2" placeholder="Send a message" @keydown.enter.prevent="handleChat">
-                <select v-model="mode" class="chatbot-mode form-control me-2">
-                    <option value="chat">
-                        Chat
-                    </option>
-                    <option value="query">
-                        Query Blob
-                    </option>
-                </select>
+                <div class="d-flex">
+                    <input v-model="prompt" type="text" class="form-control me-2" placeholder="Send a message" @keydown.enter.prevent="handleChatFromEvent">
+                    <select v-model="mode" class="chatbot-mode form-control me-2">
+                        <option value="chat">
+                            Chat
+                        </option>
+                        <option v-if="blobUuid" value="query">
+                            Query Blob
+                        </option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
@@ -58,43 +60,21 @@
             const isWaiting = ref(false);
             const mode = ref("chat");
             const prompt = ref("");
+            const show = ref(false);
 
-            /* function _handleChat() {
-             *     chatHistory.value.push(
-             *         {
-             *             id: chatHistory.value.length + 1,
-             *             content: prompt.value,
-             *             role: "user",
-             *         },
-             *     );
-             *     prompt.value = "";
-             *     isWaiting.value = true;
-             *     doPost(
-             *         props.chatUrl,
-             *         {
-             *             "chat_history": JSON.stringify(chatHistory.value),
-             *         },
-             *         (response) => {
-             *             isWaiting.value = false;
-             *             chatHistory.value.push(
-             *                 {
-             *                     id: chatHistory.value.length + 1,
-             *                     content: response.data.response,
-             *                     role: "assistant",
-             *                 },
-             *             );
-             *         },
-             *     );
-             * }; */
+            function handleChatFromEvent(event, content, blobUuid) {
+                handleChat(content, blobUuid);
+            };
 
-            function handleChat() {
+            function handleChat(content, blobUuid) {
                 let id = null;
                 let payload = {};
+
                 if (mode.value === "chat") {
                     chatHistory.value.push(
                         {
                             id: chatHistory.value.length + 1,
-                            content: prompt.value,
+                            content: content || prompt.value,
                             role: "user",
                         },
                     );
@@ -104,10 +84,15 @@
                         "chat_history": JSON.stringify(chatHistory.value),
                     };
                 } else {
-                    id = 1;
+                    if (prompt.value === "") {
+                        return;
+                    }
                     chatHistory.value = [];
+                    id = 1;
+                    content = prompt.value;
+                    prompt.value = "";
                     payload = {
-                        "content": prompt.value,
+                        "content": content,
                         "blob_uuid": props.blobUuid,
                     };
                 }
@@ -132,13 +117,22 @@
                 return chatHistory.value.filter((x) => x.role !== "system");
             });
 
+            onMounted(() => {
+                EventBus.$on("chat", (payload) => {
+                    show.value = true;
+                    handleChat(payload.content);
+                });
+            });
+
             return {
                 chatHistory,
                 filteredChatHistory,
                 handleChat,
+                handleChatFromEvent,
                 isWaiting,
                 mode,
                 prompt,
+                show,
             };
         },
     };

@@ -161,6 +161,10 @@ div.drag-target {
   background-color: var(--surface5);
 }
 
+::-webkit-scrollbar-corner {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
 .close-button {
   color: var(--text3);
 }
@@ -1787,7 +1791,9 @@ div #dateapp {
 
 #chatbot {
   position: fixed;
+  z-index: 10;
   bottom: 1rem;
+  width: 100%;
 
   .chatbot-container {
     background-color: var(--surface3);

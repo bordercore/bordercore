@@ -334,6 +334,13 @@
                 const artistDetailMenuItems = ref([
                     {
                         id: uuidv4(),
+                        title: "Artist Info",
+                        url: "#",
+                        clickHandler: handleArtistInfo,
+                        icon: "info",
+                    },
+                    {
+                        id: uuidv4(),
                         title: "Update Artist Image",
                         url: "#",
                         clickHandler: handleUpdateArtistImage,
@@ -355,6 +362,15 @@
                     }
                     return "";
                 }
+
+                function handleArtistInfo() {
+                    EventBus.$emit(
+                        "chat",
+                        {
+                            "content": "Tell me about the artist or band {{ artist.name }}",
+                        },
+                    );
+                };
 
                 function onCurrentSong(songNumber) {
                     if (songNumber === -1) {

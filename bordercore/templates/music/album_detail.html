@@ -322,6 +322,13 @@
                         clickHandler: handleUpdateAlbum,
                         icon: "pencil-alt"
                     },
+                    {
+                        id: uuidv4(),
+                        title: "Album Info",
+                        url: "#",
+                        clickHandler: handleAlbumInfo,
+                        icon: "info",
+                    },
                     {% if not album.song_set.all %}
                     {
                         id: uuidv4(),
@@ -345,6 +352,15 @@
                     }
                     selectedSong.value = songList[songNumber];
                 }
+
+                function handleAlbumInfo() {
+                    EventBus.$emit(
+                        "chat",
+                        {
+                            "content": "Tell me about the album {{ album.title }} by the band or artist {{ album.artist.name }}"
+                        },
+                    );
+                };
 
                 function handleIsPlaying(isPlaying) {
                     let src = null;
@@ -403,6 +419,7 @@
                     addToPlaylist,
                     audioPlayer,
                     getNote,
+                    handleAlbumInfo,
                     handleDeleteAlbum,
                     handleRatingMouseLeave,
                     handleRatingMouseOver,

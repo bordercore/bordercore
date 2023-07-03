@@ -94,8 +94,8 @@
                                                 Hello <strong>{{ user.get_username }}</strong>
                                             </span>
                                             {% if request.user|is_in_group:"Admin" %}
-                                                <span class="dropdown-item-extra align-middle ms-2" v-if="failed_test_count > 0">
-                                                    [[ failed_test_count ]]
+                                                <span class="dropdown-item-extra align-middle ms-2" v-if="failedTestCount > 0">
+                                                    [[ failedTestCount ]]
                                                 </span>
                                             {% endif %}
                                             <font-awesome-icon icon="angle-down" class="align-middle ms-2" />
@@ -111,6 +111,13 @@
                                 delete-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
                             >
                             </overdue-tasks>
+
+                            <chat-bot
+                                ref="chatBot"
+                                blob-uuid="{{ blob.uuid }}"
+                                chat-url="{% url 'blob:chat' %}"
+                            >
+                            </chat-bot>
 
                         </div>
 
@@ -208,6 +215,7 @@
                 const appTopBar = createApp({
                     name: "Top Bar",
                     components: {
+                        ChatBot,
                         DropDownMenu,
                         FontAwesomeIcon,
                         OverdueTasks,
@@ -218,8 +226,7 @@
                     setup() {
                         const baseStore = useBaseStore();
                         baseStore.sidebarCollapsed = {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %};
-
-                        const failed_test_count = ref({{ failed_test_count }});
+                        const failedTestCount = ref({{ failed_test_count }});
                         const userMenuItems = ref([
                             {
                                 id: uuidv4(),
@@ -238,10 +245,17 @@
                             {% endif %}
                             {
                                 id: uuidv4(),
+                                title: "ChatBot",
+                                url: "#",
+                                icon: "comment",
+                                clickHandler: handleChatBot
+                            },
+                            {
+                                id: uuidv4(),
                                 title: "Help",
                                 url: "#",
                                 icon: "question",
-                                clickHandler: this.showHelp
+                                clickHandler: showHelp
                             },
                             {
                                 id: uuidv4(),
@@ -254,6 +268,17 @@
                         const overdueTasks = JSON.parse(document.getElementById("overdue_tasks").textContent);
                         const recentSearches = JSON.parse(document.getElementById("recent_searches").textContent);
                         const recentlyViewed = JSON.parse(document.getElementById("recently_viewed").textContent);
+
+                        const chatBot = ref(null);
+
+                        function handleChatBot() {
+                            chatBot.value.show = !chatBot.value.show;
+                            if (chatBot.value.show) {
+                                nextTick(() => {
+                                    document.querySelector("#chatbot input").focus();
+                                });
+                            }
+                        };
 
                         function showHelp(evt) {
                             const helpText = document.getElementById("help-text").innerHTML;
@@ -280,7 +305,8 @@
                         const topSearch = ref(null);
 
                         return {
-                            failed_test_count,
+                            chatBot,
+                            failedTestCount,
                             baseStore,
                             userMenuItems,
                             recentBlobs,
