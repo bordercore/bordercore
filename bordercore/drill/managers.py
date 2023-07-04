@@ -29,7 +29,8 @@ class DrillManager(models.Manager):
         todo = Question.objects.filter(
             Q(user=user),
             Q(interval__lte=timezone.now() - F("last_reviewed"))
-            | Q(last_reviewed__isnull=True)
+            | Q(last_reviewed__isnull=True),
+            Q(is_disabled=False)
         ).count()
 
         percentage = 100 - (todo / count * 100) if count > 0 else 0
@@ -86,6 +87,23 @@ class DrillManager(models.Manager):
         Question = apps.get_model("drill", "Question")
 
         tags = user.userprofile.pinned_drill_tags.all().only("name").order_by("drilltag__sort_order")
+
+        info = []
+
+        for tag in tags:
+            info.append(Question.get_tag_progress(user, tag.name))
+
+        return info
+
+    def get_disabled_tags(self, user):
+        """
+        Get the user's disabled tags
+        """
+
+        Question = apps.get_model("drill", "Question")
+
+        tag_ids = Question.objects.filter(is_disabled=True).values_list("tags", flat=True)
+        tags = Tag.objects.filter(id__in=tag_ids).distinct()
 
         info = []
 

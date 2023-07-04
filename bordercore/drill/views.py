@@ -281,6 +281,19 @@ def get_pinned_tags(request):
 
 
 @login_required
+def get_disabled_tags(request):
+
+    tags = Question.objects.get_disabled_tags(request.user)
+
+    response = {
+        "status": "OK",
+        "tag_list": tags
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
 def pin_tag(request):
 
     tag_name = request.POST["tag"]
@@ -344,6 +357,45 @@ def sort_pinned_tags(request):
     response = {
         "status": "OK"
     }
+
+    return JsonResponse(response)
+
+
+@login_required
+def disable_tag(request):
+
+    tag_name = request.POST["tag"]
+
+    if tag_name in [x["name"] for x in Question.objects.get_disabled_tags(request.user)]:
+        response = {
+            "status": "Error",
+            "message": "Questions with that tag are already disabled."
+        }
+    else:
+        Question.objects.filter(tags__name=tag_name).update(is_disabled=True)
+        response = {
+            "status": "OK"
+        }
+
+    return JsonResponse(response)
+
+
+@login_required
+def enable_tag(request):
+
+    tag_name = request.POST["tag"]
+
+    if tag_name not in [x["name"] for x in Question.objects.get_disabled_tags(request.user)]:
+        response = {
+            "status": "Error",
+            "message": "No question with that tag is disabled."
+        }
+    else:
+        Question.objects.filter(tags__name=tag_name).update(is_disabled=False)
+
+        response = {
+            "status": "OK"
+        }
 
     return JsonResponse(response)
 

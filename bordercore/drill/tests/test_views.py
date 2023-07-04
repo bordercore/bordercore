@@ -8,6 +8,7 @@ import responses
 from django import urls
 
 from drill.models import Question, QuestionToObject
+from drill.tests.factories import QuestionFactory
 from drill.views import handle_related_objects
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
@@ -279,6 +280,80 @@ def test_sort_pinned_tags(auto_login_user, question, tag):
     })
 
     assert json.loads(resp.content)["status"] == "OK"
+    assert resp.status_code == 200
+
+
+def test_drill_get_disabled_tags(auto_login_user, tag):
+
+    user, client = auto_login_user()
+
+    QuestionFactory(user=user)
+    question_1 = QuestionFactory(user=user, is_disabled=True)
+    question_1.tags.add(tag[0])
+
+    url = urls.reverse(
+        "drill:get_disabled_tags"
+    )
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+    assert len(resp.json()["tag_list"]) == 1
+    assert tag[0].name in [x["name"] for x in resp.json()["tag_list"]]
+
+
+def test_drill_disable_tag(auto_login_user, tag):
+
+    user, client = auto_login_user()
+
+    question_0 = QuestionFactory(user=user)
+    question_0.tags.add(tag[0])
+
+    url = urls.reverse("drill:disable_tag")
+    resp = client.post(url, {
+        "tag": tag[0].name
+    })
+
+    assert json.loads(resp.content)["status"] == "OK"
+    assert resp.status_code == 200
+
+    question_modified = Question.objects.get(pk=question_0.pk)
+    assert question_modified.is_disabled is True
+
+    # If we try to disable the tag again, we should get an error
+    url = urls.reverse("drill:disable_tag")
+    resp = client.post(url, {
+        "tag": tag[0].name
+    })
+
+    assert json.loads(resp.content)["status"] == "Error"
+    assert resp.status_code == 200
+
+
+def test_drill_enable_tag(auto_login_user, tag):
+
+    user, client = auto_login_user()
+
+    question_0 = QuestionFactory(user=user, is_disabled=True)
+    question_0.tags.add(tag[0])
+
+    url = urls.reverse("drill:enable_tag")
+    resp = client.post(url, {
+        "tag": tag[0].name
+    })
+
+    assert json.loads(resp.content)["status"] == "OK"
+    assert resp.status_code == 200
+
+    question_modified = Question.objects.get(pk=question_0.pk)
+    assert question_modified.is_disabled is False
+
+    # If we try to enable the tag again, we should get an error
+    url = urls.reverse("drill:enable_tag")
+    resp = client.post(url, {
+        "tag": tag[0].name
+    })
+
+    assert json.loads(resp.content)["status"] == "Error"
     assert resp.status_code == 200
 
 

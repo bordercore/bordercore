@@ -2117,6 +2117,11 @@ div #dateapp {
   color: #f00;
 }
 
+.question-disabled {
+  color: $warning;
+  font-weight: bold;
+}
+
 .progress-circle {
   circle.circle-partial {
     stroke: var(--drill-progress-circle-partial);

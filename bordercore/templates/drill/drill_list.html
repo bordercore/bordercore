@@ -129,7 +129,7 @@
                 tag-search-url="{% url 'tag:search' %}"
             >
             </drill-pinned-tags>
-            <card class="backdrop-filter flex-grow-1">
+            <card class="backdrop-filter">
                 <template v-slot:title-slot>
                     <div class="d-flex">
                         <div v-if="showFeaturedTagInput" class="me-3 mb-0">
@@ -167,6 +167,13 @@
                     </div>
                 </template>
             </card>
+            <drill-disabled-tags
+                get-disabled-tags-url="{% url 'drill:get_disabled_tags' %}"
+                disable-tag-url="{% url 'drill:disable_tag' %}"
+                enable-tag-url="{% url 'drill:enable_tag' %}"
+                tag-search-url="{% url 'tag:search' %}"
+            >
+            </drill-disabled-tags>
         </div>
 
         <div class="modal fade" id="modal-study" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -258,6 +265,7 @@
             delimiters: ["[[", "]]"],
             components: {
                 Card,
+                DrillDisabledTags,
                 DrillPinnedTags,
                 DrillTagProgress,
                 FontAwesomeIcon,

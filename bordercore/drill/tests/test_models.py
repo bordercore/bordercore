@@ -169,3 +169,17 @@ def test_get_tag_progress(question, tag):
     assert tags_info["progress"] == 0
     assert tags_info["last_reviewed"] == "Never"
     assert tags_info["count"] == 0
+
+
+def test_drill_get_disabled_tags(auto_login_user, tag):
+
+    user, client = auto_login_user()
+
+    QuestionFactory(user=user)
+    question_1 = QuestionFactory(is_disabled=True)
+    question_1.tags.add(tag[0])
+
+    questions = Question.objects.get_disabled_tags(user)
+
+    assert len(questions) == 1
+    assert tag[0].name in [x["name"] for x in questions]

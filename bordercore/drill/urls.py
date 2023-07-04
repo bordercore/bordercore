@@ -96,6 +96,21 @@ urlpatterns = [
         name="sort_pinned_tags"
     ),
     path(
+        route="get_disabled_tags",
+        view=views.get_disabled_tags,
+        name="get_disabled_tags"
+    ),
+    path(
+        route="disable_tag",
+        view=views.disable_tag,
+        name="disable_tag"
+    ),
+    path(
+        route="enable_tag",
+        view=views.enable_tag,
+        name="enable_tag"
+    ),
+    path(
         route="get_title_from_url",
         view=views.get_title_from_url,
         name="get_title_from_url"

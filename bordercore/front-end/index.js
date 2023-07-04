@@ -180,6 +180,9 @@ import SelectValue from "./vue/common/SelectValue.vue";
 import "vue-multiselect/dist/vue-multiselect.css";
 window.SelectValue = SelectValue;
 
+import DrillDisabledTags from "./vue/drill/DrillDisabledTags.vue";
+window.DrillDisabledTags = DrillDisabledTags;
+
 import DrillPinnedTags from "./vue/drill/DrillPinnedTags.vue";
 window.DrillPinnedTags = DrillPinnedTags;
 

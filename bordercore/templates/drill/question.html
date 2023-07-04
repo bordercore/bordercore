@@ -133,12 +133,13 @@
                 </div>
 
                  {% if question.tags.all %}
-
                     Tags:
                     {% for tag in question.tags.all %}
                         <a class="tag" href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
                     {% endfor %}
-
+                 {% endif %}
+                 {% if question.is_disabled %}
+                     <span class="question-disabled ms-3">Disabled</span>
                  {% endif %}
 
                  <div class="d-flex mt-5">
