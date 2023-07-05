@@ -8,7 +8,7 @@
                     </div>
                     <div class="col-auto has-search position-relative px-0">
                         <font-awesome-icon icon="search" />
-                        <input id="search-bar" ref="searchInput" name="search" :value="searchTerm" placeholder="Search" class="default-input form-control">
+                        <input id="search-bar" ref="searchInput" name="search" v-model="searchTerm" placeholder="Search" class="default-input form-control">
                     </div>
                 </div>
                 <div class="d-flex w-100">
@@ -55,7 +55,7 @@
                         <div class="mb-1">
                             &nbsp;
                         </div>
-                        <input class="search-input btn btn-primary" type="submit" name="Go" value="Search">
+                        <input class="search-input btn btn-primary" type="submit" name="Go" value="Search" :disabled="termSearchDisabled">
                     </div>
                 </div>
             </div>
@@ -94,7 +94,7 @@
                     <div class="mb-1">
                         &nbsp;
                     </div>
-                    <input class="search-input btn btn-primary" type="submit" name="Go" value="Search">
+                    <input class="search-input btn btn-primary" type="submit" name="Go" value="Search" :disabled="tagSearchDisabled">
                 </div>
             </div>
         </form>
@@ -116,7 +116,7 @@
                 type: String,
                 default: "No",
             },
-            searchTerm: {
+            searchTermInitial: {
                 type: String,
                 default: "",
             },
@@ -142,6 +142,7 @@
             },
         },
         setup(props) {
+            const searchTerm = ref(props.searchTermInitial || "");
             const exactMatch = ref(props.exactMatchInitial || "No");
             const sortBy = ref(props.sortByInitial || "_score");
             const searchInput = ref(null);
@@ -165,6 +166,14 @@
                 window.location = props.tagsChangedUrl.replace("666", tagList.join(",")).replace("//", "/");
             };
 
+            const tagSearchDisabled = computed(() => {
+                return tagsInput.value && tagsInput.value.value.length === 0;
+            });
+
+            const termSearchDisabled = computed(() => {
+                return searchTerm.value === "";
+            });
+
             return {
                 exactMatch,
                 focusTagSearch,
@@ -172,8 +181,11 @@
                 handleRelatedTagsChange,
                 handleTagSearch,
                 searchInput,
+                searchTerm,
                 sortBy,
                 tagsInput,
+                tagSearchDisabled,
+                termSearchDisabled,
             };
         },
     };

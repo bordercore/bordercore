@@ -38,7 +38,7 @@
             <search-bar
                 ref="searchBar"
                 exact-match-initial="{{ request.GET.exact_match }}"
-                :search-term="searchTerm"
+                :search-term-initial="searchTerm"
                 sort-by-initial="{{ request.session.search_sort_by|default:'' }}"
                 tag-search-url="{% url 'tag:search' %}?query="
                 tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
