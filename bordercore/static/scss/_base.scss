@@ -1757,6 +1757,12 @@ blockquote > p {
   }
 }
 
+@media screen and (max-width: 1200px) {
+  #linked-blob {
+    flex-direction: column;
+  }
+}
+
 #blob-import-icon {
   width: 6.25rem;
 }
