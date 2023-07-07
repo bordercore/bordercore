@@ -11,6 +11,7 @@
   --text3-saturation: 89%;
   --text3-lightness: 69%;
   --text3: hsl(var(--text3-hue), var(--text3-saturation), var(--text3-lightness));
+  --text3-transparent: hsl(var(--text3-hue), var(--text3-saturation), var(--text3-lightness), 0.25);
 
   --text4-hue: 211;
   --text4-saturation: 65%;

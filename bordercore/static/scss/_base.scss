@@ -516,6 +516,16 @@ span {
   }
 }
 
+.zoom {
+  transition: transform 1s;
+
+  &:hover {
+    filter: drop-shadow(0.12rem 0.12rem 0.62rem var(--text3-transparent)) drop-shadow(-0.12rem -0.12rem 0.62rem var(--text3-transparent));
+    transform: scale(1.1);
+  }
+}
+
+
 .icon-disabled {
   color: var(--text-disabled);
 }

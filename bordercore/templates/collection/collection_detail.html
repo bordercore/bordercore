@@ -21,6 +21,9 @@
 
     <div class="row g-0 h-100 mx-2" id="vue-app">
 
+        <node-image-modal ref="collectionImage">
+        </node-image-modal>
+
         <div class="col-lg-3 d-flex flex-column flex-grow-last h-100">
 
             <div class="card-body h-100">
@@ -116,17 +119,15 @@
                                             <li :key="element.uuid" class="collection-item list-group-item hoverable cursor-pointer h-100 p-3">
                                                 <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(element.uuid)">
                                                 </button>
-                                                <div class="d-flex flex-column justify-content-center h-100" @click="handleBlobRemove(element.url)">
-                                                    <a :href="element.url">
-                                                        <div v-if="element.type === 'blob'">
-                                                            <img :src="element.cover_url" />
-                                                        </div>
-                                                        <div v-else>
-                                                            <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
-                                                        </div>
-                                                    </a>
+                                                <div class="zoom d-flex flex-column justify-content-center h-100">
+                                                    <div v-if="element.type === 'blob'">
+                                                        <img :src="element.cover_url" @click="handleItemClick(element.cover_url_large)" />
+                                                    </div>
+                                                    <div v-else>
+                                                        <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
+                                                    </div>
                                                     <div class="collection-item-name" v-tooltip="{delay: 1000, content: element.name}">
-                                                       [[ element.name ]]
+                                                        <a :href="element.url">[[ element.name || "No Title" ]]</a>
                                                     </div>
                                                 </div>
                                             </li>
@@ -356,11 +357,13 @@
                 Card,
                 DropDownMenu,
                 FontAwesomeIcon,
+                NodeImageModal,
                 SlickItem,
                 SlickList,
                 TagsInput,
             },
             setup() {
+                const collectionImage = ref(null);
                 const isFavorite = ref({{ object.is_favorite|yesno:"true,false" }});
                 const collectionDetailMenuItems = [
                     {
@@ -444,6 +447,10 @@
                         url = url + "?tag=" + element.dataset.tag;
                     }
                     window.location = url;
+                };
+
+                function handleItemClick(url) {
+                    collectionImage.value.openModal(url);
                 };
 
                 function handleUpdate() {
@@ -587,10 +594,6 @@
                     );
                 };
 
-                function handleBlobRemove(url) {
-                    window.location=url;
-                };
-
                 function removeBlob(uuid) {
                     doPost(
                         "{% url "collection:remove_object" %}",
@@ -652,9 +655,10 @@
                 return {
                     blobList,
                     collectionDetailMenuItems,
+                    collectionImage,
                     getBlobList,
                     handleBlobAdd,
-                    handleBlobRemove,
+                    handleItemClick,
                     handleTagSelect,
                     handleBlobDragLeave,
                     handleBlobDragOver,
