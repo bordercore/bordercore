@@ -150,8 +150,18 @@ import {cloneDeep, isEqual} from "lodash";
 window.cloneDeep = cloneDeep;
 window.isEqual = isEqual;
 
-import markdownit from "markdown-it";
-window.markdown = markdownit();
+import hljs from "highlight.js";
+const markdown = require("markdown-it")({
+    highlight: function(str) {
+      try {
+          return hljs.highlightAuto(str).value;
+      } catch (__) {}
+
+    return "";
+    },
+});
+window.markdown = markdown;
+import "highlight.js/styles/dracula.css";
 
 import "media-chrome";
 

@@ -1814,11 +1814,12 @@ div #dateapp {
   .chatbot-container {
     background-color: var(--surface3);
     border-radius: var(--border-radius1);
+    line-height: 1.75rem;
   }
 
   .chatbot-messages {
     overflow: scroll;
-    height: 20rem;
+    height: 40rem;
     background-color: var(--surface6);
   }
 

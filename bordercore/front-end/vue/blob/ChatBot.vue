@@ -11,7 +11,7 @@
                             <div v-else class="fw-bold me-2">
                                 AI
                             </div>
-                            <div v-html="message.content" />
+                            <div v-html="getMarkdown(message.content)" />
                         </div>
                         <div v-if="isWaiting" class="chatbot-waiting ms-3">
                             Waiting...
@@ -61,6 +61,10 @@
             const mode = ref("chat");
             const prompt = ref("");
             const show = ref(false);
+
+            function getMarkdown(content) {
+                return markdown.render(content);
+            };
 
             function handleChatFromEvent(event, content, blobUuid) {
                 handleChat(content, blobUuid);
@@ -126,6 +130,7 @@
 
             return {
                 chatHistory,
+                getMarkdown,
                 filteredChatHistory,
                 handleChat,
                 handleChatFromEvent,
