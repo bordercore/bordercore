@@ -2,7 +2,7 @@
   --bs-dropdown-zindex: 2000 !important;
   --border-radius1: 0.375rem; // bootstrap default, defined by $border-radius
   --border-radius2: 0.40rem;
-  --collection-list-item-width: 12rem;
+  --collection-list-item-width: 13rem;
   --dropdown-height: 2.5rem;
   --grid-margin: 1rem;
   --hover-bg-transparent: var(--surface1-transparent);
@@ -2182,7 +2182,8 @@ div #dateapp {
 //
 
 .collection-container {
-  width: var(--collection-list-item-width) + 3rem;
+  @extend .zoom;
+  width: calc(var(--collection-list-item-width) + 3rem);
 }
 
 .collection {
