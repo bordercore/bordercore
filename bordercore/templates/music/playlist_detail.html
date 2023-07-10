@@ -318,6 +318,7 @@
 
                 function onCurrentSong(songNumber) {
                     if (songNumber === -1) {
+                        selectedSong.value = {};
                         return;
                     }
                     selectedSong.value = songList[songNumber];
