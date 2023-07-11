@@ -80,6 +80,9 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         # Save the tags
         form.save_m2m()
 
+        # Index the question and answer in Elasticsearch
+        obj.index_question()
+
         handle_related_objects(obj, self.request)
 
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
@@ -176,6 +179,9 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         question = form.instance
         question.tags.set(form.cleaned_data["tags"])
         self.object = form.save()
+
+        # Index the question and answer in Elasticsearch
+        question.index_question()
 
         review_url = urls.reverse("drill:detail", kwargs={"uuid": question.uuid})
         messages.add_message(

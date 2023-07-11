@@ -500,6 +500,9 @@ def question(tag, bookmark):
     question_0.tags.add(tag[1])
     question_0.save()
 
+    # Now that the tags have been added, update Elasticsearch
+    question_0.index_question()
+
     question_0.add_related_object(bookmark[0].uuid)
     question_0.add_related_object(bookmark[1].uuid)
 

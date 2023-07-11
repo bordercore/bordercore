@@ -180,9 +180,6 @@ class Question(TimeStampedModel):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        # Index the question and answer in Elasticsearch
-        self.index_question()
-
     def delete(self):
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
