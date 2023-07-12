@@ -20,12 +20,15 @@
                 </div>
                 <div class="d-flex">
                     <input v-model="prompt" type="text" class="form-control me-2" placeholder="Send a message" @keydown.enter.prevent="handleChatFromEvent">
-                    <select v-model="mode" class="chatbot-mode form-control me-2">
+                    <select v-model="mode" class="chatbot-mode form-control me-2" @change="handleChat">
                         <option value="chat">
                             Chat
                         </option>
-                        <option v-if="blobUuid" value="query">
+                        <option v-if="blobUuid" value="blob">
                             Query Blob
+                        </option>
+                        <option v-if="questionUuid" value="question">
+                            Answer Question
                         </option>
                     </select>
                 </div>
@@ -39,6 +42,10 @@
     export default {
         props: {
             blobUuid: {
+                default: "",
+                type: String,
+            },
+            questionUuid: {
                 default: "",
                 type: String,
             },
@@ -87,7 +94,7 @@
                     payload = {
                         "chat_history": JSON.stringify(chatHistory.value),
                     };
-                } else {
+                } else if (mode.value === "blob") {
                     if (prompt.value === "") {
                         return;
                     }
@@ -99,6 +106,14 @@
                         "content": content,
                         "blob_uuid": props.blobUuid,
                     };
+                } else if (mode.value === "question") {
+                    chatHistory.value = [];
+                    id = 1;
+                    prompt.value = "";
+                    payload = {
+                        "question_uuid": props.questionUuid,
+                    };
+                    mode.value = "chat";
                 }
                 isWaiting.value = true;
                 doPost(

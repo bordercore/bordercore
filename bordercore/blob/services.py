@@ -25,6 +25,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from blob.models import Blob, MetaData, RecentlyViewedBlob
+from drill.models import Question
 from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
 
 
@@ -476,6 +477,15 @@ def chatbot(args):
             {
                 "role": "user",
                 "content": f"{args['content']}: Follow all instructions and answer all questions solely based on the following text: {blob_content}"
+            }
+        ]
+    elif "question_uuid" in args:
+        question = Question.objects.get(uuid=args["question_uuid"])
+        tags = ",".join([x.name for x in question.tags.all()])
+        messages = [
+            {
+                "role": "user",
+                "content": f"Assume the following question is tagged with {tags}. Please answer it: {question.question}"
             }
         ]
     else:

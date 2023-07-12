@@ -115,6 +115,7 @@
                             <chat-bot
                                 ref="chatBot"
                                 blob-uuid="{{ blob.uuid }}"
+                                question-uuid="{{ question.uuid }}"
                                 chat-url="{% url 'blob:chat' %}"
                             >
                             </chat-bot>
@@ -271,12 +272,20 @@
 
                         const chatBot = ref(null);
 
+                        useEvent("keydown", handleKeyDown, {});
+
                         function handleChatBot() {
                             chatBot.value.show = !chatBot.value.show;
                             if (chatBot.value.show) {
                                 nextTick(() => {
                                     document.querySelector("#chatbot input").focus();
                                 });
+                            }
+                        };
+
+                        function handleKeyDown(event) {
+                            if (event.key === "c" && event.altKey) {
+                                handleChatBot();
                             }
                         };
 
