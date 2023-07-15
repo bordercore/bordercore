@@ -16,7 +16,7 @@ from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
 from music.models import Song
-from tag.models import Tag, TagBookmark, TagTodo
+from tag.models import Tag, TagBookmark
 from todo.models import Todo
 
 
@@ -86,12 +86,11 @@ class Command(BaseCommand):
             self.stdout.write(f"Updating {count} todo{pluralize(count)}")
 
         for todo in todos:
-
-            s = TagTodo.objects.get(tag=tag_source, todo=todo)
-            s.delete()
-
             todo.tags.add(tag_target)
             todo.tags.remove(tag_source)
+
+            if not dry_run:
+                todo.index_todo()
 
         # Update blobs
         blobs = Blob.objects.filter(tags=tag_source, user=user)
