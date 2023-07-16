@@ -308,7 +308,7 @@
                 function setMode(modeParam) {
                     mode.value = modeParam;
                     nextTick(() => {
-                        MathJax.typeset;
+                        MathJax.typeset();
                         Prism.highlightAll();
                     });
                 };
