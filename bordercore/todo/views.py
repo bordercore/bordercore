@@ -34,12 +34,15 @@ class TodoListView(ListView):
 
         filter = self.get_filter()
 
-        # If a uuid is given in the url, store the associated
-        #  task and set one of its tags to be the filter.
+        # If a uuid is given in the url, store the associated task and
+        #  set one of its tags to be the filter. Also reset priority and
+        #  time filters so that the task isn't filtered out.
         if "uuid" in self.kwargs:
             context["uuid"] = self.kwargs["uuid"]
             todo = Todo.objects.get(uuid=self.kwargs["uuid"])
             filter["todo_filter_tag"] = todo.tags.first()
+            filter["todo_filter_priority"] = None
+            filter["todo_filter_time"] = None
 
         return {
             **context,
