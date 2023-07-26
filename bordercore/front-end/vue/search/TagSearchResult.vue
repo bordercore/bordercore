@@ -54,7 +54,7 @@
                         <h4>
                             <font-awesome-icon v-if="match.importance > 1" icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite" />
                             <a :href="match.object_url">
-                                {{ match.name }}
+                                {{ match.name || "No Title" }}
                             </a>
                         </h4>
                         <div v-if="docType === 'blob' || docType === 'book' || docType === 'note' || docType === 'document'">
