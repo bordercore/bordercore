@@ -123,6 +123,10 @@ div.drag-target {
   transition: all 1s;
 }
 
+.zoomable {
+  @extend .zoom;
+}
+
 // Override default Sortable classes
 .sortable-drag {
   background-color: var(--surface5);

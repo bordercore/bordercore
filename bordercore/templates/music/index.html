@@ -25,7 +25,7 @@
                 <card title="Featured Album" class="flex-grow-0 backdrop-filter">
                     <template v-slot:content>
                         <hr class="divider" />
-                        <div>
+                        <div class="zoomable">
                             <a href="{% url 'music:album_detail' random_album.uuid %}">
                                 <img src="{{ IMAGES_URL }}album_artwork/{{ random_album.uuid }}" height="150" width="150" />
                             </a>
@@ -134,8 +134,8 @@
                     <div class="d-flex ms-2">
 
                         <div id="album-list" class="d-flex flex-wrap justify-content-evenly">
-                            <div v-for="album in recentAlbums" class="hoverable p-2" data-bs-toggle="tooltip" data-placement="bottom" :title="'Added ' + album.created">
-                                <div>
+                            <div v-for="album in recentAlbums" class="p-2" data-bs-toggle="tooltip" data-placement="bottom" :title="'Added ' + album.created">
+                                <div class="zoomable">
                                     <a :href="album.album_url">
                                         <img :src="album.artwork_url" height="150" width="150" />
                                     </a>

@@ -50,7 +50,7 @@
 
             <div class="card-grid ms-3">
                 <div class="d-flex flex-wrap">
-                    <div v-for="collection, index in getCollectionList()" class="collection-container text-center p-3" @click="onClickCollection(collection.url)">
+                    <div v-for="collection in getCollectionList()" class="collection-container text-center p-3" @click="onClickCollection(collection.url)">
                         <div class="position-relative collection mx-auto">
                             <img :src="collection.cover_url" />
                             <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.num_blobs)">
