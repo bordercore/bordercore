@@ -39,10 +39,12 @@
                 ref="searchBar"
                 exact-match-initial="{{ request.GET.exact_match }}"
                 :search-term-initial="searchTerm"
+                :search-semantic-initial="searchSemantic"
                 sort-by-initial="{{ request.session.search_sort_by|default:'' }}"
                 tag-search-url="{% url 'tag:search' %}?query="
                 tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
                 term-search-url="{% url 'search:search' %}"
+                semantic-search-url="{% url 'search:semantic' %}"
             >
             </search-bar>
             <div>
@@ -239,6 +241,7 @@
     {{ block.super }}
 
     {{ results|json_script:"results" }}
+    {{ request.GET.semantic_search|json_script:"searchSemantic" }}
     {{ request.GET.search|json_script:"searchTerm" }}
 
     <script type="text/javascript" charset="utf-8">
@@ -254,6 +257,7 @@
             },
             setup() {
                 const results = JSON.parse(document.getElementById("results").textContent);
+                const searchSemantic = JSON.parse(document.getElementById("searchSemantic").textContent);
                 const searchTerm = JSON.parse(document.getElementById("searchTerm").textContent);
                 const searchBar = ref(null);
                 const currentDoctype = "{{ doctype_filter.0|safe }}";
@@ -273,6 +277,7 @@
                     handleDoctypeSelect,
                     results,
                     searchBar,
+                    searchSemantic,
                     searchTerm,
                 };
             },

@@ -7,7 +7,7 @@
         <div class="d-flex flex-column ms-2">
             <h4 class="d-flex align-items-center">
                 <a class="truncate-text" :href="url" v-html="title" />
-                <font-awesome-icon v-if="importance > 1" icon="heart" class="favorite ms-2" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite" />
+                <font-awesome-icon v-if="importance > 1" icon="heart" class="favorite mx-2" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite" />
             </h4>
             <slot name="extra" />
             <div>

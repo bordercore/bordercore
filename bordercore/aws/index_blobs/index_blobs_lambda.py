@@ -5,9 +5,9 @@ import re
 from pathlib import PurePath
 
 import boto3
+from requests_aws4auth import AWS4Auth
 
 from lib.elasticsearch_indexer import index_blob as index_blob_es
-from requests_aws4auth import AWS4Auth
 
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
@@ -30,6 +30,7 @@ def handler(event, context):
 
             file_changed = sns_record["s3"].get("file_changed", True)
             new_blob = sns_record["s3"].get("new_blob", True)
+            uuid = None
 
             # If this was triggered by S3, then parse the uuid from the S3 key.
             # Otherwise this must have been called from Django, in which case the
@@ -60,6 +61,14 @@ def handler(event, context):
                 log.info(f"Lambda triggered by Django, uuid: {uuid}")
 
             index_blob_es(uuid=uuid, file_changed=file_changed, new_blob=new_blob)
+
+            if uuid:
+                client = boto3.client("lambda")
+                client.invoke(
+                    FunctionName="arn:aws:lambda:us-east-1:192218769908:function:CreateEmbeddings",
+                    InvocationType="Event",
+                    Payload=json.dumps({"uuid": uuid})
+                )
 
         log.info("Lambda finished")
 

@@ -119,7 +119,11 @@
       "date_unixtime": { "type":"long" },
       "created_date": { "type":"date" },
       "last_modified": { "type":"date" },
-      "metadata": { "type":"object" }
+      "metadata": { "type":"object" },
+      "embeddings_vector": {
+        "type": "dense_vector",
+        "dims": 1536
+      }
     }
   }
 }

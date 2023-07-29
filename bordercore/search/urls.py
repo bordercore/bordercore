@@ -26,6 +26,11 @@ urlpatterns = [
         name="search"
     ),
     path(
+        route="semantic",
+        view=views.SemanticSearchListView.as_view(),
+        name="semantic"
+    ),
+    path(
         route="notes",
         view=views.NoteListView.as_view(),
         name="notes"

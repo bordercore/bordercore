@@ -17,6 +17,7 @@ packaged.yaml
 **/htmlcov/*
 *.coverage
 
+bordercore/aws/create_embeddings/lib/*
 bordercore/aws/create_thumbnail/lib/*
 bordercore/aws/index_blobs/lib/*
 bordercore/aws/create_bookmark_thumbnail/lib/*

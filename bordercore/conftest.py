@@ -10,7 +10,6 @@ from pathlib import Path
 
 import boto3
 import botocore
-import fitz
 import pytest
 from faker import Factory as FakerFactory
 from faker_file.providers.pdf_file import PdfFileProvider
@@ -22,6 +21,7 @@ import django
 from django.conf import settings
 
 try:
+    import fitz
     from pyvirtualdisplay import Display
     from selenium import webdriver
     from selenium.webdriver.firefox.service import Service

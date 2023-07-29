@@ -17,6 +17,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from lib.embeddings import len_safe_get_embedding
 from lib.time_utils import get_date_from_pattern, get_relative_date
 from lib.util import (favicon_url, get_elasticsearch_connection,
                       get_pagination_range, truncate)
@@ -90,13 +91,15 @@ class SearchListView(ListView):
 
     def get_queryset(self):
 
-        if "search" not in self.request.GET and not self.is_notes_search:
+        if "term_search" not in self.request.GET \
+           and "semantic_search" not in self.request.GET \
+           and not self.is_notes_search:
             return
 
         # Store the "sort" field in the user's session
         self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
 
-        search_term = self.request.GET.get("search", None)
+        search_term = self.request.GET.get("term_search", None)
         sort_field = self.request.GET.get("sort", "date_unixtime")
         boolean_type = self.request.GET.get("boolean_search_type", "AND")
         doctype = self.request.GET.get("doctype", None)
@@ -111,10 +114,14 @@ class SearchListView(ListView):
         search_object = {
             "query": {
                 "function_score": {
-                    "field_value_factor": {
-                        "field": "importance",
-                        "missing": 1
-                    },
+                    "functions": [
+                        {
+                            "field_value_factor": {
+                                "field": "importance",
+                                "missing": 1
+                            }
+                        }
+                    ],
                     "query": {
                         "bool": {
                             "must": [
@@ -148,25 +155,27 @@ class SearchListView(ListView):
             "sort": {sort_field: {"order": "desc"}},
             "from": offset,
             "size": self.RESULT_COUNT_PER_PAGE,
-            "_source": ["album_uuid",
-                        "artist",
-                        "artist_uuid",
-                        "author",
-                        "bordercore_id",
-                        "date",
-                        "date_unixtime",
-                        "doctype",
-                        "filename",
-                        "importance",
-                        "last_modified",
-                        "metadata.*",
-                        "name",
-                        "question",
-                        "sha1sum",
-                        "tags",
-                        "title",
-                        "url",
-                        "uuid"]
+            "_source": [
+                "album_uuid",
+                "artist",
+                "artist_uuid",
+                "author",
+                "bordercore_id",
+                "date",
+                "date_unixtime",
+                "doctype",
+                "filename",
+                "importance",
+                "last_modified",
+                "metadata.*",
+                "name",
+                "question",
+                "sha1sum",
+                "tags",
+                "title",
+                "url",
+                "uuid"
+            ]
         }
 
         # Let subclasses modify the query
@@ -207,8 +216,7 @@ class SearchListView(ListView):
             messages.add_message(self.request, messages.ERROR, f"Request Error: {e.status_code} {e.info['error']}")
             return []
 
-        for index, _ in enumerate(results["hits"]["hits"]):
-            match = results["hits"]["hits"][index]
+        for match in results["hits"]["hits"]:
 
             # Django templates don't support variables with underscores or dots, so
             #  we need to rename a couple of fields
@@ -235,8 +243,7 @@ class SearchListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if "doctype" in self.request.GET:
-            context["doctype_filter"] = self.request.GET["doctype"].split(",")
+        context["doctype_filter"] = self.request.GET.get("doctype", "").split(",")
 
         if context["search_results"]:
             for match in context["search_results"]["hits"]["hits"]:
@@ -515,6 +522,34 @@ class SearchTagDetailView(ListView):
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
 
         return tag_counts_sorted
+
+
+@method_decorator(login_required, name="dispatch")
+class SemanticSearchListView(SearchListView):
+
+    def refine_search(self, search_object):
+
+        embeddings = len_safe_get_embedding(self.request.GET["semantic_search"])
+
+        search_object["sort"] = {"_score": {"order": "desc"}}
+
+        # Remove the function that heavily weighs important blobs
+        search_object["query"]["function_score"]["query"]["bool"]["must"].pop(-1)
+
+        search_object["query"]["function_score"]["functions"] = [
+            {
+                "script_score": {
+                    "script": {
+                        "source": "doc['embeddings_vector'].size() == 0 ? 0 : cosineSimilarity(params.query_vector, 'embeddings_vector') + 1.0",
+                        "params": {
+                            "query_vector": embeddings
+                        }
+                    }
+                }
+            }
+        ]
+
+        return search_object
 
 
 def sort_results(matches):

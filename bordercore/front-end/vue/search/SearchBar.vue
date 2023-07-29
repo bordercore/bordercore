@@ -4,11 +4,11 @@
             <div class="d-flex">
                 <div class="d-flex flex-column">
                     <div class="mb-1 text-nowrap">
-                        Term search
+                        Term Search
                     </div>
                     <div class="col-auto has-search position-relative px-0">
                         <font-awesome-icon icon="search" />
-                        <input id="search-bar" ref="searchInput" name="search" v-model="searchTerm" placeholder="Search" class="default-input form-control">
+                        <input id="search-bar" ref="searchInput" name="term_search" v-model="searchTerm" placeholder="Search" class="default-input form-control">
                     </div>
                 </div>
                 <div class="d-flex w-100">
@@ -55,7 +55,7 @@
                         <div class="mb-1">
                             &nbsp;
                         </div>
-                        <input class="search-input btn btn-primary" type="submit" name="Go" value="Search" :disabled="termSearchDisabled">
+                        <input class="search-input btn btn-primary" type="submit" value="Search" :disabled="termSearchDisabled">
                     </div>
                 </div>
             </div>
@@ -98,6 +98,26 @@
                 </div>
             </div>
         </form>
+        <hr>
+        <form :action="semanticSearchUrl" method="get" autocomplete="off">
+            <div class="d-flex">
+                <div class="tag-search me-3">
+                    <div class="mb-1">
+                        Semantic Search
+                    </div>
+                    <div class="col-auto has-search position-relative px-0">
+                        <font-awesome-icon icon="search" />
+                        <input name="semantic_search" v-model="searchSemantic" placeholder="Search" class="default-input form-control">
+                    </div>
+                </div>
+                <div class="d-flex flex-column w-20 me-3">
+                    <div class="mb-1">
+                        &nbsp;
+                    </div>
+                    <input class="search-input btn btn-primary" type="submit" value="Search" :disabled="semanticSearchDisabled">
+                </div>
+            </div>
+        </form>
     </div>
 </template>
 
@@ -115,6 +135,10 @@
             exactMatchInitial: {
                 type: String,
                 default: "No",
+            },
+            searchSemanticInitial: {
+                type: String,
+                default: "",
             },
             searchTermInitial: {
                 type: String,
@@ -140,8 +164,13 @@
                 type: String,
                 default: "",
             },
+            semanticSearchUrl: {
+                type: String,
+                default: "",
+            },
         },
         setup(props) {
+            const searchSemantic = ref(props.searchSemanticInitial || "");
             const searchTerm = ref(props.searchTermInitial || "");
             const exactMatch = ref(props.exactMatchInitial || "No");
             const sortBy = ref(props.sortByInitial || "_score");
@@ -166,6 +195,10 @@
                 window.location = props.tagsChangedUrl.replace("666", tagList.join(",")).replace("//", "/");
             };
 
+            const semanticSearchDisabled = computed(() => {
+                return searchSemantic.value === "";
+            });
+
             const tagSearchDisabled = computed(() => {
                 return tagsInput.value && tagsInput.value.value.length === 0;
             });
@@ -181,7 +214,9 @@
                 handleRelatedTagsChange,
                 handleTagSearch,
                 searchInput,
+                searchSemantic,
                 searchTerm,
+                semanticSearchDisabled,
                 sortBy,
                 tagsInput,
                 tagSearchDisabled,

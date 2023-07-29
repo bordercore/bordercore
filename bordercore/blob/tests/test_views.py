@@ -397,7 +397,8 @@ def test_get_elasticsearch_info(auto_login_user):
     time.sleep(1)
 
     url = urls.reverse("blob:get_elasticsearch_info", kwargs={"uuid": blob.uuid})
-    resp_json = client.get(url).json()
+    resp = client.get(url)
+    resp_json = resp.json()
 
     assert resp.status_code == 200
     assert resp_json["status"] == "OK"

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import factory
 import responses
 
@@ -65,4 +67,6 @@ class BlobFactory(factory.django.DjangoModelFactory):
         responses.add(responses.GET, url,
                       json=serializer.data, status=200)
 
-        index_blob(uuid=blob.uuid, create_connection=True, extra_fields=settings.ELASTICSEARCH_EXTRA_FIELDS)
+        # Patch out the call to the CreateEmbeddings lambda
+        with patch("blob.elasticsearch_indexer.create_embeddings"):
+            index_blob(uuid=blob.uuid, create_connection=True, extra_fields=settings.ELASTICSEARCH_EXTRA_FIELDS)

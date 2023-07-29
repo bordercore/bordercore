@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Create Text Embeddings
+
+Globals:
+    Function:
+        Timeout: 120
+
+Parameters:
+  ElasticsearchEndpointParameter:
+    Type: String
+    Description: The Elasticsearch endpoint
+  DRFTokenParameter:
+    Type: String
+    Description: The Django Rest Framework token used for authentication
+  OpenaiApiKeyParameter:
+    Type: String
+    Description: The OpenAI API Key
+
+Resources:
+
+    CreateEmbeddingsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            PackageType: Image
+            ImageUri: 192218769908.dkr.ecr.us-east-1.amazonaws.com/create-embeddings-lambda:latest
+            FunctionName: CreateEmbeddings
+            MemorySize: 10240
+            Role: !GetAtt CreateEmbeddingsLambdaRole.Arn
+            VpcConfig:
+                SecurityGroupIds:
+                    - sg-bfa013fe
+                # This subnet should match the private subnet created for the NAT gateway,
+                #  which I am labeling 'Private Lambda'
+                SubnetIds:
+                    - subnet-09460047abea1c3bd
+
+            Environment:
+                Variables:
+                    TRANSFORMERS_CACHE: /tmp
+                    XDG_CACHE_HOME: /tmp
+                    DRF_TOKEN: !Ref DRFTokenParameter
+                    ELASTICSEARCH_ENDPOINT: !Ref ElasticsearchEndpointParameter
+                    OPENAI_API_KEY: !Ref OpenaiApiKeyParameter
+
+    LambdaFunctionLogGroup:
+        Type: "AWS::Logs::LogGroup"
+        DependsOn: "CreateEmbeddingsFunction"
+        Properties:
+            RetentionInDays: 90
+            LogGroupName: !Join ["", ["/aws/lambda/", !Ref CreateEmbeddingsFunction]]
+
+    CreateEmbeddingsLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: "Allow"
+                      Principal:
+                          Service:
+                              - "lambda.amazonaws.com"
+                      Action:
+                          - "sts:AssumeRole"
+
+            Policies:
+            - PolicyName: LambdaWriteToLogs
+              PolicyDocument:
+                  Statement:
+                      - Effect: "Allow"
+                        Action:
+                            - "logs:CreateLogGroup"
+                            - "logs:CreateLogStream"
+                            - "logs:PutLogEvents"
+                            - "logs:DescribeLogStreams"
+                        Resource:
+                            - "arn:aws:logs:*:*:*"
+            ManagedPolicyArns:
+            - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+
+Outputs:
+
+    CreateEmbeddingsFunction:
+      Description: "Create Text Embeddings"
+      Value: !GetAtt CreateEmbeddingsFunction.Arn

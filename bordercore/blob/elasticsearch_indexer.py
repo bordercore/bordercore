@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import logging
 import os
 import re
@@ -11,12 +12,17 @@ from pathlib import PurePath
 
 import boto3
 import elasticsearch_dsl
-import fitz
 import magic
 import requests
 from elasticsearch_dsl import DateRange
 from elasticsearch_dsl import Document as Document_ES
 from elasticsearch_dsl import Integer, Long, Range, Text
+
+try:
+    import fitz
+except ModuleNotFoundError:
+    # Don't worry if this module doesn't exist in production
+    pass
 
 from lib.util import get_elasticsearch_connection, is_pdf, is_video
 
@@ -256,6 +262,15 @@ def delete_metadata(es, uuid):
     es.update_by_query(body=q, index=ELASTICSEARCH_INDEX)
 
 
+def create_embeddings(uuid):
+    lambda_client = boto3.client("lambda")
+    lambda_client.invoke(
+        FunctionName="CreateEmbeddings",
+        InvocationType="Event",
+        Payload=json.dumps({"uuid": uuid})
+    )
+
+
 def index_blob(**kwargs):
 
     es = None
@@ -359,3 +374,6 @@ def index_blob(**kwargs):
         elasticsearch_dsl.utils.merge = elasticsearch_merge
 
         article.update(doc_as_upsert=True, **fields)
+
+    if "content" in blob_info:
+        create_embeddings(blob_info["uuid"])
