@@ -25,7 +25,7 @@ WORKDIR /bordercore/bordercore
 RUN apt update && apt install -y npm firefox-esr xvfb
 RUN npm init -y
 RUN npm install
-RUN npm run dev
+RUN npm run dev-jenkins
 
 RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz -O - |tar -xz && \
     mkdir -p /opt/bin && \
