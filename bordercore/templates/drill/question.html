@@ -156,6 +156,14 @@
                                         Update
                                      </a>
                                  </li>
+                                 <li>
+                                     <a class="dropdown-item" href="#" @click="handleAskChatbot">
+                                         <span>
+                                             <font-awesome-icon icon="comment" class="text-primary me-3" />
+                                         </span>
+                                        Ask ChatBot
+                                     </a>
+                                 </li>
                              </template>
                          </drop-down-menu>
                      </div>
@@ -293,6 +301,10 @@
                 const relatedObjectsList = ref(null);
                 const showPythonConsole = ref(false);
 
+                function handleAskChatbot() {
+                    EventBus.$emit("chat", {"questionUuid": "{{ question.uuid }}"});
+                };
+
                 function onMouseOutResponse(response) {
                     intervalString.value = "";
                 };
@@ -388,6 +400,7 @@
                 return {
                     getAnswer,
                     getQuestion,
+                    handleAskChatbot,
                     intervalString,
                     mode,
                     objectSelect,

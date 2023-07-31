@@ -27,9 +27,6 @@
                         <option v-if="blobUuid" value="blob">
                             Query Blob
                         </option>
-                        <option v-if="questionUuid" value="question">
-                            Answer Question
-                        </option>
                     </select>
                 </div>
             </div>
@@ -42,10 +39,6 @@
     export default {
         props: {
             blobUuid: {
-                default: "",
-                type: String,
-            },
-            questionUuid: {
                 default: "",
                 type: String,
             },
@@ -73,15 +66,23 @@
                 return markdown.render(content);
             };
 
-            function handleChatFromEvent(event, content, blobUuid) {
-                handleChat(content, blobUuid);
+            function handleChatFromEvent(event, content) {
+                handleChat(content);
             };
 
-            function handleChat(content, blobUuid) {
+            function handleChat(content, questionUuid) {
                 let id = null;
                 let payload = {};
 
-                if (mode.value === "chat") {
+                if (questionUuid) {
+                    chatHistory.value = [];
+                    id = 1;
+                    prompt.value = "";
+                    payload = {
+                        "question_uuid": questionUuid,
+                    };
+                    mode.value = "chat";
+                } else if (mode.value === "chat") {
                     chatHistory.value.push(
                         {
                             id: chatHistory.value.length + 1,
@@ -106,14 +107,6 @@
                         "content": content,
                         "blob_uuid": props.blobUuid,
                     };
-                } else if (mode.value === "question") {
-                    chatHistory.value = [];
-                    id = 1;
-                    prompt.value = "";
-                    payload = {
-                        "question_uuid": props.questionUuid,
-                    };
-                    mode.value = "chat";
                 }
                 isWaiting.value = true;
                 doPost(
@@ -139,7 +132,7 @@
             onMounted(() => {
                 EventBus.$on("chat", (payload) => {
                     show.value = true;
-                    handleChat(payload.content);
+                    handleChat(payload.content, payload.questionUuid);
                 });
             });
 
