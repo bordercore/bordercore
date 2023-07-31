@@ -162,7 +162,7 @@
                                 </div>
                             </div>
 
-                            <div class="row mt-3">
+                            <div v-if="action === 'Update'" class="row mt-3">
                                 <div class="col-lg-12 d-flex align-items-center">
                                     <o-switch v-model="refreshSongList" name="refresh_song_list" :native-value="refreshSongList" />
                                     <label class="ms-2">
