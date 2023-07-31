@@ -51,7 +51,6 @@ def get_creators(matches):
 class SearchListView(ListView):
 
     template_name = "search/search.html"
-    context_object_name = "search_results"
     RESULT_COUNT_PER_PAGE = 10
     is_notes_search = False
 
@@ -85,29 +84,67 @@ class SearchListView(ListView):
     def get_aggregations(self, context, aggregation):
 
         aggregations = []
-        for x in context["search_results"]["aggregations"][aggregation]["buckets"]:
+        for x in context["object_list"]["aggregations"][aggregation]["buckets"]:
             aggregations.append({"doctype": x["key"], "count": x["doc_count"]})
         return aggregations
 
+    def filter_results(self, results, search_term):
+
+        for match in results:
+            # Django templates don't support variables with underscores or dots, so
+            #  we need to rename a couple of fields
+            match["source"] = match.pop("_source")
+            match["score"] = match.pop("_score")
+
+            match["source"]["creators"] = get_creators(match["source"])
+            match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
+            match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
+            match["source"]["url"] = get_link(match["source"]["doctype"], match["source"])
+
+            if match["source"]["doctype"] in ["book", "blob"]:
+                match["source"]["cover_url"] = Blob.get_cover_url_static(
+                    match["source"]["uuid"],
+                    match["source"]["filename"],
+                    size="small"
+                )
+
+            match["tags_json"] = json.dumps(match["source"]["tags"]) \
+                if "tags" in match["source"] \
+                   else "[]"
+
+            if "highlight" in match and "attachment.content" in match["highlight"]:
+                match["highlight"]["attachment_content"] = match["highlight"].pop("attachment.content")
+
+            # Highlight matched terms using markdown italicized text when searching
+            if search_term and "contents" in match["source"]:
+                match["source"]["contents"] = match["source"]["contents"].replace(search_term, f"*{search_term}*")
+
+            # Display markdown for drill questions and todo items
+            if match["source"]["doctype"] == "drill":
+                match["source"]["question"] = markdown.markdown(match["source"]["question"])
+            if match["source"]["doctype"] == "todo":
+                match["source"]["name"] = markdown.markdown(match["source"]["name"])
+
     def get_queryset(self):
 
-        if "term_search" not in self.request.GET \
-           and "semantic_search" not in self.request.GET \
-           and not self.is_notes_search:
+        if not any(key in self.request.GET for key in [
+                "search",
+                "term_search",
+                "semantic_search"
+        ]):
             return
 
         # Store the "sort" field in the user's session
         self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
 
-        search_term = self.request.GET.get("term_search", None)
+        search_term = self.request.GET.get("term_search", None) or \
+            self.request.GET.get("search", None)
         sort_field = self.request.GET.get("sort", "date_unixtime")
         boolean_type = self.request.GET.get("boolean_search_type", "AND")
         doctype = self.request.GET.get("doctype", None)
 
         if search_term:
             RecentSearch.add(self.request.user, search_term)
-
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         offset = (int(self.request.GET.get("page", 1)) - 1) * self.RESULT_COUNT_PER_PAGE
 
@@ -188,6 +225,7 @@ class SearchListView(ListView):
                 }
             }
 
+        # Skip this for semantic searches
         if search_term:
             search_object["query"]["function_score"]["query"]["bool"]["must"].append(
                 {
@@ -210,30 +248,14 @@ class SearchListView(ListView):
                 }
             )
 
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
         try:
             results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
         except RequestError as e:
             messages.add_message(self.request, messages.ERROR, f"Request Error: {e.status_code} {e.info['error']}")
             return []
 
-        for match in results["hits"]["hits"]:
-
-            # Django templates don't support variables with underscores or dots, so
-            #  we need to rename a couple of fields
-            match["source"] = match.pop("_source")
-            match["score"] = match.pop("_score")
-            if "highlight" in match and "attachment.content" in match["highlight"]:
-                match["highlight"]["attachment_content"] = match["highlight"].pop("attachment.content")
-
-            # Highlight matched terms using markdown italicized text when searching
-            if search_term and "contents" in match["source"]:
-                match["source"]["contents"] = match["source"]["contents"].replace(search_term, f"*{search_term}*")
-
-            # Display markdown for drill questions and todo items
-            if match["source"]["doctype"] == "drill":
-                match["source"]["question"] = markdown.markdown(match["source"]["question"])
-            if match["source"]["doctype"] == "todo":
-                match["source"]["name"] = markdown.markdown(match["source"]["name"])
+        self.filter_results(results["hits"]["hits"], search_term)
 
         return results
 
@@ -244,35 +266,21 @@ class SearchListView(ListView):
         context = super().get_context_data(**kwargs)
 
         context["doctype_filter"] = self.request.GET.get("doctype", "").split(",")
+        context["title"] = "Search"
 
-        if context["search_results"]:
-            for match in context["search_results"]["hits"]["hits"]:
-                match["source"]["creators"] = get_creators(match["source"])
-                match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
-                match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
-                if match["source"]["doctype"] in ["book", "blob"]:
-                    match["source"]["cover_url"] = Blob.get_cover_url_static(
-                        match["source"]["uuid"],
-                        match["source"]["filename"],
-                        size="small"
-                    )
-                match["source"]["url"] = get_link(match["source"]["doctype"], match["source"])
-                match["tags_json"] = json.dumps(match["source"]["tags"]) \
-                    if "tags" in match["source"] \
-                    else "[]"
+        if context["object_list"]:
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
             page = int(self.request.GET.get("page", 1))
             context["paginator"] = json.dumps(
-                self.get_paginator(page, context["search_results"]["hits"]["total"]["value"])
+                self.get_paginator(page, context["object_list"]["hits"]["total"]["value"])
             )
 
-            context["count"] = context["search_results"]["hits"]["total"]["value"]
-            context["results"] = context["search_results"]["hits"]["hits"]
+            context["count"] = context["object_list"]["hits"]["total"]["value"]
+            context["results"] = context["object_list"]["hits"]["hits"]
 
-            context["object_list"].pop("hits")
-
-        context["title"] = "Search"
+            # Remove "object_list" to reduce payload size
+            context.pop("object_list")
 
         return context
 
@@ -318,7 +326,7 @@ class NoteListView(SearchListView):
         if "search" not in self.request.GET:
             context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("usernote__sort_order")
 
-        if context["results"]:
+        if "results" in context:
             page = int(self.request.GET.get("page", 1))
 
             context["paginator"] = json.dumps(

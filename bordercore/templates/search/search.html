@@ -242,7 +242,7 @@
 
     {{ results|json_script:"results" }}
     {{ request.GET.semantic_search|json_script:"searchSemantic" }}
-    {{ request.GET.search|json_script:"searchTerm" }}
+    {{ request.GET.term_search|json_script:"searchTerm" }}
 
     <script type="text/javascript" charset="utf-8">
 
