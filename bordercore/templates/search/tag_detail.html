@@ -49,23 +49,23 @@
             >
             </search-bar>
             <div class="tab-content ps-3 h-100 mb-3">
-                <tag-search-result doc-type="blob" :matches="searchResults.matches.blob">
+                <tag-search-result doc-type="blob" :matches="results.blob">
                 </tag-search-result>
-                <tag-search-result doc-type="book" :matches="searchResults.matches.book">
+                <tag-search-result doc-type="book" :matches="results.book">
                 </tag-search-result>
-                <tag-search-result doc-type="bookmark" :matches="searchResults.matches.bookmark">
+                <tag-search-result doc-type="bookmark" :matches="results.bookmark">
                 </tag-search-result>
-                <tag-search-result doc-type="document" :matches="searchResults.matches.document">
+                <tag-search-result doc-type="document" :matches="results.document">
                 </tag-search-result>
-                <tag-search-result doc-type="note" :matches="searchResults.matches.note">
+                <tag-search-result doc-type="note" :matches="results.note">
                 </tag-search-result>
-                <tag-search-result doc-type="drill" :matches="searchResults.matches.drill">
+                <tag-search-result doc-type="drill" :matches="results.drill">
                 </tag-search-result>
-                <tag-search-result doc-type="song" :matches="searchResults.matches.song">
+                <tag-search-result doc-type="song" :matches="results.song">
                 </tag-search-result>
-                <tag-search-result doc-type="todo" :matches="searchResults.matches.todo">
+                <tag-search-result doc-type="todo" :matches="results.todo">
                 </tag-search-result>
-                <tag-search-result doc-type="album" :matches="searchResults.matches.album">
+                <tag-search-result doc-type="album" :matches="results.album">
                 </tag-search-result>
             </div>
         </div>
@@ -79,7 +79,7 @@
 
     {{ doctype_counts|json_script:"doctypeCounts" }}
     {{ tag_counts|json_script:"tagCounts" }}
-    {{ search_results|json_script:"searchResults" }}
+    {{ results|json_script:"results" }}
     {{ tag_list|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript">
@@ -95,7 +95,7 @@
             setup() {
                 const doctypeCounts = JSON.parse(document.getElementById("doctypeCounts").textContent);
                 const tagCounts = JSON.parse(document.getElementById("tagCounts").textContent);
-                const searchResults = JSON.parse(document.getElementById("searchResults").textContent);
+                const results = JSON.parse(document.getElementById("results").textContent);
                 const searchBar = ref(null);
                 const selectedDoctype = ref("");
 
@@ -148,8 +148,8 @@
                     doctypeCounts,
                     doctypeMapping,
                     handleDoctypeSelect,
+                    results,
                     searchBar,
-                    searchResults,
                     selectedDoctype,
                     tagCounts,
                 };

@@ -131,7 +131,7 @@ class SearchListView(ListView):
                 "search",
                 "term_search",
                 "semantic_search"
-        ]):
+        ]) and not self.is_notes_search:
             return
 
         # Store the "sort" field in the user's session
@@ -279,9 +279,6 @@ class SearchListView(ListView):
             context["count"] = context["object_list"]["hits"]["total"]["value"]
             context["results"] = context["object_list"]["hits"]["hits"]
 
-            # Remove "object_list" to reduce payload size
-            context.pop("object_list")
-
         return context
 
 
@@ -341,7 +338,65 @@ class SearchTagDetailView(ListView):
 
     template_name = "search/tag_detail.html"
     RESULT_COUNT_PER_PAGE = 1000
-    context_object_name = "search_results"
+
+    def filter_results(self):
+        results = {}
+        for match in self.object_list["hits"]["hits"]:
+
+            result = {
+                "artist": match["_source"].get("artist", ""),
+                "artist_uuid": match["_source"].get("artist_uuid", ""),
+                "question": truncate(match["_source"].get("question", "")),
+                "name": match["_source"].get("name", "No Name"),
+                "title": match["_source"].get("title", "No Title"),
+                "task": match["_source"].get("name", ""),
+                "url": match["_source"].get("url", "") or "",
+                "uuid": match["_source"].get("uuid", ""),
+                "creators": get_creators(match["_source"]),
+                "contents": match["_source"].get("contents", "")[:200],
+                "date": get_date_from_pattern(match["_source"].get("date", None))
+            }
+
+            if "tags" in match["_source"]:
+                # Only show tags that were not searched for
+                result["tags"] = [
+                    {
+                        "name": tag,
+                        "url": reverse("search:kb_search_tag_detail", args=[tag])
+                    }
+                    for tag in match["_source"]["tags"]
+                    if tag not in self.kwargs["taglist"]
+                ]
+
+            if "sha1sum" in match["_source"]:
+                result = {
+                    "sha1sum": match["_source"]["sha1sum"],
+                    "filename": match["_source"].get("filename", ""),
+                    "url": Blob.get_s3_key(
+                        match["_source"]["uuid"],
+                        match["_source"].get("filename", "")
+                    ),
+                    "cover_url": Blob.get_cover_url_static(
+                        match["_source"].get("uuid", ""),
+                        match["_source"].get("filename", ""),
+                        size="small"
+                    ),
+                    **result,
+                }
+
+                if "content_type" in match["_source"]:
+                    result["content_type"] = Blob.get_content_type(match["_source"]["content_type"])
+
+            if match["_source"]["doctype"] == "album":
+                result["album_artwork_url"] = f"{settings.IMAGES_URL}album_artwork/{match['_source']['uuid']}"
+
+            result["favicon_url"] = favicon_url(result["url"])
+            result["url_domain"] = urlparse(result["url"]).netloc
+            result["object_url"] = get_link(get_doctype(match).lower(), match["_source"])
+
+            results.setdefault(match["_source"]["doctype"], []).append(result)
+
+        return results
 
     def get_queryset(self):
 
@@ -424,73 +479,13 @@ class SearchTagDetailView(ListView):
             ]
         }
 
-        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-        return results
+        return es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
 
-        results = {}
-        for match in context["search_results"]["hits"]["hits"]:
-
-            result = {
-                "artist": match["_source"].get("artist", ""),
-                "artist_uuid": match["_source"].get("artist_uuid", ""),
-                "question": truncate(match["_source"].get("question", "")),
-                "name": match["_source"].get("name", "No Name"),
-                "title": match["_source"].get("title", "No Title"),
-                "task": match["_source"].get("name", ""),
-                "url": match["_source"].get("url", "") or "",
-                "uuid": match["_source"].get("uuid", ""),
-                "creators": get_creators(match["_source"]),
-                "contents": match["_source"].get("contents", "")[:200],
-                "date": get_date_from_pattern(match["_source"].get("date", None))
-            }
-
-            if "tags" in match["_source"]:
-                # Only show tags that were not searched for
-                result["tags"] = [
-                    {
-                        "name": tag,
-                        "url": reverse("search:kb_search_tag_detail", args=[tag])
-                    }
-                    for tag in match["_source"]["tags"]
-                    if tag not in self.kwargs["taglist"]
-                ]
-
-            if "sha1sum" in match["_source"]:
-
-                result = {
-                    "sha1sum": match["_source"]["sha1sum"],
-                    "filename": match["_source"].get("filename", ""),
-                    "url": Blob.get_s3_key(
-                        match["_source"]["uuid"],
-                        match["_source"].get("filename", "")
-                    ),
-                    "cover_url": Blob.get_cover_url_static(
-                        match["_source"].get("uuid", ""),
-                        match["_source"].get("filename", ""),
-                        size="small"
-                    ),
-                    **result,
-                }
-
-                if "content_type" in match["_source"]:
-                    result["content_type"] = Blob.get_content_type(match["_source"]["content_type"])
-
-            if match["_source"]["doctype"] == "album":
-                result["album_artwork_url"] = f"{settings.IMAGES_URL}album_artwork/{match['_source']['uuid']}"
-            result["favicon_url"] = favicon_url(result["url"])
-            result["url_domain"] = urlparse(result["url"]).netloc
-            result["object_url"] = get_link(get_doctype(match).lower(), match["_source"])
-            results.setdefault(match["_source"]["doctype"], []).append(result)
-
-        context["search_results"]["matches"] = results
-
-        # Now that we've created a version of the result set organized by doc_type, we
-        #  don't need the original from Elasticsearch. Delete it to reduce payload size.
-        context["object_list"].pop("hits")
+        context["results"] = self.filter_results()
 
         tag_list = self.kwargs.get("taglist", "").split(",") if "taglist" in self.kwargs else []
 
@@ -498,26 +493,20 @@ class SearchTagDetailView(ListView):
         #  in the "Other tags" dropdown
         context["tag_counts"] = self.get_doc_counts(
             tag_list,
-            context["search_results"]["aggregations"]["Tag Filter"]
+            self.object_list["aggregations"]["Tag Filter"]
         )
 
         # Get a list of doc types and their counts
         context["doctype_counts"] = self.get_doc_counts(
             tag_list,
-            context["search_results"]["aggregations"]["Doctype Filter"]
+            self.object_list["aggregations"]["Doctype Filter"]
         )
 
         context["meta_tags"] = [x[0] for x in context["tag_counts"] if x[0] in Tag.get_meta_tags(self.request.user)]
-
         context["doctypes"] = [x[0] for x in context["doctype_counts"]]
-
         context["search_tag_detail_current_tab"] = self.request.session.get("search_tag_detail_current_tab", "")
-
         context["tag_list"] = tag_list
-        if context["tag_list"]:
-            context["title"] = f"Search :: Tag Detail :: {', '.join(tag_list)}"
-        else:
-            context["title"] = "Tag Search"
+        context["title"] = f"Search :: Tag Detail :: {', '.join(tag_list)}"
 
         return context
 
