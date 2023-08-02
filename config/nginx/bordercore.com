@@ -58,6 +58,9 @@ server {
         # redirects, we set the Host: header above already.
         proxy_redirect off;
 
+	# Disable buffering for streaming HTTP responses
+        proxy_buffering off;
+
         proxy_pass http://django;
 
     }

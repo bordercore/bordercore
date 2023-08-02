@@ -46,6 +46,10 @@
                 default: "",
                 type: String,
             },
+            csrfToken: {
+                default: null,
+                type: String,
+            },
         },
         setup(props) {
             const chatHistory = ref(
@@ -70,7 +74,7 @@
                 handleChat(content);
             };
 
-            function handleChat(content, questionUuid) {
+            async function handleChat(content, questionUuid) {
                 let id = null;
                 let payload = {};
 
@@ -109,20 +113,73 @@
                     };
                 }
                 isWaiting.value = true;
-                doPost(
-                    props.chatUrl,
-                    payload,
-                    (response) => {
-                        isWaiting.value = false;
+
+                const formData = new FormData();
+                for (const key in payload) {
+                    if (payload.hasOwnProperty(key)) {
+                        formData.append(key, payload[key]);
+                    }
+                }
+
+                fetch(props.chatUrl, {
+                    method: "POST",
+                    headers: {
+                        "X-Csrftoken": props.csrfToken,
+                        "Responsetype": "stream",
+                    },
+                    body: formData,
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder("utf-8");
+
+                        // The content is initially empty.
+                        // We'll fill it in as it streams in.
                         chatHistory.value.push(
                             {
                                 id: id,
-                                content: response.data.response,
+                                content: "",
                                 role: "assistant",
                             },
                         );
-                    },
-                );
+
+                        return new ReadableStream({
+                            start(controller) {
+                                function push() {
+                                    reader.read().then(({done, value}) => {
+                                        if (done) {
+                                            controller.close();
+                                            return;
+                                        }
+                                        isWaiting.value = false;
+                                        const newValue = chatHistory.value[chatHistory.value.length - 1];
+                                        newValue.content = newValue.content + decoder.decode(value, {stream: true});
+                                        chatHistory.value[chatHistory.value.length - 1] = newValue;
+
+                                        controller.enqueue(value);
+                                        push();
+                                    })
+                                          .catch((error) => {
+                                              console.error(error);
+                                              controller.error(error);
+                                          });
+                                }
+                                push();
+                            },
+                        });
+                    })
+                    .then((stream) => {
+                        return new Response(stream).text();
+                    })
+                    .then((result) => {
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
             };
 
             const filteredChatHistory = computed(() => {

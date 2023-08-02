@@ -116,6 +116,7 @@
                                 ref="chatBot"
                                 blob-uuid="{{ blob.uuid }}"
                                 chat-url="{% url 'blob:chat' %}"
+                                csrf-token="{{ csrf_token }}"
                             >
                             </chat-bot>
 

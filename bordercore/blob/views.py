@@ -591,11 +591,9 @@ def get_template(request):
 def chat(request):
 
     try:
-        return_value = chatbot(request.POST)
+        from django.http import StreamingHttpResponse
+        response = StreamingHttpResponse(chatbot(request.POST))
+        response["Content-Type"] = "text/plain"
+        return response
     except Exception as e:
-        return_value = {
-            "message": str(e),
-            "status": "Error"
-        }
-
-    return JsonResponse(return_value)
+        return str(e)

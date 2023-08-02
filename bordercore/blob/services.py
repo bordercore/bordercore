@@ -494,10 +494,10 @@ def chatbot(args):
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=messages
+        messages=messages,
+        stream=True
     )
 
-    return {
-        "response": response["choices"][0]["message"]["content"],
-        "status": "OK"
-    }
+    for chunk in response:
+        if "content" in chunk["choices"][0]["delta"]:
+            yield chunk["choices"][0]["delta"]["content"]
