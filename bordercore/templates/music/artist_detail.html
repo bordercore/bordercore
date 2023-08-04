@@ -163,7 +163,6 @@
                                     :data="songList"
                                     :default-sort="['year','desc']"
                                     hoverable
-                                    :selected.sync="selectedSong"
                                     ref="table"
                                     :row-class="(row, index) => 'song hover-target cursor-pointer'"
                                     @cell-click="onSongClicked"

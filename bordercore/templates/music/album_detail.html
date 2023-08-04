@@ -98,7 +98,6 @@
                                 :data="songList"
                                 :default-sort="['year','desc']"
                                 hoverable
-                                v-model:selected.sync="selectedSong"
                                 ref="table"
                                 :row-class="() => 'song hover-target cursor-pointer'"
                                 @cell-click="onSongClicked"
@@ -383,6 +382,7 @@
                     //  'on-hover' menu.
                     if (column.field !== "uuid" && column.field !== "rating" && column.field !== "note") {
                         audioPlayer.value.playTrack(row.uuid);
+                        selectedSong.value = row;
                     }
                 }
 

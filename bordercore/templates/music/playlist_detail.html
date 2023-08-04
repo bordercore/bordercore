@@ -118,7 +118,6 @@
                         :default-sort="['sort_order']"
                         draggable
                         hoverable
-                        v-model:selected.sync="selectedSong"
                         :row-class="() => 'song hover-target'"
                         @drop="onDrop"
                         @dragend="onDragEnd"
@@ -340,6 +339,7 @@
                     //  'on-hover' menu, which stores the song uuid
                     if (column.field !== "uuid") {
                         audioPlayer.value.playTrack(row.uuid);
+                        selectedSong.value = row;
                     }
                 }
 
