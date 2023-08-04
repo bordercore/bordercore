@@ -29,6 +29,13 @@ def test_search(blob_image_factory, blob_pdf_factory, login, live_server, browse
     submit_button = page.submit_button()
     submit_button.click()
 
+    # Select "Exact Match" search to "Yes", since there could be more
+    #  than one result, and our first test requires only one.
+    select = page.exact_match_select()
+    select.select_by_visible_text("Yes")
+    submit_button = page.submit_button()
+    submit_button.click()
+
     # Test the number of matches
     assert page.search_result_count() == 1
 

@@ -1,5 +1,6 @@
 try:
     from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import Select
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
@@ -8,6 +9,7 @@ except ModuleNotFoundError:
 class SearchPage:
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "input#search-bar")
+    SEARCH_EXACT_MATCH_DROPDOWN = (By.CSS_SELECTOR, "select[name='exact_match']")
     SUBMIT_BUTTON = (By.CSS_SELECTOR, "input[type='submit']")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "h4[class^='search-result-header'] strong")
     SEARCH_RESULT_NAME = (By.CSS_SELECTOR, "li[class*='search-result'] h4 a")
@@ -21,6 +23,12 @@ class SearchPage:
         Find the search form input
         """
         return self.browser.find_element(*self.SEARCH_INPUT)
+
+    def exact_match_select(self):
+        """
+        Find the "Exact Match" dropdown
+        """
+        return Select(self.browser.find_element(*self.SEARCH_EXACT_MATCH_DROPDOWN))
 
     def submit_button(self):
         """
