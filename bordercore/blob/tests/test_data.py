@@ -26,7 +26,7 @@ from tag.models import Tag  # isort:skip
 
 
 BLOB_DIR = "/home/media"
-ELASTICSEARCH_TIMEOUT = 20
+ELASTICSEARCH_TIMEOUT = 30
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
