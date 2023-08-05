@@ -41,7 +41,7 @@ def len_safe_get_embedding(text, model=EMBEDDING_MODEL, max_tokens=EMBEDDING_CTX
         chunk_embeddings.append(get_embedding(chunk, model=model))
         chunk_lens.append(len(chunk))
 
-        chunk_embeddings = np.average(chunk_embeddings, axis=0, weights=chunk_lens)
-        chunk_embeddings = chunk_embeddings / np.linalg.norm(chunk_embeddings)  # normalizes length to 1
-        chunk_embeddings = chunk_embeddings.tolist()
+    chunk_embeddings = np.average(chunk_embeddings, axis=0, weights=chunk_lens)
+    chunk_embeddings = chunk_embeddings / np.linalg.norm(chunk_embeddings)  # normalizes length to 1
+    chunk_embeddings = chunk_embeddings.tolist()
     return chunk_embeddings
