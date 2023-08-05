@@ -31,9 +31,14 @@ class Command(BaseCommand):
             type=int,
             default=10000
         )
+        parser.add_argument(
+            "--dry-run",
+            help="Dry run. Take no action",
+            action="store_true"
+        )
 
     @atomic
-    def handle(self, *args, limit, **kwargs):
+    def handle(self, *args, limit, dry_run, **kwargs):
 
         count = 0
 
@@ -47,20 +52,21 @@ class Command(BaseCommand):
 
                 count = count + 1
 
-                try:
+                if not dry_run:
+                    try:
 
-                    response = client.invoke(
-                        FunctionName="CreateEmbeddings",
-                        InvocationType="Event",
-                        Payload=json.dumps({"uuid": str(hit.uuid)})
-                    )
+                        response = client.invoke(
+                            FunctionName="CreateEmbeddings",
+                            InvocationType="Event",
+                            Payload=json.dumps({"uuid": str(hit.uuid)})
+                        )
 
-                    if response["StatusCode"] != 202:
-                        self.stdoute.write(response)
-                        sys.exit(0)
+                        if response["StatusCode"] != 202:
+                            self.stdoute.write(response)
+                            sys.exit(0)
 
-                except Exception as e:
-                    self.stderror.write(f"Exception during invoke_lambda: {e}")
+                    except Exception as e:
+                        self.stderror.write(f"Exception during invoke_lambda: {e}")
 
                 if count == limit:
                     sys.exit(0)
