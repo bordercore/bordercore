@@ -750,3 +750,31 @@ def test_no_test_data_in_elasticsearch(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
 
     assert found["total"]["value"] == 0, f"{found['total']['value']} documents with test data found, uuid={found['hits'][0]['_id']}"
+
+
+def test_embeddings_exist(es):
+    "Assert that all documents with non-empty contents also have text embeddings."
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"exists": {"field": "contents"}}
+                ],
+                "must_not": [
+                    {"exists": {"field": "embeddings_vector"}},
+                    {"term": {"metadata.is_book": "true"}}
+                ]
+            }
+        },
+        "size": 10000,
+        "_source": ["contents", "uuid"]
+    }
+
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
+
+    # Note that we can't filter out documents whose contents are the empty string
+    # in the query, since that field is analyzed and thus whitespace would be
+    # removed during analysis. Therefore we filter these out afterwards in Python.
+    matches = [x for x in found["hits"] if x["_source"]["contents"] != ""]
+
+    assert len(matches) == 0, f"{len(matches)} documents with no embeddings found, uuid={matches[0]['_id']}"
