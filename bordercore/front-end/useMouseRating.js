@@ -24,25 +24,26 @@ export default function() {
     };
 
     function setRating(evt, row, rating, url, songList) {
+        // If we've selected the current rating, treat it as if
+        // we've de-selected a rating entirely and and remove it.
+        const removeRating = rating === parseInt(row.rating, 10) - 1;
+
         const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
         for (const el of els) {
             el.classList.remove("rating-star-hovered");
-            if (parseInt(el.getAttribute("data-rating", 10)) < rating + 1) {
+            if (parseInt(el.getAttribute("data-rating", 10)) < rating + 1 && !removeRating) {
                 el.classList.add("rating-star-selected");
             } else {
                 el.classList.remove("rating-star-selected");
             }
         }
-        rating = rating + 1;
-        if (rating === parseInt(row.rating, 10)) {
-            // If we've selected the current rating, treat it
-            // as if we've de-selected a rating entirely
-            // and remove it.
-            rating = "";
-        }
+
+        rating = removeRating ? "" : rating + 1;
+
         nextTick(() => {
             animateCSS(evt.currentTarget, "heartBeat");
         });
+
         if (url) {
             doPost(
                 url,
