@@ -1,6 +1,6 @@
-
 import datetime
 import hashlib
+import itertools
 import json
 import os
 import re
@@ -27,6 +27,7 @@ from django.utils import timezone
 from blob.models import Blob, MetaData, RecentlyViewedBlob
 from drill.models import Question
 from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
+from search.services import semantic_search
 
 
 def get_recent_blobs(user, limit=10, skip_content=False):
@@ -466,12 +467,15 @@ def import_newyorktimes(user, url):
     return blob
 
 
-def chatbot(args):
+def chatbot(request, args):
 
     openai.api_key = os.environ.get("OPENAI_API_KEY")
+    model = "gpt-3.5-turbo"
     messages = None
+    added_values = []
 
     if "blob_uuid" in args:
+        model = "gpt-3.5-turbo-16k"  # Use the larger-context model
         blob_content = Blob.objects.get(uuid=args["blob_uuid"]).content
         messages = [
             {
@@ -488,16 +492,40 @@ def chatbot(args):
                 "content": f"Assume the following question is tagged with {tags}. Please answer it: {question.question}"
             }
         ]
+    elif args["mode"] == "notes":
+        model = "gpt-3.5-turbo-16k"  # Use the larger-context model
+        chat_history = json.loads(args["chat_history"])
+        prompt = chat_history[-1]['content']
+        results = semantic_search(request, prompt)["hits"]["hits"][0]["_source"]
+        text = results["contents"]
+        messages = [
+            {
+                "role": "user",
+                "content": f"Answer the following question based ONLY on the following text. Do not use any other source of information. The question is '{prompt}'. The text is '{text}'"
+            }
+        ]
+
+        added_values.append(
+            {
+                "choices": [
+                    {
+                        "delta": {
+                            "content": f"\n\n\nSource: [{results['name'] or 'No title'}]({reverse('blob:detail', kwargs={'uuid': results['uuid']})})"
+                        }
+                    }
+                ]
+            }
+        )
     else:
         chat_history = json.loads(args["chat_history"])
         messages = [{k: v for k, v in d.items() if k != "id"} for d in chat_history]
 
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model=model,
         messages=messages,
         stream=True
     )
 
-    for chunk in response:
+    for chunk in itertools.chain(response, added_values):
         if "content" in chunk["choices"][0]["delta"]:
             yield chunk["choices"][0]["delta"]["content"]

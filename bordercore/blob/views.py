@@ -592,7 +592,7 @@ def chat(request):
 
     try:
         from django.http import StreamingHttpResponse
-        response = StreamingHttpResponse(chatbot(request.POST))
+        response = StreamingHttpResponse(chatbot(request, request.POST))
         response["Content-Type"] = "text/plain"
         return response
     except Exception as e:

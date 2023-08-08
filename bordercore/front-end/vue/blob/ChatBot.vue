@@ -20,7 +20,10 @@
                 </div>
                 <div class="d-flex">
                     <input v-model="prompt" type="text" class="form-control me-2" placeholder="Send a message" @keydown.enter.prevent="handleChatFromEvent">
-                    <select v-model="mode" class="chatbot-mode form-control me-2" @change="handleChat">
+                    <select v-model="mode" class="chatbot-mode form-control me-2">
+                        <option value="notes">
+                            Query Notes
+                        </option>
                         <option value="chat">
                             Chat
                         </option>
@@ -62,7 +65,7 @@
                 ],
             );
             const isWaiting = ref(false);
-            const mode = ref("chat");
+            const mode = ref("notes");
             const prompt = ref("");
             const show = ref(false);
 
@@ -86,7 +89,7 @@
                         "question_uuid": questionUuid,
                     };
                     mode.value = "chat";
-                } else if (mode.value === "chat") {
+                } else if (mode.value === "chat" || mode.value === "notes") {
                     chatHistory.value.push(
                         {
                             id: chatHistory.value.length + 1,
@@ -98,6 +101,7 @@
                     id = chatHistory.value.length + 1;
                     payload = {
                         "chat_history": JSON.stringify(chatHistory.value),
+                        "mode": mode.value,
                     };
                 } else if (mode.value === "blob") {
                     if (prompt.value === "") {
