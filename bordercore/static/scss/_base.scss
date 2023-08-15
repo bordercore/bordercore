@@ -222,7 +222,9 @@ div.drag-target {
 
 body {
   min-height: 100vh;
-  background-size: cover;
+  background: rgb(0, 6, 34) url("../img/background-tile-dark.jpg") repeat-x 0 0;
+  background-attachment: fixed;
+  background-position: top;
   font-family: "Lato", sans-serif;
   line-height: 2rem;
 }

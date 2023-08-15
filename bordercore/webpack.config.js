@@ -119,7 +119,7 @@ module.exports = (env, argv) => {
                     use: "babel-loader",
                 },
                 {
-                    test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+                    test: /\.(jpg|jpeg|png|woff|woff2|eot|ttf|svg)$/,
                     loader: "url-loader",
                 },
             ],
