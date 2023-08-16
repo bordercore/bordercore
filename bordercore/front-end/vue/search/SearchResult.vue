@@ -6,7 +6,7 @@
         <slot name="image" />
         <div class="d-flex flex-column ms-2">
             <h4 class="d-flex align-items-center">
-                <a class="truncate-text" :href="url" v-html="title" />
+                <a class="truncate-text" :href="url" v-html="title || 'No Title'" />
                 <font-awesome-icon v-if="importance > 1" icon="heart" class="favorite mx-2" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite" />
             </h4>
             <slot name="extra" />
