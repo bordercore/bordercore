@@ -260,6 +260,11 @@ def start_study_session_random(request, count):
 
 
 @login_required
+def start_study_session_recent(request, interval):
+    return start_study_session(request, "recent", interval)
+
+
+@login_required
 def start_study_session_search(request, search):
     return start_study_session(request, "search", search)
 

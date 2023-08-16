@@ -260,6 +260,10 @@ class Question(TimeStampedModel):
             questions = Question.objects.filter(
                 is_favorite=True
             )
+        elif session_type == "recent":
+            questions = Question.objects.filter(
+                created__gte=timezone.now() - timedelta(days=int(param))
+            )
         elif session_type == "tag-needing-review":
             for tag in param.split(","):
                 questions = questions.filter(

@@ -61,6 +61,11 @@ urlpatterns = [
         name="start_study_session_random"
     ),
     path(
+        route="start_study_session/recent/<str:interval>",
+        view=views.start_study_session_recent,
+        name="start_study_session_recent"
+    ),
+    path(
         route="start_study_session/search/<str:search>",
         view=views.start_study_session_search,
         name="start_study_session_search"
