@@ -8,9 +8,9 @@ except ModuleNotFoundError:
 class SummaryPage:
 
     STUDY_BUTTON = (By.CSS_SELECTOR, "button[data-bs-target='#modal-study']")
-    TAG_RADIO_OPTION = (By.CSS_SELECTOR, "input[value='tag-needing-review']")
+    TAG_RADIO_OPTION = (By.CSS_SELECTOR, "input[value='tag']")
     TAG_INPUT = (By.CSS_SELECTOR, "#tag-name input")
-    START_STUDY_SESSION_BUTTON = (By.CSS_SELECTOR, "a[type='button'")
+    START_STUDY_SESSION_BUTTON = (By.CSS_SELECTOR, "input[type='submit']")
     TAG_DROPDOWN = (By.CSS_SELECTOR, "#tag-name ul li")
     QUESTION = (By.CSS_SELECTOR, "h3.drill-text p")
     BREADCRUMB = (By.CSS_SELECTOR, ".breadcrumb-item strong:first-child")

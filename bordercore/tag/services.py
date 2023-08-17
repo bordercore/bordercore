@@ -20,7 +20,7 @@ def get_additional_info(doc_types, user, tag_name):
     if "drill" in doc_types:
         return {
             "info": Question.get_tag_progress(user, tag_name),
-            "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_name})
+            "link": reverse("drill:start_study_session") + f"?study_method=tag&tags={tag_name}"
         }
     return {}
 
@@ -32,7 +32,7 @@ def get_tag_link(tag, doc_types=[]):
     if "bookmark" in doc_types:
         return reverse("bookmark:overview") + f"?tag={tag}"
     if "drill" in doc_types:
-        return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
+        return reverse("drill:start_study_session") + f"?study_method=tag&tags={tag}"
     if "song" in doc_types or "albunm" in doc_types:
         return reverse("music:search_tag") + f"?tag={tag}"
 

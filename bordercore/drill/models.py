@@ -247,7 +247,7 @@ class Question(TimeStampedModel):
         return doc
 
     @staticmethod
-    def start_study_session(user, session, session_type, filter=None, param=None):
+    def start_study_session(user, session, study_type, filter="review", params={}):
 
         questions = []
 
@@ -256,23 +256,23 @@ class Question(TimeStampedModel):
             is_disabled=False
         )
 
-        if session_type == "favorites":
+        if study_type == "favorites":
             questions = Question.objects.filter(
                 is_favorite=True
             )
-        elif session_type == "recent":
+        elif study_type == "recent":
             questions = Question.objects.filter(
-                created__gte=timezone.now() - timedelta(days=int(param))
+                created__gte=timezone.now() - timedelta(days=int(params["interval"]))
             )
-        elif session_type == "tag-needing-review":
-            for tag in param.split(","):
+        elif study_type == "tag":
+            for tag in params["tags"].split(","):
                 questions = questions.filter(
                     tags__name=tag
                 )
-        elif session_type == "search":
+        elif study_type == "keyword":
             questions = Question.objects.filter(
-                Q(question__icontains=param)
-                | Q(answer__icontains=param),
+                Q(question__icontains=params["keyword"])
+                | Q(answer__icontains=params["keyword"]),
             )
 
         if filter == "review":
@@ -283,17 +283,17 @@ class Question(TimeStampedModel):
 
         questions = questions.order_by("?").values("uuid")
 
-        if session_type == "random":
-            count = int(param)
+        if study_type == "random":
+            count = int(params["count"])
             questions = questions[:count]
 
         if questions:
             session["drill_study_session"] = {
-                "type": session_type,
+                "type": study_type,
                 "current": str(questions[0]["uuid"]),
                 "list": [str(x["uuid"]) for x in questions],
-                "tag": param,
-                "search_term": param
+                "tag": params.get("tags", None),
+                "search_term": params
             }
             return session["drill_study_session"]["current"]
 
@@ -335,7 +335,7 @@ class Question(TimeStampedModel):
             "name": tag,
             "progress": progress,
             "last_reviewed": last_reviewed,
-            "url": reverse("drill:start_study_session_tag", kwargs={"tag": tag}),
+            "url": reverse("drill:start_study_session") + f"?study_method=tag&tags={tag}",
             "count": count
         }
 

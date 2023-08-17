@@ -85,7 +85,7 @@
                 <ul v-else class="list-unstyled">
                     <li v-for="tag in tagList" :key="tag.name" class="d-flex px-2">
                         <div class="item-name flex-fill">
-                            <a :href="tag.url + '?filter=review'">{{ tag.name }}</a>
+                            <a :href="tag.url">{{ tag.name }}</a>
                         </div>
                         <div class="item-value">
                             {{ tag.progress }}%

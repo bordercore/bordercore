@@ -30,9 +30,7 @@
                                 Currently studying <strong>all questions</strong>.
                             {% elif request.session.drill_study_session.type == "favorites" %}
                                 Currently studying your <strong>favorite questions</strong>.
-                            {% elif request.session.drill_study_session.type == "tag-needing-review" %}Currently studying tag{% if "," in request.session.drill_study_session.tag %}s{% endif %} <strong>{{ request.session.drill_study_session.tag }}</strong>.
-                            {% elif request.session.drill_study_session.type == "learning" %}
-                                Currently studying questions that need learning.
+                            {% elif request.session.drill_study_session.type == "tag" %}Currently studying tag{% if "," in request.session.drill_study_session.tag %}s{% endif %} <strong>{{ request.session.drill_study_session.tag }}</strong>.
                             {% elif request.session.drill_study_session.type == "random" %}
                                 Currently studying random questions.
                             {% elif request.session.drill_study_session.type == "search" %}
@@ -105,7 +103,7 @@
                         {% for tag in tags_last_reviewed %}
                             <li class="d-flex px-2">
                                 <div class="item-name flex-fill">
-                                    <a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
+                                    <a href="{% url 'drill:start_study_session' %}?study_method=tag&tags={{ tag.name }}">{{ tag.name }}</a>
                                 </div>
                                 <div class="item-value text-end">
                                     {{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}
@@ -184,27 +182,28 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <form action="{% url 'drill:start_study_session' %}">
                         <h5>
                             Choose your study method
                             <hr />
                         </h5>
                         <div class="form-check d-flex align-items-center mt-3">
-                            <input id="id_studymethod_all" class="form-check-input" type="radio" value="all" v-model="studyMethod">
+                            <input id="id_studymethod_all" name="study_method" class="form-check-input" type="radio" value="all" v-model="studyMethod">
                             <label class="form-check-label ms-2" for="id_studymethod_all">
                                 All questions
                             </label>
                         </div>
                         <div class="form-check d-flex align-items-center mt-3">
-                            <input id="id_studymethod_favorites" class="form-check-input" type="radio" value="favorites" v-model="studyMethod">
+                            <input id="id_studymethod_favorites" name="study_method" class="form-check-input" type="radio" value="favorites" v-model="studyMethod">
                             <label class="form-check-label ms-2" for="id_studymethod_favorites">
                                 Favorite questions
                             </label>
                         </div>
                         <div class="form-check d-flex align-items-center mt-3">
-                            <input id="id_studymethod_recent" class="form-check-input" type="radio" value="recent" v-model="studyMethod">
+                            <input id="id_studymethod_recent" name="study_method" class="form-check-input" type="radio" value="recent" v-model="studyMethod">
                             <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_recent">
                                 <div class="text-nowrap me-3">Recent questions</div>
-                                <select class="form-control form-select" id="study-recent-interval">
+                                <select name="interval" class="form-control form-select" :disabled="studyMethod !== 'recent'">
                                     <option value="1">Past Day</option>
                                     <option value="3">Past 3 Days</option>
                                     <option value="7">Past Week</option>
@@ -217,23 +216,24 @@
                             </label>
                         </div>
                         <div class="form-check d-flex align-items-center mt-3">
-                            <input id="id_studymethod_tagsneedingreview" class="form-check-input" type="radio" value="tag-needing-review" v-model="studyMethod">
-                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_tagsneedingreview">
+                            <input id="id_studymethod_tag" name="study_method" class="form-check-input" type="radio" value="tag" v-model="studyMethod">
+                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_tag">
                                 <div class="me-4">Tag</div>
                                 <tags-input
                                     class-list=""
                                     search-url="{% url 'tag:search' %}?doctype=drill&query="
+                                    name="tags"
                                     id="tag-name"
                                     place-holder="Tag name"
-                                    :disabled="studyMethod !== 'tag-needing-review'"
+                                    :disabled="studyMethod !== 'tag'"
                                 ></tags-input>
                             </label>
                         </div>
                         <div class="form-check d-flex align-items-center mt-3">
-                            <input id="id_studymethod_random" class="form-check-input" type="radio" value="random" v-model="studyMethod">
+                            <input id="id_studymethod_random" name="study_method" class="form-check-input" type="radio" value="random" v-model="studyMethod">
                             <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_random">
-                                <div class="me-3">Random questions, count of</div>
-                                <select class="form-control form-select" id="study-random-count">
+                                <div class="text-nowrap me-3">Random questions, count of</div>
+                                <select name="count" class="form-control form-select" :disabled="studyMethod !== 'random'">
                                     <option value="5">5</option>
                                     <option value="10">10</option>
                                     <option value="20">20</option>
@@ -242,10 +242,10 @@
                             </label>
                         </div>
                         <div class="form-check d-flex align-items-center mt-3">
-                            <input id="id_studymethod_search" class="form-check-input" type="radio" value="search" v-model="studyMethod">
-                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_search">
-                                <div class="me-3">Questions matching search</div>
-                                <input class="form-control" id="search-term" placeholder="Search term" autocomplete="off" />
+                            <input id="id_studymethod_keyword" name="study_method" class="form-check-input" type="radio" value="keyword" v-model="studyMethod">
+                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_keyword">
+                                <div class="me-3">Questions matching keyword</div>
+                                <input class="form-control" name="keyword" id="search-term" placeholder="Keyword" autocomplete="off" :disabled="studyMethod !== 'keyword'" />
                             </label>
                         </div>
                         <hr />
@@ -258,7 +258,8 @@
                                 <option value="all">All questions</option>
                             </select>
                         </div>
-                        <a href="#" type="button" class="btn btn-primary mt-2" @click.prevent="onClickStudy">Study</a>
+                        <input type="submit" class="btn btn-primary mt-2" value="Study" />
+                        </form>
                     </div>
                 </div>
             </div>
@@ -295,33 +296,6 @@
 
                 const selectValueFeaturedTag = ref(null);
 
-                function onClickStudy() {
-                    const filter = document.getElementById("question-filter").value;
-                    if (studyMethod.value === "all") {
-                        window.location = "{% url 'drill:start_study_session' 'all' %}?filter=" + filter;
-                    } else if (studyMethod.value === "favorites") {
-                        window.location = "{% url 'drill:start_study_session' 'favorites' %}?filter=" + filter;
-                    } else if (studyMethod.value === "recent") {
-                        const interval = document.getElementById("study-recent-interval").value;
-                        window.location = "{% url 'drill:start_study_session_recent' 666 %}?filter=".replace(/666/, interval) + filter;
-                    } else if (studyMethod.value === "tag-needing-review") {
-                        const tag = document.getElementsByName("tags")[0].value;
-                        if (tag) {
-                            window.location = "{% url 'drill:start_study_session_tag' 666 %}?filter=".replace(/666/, tag) + filter;
-                        }
-                    } else if (studyMethod.value === "learning") {
-                        window.location = "{% url 'drill:start_study_session' 'learning' %}";
-                    } else if (studyMethod.value === "random") {
-                        const count = document.getElementById("study-random-count").value;
-                        window.location = "{% url 'drill:start_study_session_random' 666 %}?filter=".replace(/666/, count) + filter;
-                    } else if (studyMethod.value === "search") {
-                        const searchTerm = document.getElementById("search-term").value;
-                        if (searchTerm) {
-                            window.location = "{% url 'drill:start_study_session_search' 666 %}?filter".replace(/666/, search_term) + filter;
-                        }
-                    }
-                };
-
                 function onTagSearch() {
                     showFeaturedTagInput.value = true;
                     setTimeout( () => {
@@ -336,7 +310,6 @@
 
                 return {
                     featuredTag,
-                    onClickStudy,
                     onTagSearch,
                     selectFeaturedTag,
                     selectValueFeaturedTag,

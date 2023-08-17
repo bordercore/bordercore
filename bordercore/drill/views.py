@@ -202,23 +202,6 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
 
 
 @login_required
-def start_study_session(request, session_type, param=None):
-    """
-    Start a study session
-    """
-    first_question = Question.start_study_session(request.user, request.session, session_type, request.GET.get("filter", None), param)
-
-    if first_question:
-        return redirect("drill:detail", uuid=first_question)
-    else:
-        messages.add_message(
-            request,
-            messages.WARNING, "No questions found to study"
-        )
-        return redirect("drill:list")
-
-
-@login_required
 def get_next_question(request):
 
     if "drill_study_session" in request.session:
@@ -250,23 +233,26 @@ def get_current_question(request):
 
 
 @login_required
-def start_study_session_tag(request, tag):
-    return start_study_session(request, "tag-needing-review", tag)
+def start_study_session(request):
+    """
+    Start a study session
+    """
+    first_question = Question.start_study_session(
+        request.user,
+        request.session,
+        request.GET["study_method"],
+        request.GET.get("filter", "review"),
+        {k: v for k, v in request.GET.items() if k in ["count", "interval", "keyword", "tags"]}
+    )
 
-
-@login_required
-def start_study_session_random(request, count):
-    return start_study_session(request, "random", count)
-
-
-@login_required
-def start_study_session_recent(request, interval):
-    return start_study_session(request, "recent", interval)
-
-
-@login_required
-def start_study_session_search(request, search):
-    return start_study_session(request, "search", search)
+    if first_question:
+        return redirect("drill:detail", uuid=first_question)
+    else:
+        messages.add_message(
+            request,
+            messages.WARNING, "No questions found to study"
+        )
+        return redirect("drill:list")
 
 
 @login_required

@@ -46,29 +46,9 @@ urlpatterns = [
         name="record_response"
     ),
     path(
-        route="start_study_session/<str:session_type>",
+        route="start_study_session",
         view=views.start_study_session,
         name="start_study_session"
-    ),
-    path(
-        route="start_study_session/tag/<str:tag>",
-        view=views.start_study_session_tag,
-        name="start_study_session_tag"
-    ),
-    path(
-        route="start_study_session/random/<str:count>",
-        view=views.start_study_session_random,
-        name="start_study_session_random"
-    ),
-    path(
-        route="start_study_session/recent/<str:interval>",
-        view=views.start_study_session_recent,
-        name="start_study_session_recent"
-    ),
-    path(
-        route="start_study_session/search/<str:search>",
-        view=views.start_study_session_search,
-        name="start_study_session_search"
     ),
     path(
         route="study",

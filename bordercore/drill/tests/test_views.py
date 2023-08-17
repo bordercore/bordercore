@@ -125,13 +125,8 @@ def test_drill_start_study_session(auto_login_user, question):
 
     _, client = auto_login_user()
 
-    url = urls.reverse(
-        "drill:start_study_session",
-        kwargs={
-            "session_type": "favorites"
-        }
-    )
-    resp = client.get(url + "?filter=review")
+    url = urls.reverse("drill:start_study_session")
+    resp = client.get(url + "?study_method=favorites&filter=review")
 
     assert resp.status_code == 302
 
