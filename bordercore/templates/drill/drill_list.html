@@ -219,15 +219,15 @@
                             <input id="id_studymethod_tag" name="study_method" class="form-check-input" type="radio" value="tag" v-model="studyMethod">
                             <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_tag">
                                 <div class="me-4">Tag</div>
-                                <tags-input
-                                    class-list=""
-                                    search-url="{% url 'tag:search' %}?doctype=drill&query="
-                                    name="tags"
-                                    id="tag-name"
-                                    place-holder="Tag name"
-                                    :disabled="studyMethod !== 'tag'"
-                                ></tags-input>
                             </label>
+                            <tags-input
+                                class-list=""
+                                search-url="{% url 'tag:search' %}?doctype=drill&query="
+                                name="tags"
+                                id="tag-name"
+                                place-holder="Tag name"
+                                :disabled="studyMethod !== 'tag'"
+                            ></tags-input>
                         </div>
                         <div class="form-check d-flex align-items-center mt-3">
                             <input id="id_studymethod_random" name="study_method" class="form-check-input" type="radio" value="random" v-model="studyMethod">

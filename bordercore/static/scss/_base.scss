@@ -2160,6 +2160,10 @@ div #dateapp {
 }
 
 #modal-study {
+  :disabled {
+    border: 0.667px solid transparent;
+  }
+
   input.form-control {
     height: calc(1.5em + 0.75rem + 0.5rem);
     border-radius: 0.25rem;
@@ -2483,7 +2487,30 @@ tr.hover-target:hover {
 
 .multiselect--disabled, .multiselect--disabled .multiselect__current, .multiselect--disabled .multiselect__select {
   background: none !important;
-  color: #a6a6a6;
+  color: $form-select-indicator-color !important;  // The caret on the right-hand side
+  opacity: 1 !important;
+  pointer-events: auto !important;
+
+  .multiselect__placeholder {
+    color: var(--form-color) !important;
+  }
+
+  &:hover {
+    cursor: not-allowed !important;
+  }
+
+  .multiselect__tags {
+    border: 0.06rem solid var(--form-bg-disabled) !important;
+    &:hover {
+      border: 0.06rem solid transparent !important;
+    }
+
+    background-color: var(--form-bg-disabled) !important;
+
+    input {
+      background-color: var(--form-bg-disabled) !important;
+    }
+  }
 }
 
 .multiselect__content-wrapper {
