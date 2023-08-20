@@ -2355,6 +2355,13 @@ media-volume-range {
   flex-grow: 1;
 }
 
+// Playlist modal
+#modalCreateUpdate {
+  input:disabled {
+    border: 0.06rem solid transparent !important; // Eliminate jitter
+  }
+}
+
 // Other
 
 #album-list div {

@@ -84,11 +84,9 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-lg-8">
-                                <label class="form-check-label d-flex" for="type">
-                                    <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="smartType !== 'time'">
-                                    <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="smartType !== 'time'">
-                                </label>
+                            <div class="col-lg-8 d-flex">
+                                <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="smartType !== 'time'">
+                                <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="smartType !== 'time'">
                             </div>
                         </div>
 
@@ -102,21 +100,19 @@
                                 </div>
                             </div>
                             <div class="col-lg-8">
-                                <label class="form-check-label d-flex">
-                                    <div class="rating-container d-flex" :class="{'d-none': rating === ''}" @mouseleave="handleRatingMouseLeave">
-                                        <span
-                                            v-for="starCount in Array(5).fill().map((x,i)=>i)"
-                                            :key="starCount"
-                                            class="rating me-1"
-                                            :class="{'rating-star-selected': parseInt(rating, 10) > starCount}"
-                                            :data-rating="starCount"
-                                            @click="handleSetRating($event, starCount)"
-                                            @mouseover="handleRatingMouseOver($event, starCount)"
-                                        >
-                                            <font-awesome-icon icon="star" />
-                                        </span>
-                                    </div>
-                                </label>
+                                <div class="rating-container d-flex" :class="{'d-none': rating === ''}" @mouseleave="handleRatingMouseLeave">
+                                    <span
+                                        v-for="starCount in Array(5).fill().map((x,i)=>i)"
+                                        :key="starCount"
+                                        class="rating me-1"
+                                        :class="{'rating-star-selected': parseInt(rating, 10) > starCount}"
+                                        :data-rating="starCount"
+                                        @click="handleSetRating($event, starCount)"
+                                        @mouseover="handleRatingMouseOver($event, starCount)"
+                                    >
+                                        <font-awesome-icon icon="star" />
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
