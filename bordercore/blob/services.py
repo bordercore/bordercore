@@ -26,6 +26,7 @@ from django.utils import timezone
 
 from blob.models import Blob, MetaData, RecentlyViewedBlob
 from drill.models import Question
+from fitness.models import Exercise
 from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
 from search.services import semantic_search
 
@@ -490,6 +491,14 @@ def chatbot(request, args):
             {
                 "role": "user",
                 "content": f"Assume the following question is tagged with {tags}. Please answer it: {question.question}"
+            }
+        ]
+    elif "exercise_uuid" in args:
+        exercise = Exercise.objects.get(uuid=args["exercise_uuid"])
+        messages = [
+            {
+                "role": "user",
+                "content": f"Tell me about the strength training exercise '{exercise.name}. Include a description and talk about proper form and which muscles are targeted."
             }
         ]
     elif args["mode"] == "notes":

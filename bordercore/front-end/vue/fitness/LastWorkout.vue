@@ -45,6 +45,14 @@
                                                 Delete note
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click="handleAskChatbot">
+                                                <span>
+                                                    <font-awesome-icon icon="comment" class="text-primary me-3" />
+                                                </span>
+                                                Ask ChatBot
+                                            </a>
+                                        </li>
                                     </template>
                                 </drop-down-menu>
                             </div>
@@ -201,6 +209,10 @@
                 };
             };
 
+            function handleAskChatbot() {
+                EventBus.$emit("chat", {"exerciseUuid": props.exerciseUuid});
+            };
+
             function handleNoteAdd() {
                 editableTextArea.value.editNote(!note.value);
             };
@@ -236,6 +248,7 @@
 
             return {
                 editableTextArea,
+                handleAskChatbot,
                 handleNoteAdd,
                 note,
                 pluralize,

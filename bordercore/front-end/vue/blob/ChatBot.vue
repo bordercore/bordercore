@@ -77,7 +77,7 @@
                 handleChat(content);
             };
 
-            async function handleChat(content, questionUuid) {
+            async function handleChat(content, questionUuid, exerciseUuid) {
                 let id = null;
                 let payload = {};
 
@@ -87,6 +87,14 @@
                     prompt.value = "";
                     payload = {
                         "question_uuid": questionUuid,
+                    };
+                    mode.value = "chat";
+                } else if (exerciseUuid) {
+                    chatHistory.value = [];
+                    id = 1;
+                    prompt.value = "";
+                    payload = {
+                        "exercise_uuid": exerciseUuid,
                     };
                     mode.value = "chat";
                 } else if (mode.value === "chat" || mode.value === "notes") {
@@ -193,7 +201,7 @@
             onMounted(() => {
                 EventBus.$on("chat", (payload) => {
                     show.value = true;
-                    handleChat(payload.content, payload.questionUuid);
+                    handleChat(payload.content, payload.questionUuid, payload.exerciseUuid);
                 });
             });
 
