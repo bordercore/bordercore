@@ -4,7 +4,7 @@
             <li
                 v-for="match in matches"
                 :key="match.uuid"
-                class="search-result me-3 py-3"
+                class="search-result py-3"
                 :class="{'grid': docType === 'blob' || docType === 'book'}"
             >
                 <div v-if="docType === 'drill'">
@@ -64,7 +64,7 @@
                             <small v-else-if="match.creators">
                                 {{ match.creators }}
                             </small>
-                            <div v-if="docType !== 'note' && docType !== 'document'" class="search-result-date text-nowrap">
+                            <div v-if="docType !== 'note' && docType !== 'document'" class="search-result-date">
                                 {{ match.date }}
                             </div>
                         </div>
@@ -74,10 +74,12 @@
                                 {{ match.url_domain }}
                             </div>
                         </div>
-                        <div class="mt-2">
-                            <a v-for="tag in match.tags" :key="tag.name" :href="tag.url" class="tag">
-                                {{ tag.name }}
-                            </a>
+                        <div class="d-flex flex-wrap mt-2">
+                            <div v-for="tag in match.tags" :key="tag.name">
+                                <a :href="tag.url" class="tag">
+                                    {{ tag.name }}
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div

@@ -1497,6 +1497,9 @@ blockquote > p {
   &.grid {
     width: 33%;
     border-bottom: 0;
+    @media screen and (max-width: 1200px) {
+      width: 50%;
+    }
   }
 }
 
