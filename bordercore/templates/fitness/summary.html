@@ -51,17 +51,18 @@
                 :data="items_inactive"
                 hoverable
                 :default-sort="['exercise','asc']"
+                sort-icon="angle-up"
             >
                 <o-table-column field="exercise" label="Exercise" sortable v-slot="props">
                     <a :href="props.row.exercise_url">
                         [[ props.row.exercise ]]
                     </a>
                 </o-table-column>
-                <o-table-column field="muscle_group" label="Muscle Group"
+                <o-table-column field="muscle_group" label="Muscle Group" sortable
                     :td-attrs="() => ({ class: 'text-center' })" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     [[ props.row.muscle_group ]]
                 </o-table-column>
-                <o-table-column field="last_active" label="Last Workout" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
+                <o-table-column field="last_active" label="Last Workout" sortable :custom-sort="(a, b, isAsc) => sortLastWorkout(a, b, isAsc)" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     <div v-if="props.row.last_active" class="d-flex">
                         <div class="text-nowrap me-3">
                             [[ getDate(props.row.last_active) ]]
@@ -114,6 +115,7 @@
                         "exercise": "{{ exercise.name|escapejs }}",
                         "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
                         "last_active": "{{ exercise.last_active|date:"N j, Y" }}",
+                        "last_active_unixtime": "{{ exercise.last_active|date:"U" }}",
                         {% if exercise.delta_days %}
                         "delta_days": {{ exercise.delta_days }},
                         {% endif %}
@@ -140,21 +142,23 @@
                     if (row.overdue === 2) return "overdue";
                 };
 
+                function sortLastWorkout(a, b, isAsc) {
+                    const difference = a.last_active_unixtime - b.last_active_unixtime;
+                    return isAsc ? difference : -difference;
+                }
+
                 return {
                     getDate,
                     getFrequency,
                     items_active,
                     items_inactive,
                     rowClass,
+                    sortLastWorkout,
                 }
             },
         });
         app.use(Oruga, {
-            iconComponent: "font-awesome-icon",
-            iconPack: "fa",
-            table: {
-                sortIcon: "caret-up",
-            },
+            iconPack: "fas",
         });
         app.mount("#vue-app");
 
