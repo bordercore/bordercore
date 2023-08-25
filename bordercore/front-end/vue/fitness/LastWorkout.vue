@@ -122,8 +122,8 @@
                 type: Array,
             },
             interval: {
-                default: "",
-                type: String,
+                default: undefined,
+                type: Number,
             },
             updateNoteUrl: {
                 default: "",

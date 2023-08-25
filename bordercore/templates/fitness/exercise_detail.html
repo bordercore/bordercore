@@ -37,7 +37,7 @@
                 :duration="JSON.parse('{{ latest_duration }}')"
                 :weight="JSON.parse('{{ latest_weight }}')"
                 :reps="JSON.parse('{{ latest_reps }}')"
-                interval="{{ delta_days }}"
+                :interval="{{ delta_days }}"
                 :initial-note="note"
                 update-note-url="{% url 'fitness:edit_note' %}">
             </last-workout>
