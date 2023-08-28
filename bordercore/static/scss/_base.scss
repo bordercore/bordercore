@@ -1,5 +1,8 @@
 * {
   --bs-dropdown-zindex: 2000 !important;
+  --bs-popover-body-padding-x: 0.5rem;
+  --bs-popover-body-padding-y: 0.5rem;
+  --bs-popover-max-width: 75rem !important;
   --border-radius1: 0.375rem; // bootstrap default, defined by $border-radius
   --border-radius2: 0.40rem;
   --collection-list-item-width: 13rem;
@@ -317,6 +320,23 @@ hr.divider {
 
 p {
   font-size: 1.25em;
+}
+
+// Bootstrap Popovers
+//  Note that some CSS properties are also modified.
+//  See the bs-popover-* properties at the beginning of the file.
+.popover {
+  .popover-body {
+    border-color: var(--text2);
+    background-color: var(--text2);
+    border-radius: 0.5rem;
+  }
+
+  .popover-arrow::before, .popover-arrow::after {
+    border-color: var(--text2) !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+  }
 }
 
 strong {

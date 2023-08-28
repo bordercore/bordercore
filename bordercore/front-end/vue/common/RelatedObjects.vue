@@ -45,7 +45,17 @@
                                         <div class="dropdown-height d-flex align-items-start">
                                             <div class="d-flex flex-column">
                                                 <div v-if="element.type === 'bookmark'" class="pe-2">
-                                                    <img :src="element.cover_url" width="120" height="67">
+                                                    <img
+                                                        :src="element.cover_url"
+                                                        width="120"
+                                                        height="67"
+                                                        data-bs-toggle="popover"
+                                                        :data-bs-html="true"
+                                                        data-bs-placement="right"
+                                                        data-bs-trigger="hover"
+                                                        :data-bs-delay="1000"
+                                                        :data-bs-content="'<img src=\'' + element.cover_url_large + '\' width=\'1000px\' />'"
+                                                    >
                                                 </div>
                                                 <div v-else-if="element.type === 'blob'" class="pe-2">
                                                     <img :src="element.cover_url">
@@ -183,6 +193,10 @@
                     props.relatedObjectsUrl.replace(/00000000-0000-0000-0000-000000000000/, props.objectUuid),
                     (response) => {
                         objectList.value = response.data.related_objects;
+                        nextTick(() => {
+                            const popoverTriggerList = document.querySelectorAll("[data-bs-toggle='popover']");
+                            [...popoverTriggerList].map((popoverTriggerEl) => new Popover(popoverTriggerEl));
+                        });
                     },
                     "Error getting related objects",
                 );

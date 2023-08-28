@@ -378,6 +378,7 @@ class Blob(TimeStampedModel):
                         "name": related_object.bookmark.name,
                         "url": related_object.bookmark.url,
                         "cover_url": related_object.bookmark.thumbnail_url,
+                        "cover_url_large": related_object.bookmark.cover_url,
                         "favicon_url": related_object.bookmark.get_favicon_url(size=16),
                         "note": related_object.note,
                         "edit_url": reverse("bookmark:update", kwargs={"uuid": related_object.bookmark.uuid})

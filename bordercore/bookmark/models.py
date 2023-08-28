@@ -186,6 +186,10 @@ class Bookmark(TimeStampedModel):
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
 
+    @property
+    def cover_url(self):
+        return f"{settings.COVER_URL}bookmarks/{self.uuid}.png"
+
     def thumbnail_url_static(uuid, url):
         prefix = f"{settings.COVER_URL}bookmarks"
 

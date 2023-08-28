@@ -68,9 +68,10 @@ axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
 import "bootstrap";
-import {Dropdown, Modal, Tab} from "bootstrap";
+import {Dropdown, Modal, Popover, Tab} from "bootstrap";
 window.Dropdown = Dropdown;
 window.Modal = Modal;
+window.Popover = Popover;
 window.Tab = Tab;
 
 import {library, dom} from "@fortawesome/fontawesome-svg-core";
