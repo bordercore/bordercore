@@ -321,7 +321,7 @@ class NoteListView(SearchListView):
         context = super().get_context_data(**kwargs)
 
         if "search" not in self.request.GET:
-            context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("usernote__sort_order")
+            context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("file", "name", "uuid").order_by("usernote__sort_order")
 
         if "results" in context:
             page = int(self.request.GET.get("page", 1))

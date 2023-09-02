@@ -2,11 +2,12 @@
 {% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html color-mode="{{ request.user.userprofile.theme }}">
+<html lang="en" color-mode="{{ request.user.userprofile.theme }}">
 
     <head>
 
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Bordercore :: {{ title|default:"Bordercore" }}</title>
 
         {% if debug %}
@@ -149,11 +150,11 @@
                 </sidebar-menu>
             </div>
 
-            <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="modalHelpLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">
+                            <h4 class="modal-title" id="modalHelpLabel">
                                 <font-awesome-icon icon="question" class="text-secondary me-2"></font-awesome-icon>
                                 Help
                             </h4>

@@ -28,6 +28,7 @@ server {
 
     location /static {
         root /var/www/django;
+        add_header Cache-Control "public, max-age=31536000";
     }
 
     location /favicons {

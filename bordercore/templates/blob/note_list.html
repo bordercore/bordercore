@@ -46,47 +46,38 @@
                 </card>
             </div>
 
-            <div v-if="'{{ request.GET.search }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
-
-                <div class="h3">
-                    {{ count }} Note{{ count|pluralize:"s" }} Found
-                </div>
-
-                <div class="d-flex flex-column">
-                    <ul class="note-search-result list-unstyled" v-cloak>
-                        <li v-for="note in results" class="px-2 py-3 d-flex flex-column" :class="{'selected': note.source.uuid === selectedNoteUuid}" @click="selectedNoteUuid = note.source.uuid">
-                            <h4 class="text-primary fw-bold">
-                                [[ note.source.name || "Note" ]]
-                            </h4>
-
-                            <div class="search-result-date mb-1">
-                                [[ note.source.date ]]
-                            </div>
-
-                            <div class="position-relative">
-                                <div v-html="getContent(note.source.contents, 400)" class="fader note-content">
-                                </div>
-                            </div>
-
-                            <div class="mt-2">
-                                <span v-for="tag in note.source.tags" :key="tag" class="me-2">
-                                    <a class="tag" :href="'{% url 'search:notes' %}?tagsearch=' + tag">[[ tag ]]</a>
-                                </span>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <div class="d-flex justify-content-center">
-
-                        <pagination :paginator="JSON.parse('{{ paginator|escapejs }}')">
-                        </pagination>
-
+            <div v-cloak>
+                <div v-if="'{{ request.GET.search }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
+                    <div class="h3">
+                        {{ count }} Note{{ count|pluralize:"s" }} Found
                     </div>
-
+                    <div class="d-flex flex-column">
+                        <ul class="note-search-result list-unstyled" v-cloak>
+                            <li v-for="note in results" class="px-2 py-3 d-flex flex-column" :class="{'selected': note.source.uuid === selectedNoteUuid}" @click="selectedNoteUuid = note.source.uuid">
+                                <h4 class="text-primary fw-bold">
+                                    [[ note.source.name || "Note" ]]
+                                </h4>
+                                <div class="search-result-date mb-1">
+                                    [[ note.source.date ]]
+                                </div>
+                                <div class="position-relative">
+                                    <div v-html="getContent(note.source.contents, 400)" class="fader note-content">
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span v-for="tag in note.source.tags" :key="tag" class="me-2">
+                                        <a class="tag" :href="'{% url 'search:notes' %}?tagsearch=' + tag">[[ tag ]]</a>
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="d-flex justify-content-center">
+                            <pagination :paginator="JSON.parse('{{ paginator|escapejs }}')">
+                            </pagination>
+                        </div>
+                    </div>
                 </div>
-
             </div>
-
         </div>
 
         <div class="col-lg-9 h-100 scrollable-panel d-flex flex-column">

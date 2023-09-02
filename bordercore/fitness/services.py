@@ -16,10 +16,12 @@ def get_fitness_summary(user, count_only=False):
     )
 
     exercises = Exercise.objects.annotate(
-        last_active=Max("workout__data__date"),
+        last_active=Max(
+            "workout__data__date",
+            filter=Q(workout__user=user) | Q(workout__isnull=True)
+        ),
         is_active=Subquery(newest.values("started")[:1]),
         frequency=Subquery(newest.values("frequency")[:1])) \
-        .filter(Q(workout__user=user) | Q(workout__isnull=True)) \
         .order_by(F("last_active"))
 
     if not count_only:
