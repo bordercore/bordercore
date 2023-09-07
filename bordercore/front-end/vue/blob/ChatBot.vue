@@ -21,14 +21,8 @@
                 <div class="d-flex">
                     <input v-model="prompt" type="text" class="form-control me-2" placeholder="Send a message" @keydown.enter.prevent="handleChatFromEvent">
                     <select v-model="mode" class="chatbot-mode form-control me-2">
-                        <option value="notes">
-                            Query Notes
-                        </option>
-                        <option value="chat">
-                            Chat
-                        </option>
-                        <option v-if="blobUuid" value="blob">
-                            Query Blob
+                        <option v-for="option in chatOptions" :key="option.value" :value="option.value">
+                            {{ option.name }}
                         </option>
                     </select>
                 </div>
@@ -64,8 +58,26 @@
                     },
                 ],
             );
+            const chatOptions = [
+                {
+                    "name": "Query Notes",
+                    "value": "notes",
+                },
+                {
+                    "name": "Chat",
+                    "value": "chat",
+                },
+            ];
+            if (props.blobUuid) {
+                chatOptions.push(
+                    {
+                        "name": "Query Blob",
+                        "value": "blob",
+                    },
+                );
+            }
             const isWaiting = ref(false);
-            const mode = ref("notes");
+            const mode = ref("chat");
             const prompt = ref("");
             const show = ref(false);
 
@@ -203,10 +215,38 @@
                     show.value = true;
                     handleChat(payload.content, payload.questionUuid, payload.exerciseUuid);
                 });
+
+                hotkeys.filter = function(event) {
+                    // By default hotkeys filters form elements. Eliminate that
+                    // filter so we can capture ctrl-return events from
+                    // the Python console textarea.
+                    return true;
+                };
+
+                hotkeys("down,up", function(event, handler) {
+                    const index = chatOptions.findIndex((obj) => obj.value === mode.value);
+                    switch (handler.key) {
+                    case "down":
+                            if (index + 1 === chatOptions.length) {
+                                mode.value = chatOptions[0].value;
+                            } else {
+                                mode.value = chatOptions[index + 1].value;
+                            }
+                        break;
+                    case "up":
+                            if (index === 0) {
+                                mode.value = chatOptions[chatOptions.length - 1].value;
+                            } else {
+                                mode.value = chatOptions[index - 1].value;
+                            }
+                        break;
+                    }
+                });
             });
 
             return {
                 chatHistory,
+                chatOptions,
                 getMarkdown,
                 filteredChatHistory,
                 handleChat,
