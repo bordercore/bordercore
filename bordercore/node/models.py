@@ -1,4 +1,5 @@
 import json
+import random
 import uuid
 
 from django.contrib.auth.models import User
@@ -6,6 +7,7 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 
 from blob.models import Blob
@@ -284,6 +286,119 @@ class Node(TimeStampedModel):
 
         for so in NodeTodo.objects.filter(node=self):
             so.todo.delete()
+
+    def add_node(self, node_uuid, options={}):
+
+        new_uuid = uuid.uuid4()
+
+        layout = self.layout
+        layout[0].insert(
+            0,
+            {
+                "uuid": str(new_uuid),
+                "type": "node",
+                "node_uuid": node_uuid,
+                "options": options,
+            }
+        )
+        self.layout = layout
+        self.save()
+
+        return str(new_uuid)
+
+    def remove_node(self, uuid):
+
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(uuid)]
+
+        self.layout = layout
+        self.save()
+
+    def update_node(self, uuid, options):
+
+        for column in self.layout:
+            for row in column:
+                if row.get("uuid", None) == uuid:
+                    row["options"] = options
+
+        self.save()
+
+    def get_todo_list(self):
+        todo_list = self.todos.all().only("name", "note", "priority", "url", "uuid").order_by("nodetodo__sort_order")
+
+        return [
+            {
+                "name": x.name,
+                "note": x.note,
+                "priority": x.priority,
+                "uuid": x.uuid,
+                "url": x.url,
+            }
+            for x
+            in todo_list
+        ]
+
+    def get_preview(self):
+        images = []
+
+        # Get a list of all uuids for all images in this node.
+        image_uuids = [
+            val["uuid"]
+            for sublist in self.layout
+            for val in sublist
+            if "uuid" in val
+            and val["type"] in ["image"]
+        ]
+        if image_uuids:
+            random_uuid = random.choice(image_uuids)
+            blob = Blob.objects.get(uuid=random_uuid)
+            images.append({
+                "uuid": random_uuid,
+                "cover_url": blob.get_cover_url(),
+                "blob_url": reverse("blob:detail", kwargs={"uuid": random_uuid})
+            })
+
+        # Get a list of all uuids for all collections in this node.
+        collection_uuids = [
+            val["uuid"]
+            for sublist in self.layout
+            for val in sublist
+            if "uuid" in val
+            and val["type"] in ["collection"]
+        ]
+        all_objects = []
+        for collection_uuid in collection_uuids:
+            collection = Collection.objects.get(uuid=collection_uuid)
+            all_objects.extend(collection.get_object_list()["object_list"])
+
+        # We ultimately want two images. If we already found one image, then
+        #  we only need one more from a collection. If not, we need two.
+        images.extend([
+            {
+                "uuid": obj["uuid"],
+                "cover_url": obj["cover_url"],
+                "blob_url": obj["url"]
+            }
+            for obj in
+            random.sample([x for x in all_objects if x["type"] == "blob"], 2 - len(images))
+        ])
+
+        notes = [
+            val
+            for sublist in self.layout
+            for val in sublist
+            if "uuid" in val
+            and val["type"] in ["note"]
+        ]
+
+        todos = self.get_todo_list()
+
+        return {
+            "images": images,
+            "notes": notes,
+            "todos": todos
+        }
 
 
 class NodeTodo(SortOrderMixin):

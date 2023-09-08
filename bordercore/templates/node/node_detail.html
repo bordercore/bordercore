@@ -77,6 +77,14 @@
                         </a>
                     </li>
                     <li>
+                        <a class="dropdown-item" href="#" @click.prevent="openAddNodeModal">
+                            <span v-cloak>
+                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                Add node
+                            </span>
+                        </a>
+                    </li>
+                    <li>
                         <a class="dropdown-item" href="#" @click.prevent="editLayout = !editLayout">
                             <span v-cloak>
                                 <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
@@ -218,6 +226,20 @@
                                 >
                                 </node-quote>
                             </div>
+                            <div v-else-if="row.type === 'node'">
+                                <node-node
+                                    :uuid="row.uuid"
+                                    :node-options-initial="row.options"
+                                    parent-node-uuid="{{ object.uuid }}"
+                                    :get-node-info-url="'{% url 'node:preview' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.node_uuid)"
+                                    :node-detail-url="'{% url 'node:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.node_uuid)"
+                                    remove-node-url="{% url 'node:remove_node' %}"
+                                    update-node-url="{% url 'node:update_node' %}"
+                                    @open-node-modal="openNodeModal"
+                                    @update-layout="onUpdateLayout"
+                                >
+                                </node-node>
+                            </div>
                         </div>
                     </slick-item>
                 </slick-list>
@@ -263,6 +285,16 @@
             >
             </object-select>
 
+            <node-node-modal
+                ref="selectNode"
+                parent-node-uuid="{{ object.uuid }}"
+                add-node-url="{% url 'node:add_node' %}"
+                search-url="{% url 'node:search' %}?query="
+                @select-node="handleSelectNode"
+                @update-layout="onUpdateLayout"
+            >
+            </node-node-modal>
+
         </div>
 
     </div>
@@ -288,10 +320,12 @@
                 DropDownMenu,
                 NodeImage,
                 NodeImageModal,
+                NodeNode,
                 NodeNote,
                 NodeNoteModal,
                 NodeQuote,
                 NodeQuoteModal,
+                NodeNodeModal,
                 NodeTodoList,
                 ObjectSelect,
                 SlickItem,
@@ -309,6 +343,7 @@
                 const quoteUpdate = ref(null);
                 const objectSelectCollection = ref(null);
                 const objectSelectImage = ref(null);
+                const selectNode = ref(null);
                 const todoList = ref(null);
                 const updateTodo = ref(null);
 
@@ -463,6 +498,14 @@
                     noteUpdate.value.openModal("Update", callback, data);
                 };
 
+                function openAddNodeModal() {
+                    selectNode.value.openModal("Add");
+                };
+
+                function openNodeModal(callback, options) {
+                    selectNode.value.openModal("Update", callback, options);
+                };
+
                 function openQuoteUpdateModal(callback, data) {
                     quoteUpdate.value.openModal("Update", callback, data);
                 };
@@ -473,6 +516,20 @@
 
                 function openSelectImageModal() {
                     objectSelectImage.value.openModal();
+                };
+
+                function handleSelectNode(node_uuid) {
+                    doPost(
+                        "{% url "node:add_node" %}",
+                        {
+                            "parent_node_uuid": nodeUuid.value,
+                            "node_uuid": node_uuid,
+                        },
+                        (response) => {
+                            layout.value = JSON.parse(response.data.layout);
+                        },
+                        "Node added",
+                    );
                 };
 
                 function selectObjectCollection(object, callback, returnArgs) {
@@ -519,6 +576,7 @@
                     editLayout,
                     editLayoutDropDownItemValue,
                     handleLayoutChange,
+                    handleSelectNode,
                     handleSortStart,
                     handleTodoUpdate,
                     hasTodoList,
@@ -536,14 +594,17 @@
                     openModalCollectionUpdate,
                     openModalNoteImage,
                     openModalNoteUpdate,
+                    openNodeModal,
                     openQuoteUpdateModal,
                     openObjectSelectModal,
                     openSelectImageModal,
+                    openAddNodeModal,
                     onUpdateLayout,
                     quoteUpdate,
                     noteImage,
                     nodeName,
                     nodeUuid,
+                    selectNode,
                     selectObjectCollection,
                     selectObjectImage,
                     todoList,

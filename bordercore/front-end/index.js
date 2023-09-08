@@ -291,11 +291,17 @@ window.NodeQuote = NodeQuote;
 import NodeQuoteModal from "./vue/node/NodeQuoteModal.vue";
 window.NodeQuoteModal = NodeQuoteModal;
 
+import NodeNode from "./vue/node/NodeNode.vue";
+window.NodeNode = NodeNode;
+
 import NodeNote from "./vue/node/NodeNote.vue";
 window.NodeNote = NodeNote;
 
 import NodeNoteModal from "./vue/node/NodeNoteModal.vue";
 window.NodeNoteModal = NodeNoteModal;
+
+import NodeNodeModal from "./vue/node/NodeNodeModal.vue";
+window.NodeNodeModal = NodeNodeModal;
 
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
 window.NodeTodoList = NodeTodoList;

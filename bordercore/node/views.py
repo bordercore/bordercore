@@ -1,4 +1,5 @@
 import json
+import random
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -98,20 +99,11 @@ def edit_note(request):
 def get_todo_list(request, uuid):
 
     node = Node.objects.get(uuid=uuid, user=request.user)
-    todo_list = list(node.todos.all().only("name", "uuid").order_by("nodetodo__sort_order"))
+    todo_list = node.get_todo_list()
 
     response = {
         "status": "OK",
-        "todo_list": [
-            {
-                "name": x.name,
-                "note": x.note,
-                "priority": x.priority,
-                "uuid": x.uuid,
-                "url": x.url,
-            }
-            for x
-            in todo_list]
+        "todo_list": todo_list
     }
 
     return JsonResponse(response)
@@ -465,6 +457,107 @@ def delete_todo_list(request):
     response = {
         "status": "OK",
         "layout": node.get_layout()
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_node(request):
+
+    parent_node_uuid = request.POST["parent_node_uuid"]
+    node_uuid = request.POST["node_uuid"]
+    options = json.loads(request.POST.get("options", "{}"))
+
+    node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
+    node.add_node(node_uuid, options)
+
+    response = {
+        "status": "OK",
+        "layout": node.get_layout()
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_node(request):
+
+    parent_node_uuid = request.POST["parent_node_uuid"]
+    uuid = request.POST["uuid"]
+
+    node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
+    node.remove_node(uuid)
+
+    response = {
+        "status": "OK",
+        "layout": node.get_layout()
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def update_node(request):
+
+    parent_node_uuid = request.POST["parent_node_uuid"]
+    uuid = request.POST["uuid"]
+    options = json.loads(request.POST["options"])
+
+    node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
+    node.update_node(uuid, options)
+
+    response = {
+        "status": "OK",
+        "layout": node.get_layout()
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def search(request):
+    node_list = Node.objects.filter(name__icontains=request.GET["query"])
+
+    response = [
+        {
+            "uuid": x.uuid,
+            "name": x.name
+        }
+        for x in
+        node_list
+    ]
+
+    return JsonResponse(response, safe=False)
+
+
+@login_required
+def node_preview(request, uuid):
+
+    node = Node.objects.get(user=request.user, uuid=uuid)
+    preview = node.get_preview()
+
+    try:
+        random_note = random.choice(preview["notes"])
+    except IndexError:
+        random_note = []
+
+    try:
+        random_todo = random.choice(preview["todos"])
+    except IndexError:
+        random_todo = []
+
+    response = {
+        "status": "OK",
+        "info": {
+            "uuid": uuid,
+            "name": node.name,
+            "images": preview["images"],
+            "note_count": len(preview["notes"]),
+            "random_note": random_note,
+            "random_todo": random_todo,
+            "todo_count": len(preview["todos"]),
+        }
     }
 
     return JsonResponse(response)

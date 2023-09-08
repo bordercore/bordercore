@@ -125,9 +125,6 @@
                 action.value = actionParam;
                 callback = callbackParam;
                 modal.show();
-                setTimeout( () => {
-                    document.querySelector("#modalUpdateQuote input").focus();
-                }, 500);
             };
 
             function handleColorSelect(color) {

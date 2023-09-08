@@ -7,6 +7,7 @@ import django
 from blob.models import Blob
 from collection.models import Collection
 from node.models import Node
+from node.tests.factories import NodeFactory
 from quote.tests.factories import QuoteFactory
 
 django.setup()
@@ -281,3 +282,86 @@ def test_node_delete_todo_list(node):
         for sublist in node.layout
         for val in sublist
     ]
+
+
+def test_node_add_node(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    added_node = NodeFactory.create(user=user)
+    node.add_node(str(added_node.uuid))
+
+    # Verify that the node has been added to the node's layout
+    assert str(added_node.uuid) in [
+        val["node_uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "node_uuid" in val
+        and val["node_uuid"] == str(added_node.uuid)
+    ]
+
+
+def test_node_remove_node(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    added_node = NodeFactory.create(user=user)
+    node.add_node(str(added_node.uuid))
+    node.remove_node(added_node.uuid)
+
+    # Verify that the node has been removed from the node's layout
+    assert str(added_node.uuid) not in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+        and val["uuid"] == added_node.uuid
+    ]
+
+
+def test_node_update_node(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    added_node = NodeFactory.create(user=user)
+    uuid = node.add_node(str(added_node.uuid))
+
+    color = 2
+    rotate = 10
+
+    options = {
+        "color": color,
+        "format": "standard",
+        "rotate": 10,
+        "favorites_only": "false"
+    }
+
+    node.update_node(uuid, options)
+
+    # Verify that the node's properties have been updated in the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert color in [
+        val["options"]["color"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "node" and val.get("node_uuid", None) == str(added_node.uuid) and "options" in val
+    ]
+    assert rotate in [
+        val["options"]["rotate"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "node" and val.get("node_uuid", None) == str(added_node.uuid)
+    ]
+
+
+def test_node_get_preview(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    added_node = NodeFactory.create(user=user)
+    node.add_node(str(added_node.uuid))
+
+    preview = node.get_preview()
+    assert len(preview["images"]) > 1
+    assert len(preview["notes"]) == 0

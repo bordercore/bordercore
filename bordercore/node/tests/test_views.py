@@ -8,6 +8,7 @@ from django import urls
 from blob.models import Blob
 from collection.models import Collection
 from node.models import Node
+from node.tests.factories import NodeFactory
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -453,3 +454,64 @@ def test_node_delete_todo_list(auto_login_user, node):
         for sublist in updated_node.layout
         for val in sublist
     ]
+
+
+def test_node_add_node(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    added_node = NodeFactory.create(user=user)
+
+    url = urls.reverse("node:add_node")
+    resp = client.post(url, {
+        "parent_node_uuid": node.uuid,
+        "node_uuid": added_node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    # Verify that the node has been added to the node's layout
+    assert "node" in [
+        val["type"]
+        for sublist in updated_node.layout
+        for val in sublist
+    ]
+
+
+def test_node_remove_node(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    added_node = NodeFactory.create(user=user)
+    node.add_node(str(added_node.uuid))
+
+    url = urls.reverse("node:remove_node")
+    resp = client.post(url, {
+        "parent_node_uuid": node.uuid,
+        "uuid": added_node.uuid
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the node has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=added_node.uuid)
+    assert "node" not in [
+        val["type"]
+        for sublist in updated_node.layout
+        for val in sublist
+    ]
+
+
+def test_node_search(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    url = urls.reverse("node:search")
+    resp = client.get(f"{url}?query={node.name}")
+
+    assert resp.status_code == 200
+
+    assert resp.json()[0]["uuid"] == str(node.uuid)
+    assert resp.json()[0]["name"] == node.name

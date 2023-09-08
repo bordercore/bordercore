@@ -120,4 +120,29 @@ urlpatterns = [
         view=views.delete_todo_list,
         name="delete_todo_list"
     ),
+    path(
+        route="node/add",
+        view=views.add_node,
+        name="add_node"
+    ),
+    path(
+        route="node/remove",
+        view=views.remove_node,
+        name="remove_node"
+    ),
+    path(
+        route="node/update/",
+        view=views.update_node,
+        name="update_node"
+    ),
+    path(
+        route="node/search",
+        view=views.search,
+        name="search"
+    ),
+    path(
+        route="<uuid:uuid>/preview/",
+        view=views.node_preview,
+        name="preview"
+    ),
 ]
