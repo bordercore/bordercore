@@ -99,5 +99,5 @@ LOGGING["loggers"]["django"] = {"handlers": ["console"]}
 # LOGGING["loggers"]["django.db.backends"] = {
 #     "propagate": False,
 #     "level": "DEBUG",
-#     "handlers": ["bordercore"]
+#     "handlers": ["console"]
 # }
