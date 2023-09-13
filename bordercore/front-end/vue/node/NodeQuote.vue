@@ -2,7 +2,7 @@
     <div class="hover-target" @mouseover="hover = true" @mouseleave="hover = false">
         <card class="backdrop-filter" :class="cardClass" title="">
             <template #title-slot>
-                <div v-if="nodeQuote.format !== 'minimal'" class="dropdown-height d-flex">
+                <div v-if="quoteOptions && quoteOptions.format !== 'minimal'" class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">
                         <div>
                             <font-awesome-icon icon="quote-left" class="text-primary me-3" />
@@ -13,7 +13,7 @@
                         <drop-down-menu :show-on-hover="true">
                             <template #dropdown>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="handleQuoteUpdate()">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleOpenQuoteModal">
                                         <span>
                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
                                         </span>
@@ -63,11 +63,15 @@
             FontAwesomeIcon,
         },
         props: {
+            uuid: {
+                type: String,
+                default: "",
+            },
             nodeUuid: {
                 type: String,
                 default: "",
             },
-            nodeQuoteInitial: {
+            quoteOptionsInitial: {
                 type: Object,
                 default: function() {},
             },
@@ -92,14 +96,12 @@
         setup(props, ctx) {
             const hover = ref(false);
             const quote = ref(null);
-
-            const nodeQuote = ref(props.nodeQuoteInitial);
-
+            const quoteOptions = ref(props.quoteOptionsInitial);
             let rotateInterval = null;
 
             function getQuote() {
                 doGet(
-                    props.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", nodeQuote.value.uuid),
+                    props.getQuoteUrl,
                     (response) => {
                         quote.value = response.data;
                     },
@@ -112,7 +114,7 @@
                     props.getAndSetQuoteUrl,
                     {
                         "node_uuid": props.nodeUuid,
-                        "favorites_only": nodeQuote.value.favorites_only,
+                        "favorites_only": quoteOptions.value.favorites_only,
                     },
                     (response) => {
                         quote.value = response.data.quote;
@@ -125,7 +127,7 @@
                     props.removeQuoteUrl,
                     {
                         "node_uuid": props.nodeUuid,
-                        "node_quote_uuid": nodeQuote.value.node_quote_uuid,
+                        "uuid": props.uuid,
                     },
                     (response) => {
                         ctx.emit("update-layout", response.data.layout);
@@ -134,74 +136,73 @@
                 );
             };
 
-            function updateQuote(quote) {
+            function updateQuote(options) {
                 doPost(
                     props.updateQuoteUrl,
                     {
                         "node_uuid": props.nodeUuid,
-                        "node_quote_uuid": quote.node_quote_uuid,
-                        "color": quote.color,
-                        "format": quote.format,
-                        "rotate": quote.rotate,
-                        "favorites_only": quote.favorites_only,
+                        "uuid": props.uuid,
+                        "options": JSON.stringify(options),
                     },
                     (response) => {
-                        nodeQuote.value.color = quote.color;
-                        nodeQuote.value.rotate = quote.rotate;
+                        quoteOptions.value = options;
                         setTimer();
+                        ctx.emit("update-layout", response.data.layout);
                     },
                 );
             };
 
-            function handleQuoteUpdate() {
-                ctx.emit("open-quote-update-modal", updateQuote, nodeQuote.value);
+            function handleOpenQuoteModal() {
+                console.log(quoteOptions.value);
+                ctx.emit("open-quote-update-modal", updateQuote, quoteOptions.value);
             };
 
             function setTimer() {
-                if (!nodeQuote.value.rotate || nodeQuote.value.rotate === -1) {
+                if (!quoteOptions.value.rotate || quoteOptions.rotate === -1) {
                     return;
                 }
                 clearInterval(rotateInterval);
                 rotateInterval = setInterval( () => {
                     getRandomQuote();
-                }, nodeQuote.value.rotate * 1000 * 60);
+                }, quoteOptions.value.rotate * 1000 * 60);
             };
 
             onMounted(() => {
                 getQuote();
 
-                if (nodeQuote.value.rotate !== null && nodeQuote.value.rotate !== -1) {
+                if (quoteOptions.value.rotate !== null && quoteOptions.value.rotate !== -1) {
                     setTimer();
                 }
 
                 hotkeys("m,right,u", function(event, handler) {
+                    if (!hover.value) {
+                        return;
+                    }
                     switch (handler.key) {
                     case "m":
-                        nodeQuote.value.format = nodeQuote.value.format === "minimal" ? "standard": "minimal";
+                        quoteOptions.value.format = quoteOptions.value.format === "minimal" ? "standard": "minimal";
                         break;
                     case "right":
-                        if (hover.value) {
-                            getRandomQuote();
-                        }
+                        getRandomQuote();
                         break;
                     case "u":
-                        handleQuoteUpdate();
+                        handleOpenQuoteModal();
                         break;
                     }
                 });
             });
 
             const cardClass = computed(() => {
-                return `node-color-${nodeQuote.value.color}`;
+                return `node-color-${quoteOptions.value.color}`;
             });
 
             return {
                 cardClass,
+                handleOpenQuoteModal,
                 handleQuoteRemove,
-                handleQuoteUpdate,
                 hover,
-                nodeQuote,
                 quote,
+                quoteOptions,
             };
         },
     };

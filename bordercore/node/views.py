@@ -351,16 +351,17 @@ def remove_image(request):
 def add_quote(request):
 
     node_uuid = request.POST["node_uuid"]
+    options = json.loads(request.POST.get("options", "{}"))
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
 
     # Choose a random quote
-    quote = Quote.objects.all().order_by("?")[0]
-    node.add_quote(quote.uuid)
+    quote = Quote.objects.all().order_by("?").first()
+    node.add_quote(quote, options)
 
     response = {
         "status": "OK",
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)
@@ -370,10 +371,10 @@ def add_quote(request):
 def remove_quote(request):
 
     node_uuid = request.POST["node_uuid"]
-    node_quote_uuid = request.POST["node_quote_uuid"]
+    uuid = request.POST["uuid"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.remove_quote(node_quote_uuid)
+    node.remove_quote(uuid)
 
     response = {
         "status": "OK",
@@ -387,17 +388,16 @@ def remove_quote(request):
 def update_quote(request):
 
     node_uuid = request.POST["node_uuid"]
-    node_quote_uuid = request.POST["node_quote_uuid"]
-    format = request.POST["format"]
-    color = int(request.POST["color"])
-    rotate = int(request.POST["rotate"])
-    favorites_only = True if request.POST["favorites_only"] == "true" else False
+    uuid = request.POST["uuid"]
+    options = json.loads(request.POST["options"])
+    options["favorites_only"] = True if options.get("favorites_only", "false") == "true" else False
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.update_quote(node_quote_uuid, color, format, rotate, favorites_only)
+    node.update_quote(uuid, options)
 
     response = {
         "status": "OK",
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)

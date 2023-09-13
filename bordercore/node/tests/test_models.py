@@ -183,57 +183,58 @@ def test_node_remove_image(node, blob_image_factory):
 
 def test_node_add_quote(node, quote):
 
-    node_quote_uuid = node.add_quote(quote.uuid)
+    new_uuid = node.add_quote(quote)
 
     # Verify that the quote has been added to the node's layout
-    assert str(quote.uuid) in [
+    assert new_uuid in [
         val["uuid"]
         for sublist in node.layout
         for val in sublist
-        if "node_quote_uuid" in val
-        and val["node_quote_uuid"] == node_quote_uuid
+        if "uuid" in val
     ]
 
 
 def test_node_remove_quote(node, quote):
 
-    node_quote_uuid = node.add_quote(quote.uuid)
-    node.remove_quote(node_quote_uuid)
+    new_uuid = node.add_quote(quote)
+    node.remove_quote(new_uuid)
 
     # Verify that the quote has been removed from the node's layout
     assert str(quote.uuid) not in [
         val["uuid"]
         for sublist in node.layout
         for val in sublist
-        if "node_quote_uuid" in val
-        and val["node_quote_uuid"] == node_quote_uuid
+        if "quote_uuid" in val
     ]
 
 
 def test_node_update_quote(node, quote):
 
-    node_quote_uuid = node.add_quote(quote.uuid)
+    new_uuid = node.add_quote(quote)
     color = 2
-    format = "standard"
     rotate = 10
-    favorites_only = "false"
 
-    node.update_quote(node_quote_uuid, color, format, rotate, favorites_only)
+    options = {
+        "color": color,
+        "format": "standard",
+        "rotate": rotate,
+        "favorites_only": "false"
+    }
+
+    node.update_quote(new_uuid, options)
 
     # Verify that the quote's properties have been updated in the node's layout
-    updated_node = Node.objects.get(uuid=node.uuid)
-
     assert color in [
-        val["color"]
-        for sublist in updated_node.layout
+        val["options"]["color"]
+        for sublist in node.layout
         for val in sublist
-        if val["type"] == "quote" and val.get("node_quote_uuid", None) == str(node_quote_uuid)
+        if val["type"] == "quote" and val.get("quote_uuid", None) == str(quote.uuid) and "options" in val
     ]
     assert rotate in [
-        val["rotate"]
-        for sublist in updated_node.layout
+        val["options"]["rotate"]
+        for sublist in node.layout
         for val in sublist
-        if val["type"] == "quote" and val.get("node_quote_uuid", None) == str(node_quote_uuid)
+        if val["type"] == "quote" and val.get("quote_uuid", None) == str(quote.uuid) and "options" in val
     ]
 
 
@@ -243,14 +244,14 @@ def test_node_set_quote(auto_login_user, node):
 
     quotes = QuoteFactory.create_batch(2, user=user)
 
-    node.add_quote(quotes[0].uuid)
+    node.add_quote(quotes[0])
     node.set_quote(quotes[1].uuid)
 
     # Verify that the quote's properties have been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
 
     assert str(quotes[1].uuid) in [
-        val["uuid"]
+        val["quote_uuid"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "quote"

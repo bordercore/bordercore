@@ -334,12 +334,12 @@ def test_node_remove_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
-    node_quote_uuid = node.add_quote(quote.uuid)
+    new_uuid = node.add_quote(quote)
 
     url = urls.reverse("node:remove_quote")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "node_quote_uuid": node_quote_uuid
+        "uuid": new_uuid
     })
 
     assert resp.status_code == 200
@@ -357,19 +357,22 @@ def test_node_update_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
-    node_quote_uuid = node.add_quote(quote.uuid)
+    node_quote_uuid = node.add_quote(quote)
     color = 2
     format = "minimal"
     rotate = 10
+    options = {
+        "color": color,
+        "format": format,
+        "rotate": rotate,
+        "favorites_only": "false"
+    }
 
     url = urls.reverse("node:update_quote")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "node_quote_uuid": node_quote_uuid,
-        "color": color,
-        "format": format,
-        "rotate": rotate,
-        "favorites_only": "true",
+        "uuid": node_quote_uuid,
+        "options": json.dumps(options)
     })
 
     assert resp.status_code == 200
@@ -378,19 +381,19 @@ def test_node_update_quote(auto_login_user, node, quote):
     updated_node = Node.objects.get(uuid=node.uuid)
 
     assert color in [
-        val["color"]
+        val["options"]["color"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "quote"
     ]
     assert format in [
-        val["format"]
+        val["options"]["format"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "quote"
     ]
     assert rotate in [
-        val["rotate"]
+        val["options"]["rotate"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "quote"

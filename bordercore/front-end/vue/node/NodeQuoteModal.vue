@@ -21,13 +21,13 @@
                         <label class="col-lg-3 col-form-label" for="inputTitle">Rotate</label>
                         <div class="col-lg-9">
                             <div class="d-flex flex-column">
-                                <select v-model="nodeQuote.rotate" class="form-control form-select">
+                                <select v-model="options.rotate" class="form-control form-select">
                                     <option v-for="option in rotateOptions" :key="option.value" :value="option.value">
                                         {{ option.display }}
                                     </option>
                                 </select>
                                 <div class="d-flex align-items-center mt-1">
-                                    <o-switch v-model="nodeQuote.favorites_only" value="favorites-only" />
+                                    <o-switch v-model="options.favorites_only" value="favorites-only" />
                                     <label class="ms-2">Favorites Only</label>
                                 </div>
                             </div>
@@ -37,7 +37,7 @@
                         <label class="col-lg-3 col-form-label" for="inputTitle">Format</label>
                         <div class="col-lg-9">
                             <div class="d-flex flex-column">
-                                <select v-model="nodeQuote.format" class="form-control form-select">
+                                <select v-model="options.format" class="form-control form-select">
                                     <option v-for="option in formatOptions" :key="option.value" :value="option.value">
                                         {{ option.display }}
                                     </option>
@@ -57,9 +57,19 @@
 <script>
 
     export default {
-        setup() {
+        props: {
+            nodeUuid: {
+                default: "",
+                type: String,
+            },
+            addNodeUrl: {
+                default: "",
+                type: String,
+            },
+        },
+        emits: ["update-layout"],
+        setup(props, ctx) {
             const action = ref("Update");
-            const nodeQuote = ref({});
 
             let callback = null;
             const colors = [1, 2, 3, 4];
@@ -74,7 +84,8 @@
                 },
             ];
             let modal = null;
-            let nodeQuoteInitial = {};
+            const optionsDefault = {"format": "standard", "rotate": -1};
+            const options = ref(optionsDefault);
             const rotateOptions = [
                 {
                     value: -1,
@@ -107,28 +118,39 @@
             ];
 
             function getClass(color) {
-                const selectedColor = color === (nodeQuote.value && nodeQuote.value.color) ? "selected-color" : "";
+                const selectedColor = color === (options.value && options.value.color) ? "selected-color" : "";
                 return `node-color-${color} ${selectedColor}`;
             };
 
             function handleQuoteUpdate() {
-                // If any of the properties have changed, trigger the callback
-                if (nodeQuote.value !== nodeQuoteInitial) {
-                    callback(nodeQuote.value);
+                if (action.value === "Add") {
+                    doPost(
+                        props.addNodeUrl,
+                        {
+                            "node_uuid": props.nodeUuid,
+                            "options": JSON.stringify(options.value),
+                        },
+                        (response) => {
+                            ctx.emit("update-layout", response.data.layout);
+                            modal.hide();
+                        },
+                        "Quote added",
+                    );
+                } else {
+                    callback(options.value);
                 }
                 modal.hide();
             };
 
-            function openModal(actionParam, callbackParam, nodeQuoteParam) {
-                nodeQuote.value = nodeQuoteParam;
-                nodeQuoteInitial = {...nodeQuote};
+            function openModal(actionParam, callbackParam, optionsParam) {
                 action.value = actionParam;
                 callback = callbackParam;
+                options.value = optionsParam ? optionsParam : optionsDefault;
                 modal.show();
             };
 
             function handleColorSelect(color) {
-                nodeQuote.value.color = color;
+                options.value.color = color;
             };
 
             onMounted(() => {
@@ -143,7 +165,7 @@
                 handleColorSelect,
                 handleQuoteUpdate,
                 openModal,
-                nodeQuote,
+                options,
                 rotateOptions,
             };
         },

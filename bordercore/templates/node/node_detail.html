@@ -61,7 +61,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#" @click.prevent="onAddQuote">
+                        <a class="dropdown-item" href="#" @click.prevent="openAddQuoteModal">
                             <span v-cloak>
                                 <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                                 Add quote
@@ -215,9 +215,10 @@
                             <div v-else-if="row.type === 'quote'">
                                 <node-quote
                                     ref="quote"
+                                    :uuid="row.uuid"
                                     node-uuid="{{ object.uuid }}"
-                                    :node-quote-initial="row"
-                                    get-quote-url="{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}"
+                                    :quote-options-initial="row.options"
+                                    :get-quote-url="'{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.quote_uuid)"
                                     get-and-set-quote-url="{% url 'node:get_quote' %}"
                                     remove-quote-url="{% url 'node:remove_quote' %}"
                                     update-quote-url="{% url 'node:update_quote' %}"
@@ -229,8 +230,8 @@
                             <div v-else-if="row.type === 'node'">
                                 <node-node
                                     :uuid="row.uuid"
-                                    :node-options-initial="row.options"
                                     parent-node-uuid="{{ object.uuid }}"
+                                    :node-options-initial="row.options"
                                     :get-node-info-url="'{% url 'node:preview' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.node_uuid)"
                                     :node-detail-url="'{% url 'node:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.node_uuid)"
                                     remove-node-url="{% url 'node:remove_node' %}"
@@ -261,10 +262,17 @@
             >
             </node-note-modal>
 
-            <node-image-modal ref="noteImage">
+            <node-image-modal
+                ref="noteImage"
+            >
             </node-image-modal>
 
-            <node-quote-modal ref="quoteUpdate">
+            <node-quote-modal
+                ref="quoteUpdate"
+                node-uuid="{{ object.uuid }}"
+                add-node-url="{% url 'node:add_quote' %}"
+                @update-layout="onUpdateLayout"
+            >
             </node-quote-modal>
 
             <object-select
@@ -407,19 +415,6 @@
                     todoList.value[0].getTodoList();
                 };
 
-                function onAddQuote() {
-                    doPost(
-                        "{% url "node:add_quote" %}",
-                        {
-                            "node_uuid": nodeUuid.value,
-                        },
-                        (response) => {
-                            layout.value = JSON.parse(response.data.layout);
-                        },
-                        "Quote added",
-                    );
-                };
-
                 function onAddTodoList() {
                     doPost(
                         "{% url "node:add_todo_list" %}",
@@ -500,6 +495,10 @@
 
                 function openAddNodeModal() {
                     selectNode.value.openModal("Add");
+                };
+
+                function openAddQuoteModal() {
+                    quoteUpdate.value.openModal("Add");
                 };
 
                 function openNodeModal(callback, options) {
@@ -584,11 +583,11 @@
                     noteUpdate,
                     objectSelectCollection,
                     objectSelectImage,
-                    onAddQuote,
                     onAddTodoList,
                     onClickUpdateNode,
                     onUpdateNode,
                     openAddNoteModal,
+                    openAddQuoteModal,
                     openCollectionModal,
                     openCreateUpdateTodoModal,
                     openModalCollectionUpdate,

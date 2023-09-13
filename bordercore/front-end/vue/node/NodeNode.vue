@@ -89,13 +89,13 @@
                 type: String,
                 default: "",
             },
-            nodeOptionsInitial: {
-                type: Object,
-                default: function() {},
-            },
             parentNodeUuid: {
                 type: String,
                 default: "",
+            },
+            nodeOptionsInitial: {
+                type: Object,
+                default: function() {},
             },
             getNodeInfoUrl: {
                 type: String,
@@ -165,11 +165,7 @@
             };
 
             function handleOpenNodeModal() {
-                ctx.emit(
-                    "open-node-modal",
-                    updateNode,
-                    nodeOptions.value,
-                );
+                ctx.emit("open-node-modal", updateNode, nodeOptions.value);
             };
 
             function setTimer() {

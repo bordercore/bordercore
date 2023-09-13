@@ -26,7 +26,7 @@
                         <label class="col-lg-4 col-form-label" for="inputTitle">Rotate</label>
                         <div class="col-lg-8">
                             <div class="d-flex flex-column">
-                                <select v-model="nodeOptions.rotate" class="form-control form-select">
+                                <select v-model="options.rotate" class="form-control form-select">
                                     <option
                                         v-for="option in rotateOptions"
                                         :key="option.value"
@@ -74,8 +74,8 @@
             const action = ref("Update");
             let callback = null;
             let modal = null;
-            const nodeOptionsDefault = {"rotate": -1};
-            const nodeOptions = ref(nodeOptionsDefault);
+            const optionsDefault = {"rotate": -1};
+            const options = ref(optionsDefault);
             let nodeUuid = null;
 
             const rotateOptions = [
@@ -119,7 +119,7 @@
                         {
                             "parent_node_uuid": props.parentNodeUuid,
                             "node_uuid": nodeUuid,
-                            "options": JSON.stringify(nodeOptions.value),
+                            "options": JSON.stringify(options.value),
                         },
                         (response) => {
                             ctx.emit("update-layout", response.data.layout);
@@ -128,7 +128,7 @@
                         "Node added",
                     );
                 } else {
-                    callback(nodeOptions.value);
+                    callback(options.value);
                     modal.hide();
                 }
             };
@@ -137,11 +137,10 @@
                 nodeUuid = node.uuid;
             };
 
-            function openModal(actionParam, callbackParam, nodeOptionsParam) {
-                console.log(nodeOptionsParam);
+            function openModal(actionParam, callbackParam, optionsParam) {
                 action.value = actionParam;
                 callback = callbackParam;
-                nodeOptions.value = nodeOptionsParam ? nodeOptionsParam : nodeOptionsDefault;
+                options.value = optionsParam ? optionsParam : optionsDefault;
                 modal.show();
                 if (action.value === "Add") {
                     setTimeout( () => {
@@ -158,7 +157,7 @@
                 action,
                 handleNodeSelect,
                 handleNodeUpdate,
-                nodeOptions,
+                options,
                 openModal,
                 rotateOptions,
                 selectValue,
