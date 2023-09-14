@@ -105,7 +105,7 @@
                 type: String,
                 default: "",
             },
-            removeNodeUrl: {
+            removeComponentUrl: {
                 type: String,
                 default: "",
             },
@@ -152,9 +152,9 @@
 
             function handleRemoveNode() {
                 doPost(
-                    props.removeNodeUrl,
+                    props.removeComponentUrl,
                     {
-                        "parent_node_uuid": props.parentNodeUuid,
+                        "node_uuid": props.parentNodeUuid,
                         "uuid": props.uuid,
                     },
                     (response) => {

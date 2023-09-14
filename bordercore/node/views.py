@@ -11,7 +11,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin
 from django.views.generic.list import ListView
 
-from blob.models import RecentlyViewedBlob
+from blob.models import Blob, RecentlyViewedBlob
 from collection.models import Collection
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
@@ -318,30 +318,14 @@ def add_image(request):
     image_uuid = request.POST["image_uuid"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.add_image(image_uuid)
+    image = Blob.objects.get(uuid=image_uuid, user=request.user)
+    node.add_component("image", image)
 
     node.populate_image_info()
 
     response = {
         "status": "OK",
         "layout": json.dumps(node.layout)
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_image(request):
-
-    node_uuid = request.POST["node_uuid"]
-    image_uuid = request.POST["image_uuid"]
-
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.remove_image(image_uuid)
-
-    response = {
-        "status": "OK",
-        "layout": node.get_layout()
     }
 
     return JsonResponse(response)
@@ -357,24 +341,7 @@ def add_quote(request):
 
     # Choose a random quote
     quote = Quote.objects.all().order_by("?").first()
-    node.add_quote(quote, options)
-
-    response = {
-        "status": "OK",
-        "layout": node.get_layout()
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_quote(request):
-
-    node_uuid = request.POST["node_uuid"]
-    uuid = request.POST["uuid"]
-
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.remove_quote(uuid)
+    node.add_component("quote", quote, options)
 
     response = {
         "status": "OK",
@@ -393,7 +360,7 @@ def update_quote(request):
     options["favorites_only"] = True if options.get("favorites_only", "false") == "true" else False
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.update_quote(uuid, options)
+    node.update_component(uuid, options)
 
     response = {
         "status": "OK",
@@ -469,29 +436,13 @@ def add_node(request):
     node_uuid = request.POST["node_uuid"]
     options = json.loads(request.POST.get("options", "{}"))
 
-    node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
-    node.add_node(node_uuid, options)
+    parent_node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    parent_node.add_component("node", node, options)
 
     response = {
         "status": "OK",
-        "layout": node.get_layout()
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_node(request):
-
-    parent_node_uuid = request.POST["parent_node_uuid"]
-    uuid = request.POST["uuid"]
-
-    node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
-    node.remove_node(uuid)
-
-    response = {
-        "status": "OK",
-        "layout": node.get_layout()
+        "layout": parent_node.get_layout()
     }
 
     return JsonResponse(response)
@@ -505,7 +456,7 @@ def update_node(request):
     options = json.loads(request.POST["options"])
 
     node = Node.objects.get(uuid=parent_node_uuid, user=request.user)
-    node.update_node(uuid, options)
+    node.update_component(uuid, options)
 
     response = {
         "status": "OK",
@@ -558,6 +509,23 @@ def node_preview(request, uuid):
             "random_todo": random_todo,
             "todo_count": len(preview["todos"]),
         }
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_component(request):
+
+    node_uuid = request.POST["node_uuid"]
+    uuid = request.POST["uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.remove_component(uuid)
+
+    response = {
+        "status": "OK",
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)

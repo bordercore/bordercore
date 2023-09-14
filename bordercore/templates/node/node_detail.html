@@ -202,11 +202,11 @@
                             <div v-else-if="row.type === 'image'">
                                 <node-image
                                     node-uuid="{{ object.uuid }}"
-                                    :image-uuid="row.uuid"
+                                    :uuid="row.uuid"
                                     :image-title="row.image_title"
                                     :image-url="row.image_url"
                                     :image-detail-url="'{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.uuid)"
-                                    remove-image-url="{% url 'node:remove_image' %}"
+                                    remove-component-url="{% url 'node:remove_component' %}"
                                     @open-modal-note-image="openModalNoteImage"
                                     @update-layout="onUpdateLayout"
                                 >
@@ -214,13 +214,12 @@
                             </div>
                             <div v-else-if="row.type === 'quote'">
                                 <node-quote
-                                    ref="quote"
                                     :uuid="row.uuid"
                                     node-uuid="{{ object.uuid }}"
                                     :quote-options-initial="row.options"
                                     :get-quote-url="'{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.quote_uuid)"
                                     get-and-set-quote-url="{% url 'node:get_quote' %}"
-                                    remove-quote-url="{% url 'node:remove_quote' %}"
+                                    remove-component-url="{% url 'node:remove_component' %}"
                                     update-quote-url="{% url 'node:update_quote' %}"
                                     @open-quote-update-modal="openQuoteUpdateModal"
                                     @update-layout="onUpdateLayout"
@@ -234,7 +233,7 @@
                                     :node-options-initial="row.options"
                                     :get-node-info-url="'{% url 'node:preview' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.node_uuid)"
                                     :node-detail-url="'{% url 'node:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', row.node_uuid)"
-                                    remove-node-url="{% url 'node:remove_node' %}"
+                                    remove-component-url="{% url 'node:remove_component' %}"
                                     update-node-url="{% url 'node:update_node' %}"
                                     @open-node-modal="openNodeModal"
                                     @update-layout="onUpdateLayout"

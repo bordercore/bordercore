@@ -174,7 +174,7 @@ class Node(TimeStampedModel):
         for column in self.layout:
             for row in column:
                 if row["type"] == "image":
-                    blob = Blob.objects.get(uuid=row["uuid"])
+                    blob = Blob.objects.get(uuid=row["image_uuid"])
                     row["image_url"] = blob.get_cover_url()
                     row["image_title"] = blob.name
 
@@ -184,69 +184,6 @@ class Node(TimeStampedModel):
             for row in column:
                 if "uuid" in row and row["uuid"] == note_uuid:
                     row["color"] = color
-
-        self.save()
-
-    def add_image(self, image_uuid):
-
-        layout = self.layout
-        layout[0].insert(
-            0,
-            {
-                "type": "image",
-                "uuid": str(image_uuid),
-            }
-        )
-        self.layout = layout
-        self.save()
-
-    def remove_image(self, image_uuid):
-
-        layout = self.layout
-        for i, col in enumerate(layout):
-            layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(image_uuid)]
-
-        self.layout = layout
-        self.save()
-
-    def add_quote(self, quote, options={}):
-
-        new_uuid = str(uuid.uuid4())
-
-        layout = self.layout
-        layout[0].insert(
-            0,
-            {
-                "type": "quote",
-                "uuid": new_uuid,
-                "quote_uuid": str(quote.uuid),
-                "options": options,
-            }
-        )
-        self.layout = layout
-        self.save()
-
-        return new_uuid
-
-    def remove_quote(self, uuid):
-
-        layout = self.layout
-        for i, col in enumerate(layout):
-            layout[i] = [
-                x
-                for x in col
-                if x.get("uuid", None) != str(uuid)
-            ]
-
-        self.layout = layout
-        self.save()
-
-    def update_quote(self, uuid, options):
-
-        for column in self.layout:
-            for row in column:
-                if row.get("uuid", None) == uuid:
-                    row["options"] = options
 
         self.save()
 
@@ -281,43 +218,6 @@ class Node(TimeStampedModel):
 
         for so in NodeTodo.objects.filter(node=self):
             so.todo.delete()
-
-    def add_node(self, node_uuid, options={}):
-
-        new_uuid = str(uuid.uuid4())
-
-        layout = self.layout
-        layout[0].insert(
-            0,
-            {
-                "type": "node",
-                "uuid": new_uuid,
-                "node_uuid": node_uuid,
-                "options": options,
-            }
-        )
-        self.layout = layout
-        self.save()
-
-        return new_uuid
-
-    def remove_node(self, uuid):
-
-        layout = self.layout
-        for i, col in enumerate(layout):
-            layout[i] = [x for x in col if x.get("uuid", None) != str(uuid)]
-
-        self.layout = layout
-        self.save()
-
-    def update_node(self, uuid, options):
-
-        for column in self.layout:
-            for row in column:
-                if row.get("uuid", None) == uuid:
-                    row["options"] = options
-
-        self.save()
 
     def get_todo_list(self):
         todo_list = self.todos.all().only("name", "note", "priority", "url", "uuid").order_by("nodetodo__sort_order")
@@ -367,6 +267,9 @@ class Node(TimeStampedModel):
             collection = Collection.objects.get(uuid=collection_uuid)
             all_objects.extend(collection.get_object_list()["object_list"])
 
+        blobs = [x for x in all_objects if x["type"] == "blob"]
+        blob_count = len([x for x in all_objects if x["type"] == "blob"])
+
         # We ultimately want two images. If we already found one image, then
         #  we only need one more from a collection. If not, we need two.
         images.extend([
@@ -376,7 +279,7 @@ class Node(TimeStampedModel):
                 "blob_url": obj["url"]
             }
             for obj in
-            random.sample([x for x in all_objects if x["type"] == "blob"], 2 - len(images))
+            random.sample(blobs, min(2 - len(images), blob_count))
         ])
 
         notes = [
@@ -394,6 +297,47 @@ class Node(TimeStampedModel):
             "notes": notes,
             "todos": todos
         }
+
+    # Add an image, quote or node to a node
+    def add_component(self, component_type, component, options={}):
+        new_uuid = str(uuid.uuid4())
+
+        layout = self.layout
+        layout[0].insert(
+            0,
+            {
+                "type": component_type,
+                "uuid": new_uuid,
+                f"{component_type}_uuid": str(component.uuid),
+                "options": options,
+            }
+        )
+        self.layout = layout
+        self.save()
+
+        return new_uuid
+
+    # Update the options for a quote or node
+    def update_component(self, uuid, options):
+        for column in self.layout:
+            for row in column:
+                if row.get("uuid", None) == uuid:
+                    row["options"] = options
+
+        self.save()
+
+    # Remove an image, quote, or node from a node
+    def remove_component(self, uuid):
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [
+                x
+                for x in col
+                if x.get("uuid", None) != str(uuid)
+            ]
+
+        self.layout = layout
+        self.save()
 
 
 class NodeTodo(SortOrderMixin):

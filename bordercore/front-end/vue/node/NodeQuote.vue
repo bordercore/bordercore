@@ -83,7 +83,7 @@
                 type: String,
                 default: "",
             },
-            removeQuoteUrl: {
+            removeComponentUrl: {
                 type: String,
                 default: "",
             },
@@ -124,7 +124,7 @@
 
             function handleQuoteRemove() {
                 doPost(
-                    props.removeQuoteUrl,
+                    props.removeComponentUrl,
                     {
                         "node_uuid": props.nodeUuid,
                         "uuid": props.uuid,
@@ -153,7 +153,6 @@
             };
 
             function handleOpenQuoteModal() {
-                console.log(quoteOptions.value);
                 ctx.emit("open-quote-update-modal", updateQuote, quoteOptions.value);
             };
 

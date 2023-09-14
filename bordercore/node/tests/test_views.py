@@ -278,10 +278,10 @@ def test_node_add_image(monkeypatch_blob, auto_login_user, node, blob_image_fact
     # Verify that the collection has been removed from the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
     assert str(blob_image_factory[0].uuid) in [
-        val["uuid"]
+        val["image_uuid"]
         for sublist in updated_node.layout
         for val in sublist
-        if "uuid" in val
+        if "image_uuid" in val
     ]
 
 
@@ -289,12 +289,12 @@ def test_node_remove_image(monkeypatch_blob, auto_login_user, node, blob_image_f
 
     _, client = auto_login_user()
 
-    node.add_image(blob_image_factory[0].uuid)
+    new_uuid = node.add_component("image", blob_image_factory[0])
 
-    url = urls.reverse("node:remove_image")
+    url = urls.reverse("node:remove_component")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "image_uuid": blob_image_factory[0].uuid
+        "uuid": new_uuid
     })
 
     assert resp.status_code == 200
@@ -302,10 +302,10 @@ def test_node_remove_image(monkeypatch_blob, auto_login_user, node, blob_image_f
     # Verify that the image has been removed from the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
     assert str(blob_image_factory[0].uuid) not in [
-        val["uuid"]
+        val["image_uuid"]
         for sublist in updated_node.layout
         for val in sublist
-        if "uuid" in val
+        if "image_uuid" in val
     ]
 
 
@@ -334,9 +334,9 @@ def test_node_remove_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
-    new_uuid = node.add_quote(quote)
+    new_uuid = node.add_component("quote", quote)
 
-    url = urls.reverse("node:remove_quote")
+    url = urls.reverse("node:remove_component")
     resp = client.post(url, {
         "node_uuid": node.uuid,
         "uuid": new_uuid
@@ -357,7 +357,7 @@ def test_node_update_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
-    node_quote_uuid = node.add_quote(quote)
+    node_quote_uuid = node.add_component("quote", quote)
     color = 2
     format = "minimal"
     rotate = 10
@@ -488,11 +488,11 @@ def test_node_remove_node(auto_login_user, node):
     user, client = auto_login_user()
 
     added_node = NodeFactory.create(user=user)
-    node.add_node(str(added_node.uuid))
+    node.add_component("node", added_node)
 
-    url = urls.reverse("node:remove_node")
+    url = urls.reverse("node:remove_component")
     resp = client.post(url, {
-        "parent_node_uuid": node.uuid,
+        "node_uuid": node.uuid,
         "uuid": added_node.uuid
     })
 

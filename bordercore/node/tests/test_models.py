@@ -152,25 +152,27 @@ def test_node_set_note_color(monkeypatch_blob, node):
 
 def test_node_add_image(monkeypatch_blob, node, blob_image_factory):
 
-    node.add_image(blob_image_factory[0].uuid)
+    new_uuid = node.add_component("image", blob_image_factory[0])
 
     assert \
         {
-            "uuid": str(blob_image_factory[0].uuid),
-            "type": "image"
+            "uuid": new_uuid,
+            "image_uuid": str(blob_image_factory[0].uuid),
+            "type": "image",
+            "options": {}
         } in [
             val
             for sublist in node.layout
             for val in sublist
-            if "uuid" in val
+            if "image_uuid" in val
         ]
 
 
 def test_node_remove_image(node, blob_image_factory):
 
-    node.add_image(blob_image_factory[0].uuid)
+    node.add_component("image", blob_image_factory[0])
 
-    node.remove_image(blob_image_factory[0].uuid)
+    node.remove_component(blob_image_factory[0].uuid)
 
     # Verify that the image has been removed from the node's layout
     assert str(blob_image_factory[0].uuid) not in [
@@ -183,7 +185,7 @@ def test_node_remove_image(node, blob_image_factory):
 
 def test_node_add_quote(node, quote):
 
-    new_uuid = node.add_quote(quote)
+    new_uuid = node.add_component("quote", quote)
 
     # Verify that the quote has been added to the node's layout
     assert new_uuid in [
@@ -194,23 +196,9 @@ def test_node_add_quote(node, quote):
     ]
 
 
-def test_node_remove_quote(node, quote):
-
-    new_uuid = node.add_quote(quote)
-    node.remove_quote(new_uuid)
-
-    # Verify that the quote has been removed from the node's layout
-    assert str(quote.uuid) not in [
-        val["uuid"]
-        for sublist in node.layout
-        for val in sublist
-        if "quote_uuid" in val
-    ]
-
-
 def test_node_update_quote(node, quote):
 
-    new_uuid = node.add_quote(quote)
+    new_uuid = node.add_component("quote", quote)
     color = 2
     rotate = 10
 
@@ -221,7 +209,7 @@ def test_node_update_quote(node, quote):
         "favorites_only": "false"
     }
 
-    node.update_quote(new_uuid, options)
+    node.update_component(new_uuid, options)
 
     # Verify that the quote's properties have been updated in the node's layout
     assert color in [
@@ -244,7 +232,7 @@ def test_node_set_quote(auto_login_user, node):
 
     quotes = QuoteFactory.create_batch(2, user=user)
 
-    node.add_quote(quotes[0])
+    node.add_component("quote", quotes[0])
     node.set_quote(quotes[1].uuid)
 
     # Verify that the quote's properties have been updated in the node's layout
@@ -290,7 +278,7 @@ def test_node_add_node(auto_login_user, node):
     user, client = auto_login_user()
 
     added_node = NodeFactory.create(user=user)
-    node.add_node(str(added_node.uuid))
+    node.add_component("node", added_node)
 
     # Verify that the node has been added to the node's layout
     assert str(added_node.uuid) in [
@@ -302,30 +290,12 @@ def test_node_add_node(auto_login_user, node):
     ]
 
 
-def test_node_remove_node(auto_login_user, node):
-
-    user, client = auto_login_user()
-
-    added_node = NodeFactory.create(user=user)
-    node.add_node(str(added_node.uuid))
-    node.remove_node(added_node.uuid)
-
-    # Verify that the node has been removed from the node's layout
-    assert str(added_node.uuid) not in [
-        val["uuid"]
-        for sublist in node.layout
-        for val in sublist
-        if "uuid" in val
-        and val["uuid"] == added_node.uuid
-    ]
-
-
 def test_node_update_node(auto_login_user, node):
 
     user, client = auto_login_user()
 
     added_node = NodeFactory.create(user=user)
-    uuid = node.add_node(str(added_node.uuid))
+    uuid = node.add_component("node", added_node)
 
     color = 2
     rotate = 10
@@ -337,7 +307,7 @@ def test_node_update_node(auto_login_user, node):
         "favorites_only": "false"
     }
 
-    node.update_node(uuid, options)
+    node.update_component(uuid, options)
 
     # Verify that the node's properties have been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
@@ -361,7 +331,7 @@ def test_node_get_preview(auto_login_user, node):
     user, client = auto_login_user()
 
     added_node = NodeFactory.create(user=user)
-    node.add_node(str(added_node.uuid))
+    node.add_component("node", added_node)
 
     preview = node.get_preview()
     assert len(preview["images"]) > 1

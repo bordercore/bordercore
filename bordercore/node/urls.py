@@ -86,19 +86,9 @@ urlpatterns = [
         name="add_image"
     ),
     path(
-        route="image/remove",
-        view=views.remove_image,
-        name="remove_image"
-    ),
-    path(
         route="quote/add/",
         view=views.add_quote,
         name="add_quote"
-    ),
-    path(
-        route="quote/remove/",
-        view=views.remove_quote,
-        name="remove_quote"
     ),
     path(
         route="quote/update/",
@@ -126,11 +116,6 @@ urlpatterns = [
         name="add_node"
     ),
     path(
-        route="node/remove",
-        view=views.remove_node,
-        name="remove_node"
-    ),
-    path(
         route="node/update/",
         view=views.update_node,
         name="update_node"
@@ -144,5 +129,10 @@ urlpatterns = [
         route="<uuid:uuid>/preview/",
         view=views.node_preview,
         name="preview"
+    ),
+    path(
+        route="component/remove",
+        view=views.remove_component,
+        name="remove_component"
     ),
 ]

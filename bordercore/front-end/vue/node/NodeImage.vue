@@ -53,11 +53,11 @@
             FontAwesomeIcon,
         },
         props: {
-            nodeUuid: {
+            uuid: {
                 type: String,
                 default: "",
             },
-            imageUuid: {
+            nodeUuid: {
                 type: String,
                 default: "",
             },
@@ -73,7 +73,7 @@
                 type: String,
                 default: "",
             },
-            removeImageUrl: {
+            removeComponentUrl: {
                 type: String,
                 default: "",
             },
@@ -85,13 +85,13 @@
 
             function onRemoveImage() {
                 doPost(
-                    props.removeImageUrl,
+                    props.removeComponentUrl,
                     {
                         "node_uuid": props.nodeUuid,
-                        "image_uuid": props.imageUuid,
+                        "uuid": props.uuid,
                     },
                     (response) => {
-                        ctx.emit("updateLayout", response.data.layout);
+                        ctx.emit("update-layout", response.data.layout);
                     },
                     "Image removed",
                 );
