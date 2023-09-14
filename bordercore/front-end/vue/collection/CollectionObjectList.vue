@@ -417,6 +417,10 @@
                 });
             });
 
+            onUnmounted(() => {
+                clearInterval(rotateInterval);
+            });
+
             return {
                 collectionObjectList,
                 currentObjectIndex,

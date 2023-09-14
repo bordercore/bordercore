@@ -191,6 +191,10 @@
                 });
             });
 
+            onUnmounted(() => {
+                clearInterval(rotateInterval);
+            });
+
             const cardClass = computed(() => {
                 return `node-color-${quoteOptions.value.color}`;
             });

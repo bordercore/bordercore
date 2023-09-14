@@ -5,12 +5,13 @@ window.DragHandle = DragHandle;
 window.SlickList = SlickList;
 window.SlickItem = SlickItem;
 
-import {computed, createApp, h, nextTick, onMounted, reactive, ref, watch} from "vue";
+import {computed, createApp, h, nextTick, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 window.computed = computed;
 window.createApp = createApp;
 window.h = h;
 window.nextTick = nextTick;
 window.onMounted = onMounted;
+window.onUnmounted = onUnmounted;
 window.reactive = reactive;
 window.ref = ref;
 window.watch = watch;

@@ -204,6 +204,11 @@
                 setTimer();
             });
 
+            onUnmounted(() => {
+                clearInterval(rotateInterval);
+                clearInterval(rotateIntervalNotes);
+            });
+
             return {
                 handleOpenNodeModal,
                 handleRemoveNode,
