@@ -117,6 +117,7 @@ module.exports = (env, argv) => {
                 {
                     test: /\.(js|jsx)$/,
                     use: "babel-loader",
+                    exclude: /node_modules/, // Avoid transpiling node_modules
                 },
                 {
                     test: /\.(jpg|jpeg|png|woff|woff2|eot|ttf|svg)$/,
