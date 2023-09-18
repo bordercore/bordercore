@@ -6,33 +6,20 @@ const RemoveEmptyScriptsPlugin = require("webpack-remove-empty-scripts");
 const StylelintPlugin = require("stylelint-webpack-plugin");
 const {VueLoaderPlugin} = require("vue-loader");
 
-/**
- * Only return CSS webpack entries if the environment
- * variable WEBPACK_CSS_ONLY is set.
- * @param {string} value The array value to potentially filter
- * @return {value} the filtered value
- */
-function filterEntries(value) {
-    if (process.env.WEBPACK_CSS_ONLY) {
-        if (value[0].search("/css/") !== -1) {
-            return value;
-        }
-    } else {
-        return value;
-    }
-}
-
 module.exports = (env, argv) => {
     const devMode = argv.mode == "development";
 
+    const entries = {
+        "dist/css/bordercore": ["./static/scss/bordercore.scss"],
+        "dist/css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
+    };
+    // Exclude JavaScript code if the environment variable WEBPACK_CSS_ONLY is set
+    if (!process.env.WEBPACK_CSS_ONLY) {
+        entries["dist/js/javascript"] = ["./front-end/index.js"];
+    }
+
     config = {
-        entry: Object.entries({
-            "dist/js/javascript": ["./front-end/index.js"],
-            "dist/css/bordercore": ["./static/scss/bordercore.scss"],
-            "dist/css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
-        })
-            .filter(filterEntries)
-            .reduce((a, [name, entry]) => Object.assign(a, {[name]: entry}), {}),
+        entry: entries,
         output: {
             filename: "[name]-bundle-[contenthash].min.js",
             path: path.resolve(__dirname, "./static"),
