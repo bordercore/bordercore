@@ -1,8 +1,7 @@
-import {plugin as Slicksort} from "vue-slicksort";
-window.Slicksort = Slicksort;
-import {DragHandle, SlickList, SlickItem} from "vue-slicksort";
+import {DragHandle, SlickList, plugin as Slicksort, SlickItem} from "vue-slicksort";
 window.DragHandle = DragHandle;
 window.SlickList = SlickList;
+window.Slicksort = Slicksort;
 window.SlickItem = SlickItem;
 
 import {computed, createApp, h, nextTick, onMounted, onUnmounted, reactive, ref, watch} from "vue";
@@ -76,73 +75,11 @@ window.Popover = Popover;
 window.Tab = Tab;
 
 import {library, dom} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faExternalLinkAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faComment, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faGripHorizontal, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser} from "@fortawesome/free-solid-svg-icons";
-import {fas} from "@fortawesome/free-solid-svg-icons";
-library.add(fas);
-dom.watch();
+import {faAlignLeft, faAngleDown, faAngleRight, faAngleUp, faArrowsAltH, faExchangeAlt, faExternalLinkAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faComment, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faGripHorizontal, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {faAws} from "@fortawesome/free-brands-svg-icons";
-import {faPython} from "@fortawesome/free-brands-svg-icons";
-library.add(faAlignLeft);
-library.add(faAngleDown);
-library.add(faAngleRight);
-library.add(faArrowsAltH);
-library.add(faAws);
-library.add(faExchangeAlt);
-library.add(faExternalLinkAlt);
-library.add(faBars);
-library.add(faBookmark);
-library.add(faBook);
-library.add(faBox);
-library.add(faBriefcase);
-library.add(faCalendarAlt);
-library.add(faCaretUp);
-library.add(faChartBar);
-library.add(faCheck);
-library.add(faChevronLeft);
-library.add(faChevronRight);
-library.add(faChevronUp);
-library.add(faClone);
-library.add(faComment);
-library.add(faCopy);
-library.add(faDownload);
-library.add(faEllipsisV);
-library.add(faExclamationTriangle);
-library.add(faFileAlt);
-library.add(faFileImport);
-library.add(faGripHorizontal);
-library.add(faHeart);
-library.add(faHome);
-library.add(faImage);
-library.add(faImages);
-library.add(faInfo);
-library.add(faGraduationCap);
-library.add(faLink);
-library.add(faList);
-library.add(faLock);
-library.add(faMusic);
-library.add(faNewspaper);
-library.add(faObjectGroup);
-library.add(faPencilAlt);
-library.add(faPlus);
-library.add(faPython);
-library.add(faQuestion);
-library.add(faQuoteLeft);
-library.add(faRandom);
-library.add(faRunning);
-library.add(faSearch);
-library.add(faSquareRootAlt);
-library.add(faStar);
-library.add(faStickyNote);
-library.add(faTags);
-library.add(faSignOutAlt);
-library.add(faSplotch);
-library.add(faTasks);
-library.add(faThumbtack);
-library.add(faTimes);
-library.add(faTimesCircle);
-library.add(faTrashAlt);
-library.add(faUser);
+import {faAws, faPython} from "@fortawesome/free-brands-svg-icons";
+library.add(faAlignLeft, faAngleDown, faAngleRight, faAngleUp, faArrowsAltH, faAws, faExchangeAlt, faExternalLinkAlt, faBars, faBookmark, faBook, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faComment, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faGripHorizontal, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faPython, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSquareRootAlt, faStar, faStickyNote, faTags, faSignOutAlt, faSplotch, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt, faUser);
+dom.watch();
 window.FontAwesomeIcon = FontAwesomeIcon;
 
 import {format} from "date-fns";
@@ -182,67 +119,6 @@ window.doPut = doPut;
 window.getFormattedDate = getFormattedDate;
 window.animateCSS = animateCSS;
 
-import ChatBot from "./vue/blob/ChatBot.vue";
-window.ChatBot = ChatBot;
-
-import EditableTextArea from "./vue/common/EditableTextArea.vue";
-window.EditableTextArea= EditableTextArea;
-
-import SelectValue from "./vue/common/SelectValue.vue";
-import "vue-multiselect/dist/vue-multiselect.css";
-window.SelectValue = SelectValue;
-
-import DrillDisabledTags from "./vue/drill/DrillDisabledTags.vue";
-window.DrillDisabledTags = DrillDisabledTags;
-
-import DrillPinnedTags from "./vue/drill/DrillPinnedTags.vue";
-window.DrillPinnedTags = DrillPinnedTags;
-
-import SearchBar from "./vue/search/SearchBar.vue";
-window.SearchBar = SearchBar;
-
-import SearchResult from "./vue/search/SearchResult.vue";
-window.SearchResult = SearchResult;
-
-import TagSearchResult from "./vue/search/TagSearchResult.vue";
-window.TagSearchResult = TagSearchResult;
-
-import TopSearch from "./vue/search/TopSearch.vue";
-window.TopSearch = TopSearch;
-
-import OverdueTasks from "./vue/todo/OverdueTasks.vue";
-window.OverdueTasks = OverdueTasks;
-
-import TagsInput from "./vue/common/TagsInput.vue";
-window.TagsInput = TagsInput;
-
-import RelatedTags from "./vue/common/RelatedTags.vue";
-window.RelatedTags = RelatedTags;
-
-import BackReferences from "./vue/common/BackReferences.vue";
-window.BackReferences = BackReferences;
-
-import Card from "./vue/common/Card.vue";
-window.Card = Card;
-
-import SearchNoResult from "./vue/common/SearchNoResult.vue";
-window.SearchNoResult = SearchNoResult;
-
-import TreeMenu from "./vue/common/TreeMenu.vue";
-window.TreeMenu = TreeMenu;
-
-import PinnedTags from "./vue/bookmark/PinnedTags.vue";
-window.PinnedTags = PinnedTags;
-
-import RelatedObjects from "./vue/common/RelatedObjects.vue";
-window.RelatedObjects = RelatedObjects;
-
-import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
-window.DrillTagProgress = DrillTagProgress;
-
-import DropDownMenu from "./vue/common/DropDownMenu.vue";
-window.DropDownMenu = DropDownMenu;
-
 import {RouterLink} from "vue-router";
 window.RouterLink = RouterLink;
 
@@ -250,95 +126,8 @@ import {SidebarMenu} from "vue-sidebar-menu";
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css";
 window.SidebarMenu = SidebarMenu;
 
-import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
-window.AddToPlaylist = AddToPlaylist;
-
-import AudioPlayer from "./vue/music/AudioPlayer.vue";
-window.AudioPlayer = AudioPlayer;
-
-import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
-window.CreateUpdatePlaylist = CreateUpdatePlaylist;
-
-import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
-window.BlobDetailCover = BlobDetailCover;
-
-import RecentBlobs from "./vue/blob/RecentBlobs.vue";
-window.RecentBlobs = RecentBlobs;
-
-import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
-window.CreateUpdateFeed = CreateUpdateFeed;
-import FeedInfo from "./vue/feed/FeedInfo.vue";
-window.FeedInfo = FeedInfo;
-import FeedItemList from "./vue/feed/FeedItemList.vue";
-window.FeedItemList = FeedItemList;
-import FeedList from "./vue/feed/FeedList.vue";
-window.FeedList = FeedList;
-
-import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
-window.CreateUpdateTodo = CreateUpdateTodo;
-
-import AddToCollection from "./vue/blob/AddToCollection.vue";
-window.AddToCollection = AddToCollection;
-
-import NodeImage from "./vue/node/NodeImage.vue";
-window.NodeImage = NodeImage;
-
-import NodeImageModal from "./vue/node/NodeImageModal.vue";
-window.NodeImageModal = NodeImageModal;
-
-import NodeQuote from "./vue/node/NodeQuote.vue";
-window.NodeQuote = NodeQuote;
-
-import NodeQuoteModal from "./vue/node/NodeQuoteModal.vue";
-window.NodeQuoteModal = NodeQuoteModal;
-
-import NodeNode from "./vue/node/NodeNode.vue";
-window.NodeNode = NodeNode;
-
-import NodeNote from "./vue/node/NodeNote.vue";
-window.NodeNote = NodeNote;
-
-import NodeNoteModal from "./vue/node/NodeNoteModal.vue";
-window.NodeNoteModal = NodeNoteModal;
-
-import NodeNodeModal from "./vue/node/NodeNodeModal.vue";
-window.NodeNodeModal = NodeNodeModal;
-
-import NodeTodoList from "./vue/node/NodeTodoList.vue";
-window.NodeTodoList = NodeTodoList;
-
-import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
-window.CollectionObjectList = CollectionObjectList;
-
-import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
-window.CollectionObjectListModal = CollectionObjectListModal;
-
-import IconButton from "./vue/common/IconButton.vue";
-window.IconButton = IconButton;
-
-import ObjectSelect from "./vue/common/ObjectSelect.vue";
-window.ObjectSelect = ObjectSelect;
-
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
-
-import Pagination from "./vue/common/Pagination.vue";
-window.Pagination = Pagination;
-
-import PythonConsole from "./vue/common/PythonConsole.vue";
-window.PythonConsole = PythonConsole;
-
-import Frequency from "./vue/fitness/Frequency.vue";
-window.Frequency = Frequency;
-import LastWorkout from "./vue/fitness/LastWorkout.vue";
-window.LastWorkout = LastWorkout;
-import AddWorkoutForm from "./vue/fitness/AddWorkoutForm.vue";
-window.AddWorkoutForm = AddWorkoutForm;
-import WorkoutGraph from "./vue/fitness/WorkoutGraph.vue";
-window.WorkoutGraph = WorkoutGraph;
-
-import Toast from "./vue/common/Toast.vue";
-window.Toast = Toast;
 
 import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title, Tooltip} from "chart.js";
 window.Chart = Chart;
@@ -381,3 +170,161 @@ VueMarkdownEditor.use(vuepressTheme, {
 });
 VueMarkdownEditor.lang.use("en-US", enUS);
 window.VueMarkdownEditor = VueMarkdownEditor;
+
+//
+// Custom Vue Components
+//
+
+import AddToCollection from "./vue/blob/AddToCollection.vue";
+window.AddToCollection = AddToCollection;
+
+import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
+window.AddToPlaylist = AddToPlaylist;
+
+import AddWorkoutForm from "./vue/fitness/AddWorkoutForm.vue";
+window.AddWorkoutForm = AddWorkoutForm;
+
+import AudioPlayer from "./vue/music/AudioPlayer.vue";
+window.AudioPlayer = AudioPlayer;
+
+import BackReferences from "./vue/common/BackReferences.vue";
+window.BackReferences = BackReferences;
+
+import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
+window.BlobDetailCover = BlobDetailCover;
+
+import Card from "./vue/common/Card.vue";
+window.Card = Card;
+
+import ChatBot from "./vue/blob/ChatBot.vue";
+window.ChatBot = ChatBot;
+
+import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
+window.CollectionObjectList = CollectionObjectList;
+
+import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
+window.CollectionObjectListModal = CollectionObjectListModal;
+
+import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
+window.CreateUpdateFeed = CreateUpdateFeed;
+
+import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
+window.CreateUpdatePlaylist = CreateUpdatePlaylist;
+
+import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
+window.CreateUpdateTodo = CreateUpdateTodo;
+
+import DrillDisabledTags from "./vue/drill/DrillDisabledTags.vue";
+window.DrillDisabledTags = DrillDisabledTags;
+
+import DrillPinnedTags from "./vue/drill/DrillPinnedTags.vue";
+window.DrillPinnedTags = DrillPinnedTags;
+
+import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
+window.DrillTagProgress = DrillTagProgress;
+
+import DropDownMenu from "./vue/common/DropDownMenu.vue";
+window.DropDownMenu = DropDownMenu;
+
+import EditableTextArea from "./vue/common/EditableTextArea.vue";
+window.EditableTextArea= EditableTextArea;
+
+import FeedInfo from "./vue/feed/FeedInfo.vue";
+window.FeedInfo = FeedInfo;
+
+import FeedItemList from "./vue/feed/FeedItemList.vue";
+window.FeedItemList = FeedItemList;
+
+import FeedList from "./vue/feed/FeedList.vue";
+window.FeedList = FeedList;
+
+import Frequency from "./vue/fitness/Frequency.vue";
+window.Frequency = Frequency;
+
+import IconButton from "./vue/common/IconButton.vue";
+window.IconButton = IconButton;
+
+import LastWorkout from "./vue/fitness/LastWorkout.vue";
+window.LastWorkout = LastWorkout;
+
+import NodeImage from "./vue/node/NodeImage.vue";
+window.NodeImage = NodeImage;
+
+import NodeImageModal from "./vue/node/NodeImageModal.vue";
+window.NodeImageModal = NodeImageModal;
+
+import NodeQuote from "./vue/node/NodeQuote.vue";
+window.NodeQuote = NodeQuote;
+
+import NodeQuoteModal from "./vue/node/NodeQuoteModal.vue";
+window.NodeQuoteModal = NodeQuoteModal;
+
+import NodeNode from "./vue/node/NodeNode.vue";
+window.NodeNode = NodeNode;
+
+import NodeNote from "./vue/node/NodeNote.vue";
+window.NodeNote = NodeNote;
+
+import NodeNodeModal from "./vue/node/NodeNodeModal.vue";
+window.NodeNodeModal = NodeNodeModal;
+
+import NodeNoteModal from "./vue/node/NodeNoteModal.vue";
+window.NodeNoteModal = NodeNoteModal;
+
+import NodeTodoList from "./vue/node/NodeTodoList.vue";
+window.NodeTodoList = NodeTodoList;
+
+import ObjectSelect from "./vue/common/ObjectSelect.vue";
+window.ObjectSelect = ObjectSelect;
+
+import OverdueTasks from "./vue/todo/OverdueTasks.vue";
+window.OverdueTasks = OverdueTasks;
+
+import Pagination from "./vue/common/Pagination.vue";
+window.Pagination = Pagination;
+
+import PinnedTags from "./vue/bookmark/PinnedTags.vue";
+window.PinnedTags = PinnedTags;
+
+import PythonConsole from "./vue/common/PythonConsole.vue";
+window.PythonConsole = PythonConsole;
+
+import RecentBlobs from "./vue/blob/RecentBlobs.vue";
+window.RecentBlobs = RecentBlobs;
+
+import RelatedObjects from "./vue/common/RelatedObjects.vue";
+window.RelatedObjects = RelatedObjects;
+
+import RelatedTags from "./vue/common/RelatedTags.vue";
+window.RelatedTags = RelatedTags;
+
+import SearchBar from "./vue/search/SearchBar.vue";
+window.SearchBar = SearchBar;
+
+import SearchNoResult from "./vue/common/SearchNoResult.vue";
+window.SearchNoResult = SearchNoResult;
+
+import SearchResult from "./vue/search/SearchResult.vue";
+window.SearchResult = SearchResult;
+
+import SelectValue from "./vue/common/SelectValue.vue";
+import "vue-multiselect/dist/vue-multiselect.css";
+window.SelectValue = SelectValue;
+
+import TagSearchResult from "./vue/search/TagSearchResult.vue";
+window.TagSearchResult = TagSearchResult;
+
+import TagsInput from "./vue/common/TagsInput.vue";
+window.TagsInput = TagsInput;
+
+import Toast from "./vue/common/Toast.vue";
+window.Toast = Toast;
+
+import TopSearch from "./vue/search/TopSearch.vue";
+window.TopSearch = TopSearch;
+
+import TreeMenu from "./vue/common/TreeMenu.vue";
+window.TreeMenu = TreeMenu;
+
+import WorkoutGraph from "./vue/fitness/WorkoutGraph.vue";
+window.WorkoutGraph = WorkoutGraph;
