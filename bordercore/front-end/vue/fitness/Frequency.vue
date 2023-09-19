@@ -222,7 +222,7 @@
                                 EventBus.$emit(
                                     "toast",
                                     {
-                                        "body": "Exercise '`${props.exerciseName}`' is now inactive",
+                                        "body": `Exercise '${props.exerciseName}' is now inactive`,
                                     },
                                 );
                             },
