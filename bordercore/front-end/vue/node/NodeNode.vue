@@ -42,30 +42,26 @@
                     </div>
                 </div>
                 <div id="node-node-misc">
-                    <transition enter-active-class="animate__animated animate__fadeIn animate__slow">
-                        <div v-if="nodeInfo.note_count" :key="nodeInfo.random_note" class="text-truncate">
-                            <div class="d-flex">
-                                <div class="text-nowrap">
-                                    <strong>{{ nodeInfo.note_count }}</strong> {{ pluralize("note", nodeInfo.note_count) }}
-                                </div>
-                                <div class="text-truncate text-info ms-2">
-                                    {{ nodeInfo.random_note.name }}
-                                </div>
+                    <div v-if="nodeInfo.note_count" :key="nodeInfo.random_note" class="text-truncate">
+                        <div class="d-flex">
+                            <div class="text-nowrap">
+                                <strong>{{ nodeInfo.note_count }}</strong> {{ pluralize("note", nodeInfo.note_count) }}
+                            </div>
+                            <div class="text-truncate text-info ms-2">
+                                {{ nodeInfo.random_note.name }}
                             </div>
                         </div>
-                    </transition>
-                    <transition enter-active-class="animate__animated animate__fadeIn animate__slow">
-                        <div v-if="nodeInfo.todo_count" :key="nodeInfo.random_todo">
-                            <div class="d-flex">
-                                <div class="text-nowrap">
-                                    <strong>{{ nodeInfo.todo_count }}</strong> {{ pluralize("todo", nodeInfo.todo_count) }}
-                                </div>
-                                <div class="text-truncate text-info ms-2">
-                                    {{ nodeInfo.random_todo.name }}
-                                </div>
+                    </div>
+                    <div v-if="nodeInfo.todo_count" :key="nodeInfo.random_todo">
+                        <div class="d-flex">
+                            <div class="text-nowrap">
+                                <strong>{{ nodeInfo.todo_count }}</strong> {{ pluralize("todo", nodeInfo.todo_count) }}
+                            </div>
+                            <div class="text-truncate text-info ms-2">
+                                {{ nodeInfo.random_todo.name }}
                             </div>
                         </div>
-                    </transition>
+                    </div>
                 </div>
             </template>
         </card>
