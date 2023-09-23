@@ -54,7 +54,7 @@
                                                         data-bs-placement="right"
                                                         data-bs-trigger="hover"
                                                         :data-bs-delay="1000"
-                                                        :data-bs-content="'<img src=\'' + element.cover_url_large + '\' width=\'1000px\' />'"
+                                                        :data-bs-content="`<img src='${element.cover_url_large}' />`"
                                                     >
                                                 </div>
                                                 <div v-else-if="element.type === 'blob'" class="pe-2">
