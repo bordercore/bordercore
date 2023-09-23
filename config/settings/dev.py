@@ -53,12 +53,16 @@ DEBUG_TOOLBAR_PANELS = (
     "debug_toolbar.panels.templates.TemplatesPanel",
     "debug_toolbar.panels.timer.TimerPanel",
     "debug_toolbar.panels.versions.VersionsPanel"
+
 )
 
+# Reduce 'Data for this panel isn't available anymore' warnings
+RESULTS_CACHE_SIZE = 1000
 
 # Disable the debug toolbar if the environment variable
 # "DISABLE_DEBUG_TOOLBAR" is set. Useful for selenium
 # testing when you don't want it getting in the way.
+
 
 def show_debug_toolbar(request):
     return not bool(int(os.getenv("DISABLE_DEBUG_TOOLBAR", 0)))
