@@ -435,6 +435,10 @@ span {
   width: 20%;
 }
 
+.mw-50 {
+  min-width: 50%;
+}
+
 .vh-50 {
   height: 50vh;
 }
@@ -2499,6 +2503,12 @@ tr.hover-target:hover {
   .count {
     font-size: 0.75rem;
   }
+}
+
+// SQL Playground
+textarea.sql-input {
+  background-color: var(--surface5);
+  color: var(--text1);
 }
 
 // Vue Multiselect

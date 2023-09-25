@@ -30,6 +30,9 @@ module.exports = (env, argv) => {
                 vue$: "vue/dist/vue.esm-bundler.js",
             },
         },
+        externals: {
+            "sqlite3": "commonjs sqlite3",
+        },
         plugins: [
             // Lint my SCSS
             new StylelintPlugin({

@@ -180,6 +180,11 @@ def gallery(request):
     return render(request, "homepage/gallery.html", {})
 
 
+@login_required
+def sql(request):
+    return render(request, "homepage/sql.html", {})
+
+
 def handler404(request, exception):
 
     response = render(request, "404.html", {})

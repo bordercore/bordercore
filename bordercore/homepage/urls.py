@@ -20,4 +20,9 @@ urlpatterns = [
         view=views.gallery,
         name="gallery"
     ),
+    path(
+        route="sql",
+        view=views.sql,
+        name="sql"
+    ),
 ]
