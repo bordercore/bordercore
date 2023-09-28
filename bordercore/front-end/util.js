@@ -5,8 +5,8 @@
  * @param {string} callback An optional callback function.
  * @param {string} errorMsg The message to display on error.
  */
-export function doGet(url, callback, errorMsg = "") {
-    axios.get(url)
+export function doGet(url, callback, errorMsg = "", responseType = "json") {
+    axios.get(url, {responseType: responseType})
         .then((response) => {
             if (response.data.status && response.data.status !== "OK") {
                 EventBus.$emit(
