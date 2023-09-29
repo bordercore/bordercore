@@ -221,6 +221,10 @@ class Question(TimeStampedModel):
         return response
 
     @property
+    def sql_db(self):
+        return QuestionToObject.objects.filter(node=self, note="sql").first()
+
+    @property
     def elasticsearch_document(self):
         """
         Return a representation of the drill question suitable for indexing in Elasticsearch

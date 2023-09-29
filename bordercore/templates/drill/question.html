@@ -143,6 +143,9 @@
                  {% endif %}
 
                  <div class="d-flex mt-5">
+                     {% if sql_db %}
+                         <a href="{% url 'homepage:sql' %}?sql_db_uuid={{ sql_db.blob.uuid }}" target="_blank" class="btn btn-primary me-2" role="button">SQL Playground</a>
+                     {% endif %}
                      <a href="#" class="btn btn-primary" role="button" @click.prevent="setMode('answer')">Show Answer</a>
                      <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
                      <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">

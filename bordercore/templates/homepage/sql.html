@@ -53,7 +53,6 @@
             <template #content>
                 <textarea v-model="sql" class="sql-input mt-2 p-3 w-100" rows="3" placeholder="Your SQL Here..." @keydown="handleKeyDown"></textarea>
                 <input class="btn btn-primary" type="button" value="Run" @click="handleRunSQL" />
-                <a href="#" id="exportButton" class="btn btn-primary" type="button">Export</a>
                 <input type="file" id="importDB" class="d-none">
             </template>
         </card>
@@ -110,22 +109,31 @@
                 const output = ref([]);
                 let db = null;
 
-                sqlite3InitModule({
-                    print: log,
-                    printErr: logError,
-                }).then((_sqlite3) => {
-                    try {
-                        sqlite3 = _sqlite3;
-                        db = new sqlite3.oo1.DB("/mydb.sqlite3", "c");
-                        const byteArray = sqlite3.capi.sqlite3_js_db_export(db);
-                        const blob = new Blob([byteArray.buffer], {type: "application/x-sqlite3"});
-                        const exportButton = document.getElementById("exportButton");
-                        exportButton.href = window.URL.createObjectURL(blob);
-                        exportButton.download = ("/mydb.sqlite3");
-                    } catch (err) {
-                        logError(err.name, err.message);
-                    }
-                });
+                createDatabase();
+
+                function createDatabase() {
+                    sqlite3InitModule({
+                        print: log,
+                        printErr: logError,
+                    }).then((_sqlite3) => {
+                        try {
+                            sqlite3 = _sqlite3;
+                            db = new sqlite3.oo1.DB("/mydb.sqlite3", "c");
+                            {% if sql_db_url %}
+                            doGet(
+                                "{{ sql_db_url }}",
+                                (response) => {
+                                    loadDatabase(response.data);
+                                },
+                                "Error getting quote",
+                                "arraybuffer",
+                            );
+                            {% endif %}
+                        } catch (err) {
+                            logError(err.name, err.message);
+                        }
+                    });
+                };
 
                 function getTableData() {
                     for (const table in tables.value) {
@@ -179,7 +187,19 @@
                     }
                 };
 
-                function populateDatabase() {
+                function loadDatabase(data) {
+                    const uint8ArrayData = new Int8Array(data);
+                    const p = sqlite3.wasm.allocFromTypedArray(uint8ArrayData);
+                    const rc = sqlite3.capi.sqlite3_deserialize(
+                        db.pointer, "main", p, data.byteLength, data.byteLength,
+                        sqlite3.capi.SQLITE_DESERIALIZE_RESIZEABLE,
+                    );
+                    db.checkRc(rc);
+                    populateDatabaseSchema();
+                    getTableData();
+                };
+
+                function populateDatabaseSchema() {
                     tables.value = {};
                     db.exec({
                         sql: "SELECT name FROM sqlite_master WHERE type='table'",
@@ -203,20 +223,14 @@
                         const r = new FileReader();
                         r.addEventListener("load", function() {
                             const arrayBuffer = this.result;
-                            const p = sqlite3.wasm.allocFromTypedArray(arrayBuffer);
-                            const rc = sqlite3.capi.sqlite3_deserialize(
-                                db.pointer, "main", p, arrayBuffer.byteLength, arrayBuffer.byteLength,
-                                sqlite3.capi.SQLITE_DESERIALIZE_RESIZEABLE,
-                            );
-                            db.checkRc(rc);
-                            populateDatabase();
-                            getTableData();
+                            loadDatabase(arrayBuffer);
                             // Reset the file input so that the "change" event
                             //  will fire again if we import another db
                             document.getElementById("importDB").value = "";
                         });
                         r.readAsArrayBuffer(file);
                     });
+
                 });
 
                 return {

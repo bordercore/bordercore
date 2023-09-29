@@ -111,6 +111,7 @@ class Blob(TimeStampedModel):
             "application/mp4": "Video",
             "application/octet-stream": "Video",
             "application/pdf": "PDF",
+            "application/x-sqlite3": "SQLite Database",
             "application/x-mobipocket-ebook": "E-Book",
             "audio/mpeg": "Audio",
             "audio/x-wav": "Audio",
@@ -351,7 +352,7 @@ class Blob(TimeStampedModel):
 
         related_objects = []
 
-        for related_object in model.objects.filter(node=base_object).select_related("bookmark").select_related("blob"):
+        for related_object in model.objects.filter(node=base_object).exclude(note="sql").select_related("bookmark").select_related("blob"):
             if related_object.blob:
                 related_objects.append(
                     {

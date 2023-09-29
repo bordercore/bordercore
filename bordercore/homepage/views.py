@@ -182,7 +182,12 @@ def gallery(request):
 
 @login_required
 def sql(request):
-    return render(request, "homepage/sql.html", {})
+    context = {}
+    if "sql_db_uuid" in request.GET:
+        sql_db = Blob.objects.get(uuid=request.GET["sql_db_uuid"])
+        context["sql_db_url"] = settings.MEDIA_URL + "blobs/" + sql_db.get_url()
+
+    return render(request, "homepage/sql.html", context)
 
 
 def handler404(request, exception):

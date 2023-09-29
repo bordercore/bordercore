@@ -330,7 +330,7 @@
                         <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url }}" type="video/mp4">
                     </video>
                 </div>
-                {% elif blob.sha1sum and not blob.is_audio %}
+                {% elif blob.is_image or blob.is_video or blob.is_pdf %}
                 <blob-detail-cover
                     cover-url="{{ blob.get_cover_url }}?nodefault=1"
                     class="mx-2"
@@ -357,6 +357,10 @@
                 {% if blob.content %}
                     <div class="blob-content table-borders mx-2 p-3" id="blob-detail-content" v-html="getContent()">
                     </div>
+                {% endif %}
+
+                {% if elasticsearch_info.content_type == "SQLite Database" %}
+                    <a href="{% url 'homepage:sql' %}?sql_db_uuid={{ blob.uuid }}" target="_blank" class="btn btn-primary ms-2" role="button">SQL Playground</a>
                 {% endif %}
 
                 <add-to-collection ref="addToCollection" blob-uuid="{{ blob.uuid }}"
