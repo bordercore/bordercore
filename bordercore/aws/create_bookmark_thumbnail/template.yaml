@@ -29,11 +29,10 @@ Resources:
     CreateBookmarkThumbnailFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: .
+            PackageType: Image
+            ImageUri: 192218769908.dkr.ecr.us-east-1.amazonaws.com/create-bookmark-thumbnail-lambda:latest
             FunctionName: CreateBookmarkThumbnail
-            Handler: create_bookmark_thumbnail_lambda.handler
             MemorySize: 1024
-            Runtime: python3.7
             Role: !GetAtt CreateBookmarkThumbnailLambdaRole.Arn
             Environment:
                 Variables:
