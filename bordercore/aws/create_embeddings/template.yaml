@@ -7,15 +7,21 @@ Globals:
         Timeout: 120
 
 Parameters:
-  ElasticsearchEndpointParameter:
-    Type: String
-    Description: The Elasticsearch endpoint
-  DRFTokenParameter:
-    Type: String
-    Description: The Django Rest Framework token used for authentication
-  OpenaiApiKeyParameter:
-    Type: String
-    Description: The OpenAI API Key
+    ElasticsearchEndpointParameter:
+        Type: String
+        Description: The Elasticsearch endpoint
+    DRFTokenParameter:
+        Type: String
+        Description: The Django Rest Framework token used for authentication
+    OpenaiApiKeyParameter:
+        Type: String
+        Description: The OpenAI API Key
+    SecurityGroupParameter:
+        Type: String
+        Description: The VPC security group that lambda is in
+    SubnetParameter:
+        Type: String
+        Description: The VPC subnet
 
 Resources:
 
@@ -29,11 +35,11 @@ Resources:
             Role: !GetAtt CreateEmbeddingsLambdaRole.Arn
             VpcConfig:
                 SecurityGroupIds:
-                    - sg-bfa013fe
+                    - !Ref SecurityGroupParameter
                 # This subnet should match the private subnet created for the NAT gateway,
                 #  which I am labeling 'Private Lambda'
                 SubnetIds:
-                    - subnet-09460047abea1c3bd
+                    - !Ref SubnetParameter
 
             Environment:
                 Variables:

@@ -4,6 +4,8 @@ BUCKET=bordercore-blobs
 IMAGE_REPO=192218769908.dkr.ecr.us-east-1.amazonaws.com/create-embeddings-lambda
 TEMPLATE_FILE=packaged.yaml
 SAM=~/.local/bin/sam
+SECURITY_GROUP=sg-bfa013fe
+SUBNET=subnet-09460047abea1c3bd
 
 $SAM build --use-container &&
 
@@ -17,5 +19,7 @@ $SAM deploy \
      --stack-name CreateEmbeddingsStack \
      --capabilities CAPABILITY_IAM \
      --image-repository $IMAGE_REPO \
-     --parameter-overrides ParameterKey=DRFTokenParameter,ParameterValue=${DRF_TOKEN} \ ParameterKey=ElasticsearchEndpointParameter,ParameterValue=${ELASTICSEARCH_ENDPOINT} \
-     ParameterKey=OpenaiApiKeyParameter,ParameterValue=${OPENAI_API_KEY}
+     --parameter-overrides ParameterKey=DRFTokenParameter,ParameterValue=$DRF_TOKEN \ ParameterKey=ElasticsearchEndpointParameter,ParameterValue=$ELASTICSEARCH_ENDPOINT \
+     ParameterKey=OpenaiApiKeyParameter,ParameterValue=$OPENAI_API_KEY \
+     ParameterKey=SecurityGroupParameter,ParameterValue=$SECURITY_GROUP \
+     ParameterKey=SubnetParameter,ParameterValue=$SUBNET
