@@ -60,7 +60,7 @@ def create_thumbnail_from_video(infile, outdir):
 
     subprocess.run(
         [
-            "ffmpeg",
+            "/usr/local/bin/ffmpeg",
             "-ss",
             "00:00:01",
             "-i",

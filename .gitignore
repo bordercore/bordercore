@@ -18,6 +18,8 @@ packaged.yaml
 *.coverage
 
 bordercore/aws/create_embeddings/lib/*
+bordercore/aws/create_thumbnail/ffmpeg-6.0-amd64-static/*
+bordercore/aws/create_thumbnail/ffmpeg-release-amd64-static.tar.xz
 bordercore/aws/create_thumbnail/lib/*
 bordercore/aws/index_blobs/lib/*
 bordercore/aws/create_bookmark_thumbnail/lib/*
