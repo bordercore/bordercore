@@ -1,0 +1,26 @@
+{
+    "TopicConfigurations": [
+        {
+            "Id": "NewS3Blob",
+            "TopicArn": "arn:aws:sns:us-east-1:192218769908:NewS3Blob",
+            "Events": [
+                "s3:ObjectCreated:Put",
+                "s3:ObjectCreated:CompleteMultipartUpload"
+            ],
+            "Filter": {
+                "Key": {
+                    "FilterRules": [
+                        {
+                            "Name": "Prefix",
+                            "Value": "blobs/"
+                        },
+                        {
+                            "Name": "Suffix",
+                            "Value": ""
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
