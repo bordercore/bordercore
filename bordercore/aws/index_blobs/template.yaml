@@ -1,6 +1,6 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Index blobs into ElasticSearch
+Description: Index blob into ElasticSearch
 
 Globals:
     Function:
@@ -25,17 +25,16 @@ Resources:
     IndexBlobFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: .
+            PackageType: Image
+            ImageUri: 192218769908.dkr.ecr.us-east-1.amazonaws.com/index-blob-lambda:latest
             FunctionName: IndexBlob
-            Handler: index_blobs_lambda.handler
             MemorySize: 10240
-            Runtime: python3.7
             Role: !GetAtt IndexBlobLambdaRole.Arn
             VpcConfig:
               SecurityGroupIds:
                 - sg-bfa013fe
               # This subnet should match the private subnet created for the NAT gateway,
-              #  which I am labeling 'Private Lambda'
+              #  which I am labeling "Private Lambda"
               SubnetIds:
                 - subnet-09460047abea1c3bd
             Environment:
@@ -61,10 +60,10 @@ Resources:
     IndexBlobLambdaPermission:
         Type: AWS::Lambda::Permission
         Properties:
-            Action: 'lambda:InvokeFunction'
+            Action: "lambda:InvokeFunction"
             FunctionName: !Ref IndexBlobFunction
             Principal: s3.amazonaws.com
-            SourceArn: !Sub 'arn:aws:s3:::bordercore-blobs'
+            SourceArn: !Sub "arn:aws:s3:::bordercore-blobs"
             SourceAccount: !Ref AWS::AccountId
 
     IndexBlobLambdaRole:
@@ -73,42 +72,42 @@ Resources:
             AssumeRolePolicyDocument:
                 Version: 2012-10-17
                 Statement:
-                    - Effect: 'Allow'
+                    - Effect: "Allow"
                       Principal:
                           Service:
-                              - 'lambda.amazonaws.com'
+                              - "lambda.amazonaws.com"
                       Action:
-                          - 'sts:AssumeRole'
+                          - "sts:AssumeRole"
 
             Policies:
             - PolicyName: LambdaWriteToLogs
               PolicyDocument:
                   Statement:
-                      - Effect: 'Allow'
+                      - Effect: "Allow"
                         Action:
-                            - 'logs:CreateLogGroup'
-                            - 'logs:CreateLogStream'
-                            - 'logs:PutLogEvents'
-                            - 'logs:DescribeLogStreams'
+                            - "logs:CreateLogGroup"
+                            - "logs:CreateLogStream"
+                            - "logs:PutLogEvents"
+                            - "logs:DescribeLogStreams"
                         Resource:
-                            - 'arn:aws:logs:*:*:*'
+                            - "arn:aws:logs:*:*:*"
             - PolicyName: LambdaSearchElasticsearch
               PolicyDocument:
                   Statement:
-                      - Effect: 'Allow'
+                      - Effect: "Allow"
                         Action:
-                            - 'es:ESHttpPost'
+                            - "es:ESHttpPost"
                         Resource:
-                            - '*'
+                            - "*"
             - PolicyName: LambdaInvokeOtherLambda
               PolicyDocument:
                   Statement:
-                      - Effect: 'Allow'
+                      - Effect: "Allow"
                         Action:
-                            - 'lambda:InvokeFunction'
-                            - 'lambda:InvokeAsync'
+                            - "lambda:InvokeFunction"
+                            - "lambda:InvokeAsync"
                         Resource:
-                            - '*'
+                            - "*"
             ManagedPolicyArns:
             - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 
