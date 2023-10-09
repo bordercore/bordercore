@@ -16,11 +16,10 @@ Resources:
     UpdateFeedsFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: .
+            PackageType: Image
+            ImageUri: 192218769908.dkr.ecr.us-east-1.amazonaws.com/update-feeds-lambda:latest
             FunctionName: UpdateFeeds
-            Handler: update_feeds_lambda.handler
             MemorySize: 128
-            Runtime: python3.10
             Role: !GetAtt UpdateFeedsLambdaRole.Arn
             Environment:
                 Variables:

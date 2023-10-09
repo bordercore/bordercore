@@ -4,11 +4,6 @@ IMAGE_REPO=192218769908.dkr.ecr.us-east-1.amazonaws.com/update-feeds-lambda
 TEMPLATE_FILE=packaged.yaml
 SAM=~/.local/bin/sam
 
-# We copy the dependencies rather than use symlinks because
-#  symlinks don't work inside a "--use-container" Docker image
-#cp ../../lib/util.py ./lib/
-#cp ../../blob/elasticsearch_indexer.py ./lib/
-
 $SAM build --use-container &&
 
 $SAM package \
