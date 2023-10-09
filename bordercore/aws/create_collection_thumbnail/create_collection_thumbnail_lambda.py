@@ -72,7 +72,7 @@ def handler(event, context):
                 result = subprocess.run(
                     [
                         "sh",
-                        f"{EFS_DIR}/create-cover.sh",
+                        "create-cover.sh",
                         collection_uuid,
                         *object_list
                     ],
