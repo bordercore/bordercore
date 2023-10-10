@@ -50,3 +50,16 @@ def test_get_random_image(monkeypatch_collection, auto_login_user):
 
     assert image["name"] == blob.name
     assert image["uuid"] == blob.uuid
+
+
+def test_sql(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob = BlobFactory(user=user)
+
+    url = urls.reverse("homepage:sql")
+    resp = client.get(f"{url}?sql_db_uuid={blob.uuid}")
+
+    assert resp.context["sql_db_url"] == f"https://bordercore-blobs.s3.amazonaws.com/blobs/{blob.uuid}/"
+    assert resp.status_code == 200

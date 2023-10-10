@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from .factories import QuestionFactory
 
-from drill.models import Question  # isort:skip
+from drill.models import Question, QuestionToObject  # isort:skip
 
 pytestmark = pytest.mark.django_db
 
@@ -107,6 +107,12 @@ def test_get_all_tags_progress(question):
 
     tags_info = question[0].get_all_tags_progress()
     assert len(tags_info) == 2
+
+
+def test_sql_db(question, blob_image_factory):
+
+    QuestionToObject.objects.create(node=question[0], blob=blob_image_factory[0], note="sql")
+    assert question[0].sql_db.blob == blob_image_factory[0]
 
 
 def test_start_study_session(question, tag):
