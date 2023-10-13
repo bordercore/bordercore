@@ -2366,16 +2366,30 @@ hr.collection-list-divider {
 }
 
 // Audio player controls
+.audio-player-wrapper {
+  background-color: var(--media-background-color);
+  border-radius: var(--border-radius2);
+}
+
 .media-control-bar {
   width: 100%;
   flex-flow: wrap;
+}
+
+media-controller {
+  border-radius: var(--border-radius2);
 }
 
 media-time-display {
   color: var(--text1);
 }
 
+media-play-button {
+  border-top-left-radius: var(--border-radius2);
+}
+
 media-playback-rate-button {
+  border-bottom-left-radius: var(--border-radius2);
   color: var(--text1);
 }
 
@@ -2385,8 +2399,13 @@ media-playback-rate-button {
   }
 }
 
+media-time-range {
+  border-top-right-radius: var(--border-radius2);
+}
+
 media-volume-range {
   flex-grow: 1;
+  border-bottom-right-radius: var(--border-radius2);
 }
 
 // Playlist modal
