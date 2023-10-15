@@ -1272,10 +1272,17 @@ blockquote > p {
 
 // Top Title
 
-#top-title {
+#top-title * {
   padding-left: var(--grid-margin);
+  background: linear-gradient(
+    to right,
+    var(--title-gradient-start),
+    var(--title-gradient-end)
+  );
+  -webkit-background-clip: text;
   font-size: 2rem;
   line-height: 2.7rem;
+  -webkit-text-fill-color: transparent;
 }
 
 //
