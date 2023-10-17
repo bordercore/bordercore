@@ -2,8 +2,8 @@
     <card title="Back references">
         <template #content>
             <hr class="divider">
-            <ul class="list-group interior-borders cursor-pointer">
-                <li v-for="node in backReferences" :key="node.uuid" class="hoverable px-0 py-3 list-group-item list-group-item-secondary text-primary">
+            <ul class="list-group interior-borders cursor-pointer text-truncate">
+                <li v-for="node in backReferences" :key="node.uuid" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
                     <div v-if="node.type === 'question'" class="d-flex">
                         <div class="mt-1 me-2">
                             <font-awesome-icon icon="question" class="text-success" />
