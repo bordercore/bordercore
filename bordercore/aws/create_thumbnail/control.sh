@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_REPO=192218769908.dkr.ecr.us-east-1.amazonaws.com/create-thumbnail-lambda
-FUNCTION=CreateThumbnailFunction
+FUNCTION=CreateThumbnail
 LAMBDA=create-thumbnail-lambda
 TAG=latest
 
