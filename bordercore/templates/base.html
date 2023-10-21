@@ -140,7 +140,12 @@
 
             <div id="sidebar">
                 <sidebar-menu @update:collapsed="onToggleCollapse" @item-click="onItemClick" :menu="menu"
-                    :collapsed="baseStore.sidebarCollapsed">
+                              :collapsed="baseStore.sidebarCollapsed">
+                    <template #header>
+                        <div v-if="baseStore.sidebarCollapsed" class="d-flex justify-content-center">
+                            <img class="mt-2" src="{{ STATIC_URL }}img/bordercore-logo.png" width="64" height="64" />
+                        </div>
+                    </template>
                     <template #toggle-icon>
                         <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
                     </template>
@@ -348,11 +353,6 @@
                         })
 
                         const menu = [
-                            {
-                                header: "Bordercore",
-                                hiddenOnCollapse: true,
-                                class: "sidebar-header text-center"
-                            },
                             {
                                 href: "{% url 'homepage:homepage' %}",
                                 title: "Home",
