@@ -364,7 +364,7 @@
                                     <div class="col-lg-10 col-sm-10">
                                         <div class="input-group">
                                             <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="addMetadata" />
-                                            <button class="btn btn-success" type="button" @click="addMetadata">
+                                            <button id="blob-metadata-button" class="btn btn-success" type="button" @click="addMetadata">
                                                 <span>
                                                     <font-awesome-icon icon="plus" class="metadata-icon" />
                                                 </span>
@@ -379,13 +379,11 @@
                                             <div class="col-lg-10 col-sm-10">
                                                 <div class="input-group">
                                                     <input type="text" v-model="m.value" class="form-control" autocomplete="off" />
-                                                    <span class="input-group-append">
-                                                        <button class="btn btn-danger btn-remove" type="button" @click="deleteMetadata(index)">
-                                                            <span>
-                                                                <font-awesome-icon icon="times" class="metadata-icon" />
-                                                            </span>
-                                                        </button>
-                                                    </span>
+                                                    <button id="blob-metadata-button" class="btn btn-danger btn-remove" type="button" @click="deleteMetadata(index)">
+                                                        <span>
+                                                            <font-awesome-icon icon="times" class="metadata-icon" />
+                                                        </span>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
