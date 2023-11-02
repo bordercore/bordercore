@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.fields.array import ArrayField
 from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import F, Max
@@ -177,6 +178,7 @@ class ExerciseUser(models.Model):
     started = models.DateTimeField(auto_now_add=True)
     frequency = models.DurationField(default=timedelta(days=7), blank=False, null=False)
     rest_period = models.FloatField(blank=True, null=True)
+    schedule = ArrayField(models.BooleanField(blank=True, null=True), size=7)
 
     class Meta:
         unique_together = ("user", "exercise")
@@ -187,6 +189,25 @@ class ExerciseUser(models.Model):
     def activity_info(self):
         return {
             "frequency": self.frequency.days,
+            "schedule": self.schedule,
             "relative_date": get_relative_date_from_date(self.started),
             "started": self.started.strftime("%b %d, %Y")
         }
+
+    @staticmethod
+    def schedule_days(schedule):
+
+        if not schedule:
+            return
+
+        days = []
+
+        # We'll start from a known Monday. Let's choose 2023-01-02, which was a Monday.
+        start_date = datetime.datetime(2023, 1, 2)
+
+        for index, day in enumerate(schedule):
+            if day:
+                target_date = start_date + timedelta(days=index)
+                days.append(target_date.strftime("%a"))
+
+        return ", ".join(days)

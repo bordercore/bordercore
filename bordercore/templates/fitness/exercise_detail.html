@@ -24,12 +24,12 @@
     {% csrf_token %}
     <div id="vue-app" class="row g-0 h-100 mx-2">
         <div class="col-lg-3 d-flex flex-column">
-            <frequency
+            <schedule
                 change-active-status-url="{% url 'fitness:change_active_status' %}"
                 exercise-name="{{ object.name }}"
-                update-frequency-url="{% url 'fitness:update_frequency' %}"
+                update-schedule-url="{% url 'fitness:update_schedule' %}"
             >
-            </frequency>
+            </schedule>
            <last-workout
                 date="{{ recent_data.0.date|date:" N j, Y" }}"
                 :description="description"
@@ -137,7 +137,7 @@
                 Card,
                 DropDownMenu,
                 FontAwesomeIcon,
-                Frequency,
+                Schedule,
                 LastWorkout,
                 WorkoutGraph,
             },
@@ -148,7 +148,7 @@
                 const plotDataNotes = JSON.parse(document.getElementById("plotDataNotes").textContent);
                 const relatedExercises = JSON.parse(document.getElementById("related_exercises").textContent);
                 const restPeriod = ref({% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %} null{% endif %});
-                const frequency = ref(null);
+                const schedule = ref(null);
 
                 const exerciseStore = useExerciseStore();
                 exerciseStore.uuid = "{{ object.uuid }}";
@@ -196,7 +196,7 @@
                 return {
                     csrfToken,
                     description,
-                    frequency,
+                    schedule,
                     note,
                     handleChangeRestPeriod,
                     handleStartTimer,

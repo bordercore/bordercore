@@ -114,22 +114,22 @@ def test_fitness_get_workout_data(auto_login_user, fitness):
     assert json.loads(result["workout_data"]["paginator"])["page_number"] == 1
 
 
-def test_fitness_update_frequency(auto_login_user, fitness):
+def test_fitness_update_schedule(auto_login_user, fitness):
 
     user, client = auto_login_user()
 
-    frequency = 5
+    schedule = [False, True, False, False, False, True, False]
 
-    url = urls.reverse("fitness:update_frequency")
+    url = urls.reverse("fitness:update_schedule")
     resp = client.post(url, {
         "uuid": fitness[0].uuid,
-        "frequency": frequency
+        "schedule": ",".join([str(x).lower() for x in schedule])
     })
 
     assert resp.status_code == 200
 
     updated_exercise_user = ExerciseUser.objects.get(user=user, exercise__uuid=fitness[0].uuid)
-    assert updated_exercise_user.frequency.days == frequency
+    assert updated_exercise_user.schedule == schedule
 
 
 def test_fitness_update_rest_period(auto_login_user, fitness):

@@ -345,7 +345,12 @@ def fitness(auto_login_user):
     note = "### Trying to make some **gains**"
     exercise_0 = Exercise.objects.create(name="Bench Press", note=note)
     exercise_0.muscle.add(muscle)
-    ExerciseUser.objects.create(user=user, exercise=exercise_0, started=datetime.datetime.now(), frequency=timedelta(days=2))
+    ExerciseUser.objects.create(
+        user=user,
+        exercise=exercise_0,
+        started=datetime.datetime.now(),
+        schedule=[True, False, False, False, False, False, False]
+    )
 
     # Generate a bunch of workouts for one exercise, helpful for
     #  testing pagination
@@ -376,17 +381,21 @@ def fitness(auto_login_user):
     exercise_2 = Exercise.objects.create(name="Squats")
     exercise_2.muscle.add(muscle)
 
-    ExerciseUser.objects.create(user=user, exercise=exercise_2, frequency=timedelta(days=2))
+    ExerciseUser.objects.create(
+        user=user,
+        exercise=exercise_2,
+        schedule=[True, False, False, False, False, False, False]
+    )
     workout = Workout.objects.create(user=user, exercise=exercise_2)
 
     # Force this exercise to be overdue
     data = Data.objects.create(workout=workout, weight=200, reps=8)
-    data.date = data.date - timedelta(days=3)
+    data.date = data.date - timedelta(days=10)
     data.save()
 
     # Force this exercise to be overdue
     data = Data.objects.create(workout=workout, weight=205, reps=8)
-    data.date = data.date - timedelta(days=3)
+    data.date = data.date - timedelta(days=10)
     data.save()
 
     # Add a related exercise to exercise_0

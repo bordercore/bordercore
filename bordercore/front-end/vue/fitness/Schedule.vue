@@ -31,26 +31,30 @@
                 </div>
             </div>
         </div>
-        <div id="modalChangeFrequency" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div id="modalChangeSchedule" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 id="myModalLabel" class="modal-title">
-                            Change Exercise Frequency
+                            Change Exercise Schedule
                         </h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                     </div>
                     <div class="modal-body">
-                        <div class="d-flex align-items-center">
-                            <div>Workout every</div>
-                            <div class="ms-3 w-20">
-                                <input v-model="frequency" class="form-control" type="number" min="1" autocomplete="off">
-                            </div>
+                        <div class="d-flex">
+                            <div class="text-nowrap">Workout every</div>
                             <div class="ms-3">
-                                days
+                                <div v-for="(day, index) in daysOfTheWeek" :key="index" class="d-flex">
+                                    <div id="fitness-schedule-d-o-t-w" class="text-info me-2">
+                                        {{ day }}
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <o-switch v-model="exerciseStore.activityInfo.schedule[index]" />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="ms-3">
-                                <button type="button" class="btn btn-primary" @click="handleFrequencyChange">
+                            <div class="ms-5 mt-2">
+                                <button type="button" class="btn btn-primary" @click="handleScheduleChange">
                                     Change
                                 </button>
                             </div>
@@ -88,8 +92,8 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="#" @click.prevent="openModal('#modalChangeFrequency')">
-                                                <font-awesome-icon icon="calendar-alt" class="text-primary me-3" />Change Frequency
+                                            <a class="dropdown-item" href="#" @click.prevent="openModal('#modalChangeSchedule')">
+                                                <font-awesome-icon icon="calendar-alt" class="text-primary me-3" />Change Schedule
                                             </a>
                                         </li>
                                     </template>
@@ -98,11 +102,11 @@
                             <hr class="m-2">
                             <div class="d-flex">
                                 <div class="item-name">
-                                    Frequency
+                                    Schedule
                                 </div>
                                 <div class="item-value ms-2">
                                     <strong>
-                                        every {{ frequency }} days
+                                        every {{ scheduleDays }}
                                     </strong>
                                 </div>
                             </div>
@@ -145,7 +149,7 @@
                 default: "",
                 type: String,
             },
-            updateFrequencyUrl: {
+            updateScheduleUrl: {
                 default: "",
                 type: String,
             },
@@ -153,7 +157,17 @@
         setup(props) {
             const exerciseStore = useExerciseStore();
             const isActive = ref(exerciseStore.activityInfo ? true : false);
-            const frequency = ref(exerciseStore.activityInfo.frequency);
+            const schedule = ref(exerciseStore.activityInfo.schedule_days);
+
+            const daysOfTheWeek = [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+            ];
 
             const relatedExercisesFields = [
                 {
@@ -171,21 +185,21 @@
                 modal.show();
             };
 
-            function handleFrequencyChange() {
+            function handleScheduleChange() {
                 doPost(
-                    props.updateFrequencyUrl,
+                    props.updateScheduleUrl,
                     {
                         "uuid": exerciseStore.uuid,
-                        "frequency": frequency.value,
+                        "schedule": exerciseStore.activityInfo.schedule,
                     }
                     ,
                     () => {
-                        const modal = Modal.getInstance(document.getElementById("modalChangeFrequency"));
+                        const modal = Modal.getInstance(document.getElementById("modalChangeSchedule"));
                         modal.hide();
                         EventBus.$emit(
                             "toast",
                             {
-                                "body": `Exercise frequency changed to ${frequency.value}`,
+                                "body": `Exercise schedule changed to ${schedule.value}`,
                             },
                         );
                     },
@@ -246,20 +260,42 @@
                 );
             };
 
+            const scheduleDays = computed(() => {
+                const schedule = exerciseStore.activityInfo.schedule;
+                const days = [];
+
+                // JavaScript's Date object starts from Sunday as 0
+                const baseDate = new Date(2023, 0, 2); // January is 0 in JavaScript
+
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index]) {
+                        // Clone the base date and add the index days to it
+                        const targetDate = new Date(baseDate.getTime());
+                        targetDate.setDate(targetDate.getDate() + index);
+                        // Get the day name
+                        days.push(targetDate.toLocaleString("en-US", {weekday: "long"}));
+                    }
+                }
+
+                return days.join(" and ");
+            });
+
             const activeButtonValue = computed(() => {
                 return isActive.value ? "Active" : "Activate Exercise";
             });
 
             return {
                 activeButtonValue,
+                daysOfTheWeek,
                 exerciseStore,
-                frequency,
-                handleFrequencyChange,
+                schedule,
+                handleScheduleChange,
                 handleSelectRelatedExercise,
                 handleStatusChange,
                 isActive,
                 openModal,
                 relatedExercisesFields,
+                scheduleDays,
             };
         },
     };

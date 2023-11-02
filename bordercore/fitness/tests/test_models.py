@@ -110,7 +110,16 @@ def test_get_overdue_exercises(auto_login_user, fitness):
     overdue = get_overdue_exercises(user)
 
     assert overdue[0] == fitness[2]
-    assert overdue[0].delta_days == 3
+    assert overdue[0].delta_days == 10
 
     overdue = get_overdue_exercises(user, True)
     assert overdue == 1
+
+
+def test_schedule_days():
+
+    assert ExerciseUser.schedule_days(None) is None
+
+    assert ExerciseUser.schedule_days([False, False, True, False, False, False, False, ]) == "Wed"
+
+    assert ExerciseUser.schedule_days([True, False, False, True, False, False, False, ]) == "Mon, Thu"

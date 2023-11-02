@@ -36,9 +36,9 @@ urlpatterns = [
         name="get_workout_data"
     ),
     path(
-        route="update_frequency",
-        view=views.update_frequency,
-        name="update_frequency"
+        route="update_schedule",
+        view=views.update_schedule,
+        name="update_schedule"
     ),
     path(
         route="update_rest_period",

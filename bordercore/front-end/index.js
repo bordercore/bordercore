@@ -241,8 +241,8 @@ window.FeedItemList = FeedItemList;
 import FeedList from "./vue/feed/FeedList.vue";
 window.FeedList = FeedList;
 
-import Frequency from "./vue/fitness/Frequency.vue";
-window.Frequency = Frequency;
+import Schedule from "./vue/fitness/Schedule.vue";
+window.Schedule = Schedule;
 
 import IconButton from "./vue/common/IconButton.vue";
 window.IconButton = IconButton;

@@ -1,5 +1,4 @@
 import json
-from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -105,7 +104,7 @@ def change_active_status(request):
         info = {}
     else:
         exercise = Exercise.objects.get(uuid=uuid)
-        eu = ExerciseUser(user=request.user, exercise=exercise)
+        eu = ExerciseUser(user=request.user, exercise=exercise, schedule=["True", "False", "False", "False", "False", "False", "False"])
         eu.save()
         info = eu.activity_info()
 
@@ -151,13 +150,17 @@ def get_workout_data(request):
 
 
 @login_required
-def update_frequency(request):
+def update_schedule(request):
 
     uuid = request.POST["uuid"]
-    frequency = int(request.POST["frequency"])
+    schedule = request.POST["schedule"]
+
+    # Convert each string to its corresponding Boolean value
+    # "true" should become True, "false" should become False
+    boolean_values = [s.lower() == "true" for s in schedule.split(",")]
 
     eu = ExerciseUser.objects.get(user=request.user, exercise__uuid=uuid)
-    eu.frequency = timedelta(days=frequency)
+    eu.schedule = boolean_values
     eu.save()
 
     return JsonResponse({"status": "OK"}, safe=False)

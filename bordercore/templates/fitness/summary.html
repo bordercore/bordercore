@@ -28,8 +28,8 @@
                     [[ props.row.muscle_group ]]
                 </o-table-column>
 
-                <o-table-column field="frequency" label="Frequency" :td-attrs="() => ({ class: 'fitness-col-frequency text-center' })" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
-                    [[ props.row.frequency ]]
+                <o-table-column field="schedule_days" label="Schedule" :td-attrs="() => ({ class: 'fitness-col-schedule text-center' })" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
+                    [[ props.row.schedule_days ]]
                 </o-table-column>
 
                 <o-table-column field="last_active" label="Last Workout" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
@@ -96,6 +96,7 @@
                         "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
                         "exercise": "{{ exercise.name|escapejs }}",
                         "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
+                        "schedule_days": "{{ exercise.schedule_days }}",
                         "frequency": "{{ exercise.frequency.days }} day{{ exercise.frequency.days|pluralize:"s" }}",
                         {% if exercise.last_active %}
                         "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
