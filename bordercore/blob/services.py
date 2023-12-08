@@ -179,6 +179,74 @@ def get_recently_viewed(user):
     return object_list
 
 
+def get_books(user, tag=None, search=None):
+
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": user.id
+                        }
+                    },
+                    {
+                        "term": {
+                            "doctype": "book"
+                        }
+                    }
+                ]
+            }
+        },
+        "sort": [
+            {"last_modified": {"order": "desc"}}
+        ],
+        "from": 0,
+        "size": 10,
+        "_source": [
+            "date",
+            "date_unixtime",
+            "filename",
+            "last_modified",
+            "name",
+            "tags",
+            "title",
+            "url",
+            "uuid"
+        ]
+    }
+
+    if tag:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "term": {
+                    "tags.keyword": tag
+                }
+            }
+        )
+        search_object["size"] = 1000
+
+    if search:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "multi_match": {
+                    "query": search,
+                    "fields": [
+                        "metadata.*",
+                        "name",
+                        "title",
+                    ],
+                    "operator": "OR",
+                }
+            }
+        )
+        search_object["size"] = 1000
+
+    return es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+
 def get_blob_sizes(blob_list):
     """
     Query Elasticsearch for the sizes of a list of blobs

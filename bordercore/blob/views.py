@@ -6,7 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -19,7 +19,7 @@ from django.views.generic.list import ListView
 from blob.forms import BlobForm
 from blob.models import (Blob, BlobTemplate, BlobToObject, MetaData,
                          RecentlyViewedBlob)
-from blob.services import chatbot, import_blob
+from blob.services import chatbot, get_books, import_blob
 from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
 from drill.models import Question
@@ -597,3 +597,54 @@ def chat(request):
         return response
     except Exception as e:
         return str(e)
+
+
+@method_decorator(login_required, name="dispatch")
+class BookshelfListView(ListView):
+    template_name = "blob/bookshelf.html"
+
+    def get_queryset(self):
+        book_list = get_books(
+            self.request.user,
+            self.request.GET.get("tag", None),
+            self.request.GET.get("search", None)
+        )
+
+        self.tag_list = [
+            {
+                "name": x["tags__name"],
+                "count": x["tag_count"]
+            }
+            for x in
+            Blob.objects.filter(
+                metadata__name="is_book"
+            ).values(
+                "tags__name"
+            ).annotate(
+                tag_count=Count("tags__name")
+            ).order_by(
+                "-tag_count"
+            )
+        ]
+
+        return [
+            {
+                "cover_url": Blob.get_cover_url_static(x["_source"]["uuid"], x["_source"]["filename"], size="small"),
+                "date": x["_source"]["date"],
+                "name": x["_source"]["name"],
+                "tags": [tag for tag in x["_source"]["tags"]],
+                "url": reverse("blob:detail", kwargs={"uuid": x["_source"]["uuid"]}),
+                "uuid": x["_source"]["uuid"]
+            }
+            for x in
+            book_list["hits"]["hits"]
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return {
+            **context,
+            "tag_list": self.tag_list,
+            "total_count": Blob.objects.filter(user=self.request.user, metadata__name="is_book").count(),
+            "title": "Bookshelf"
+        }

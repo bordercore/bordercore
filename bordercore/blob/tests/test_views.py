@@ -19,11 +19,12 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
-from blob.models import Blob, BlobTemplate, BlobToObject
+from blob.models import Blob, BlobTemplate, BlobToObject, MetaData
 from blob.tests.factories import BlobFactory
 from blob.views import handle_linked_collection, handle_metadata
 from collection.models import Collection
 from collection.tests.factories import CollectionFactory
+from tag.tests.factories import TagFactory
 
 try:
     from bs4 import BeautifulSoup
@@ -550,3 +551,19 @@ def test_blob_get_template(auto_login_user):
     payload = resp.json()
     assert payload["template"]["content"] == content
     assert payload["template"]["tags"] == tags
+
+
+def test_bookshelf_list(auto_login_user):
+
+    user, client = auto_login_user()
+
+    book = BlobFactory.create(user=user)
+    _ = MetaData.objects.create(blob=book, user=user, name="is_book", value="true")
+    tag = TagFactory(user=user)
+    book.tags.add(tag)
+
+    url = urls.reverse("blob:bookshelf")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+    assert resp.context["total_count"] == 1

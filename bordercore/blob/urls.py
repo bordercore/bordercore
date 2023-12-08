@@ -95,4 +95,9 @@ urlpatterns = [
         view=views.chat,
         name="chat"
     ),
+    path(
+        route="bookshelf",
+        view=views.BookshelfListView.as_view(),
+        name="bookshelf"
+    ),
 ]
