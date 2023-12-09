@@ -1038,7 +1038,14 @@ textarea.form-control {
 
 // Login page
 
+.login-body {
+  background-image: url("/static/img/header_cyber.jpg");
+  background-size: cover;
+}
+
 .jumbotron {
+  width: 37.50rem;
+  height: 43.75rem;
   border: 0.12rem solid var(--text1);
   border-radius: 1.5rem;
   opacity: 0.9;
@@ -1046,6 +1053,19 @@ textarea.form-control {
   .input-group-text {
     background-color: var(--text4);
   };
+
+  > div {
+    background-image: url("/static/img/bordercore-logo-login.png");
+    background-position: center -90px;
+    background-repeat: no-repeat;
+    background-size: 32rem 32rem;
+  }
+
+  form {
+    top: 18.75rem;
+    right: 4rem;
+
+  }
 }
 
 // Help
