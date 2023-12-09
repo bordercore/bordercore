@@ -360,6 +360,10 @@ span {
     color: var(--selected-secondary-color) !important;
   }
 
+  .yt-hover-target {
+    background-color: var(--selected-bg);
+  }
+
   // The first and last cells of any selected row are highlighted
   @extend .hoverable-cells;
 }
@@ -1386,6 +1390,10 @@ blockquote > p {
   color: var(--text5);
 }
 
+#bookmark-list-container {
+  scrollbar-gutter: stable;
+}
+
 .bookmark-list {
   @extend .hoverable-cells;
 
@@ -1468,6 +1476,13 @@ blockquote > p {
   font-size: 0.8rem;
 }
 
+.yt-hover-target {
+  right: 1rem;
+  bottom: 1rem;
+  padding-left: 0.5rem;
+  background-color: var(--hover-bg);
+  // Note: see additional selector underneath .selected, above
+}
 
 //
 // Search
