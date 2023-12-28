@@ -1,5 +1,5 @@
 <template>
-    <div class="audio-player-wrapper mb-3 mt-3 pb-2">
+    <div class="audio-player-wrapper h-100 p-2">
         <div class="text5 text-center text-truncate mx-2">
             {{ currentTitle }}
         </div>
@@ -21,9 +21,9 @@
                 </media-control-bar>
             </media-controller>
         </div>
-        <div class="d-flex align-items-center ms-4 mt-2">
+        <div class="d-flex align-items-center ms-2 mt-2 pb-2">
             <o-switch id="continuous_play" v-model="continuousPlay">
-                Continous Play
+                Continuous Play
             </o-switch>
         </div>
     </div>

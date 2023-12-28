@@ -31,9 +31,9 @@
             </div>
         {% endif %}
 
-        <div class="sticky-top col-lg-3 d-flex flex-column">
+        <div class="sticky-top col-lg-3 d-flex flex-column h-100">
 
-            <div class="card-grid ms-2">
+            <div class="card-grid flex-grow-1 ms-2">
 
                 <audio-player
                     v-if="songList"
@@ -50,67 +50,48 @@
 
         </div>
 
-        <div class="col-lg-9">
-
-            <div class="card-grid ms-2">
-
-                {% if album_list %}
-
+        <div class="col-lg-9 d-flex flex-column h-100">
+            {% if album_list %}
+                <div class="card-grid ms-2">
                     <div class="me-3">
-                        <card class="backdrop-filter">
-
-                        <template v-slot:title-slot>
-                            <h4>
-                                <strong>
-                                {{ album_list|length }} album{{ album_list|pluralize }}
-                                </strong>
-                            </h4>
-                        </template>
-
-                        <template v-slot:content>
-                            <table class="table-borderless">
-                                <tr>
-
+                        <card class="backdrop-filter h-100">
+                            <template v-slot:title-slot>
+                                <h4>
+                                    <strong>
+                                        {{ album_list|length }} album{{ album_list|pluralize }}
+                                    </strong>
+                                </h4>
+                            </template>
+                            <template v-slot:content>
+                                <div class="d-flex flex-wrap">
                                 {% for album in album_list %}
-
-                                {% if forloop.counter0|divisibleby:"4" %}
-
-                                </tr>
-                                <tr>
-
-                                {% endif %}
-
-                                <td class="album hoverable">
-                                    <a href="{% url 'music:album_detail' album.uuid %}">
-                                        <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
-                                    </a>
-                                    <div class="mt-1 fw-bold">
-                                            {{ album.title }}
+                                    <div class="collection-container p-3">
+                                        <div class="collection">
+                                            <a href="{% url 'music:album_detail' album.uuid %}">
+                                                <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
+                                            </a>
+                                            <div class="mt-1 fw-bold">
+                                                {{ album.title }}
+                                            </div>
+                                            <div class="text-light">
+                                                <a href="{% url 'music:artist_detail' album.artist.uuid %}">
+                                                    {{ album.artist.name }}
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="text-light">
-                                        <a href="{% url 'music:artist_detail' album.artist.uuid %}">
-                                            {{ album.artist.name }}
-                                        </a>
-                                    </div>
-                                </td>
-
                                 {% endfor %}
-
-                                </tr>
-                            </table>
-                        </template>
-
+                                </div>
+                            </template>
                         </card>
                     </div>
+                </div>
+            {% endif %}
 
-                {% endif %}
+            <div class="card-grid h-100 ms-2 pe-0">
 
-            </div>
-
-            <div class="card-grid ms-2 pe-0">
-
-                <div v-if="songList" class="me-3">
-                    <card>
+                <div v-if="songList" class="h-100 me-3">
+                    <card class="backdrop-filter h-100">
                         <template v-slot:title-slot>
                             <h4>
                                 <strong>
