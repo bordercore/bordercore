@@ -81,21 +81,21 @@ class Question(TimeStampedModel):
         Get the interval changes based on a question response of "easy"
         """
 
-        if self.interval_index + 1 < len(self.user.userprofile.drill_intervals):
-            # Skip two intervals. If that would exceed the interval array, skip one,
-            #  which should take us to the last interval.
-            delta = 1 if self.interval_index + 2 == len(self.user.userprofile.drill_intervals) else 2
-            new_interval = timedelta(days=self.user.userprofile.drill_intervals[self.interval_index + delta])
-            return {
-                "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
-                "interval": new_interval,
-                "interval_index": self.interval_index + 2
-            }
-        else:
+        if self.interval_index + 1 == len(self.user.userprofile.drill_intervals):
             return {
                 "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
                 "interval": self.interval,
                 "interval_index": self.interval_index
+            }
+        else:
+            # Skip two intervals. If that would exceed the interval array, skip one,
+            #  which should take us to the last interval.
+            new_index = min(self.interval_index + 2, len(self.user.userprofile.drill_intervals) - 1)
+            new_interval = timedelta(days=self.user.userprofile.drill_intervals[new_index])
+            return {
+                "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
+                "interval": new_interval,
+                "interval_index": new_index
             }
 
     def _hard_response(self):
@@ -103,12 +103,13 @@ class Question(TimeStampedModel):
         Get the interval changes based on a question response of "hard"
         """
 
-        if self.interval_index > 1:
-            new_interval = timedelta(days=self.user.userprofile.drill_intervals[self.interval_index - 2])
+        if self.interval_index > 0:
+            new_index = max(self.interval_index - 2, 0)
+            new_interval = timedelta(days=self.user.userprofile.drill_intervals[new_index])
             return {
                 "description": f"Decrease interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
                 "interval": new_interval,
-                "interval_index": self.interval_index - 2
+                "interval_index": new_index
             }
         else:
             return {

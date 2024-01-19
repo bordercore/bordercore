@@ -41,27 +41,45 @@ def test_get_intervals():
     question = QuestionFactory()
     _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
 
+    question = QuestionFactory()
     question.record_response("good")
     _test_one_interval(question.get_intervals(), 3, 2, 5, 3, 1, 0, 1, 0)
 
+    question = QuestionFactory(interval=timedelta(days=2), interval_index=1)
     question.record_response("easy")
     _test_one_interval(question.get_intervals(), 8, 4, 13, 5, 2, 1, 1, 0)
 
+    question = QuestionFactory(interval=timedelta(days=5), interval_index=3)
     question.record_response("easy")
     question.record_response("easy")
     _test_one_interval(question.get_intervals(), 30, 7, 30, 7, 13, 5, 1, 0)
 
+    question = QuestionFactory(interval=timedelta(days=30), interval_index=7)
     question.record_response("reset")
     _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
 
+    question = QuestionFactory(interval=timedelta(days=1), interval_index=0)
     question.record_response("good")
     question.record_response("good")
     question.record_response("good")
     question.record_response("hard")
     _test_one_interval(question.get_intervals(), 3, 2, 5, 3, 1, 0, 1, 0)
 
+    question = QuestionFactory(interval=timedelta(days=2), interval_index=1)
     question.record_response("hard")
     _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
+
+    question = QuestionFactory(interval=timedelta(days=1), interval_index=0)
+    question.record_response("hard")
+    _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
+
+    question = QuestionFactory(interval=timedelta(days=21), interval_index=6)
+    question.record_response("easy")
+    _test_one_interval(question.get_intervals(), 30, 7, 30, 7, 13, 5, 1, 0)
+
+    question = QuestionFactory(interval=timedelta(days=30), interval_index=7)
+    question.record_response("easy")
+    _test_one_interval(question.get_intervals(), 30, 7, 30, 7, 13, 5, 1, 0)
 
 
 def test_get_tags(question):
