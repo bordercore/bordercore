@@ -69,6 +69,8 @@
                    initial-reps="{% if recent_data %}{{ latest_reps|first|default:0 }}{% else %}0{% endif %}"
                    initial-duration="{% if recent_data %}{{ latest_duration|first|default:0 }}{% else %}0{% endif %}"
                    add-workout-url="{% url 'fitness:add' exercise.uuid %}"
+                   :has-weight="'{{ object.has_weight }}' == 'True'"
+                   :has-duration="'{{ object.has_duration }}' == 'True'"
                >
                </add-workout-form>
                <div class="d-flex flex-column w-50">

@@ -35,6 +35,8 @@ class Exercise(models.Model):
     muscle = models.ManyToManyField(Muscle, through="ExerciseMuscle", related_name="muscle")
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
+    has_duration = models.BooleanField(default=True)
+    has_weight = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

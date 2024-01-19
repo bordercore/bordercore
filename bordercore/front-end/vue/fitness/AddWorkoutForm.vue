@@ -11,12 +11,12 @@
                 <input type="hidden" name="csrfmiddlewaretoken" :value="csrfToken">
                 <div class="d-flex">
                     <div>
-                        <div v-if="weight && weight != '0'" class="d-flex align-items-center my-2">
+                        <div v-if="hasWeight" class="d-flex align-items-center my-2">
                             <label class="fitness-col-new-workout-data flex-shrink-0">Weight</label>
                             <input v-model="weight" class="form-control" type="text" name="weight" size="3" autocomplete="off">
                         </div>
 
-                        <div v-if="duration && duration !== '0'" class="d-flex align-items-center my-2">
+                        <div v-if="hasDuration" class="d-flex align-items-center my-2">
                             <label class="fitness-col-new-workout-data flex-shrink-0">Duration</label>
                             <input v-model="duration" class="form-control" type="text" name="duration" size="3" autocomplete="off">
                         </div>
@@ -44,7 +44,7 @@
                         class="w-75 mx-auto"
                     >
                         <o-table-column
-                            v-if="weight && weight !== '0'"
+                            v-if="hasWeight"
                             v-slot="props"
                             field="weight"
                             label="Weight"
@@ -58,7 +58,7 @@
                         </o-table-column>
 
                         <o-table-column
-                            v-if="duration && duration !== '0'"
+                            v-if="hasDuration"
                             v-slot="props"
                             field="duration"
                             label="Duration"
@@ -124,6 +124,14 @@
             addWorkoutUrl: {
                 default: "",
                 type: String,
+            },
+            hasWeight: {
+                default: true,
+                type: Boolean,
+            },
+            hasDuration: {
+                default: true,
+                type: Boolean,
             },
         },
         setup(props) {
