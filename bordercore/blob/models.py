@@ -573,7 +573,7 @@ class Blob(TimeStampedModel):
             fo,
             settings.AWS_STORAGE_BUCKET_NAME,
             key,
-            ExtraArgs={'Metadata': {"image-width": str(width),
+            ExtraArgs={"Metadata": {"image-width": str(width),
                                     "image-height": str(height),
                                     "cover-image": "Yes"},
                        "ContentType": "image/jpeg"}
@@ -594,7 +594,7 @@ class Blob(TimeStampedModel):
             fo,
             settings.AWS_STORAGE_BUCKET_NAME,
             key,
-            ExtraArgs={'Metadata': {"image-width": str(width),
+            ExtraArgs={"Metadata": {"image-width": str(width),
                                     "image-height": str(height),
                                     "cover-image": "Yes"},
                        "ContentType": "image/jpeg"}

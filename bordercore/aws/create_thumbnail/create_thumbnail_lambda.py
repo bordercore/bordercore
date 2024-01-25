@@ -30,13 +30,16 @@ Its width and height dimensions are calculated and stored as S3 metadata.
 
 All cover images are then uploaded to S3 in the same directory
 as the original file.
+
+For bookmarks, only a small cover image is created, since the Chromda lambda
+generates the large version based on the bookmark's webpage.
 """
 
 import glob
 import json
 import logging
 import os
-import uuid
+import re
 from pathlib import PurePath
 from urllib.parse import unquote_plus
 
@@ -51,7 +54,6 @@ log.setLevel(logging.DEBUG)
 
 s3_client = boto3.client("s3")
 s3_resource = boto3.resource("s3")
-
 EFS_DIR = os.environ.get("EFS_DIR", "/tmp")
 BLOBS_DIR = f"{EFS_DIR}/blobs"
 COVERS_DIR = f"{EFS_DIR}/covers"
@@ -63,10 +65,31 @@ def is_cover_image(bucket, key):
     """
     response = s3_client.head_object(Bucket=bucket, Key=key)
 
-    if response["Metadata"].get("cover-image", None) == "Yes":
-        return True
+    return response["Metadata"].get("cover-image", None) == "Yes"
+
+
+def extract_uuid(key):
+    # UUID format: 8-4-4-4-12 hexadecimal digits
+    uuid_pattern = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+    match = re.search(uuid_pattern, key)
+    if match:
+        return match.group()
     else:
-        return False
+        raise ValueError(f"Can't extract uuid from key: {key}")
+
+
+def get_cover_filename(key, uuid, is_bookmark):
+    """
+    For blobs, the filename is cover.jpg or cover-large.jpg.
+    For bookmarks, the filename is <uuid>-small.png.
+    """
+
+    if is_bookmark:
+        cover_filename = f"{uuid}-small.png"
+    else:
+        _, cover_filename = key.split(f"{COVERS_DIR}/{uuid}-")
+
+    return cover_filename
 
 
 def handler(event, context):
@@ -82,8 +105,10 @@ def handler(event, context):
             if sns_record["eventName"] == "ObjectRemoved:Delete":
                 continue
 
-            # Spaces are replaced with '+'s
+            # Spaces are replaced with "+"s
             key = unquote_plus(sns_record["s3"]["object"]["key"])
+
+            is_bookmark = key.startswith("bookmarks/")
 
             # Look for an optional page number (for pdfs)
             page_number = sns_record["s3"]["object"].get("page_number", 1)
@@ -98,7 +123,7 @@ def handler(event, context):
                 log.info(f"Skipping cover image {filename}")
                 continue
 
-            myuuid = uuid.uuid4()
+            uuid = extract_uuid(key)
 
             try:
                 os.mkdir(BLOBS_DIR)
@@ -110,20 +135,21 @@ def handler(event, context):
             except FileExistsError:
                 pass
 
-            download_path = f"{BLOBS_DIR}/{myuuid}-{filename}"
+            download_path = f"{BLOBS_DIR}/{uuid}-{filename}"
 
             s3_client.download_file(bucket, key, download_path)
-            create_thumbnail(download_path, f"{COVERS_DIR}/{myuuid}", page_number)
+            create_thumbnail(download_path, f"{COVERS_DIR}/{uuid}", page_number)
 
             # Upload all cover images created (large or small) to S3
-            for cover in glob.glob(f"{COVERS_DIR}/{myuuid}-cover*"):
+            for cover in glob.glob(f"{COVERS_DIR}/{uuid}-cover*"):
                 width, height = Image.open(cover).size
-                _, coverfile = cover.split(f"{COVERS_DIR}/{myuuid}-")
+                cover_filename = get_cover_filename(cover, uuid, is_bookmark)
+                log.info(f"coverfile: {cover_filename}")
                 s3_client.upload_file(
                     cover,
                     bucket,
-                    f"{path}/{coverfile}",
-                    ExtraArgs={'Metadata': {"image-width": str(width),
+                    f"{path}/{cover_filename}",
+                    ExtraArgs={"Metadata": {"image-width": str(width),
                                             "image-height": str(height),
                                             "cover-image": "Yes"},
                                "ContentType": "image/jpeg"}

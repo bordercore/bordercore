@@ -23,10 +23,7 @@ def is_cover_image(bucket, key):
     """
     response = s3_client.head_object(Bucket=bucket, Key=key)
 
-    if response["Metadata"].get("cover-image", None) == "Yes":
-        return True
-    else:
-        return False
+    return response["Metadata"].get("cover-image", None) == "Yes"
 
 
 def handler(event, context):
