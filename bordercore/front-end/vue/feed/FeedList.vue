@@ -58,7 +58,7 @@
             const localFeedList = ref(props.feedList.slice());
 
             function deleteFeed(feedUuid) {
-                for (const i = 0; i < localFeedList.value.length; i++) {
+                for (let i = 0; i < localFeedList.value.length; i++) {
                     if (localFeedList.value[i].uuid == feedUuid) {
                         localFeedList.value.splice(i, 1);
                     }
