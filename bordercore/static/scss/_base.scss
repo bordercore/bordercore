@@ -13,6 +13,13 @@
   --search-box-width: 30rem;
 }
 
+:root[eye-candy="True"] {
+  --eye-candy: blur(1.56rem) brightness(170%);
+}
+
+:root[eye-candy="False"] {
+  --eye-candy: none;
+}
 
 // Background glowing sphere
 div.sphere {
@@ -1232,7 +1239,7 @@ table.b-table th {
 
 @supports (backdrop-filter: blur(1.56rem) brightness(170%)) {
   .backdrop-filter {
-    backdrop-filter: blur(1.56rem) brightness(170%);
+    backdrop-filter: var(--eye-candy);
     background: var(--surface1-transparent) !important;
   }
 }

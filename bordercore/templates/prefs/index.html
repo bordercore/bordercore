@@ -43,19 +43,18 @@
                     {% csrf_token %}
 
                     <div class="row mb-3">
-                        <label class="fw-bold col-lg-3 col-form-label text-end" for="inputTitle">API Token</label>
+                        <label class="fw-bold col-lg-3 col-form-label text-end">API Token</label>
                         <div class="col-lg-7 align-self-center">{{ user.auth_token|default:"None" }}</div>
                     </div>
 
                     {% if user.groups.all %}
                         <div class="row mb-3">
-                            <label class="fw-bold col-lg-3 col-form-label text-end" for="inputTitle">Groups</label>
+                            <label class="fw-bold col-lg-3 col-form-label text-end">Groups</label>
                             <div class="col-lg-7 align-self-center">{{ groups }}</div>
                         </div>
                     {% endif %}
 
                     {% for field in form %}
-
                         {% if field.label == "Background image" %}
                             <div>
                                 <div class="row mb-3">
@@ -106,11 +105,18 @@
                                     </div>
                                 </div>
                             </div>
+                        {% elif field.label == "Eye candy" %}
+                            <div class="row mb-3">
+                                <label class="fw-bold col-lg-3 col-form-label text-end" for="eye_candy">Eye Candy</label>
+                                <div class="col-lg-7 d-flex">
+                                    <o-switch v-model="eyeCandy" name="eye_candy" :native-value="eye_candy" id="eye_candy" />
+                                </div>
+                            </div>
                         {% else %}
                             <div class="{% if field.errors %} error{% endif %} row mb-3">
-                                <label class="fw-bold col-lg-3 col-sm-2 col-form-label text-end" for="inputTitle">{{ field.label }}</label>
+                                <label class="fw-bold col-lg-3 col-sm-2 col-form-label text-end">{{ field.label }}</label>
                                 <div class="col-lg-7">
-                            {% if field.name == 'instagram_credentials' %}
+                            {% if field.name == "instagram_credentials" %}
                                 <div class="d-flex">
                                     <input type="text" name="instagram_username" value="{{ instagram_username }}" class="form-control me-2" placeholder="Username" autocomplete="off">
                                     <input type="password" name="instagram_password" value="{{ instagram_password }}" class="form-control ms-2" placeholder="Password" autocomplete="off">
@@ -161,6 +167,7 @@
                 const filename = ref("{{ object.sidebar_image|default:"" }}");
                 const background_image_filename = ref("{{ object.background_image|default:"" }}");
                 const deleteSidebar = ref(false);
+                const eyeCandy = ref({{ form.eye_candy.value|yesno:"true,false" }});
 
                 useEvent("click", onSelectTheme, {id: "id_theme"});
 
@@ -181,6 +188,7 @@
                     background_image_filename,
                     deleteBackground,
                     deleteSidebar,
+                    eyeCandy,
                     filename,
                     onChangeBackgroundImage,
                     onChangeSidebarImage,

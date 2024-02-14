@@ -31,6 +31,7 @@ class UserProfile(models.Model):
     sidebar_image = models.TextField(blank=True, null=True)
     background_image = models.TextField(blank=True, null=True)
     drill_intervals = ArrayField(models.IntegerField(default=INTERVALS_DEFAULT))
+    eye_candy = models.BooleanField(default=False)
 
     THEMES = [
         ("light", "light"),

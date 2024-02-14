@@ -50,7 +50,8 @@ class UserProfileForm(ModelForm):
             "drill_intervals",
             "nytimes_api_key",
             "instagram_credentials",
-            "google_calendar"
+            "google_calendar",
+            "eye_candy"
         )
         widgets = {
             "google_calendar": Textarea(attrs={"class": "form-control"}),
