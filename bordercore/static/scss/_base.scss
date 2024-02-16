@@ -1406,7 +1406,13 @@ blockquote > p {
 }
 
 #bookmark-list-container {
+  min-height: 100%;
+  border-radius: var(--border-radius2);
   scrollbar-gutter: stable;
+
+  ul {
+    background-color: var(--surface2);
+  }
 }
 
 .bookmark-list {
