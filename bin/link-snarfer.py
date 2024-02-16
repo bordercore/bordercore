@@ -18,7 +18,7 @@ from lib.util import parse_title_from_url
 link_dict = {}  # Store links in a dict to avoid duplication
 
 p = re.compile(r"(https?://[^\">\s\n]*)[\">\s\n]")
-ignore = re.compile("doubleclick|https://twitter.com|tapbots.com|tapbots.net|search.twitter.com|www.youtube.com/subscription_manager|blogtrottr")
+ignore = re.compile("doubleclick|https://twitter.com|search.twitter.com|www.youtube.com/subscription_manager|blogtrottr")
 
 # Remove existing handlers added by Django
 for handler in logging.root.handlers[:]:
