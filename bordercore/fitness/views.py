@@ -45,6 +45,10 @@ class ExerciseDetailView(DetailView):
 
         if active:
             context["activity_info"] = active.activity_info()
+        else:
+            context["activity_info"] = {
+                "schedule": [False, False, False, False, False, False, False]
+            }
 
         return {
             **context,

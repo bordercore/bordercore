@@ -104,10 +104,13 @@
                                 <div class="item-name">
                                     Schedule
                                 </div>
-                                <div class="item-value ms-2">
-                                    <strong>
+                                <div class="item-value fw-bold ms-2">
+                                    <div v-if="scheduleDays">
                                         every {{ scheduleDays }}
-                                    </strong>
+                                    </div>
+                                    <div v-else>
+                                        Not scheduled
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -156,8 +159,7 @@
         },
         setup(props) {
             const exerciseStore = useExerciseStore();
-            const isActive = ref(exerciseStore.activityInfo ? true : false);
-            const schedule = ref(exerciseStore.activityInfo.schedule_days);
+            const isActive = ref(exerciseStore.activityInfo.started ? true : false);
 
             const daysOfTheWeek = [
                 "Monday",
@@ -199,7 +201,7 @@
                         EventBus.$emit(
                             "toast",
                             {
-                                "body": `Exercise schedule changed to ${schedule.value}`,
+                                "body": `Exercise schedule changed to ${scheduleDays.value}`,
                             },
                         );
                     },
@@ -288,7 +290,6 @@
                 activeButtonValue,
                 daysOfTheWeek,
                 exerciseStore,
-                schedule,
                 handleScheduleChange,
                 handleSelectRelatedExercise,
                 handleStatusChange,
