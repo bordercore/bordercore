@@ -372,22 +372,22 @@
                                 setMode("answer");
                                 break;
                             case "e":
-                                if (mode === "answer") {
+                                if (mode.value === "answer") {
                                     window.location = "{% url 'drill:record_response' question.uuid 'easy' %}";
                                 }
                                 break;
                             case "g":
-                                if (mode === "answer") {
+                                if (mode.value === "answer") {
                                     window.location = "{% url 'drill:record_response' question.uuid 'good' %}";
                                 }
                                 break;
                             case "h":
-                                if (mode === "answer") {
+                                if (mode.value === "answer") {
                                     window.location = "{% url 'drill:record_response' question.uuid 'hard' %}";
                                 }
                                 break;
                             case "r":
-                                if (mode === "answer") {
+                                if (mode.value === "answer") {
                                     window.location = "{% url 'drill:record_response' question.uuid 'again' %}";
                                 }
                                 break;
