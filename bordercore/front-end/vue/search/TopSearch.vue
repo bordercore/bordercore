@@ -265,6 +265,15 @@
                     form.action = props.drillQuerySearchUrl;
                 } else {
                     form.action = props.querySearchUrl;
+                    // The main search page is expecting the form field name to be
+                    //  "term_search", so we need to change it before form submission.
+                    for (let i = 0; i < form.elements.length; i++) {
+                        const element = form.elements[i];
+                        if (element.name == "search") {
+                            element.name = "term_search";
+                            break;
+                        }
+                    }
                 }
                 form.submit();
             };
