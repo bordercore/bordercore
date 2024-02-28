@@ -539,7 +539,7 @@ def import_newyorktimes(user, url):
 def chatbot(request, args):
 
     openai.api_key = os.environ.get("OPENAI_API_KEY")
-    model = "gpt-3.5-turbo"
+    model = "gpt-4"
     messages = None
     added_values = []
 
