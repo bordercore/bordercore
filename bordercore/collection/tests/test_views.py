@@ -1,4 +1,5 @@
 import logging
+from unittest.mock import patch
 
 import pytest
 from faker import Factory as FakerFactory
@@ -247,9 +248,12 @@ def test_remove_object(auto_login_user, collection, blob_image_factory):
     assert resp.status_code == 200
 
 
-def test_add_new_bookmark(monkeypatch_bookmark, auto_login_user, collection, blob_image_factory):
+@patch("collection.views.parse_title_from_url")
+def test_add_new_bookmark(mock_parse_title_from_url, monkeypatch_bookmark, auto_login_user, collection, blob_image_factory):
 
     user, client = auto_login_user()
+
+    mock_parse_title_from_url.return_value = None, "Bogus Title"
 
     url = faker.image_url()
     bookmark = BookmarkFactory(user=user, url=url)
