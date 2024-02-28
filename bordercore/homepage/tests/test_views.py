@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 import pytest
 
@@ -43,7 +43,7 @@ def test_get_random_image(monkeypatch_collection, auto_login_user):
     collection.add_object(blob)
     user.userprofile.homepage_image_collection = collection
 
-    mock_request = MagicMock()
+    mock_request = Mock()
     mock_request.user = user
 
     image = views.get_random_image(mock_request)

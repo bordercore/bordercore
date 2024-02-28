@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 import pytest
 import responses
@@ -62,7 +62,7 @@ def test_drill_handle_related_objects(monkeypatch_drill, auto_login_user, questi
 
     user, client = auto_login_user()
 
-    mock_request = MagicMock()
+    mock_request = Mock()
     mock_request.user = user
     mock_request.POST = {
         "related-objects": json.dumps(

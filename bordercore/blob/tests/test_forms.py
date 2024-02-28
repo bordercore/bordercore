@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import Mock
 
 from faker import Factory as FakerFactory
 
@@ -14,7 +14,7 @@ def test_blob_form_add(auto_login_user, blob_pdf_factory):
 
     user, _ = auto_login_user()
 
-    mock_request = MagicMock()
+    mock_request = Mock()
     mock_request.user = user
 
     file_path = Path(__file__).parent / "resources/test_blob.jpg"
