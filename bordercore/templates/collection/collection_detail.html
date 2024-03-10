@@ -29,7 +29,7 @@
             <div class="card-body h-100">
 
                 {% if collection.description %}
-                    <h3 class="mb-3">{{ collection.description }}</h3>
+                    <h3 class="mb-3" v-html="getDescription()" v-cloak></h3>
                 {% endif %}
 
                 <div class="d-flex mb-3">
@@ -347,6 +347,7 @@
     {{ collection_json|json_script:"collectionJson" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
     {{ object_tags|json_script:"object_tags" }}
+    {{ object.description|json_script:"collectionDescription" }}
 
     <script type="text/javascript">
 
@@ -402,6 +403,7 @@
 
                 const collectionJson = JSON.parse(document.getElementById("collectionJson").textContent);
                 const objectTags = ref(JSON.parse(document.getElementById("object_tags").textContent));
+                const collectionDescription = JSON.parse(document.getElementById("collectionDescription").textContent);
 
                 const slideShowOptions = [
                     {
@@ -484,6 +486,10 @@
                     } else {
                         getSlideShowImage("next");
                     }
+                };
+
+                function getDescription() {
+                    return markdown.render(collectionDescription);
                 };
 
                 function getSlideShowImage(direction = "next") {
@@ -657,6 +663,7 @@
                     collectionDetailMenuItems,
                     collectionImage,
                     getBlobList,
+                    getDescription,
                     handleBlobAdd,
                     handleItemClick,
                     handleTagSelect,
