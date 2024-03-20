@@ -21,9 +21,6 @@ def test_search(blob_image_factory, blob_pdf_factory, login, live_server, browse
 
     page = SearchPage(browser)
 
-    # Wait for the Vue front-end to load
-    time.sleep(1)
-
     search_input = page.search_input()
     search_input.send_keys(blob_image_factory[0].name)
     submit_button = page.submit_button()
@@ -54,18 +51,17 @@ def test_tag_search(blob_text_factory, login, live_server, browser, settings):
 
     page = TagSearchPage(browser)
 
-    # Wait for the Vue front-end to load
-    time.sleep(1)
-
     search_input = page.search_input()
     search_input.send_keys("django")
+
+    # Wait for the dropdown to apear
     time.sleep(1)
+
     search_input.send_keys(Keys.DOWN)
     search_input.send_keys(Keys.ENTER)
 
     # Count the number of search results
-    time.sleep(2)
-    assert page.search_tag_result_count() == 3
+    assert page.search_tag_result_count(wait=True) == 3
 
 
 @pytest.mark.parametrize("login", [reverse("homepage:homepage")], indirect=True)
@@ -73,14 +69,9 @@ def test_note_search(blob_note, login, live_server, browser, settings):
 
     page = NoteSearchPage(browser)
 
-    # Wait for the Vue front-end to load
-    time.sleep(1)
-
     # Click the search icon to reveal the search dialog box
     top_search_icon = page.top_search_icon()
     top_search_icon.click()
-
-    time.sleep(1)
 
     search_input = page.search_input()
     # Search for the first two words from the note's title
@@ -92,8 +83,6 @@ def test_note_search(blob_note, login, live_server, browser, settings):
     action.key_down(Keys.ALT).send_keys("n").perform()
     action.reset_actions()
 
-    time.sleep(2)
     search_input.send_keys(Keys.RETURN)
 
-    time.sleep(2)
-    assert page.search_result_count() == 1
+    assert page.search_result_count(wait=True) == 1

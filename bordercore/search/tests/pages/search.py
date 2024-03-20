@@ -5,8 +5,10 @@ except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
 
+from test_page import Page
 
-class SearchPage:
+
+class SearchPage(Page):
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "input#search-bar")
     SEARCH_EXACT_MATCH_DROPDOWN = (By.CSS_SELECTOR, "select[name='exact_match']")
@@ -36,11 +38,11 @@ class SearchPage:
         """
         return self.browser.find_element(*self.SUBMIT_BUTTON)
 
-    def search_result_count(self):
+    def search_result_count(self, wait=False):
         """
         Find the text of the first ask
         """
-        element = self.browser.find_element(*self.SEARCH_RESULT_COUNT)
+        element = self.find_element(self.browser, self.SEARCH_RESULT_COUNT, wait)
         return int(element.get_attribute("innerHTML"))
 
     def search_result_name(self):
@@ -64,7 +66,7 @@ class SearchPage:
         return [x.get_attribute("innerHTML") for x in element]
 
 
-class TagSearchPage:
+class TagSearchPage(Page):
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "input[placeholder='Tag']")
     SEARCH_TAG_RESULT = (By.CSS_SELECTOR, "li[class*='search-result']")
@@ -78,14 +80,14 @@ class TagSearchPage:
         """
         return self.browser.find_element(*self.SEARCH_INPUT)
 
-    def search_tag_result_count(self):
+    def search_tag_result_count(self, wait=False):
         """
         Find the search result tag list
         """
-        return len(self.browser.find_elements(*self.SEARCH_TAG_RESULT))
+        return len(self.find_elements(self.browser, self.SEARCH_TAG_RESULT, wait))
 
 
-class NoteSearchPage:
+class NoteSearchPage(Page):
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "#top-search input.multiselect__input")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#vue-app ul[class*='note-search-result'] li")
@@ -106,8 +108,8 @@ class NoteSearchPage:
         """
         return self.browser.find_element(*self.SEARCH_INPUT)
 
-    def search_result_count(self):
+    def search_result_count(self, wait=False):
         """
         Find the search result count
         """
-        return len(self.browser.find_elements(*self.SEARCH_RESULT_COUNT))
+        return len(self.find_elements(self.browser, self.SEARCH_RESULT_COUNT, wait))

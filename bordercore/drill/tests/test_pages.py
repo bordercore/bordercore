@@ -20,9 +20,6 @@ def test_tag_search(question, login, live_server, browser, settings):
 
     page = SummaryPage(browser)
 
-    # Wait for the Vue front-end to load
-    time.sleep(1)
-
     element = page.study_button()
     element.click()
 
@@ -34,17 +31,14 @@ def test_tag_search(question, login, live_server, browser, settings):
     element = page.tag_input()
     element.send_keys(tag_name)
 
-    time.sleep(2)
+    # Wait for dropdown to populate
+    time.sleep(1)
 
     element = page.tag_dropdown_option(tag_name)
     element.click()
 
-    time.sleep(1)
-
     element = page.start_study_session_button()
     element.click()
-
-    time.sleep(2)
 
     element = page.question_text()
     assert element == question[0].question.replace("\n", " ")

@@ -4,8 +4,10 @@ except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
 
+from test_page import Page
 
-class NodeListPage:
+
+class NodeListPage(Page):
 
     TITLE = (By.TAG_NAME, "title")
     NODE_DETAIL_LINK = (By.CSS_SELECTOR, "a[data-name='node_0']")
@@ -79,12 +81,11 @@ class NodeListPage:
 
         return element.find_element(*self.SEARCH_INPUT)
 
-    def search_suggestion_first(self, element):
+    def search_suggestion_first(self, element, wait=False):
         """
         Find the first search suggestion
         """
-
-        return element.find_elements(*self.SEARCH_SUGGESTION_FIRST)
+        return self.find_element(element, self.SEARCH_SUGGESTION_FIRST, wait)
 
     def checkbox_bookmarks(self, element):
         """

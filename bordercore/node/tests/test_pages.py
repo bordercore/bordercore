@@ -60,24 +60,16 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     user = node.user
 
-    # Wait for the Vue front-end to load
-    time.sleep(1)
-
     assert page.title_value() == "Bordercore :: Node List"
 
     element = page.node_detail_link()
     element.click()
-
-    time.sleep(1)
 
     action = ActionChains(browser)
     menu = page.collection_menu()
     action.move_to_element(menu).perform()
     page.dropdown_menu_container(menu).click()
     page.menu_item(menu).click()
-
-    # Wait for the "Recent Blobs" menu to appear
-    time.sleep(1)
 
     modal = page.select_object_modal()
     menu_items = page.recent_items(modal)
@@ -92,13 +84,11 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
     action.reset_actions()
     action.move_to_element(search_input)
     action.send_keys(blob.name[:5]).perform()
-
     time.sleep(1)
 
     # Verify that it's shown in the suggestion menu
-    suggestion = page.search_suggestion_first(modal)
-
-    assert suggestion[0].text.lower() == blob.name.lower()
+    suggestion = page.search_suggestion_first(modal, wait=True)
+    assert suggestion.text.lower() == blob.name.lower()
 
     _delete_input(action, search_input)
 
@@ -120,7 +110,7 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
     # Search for the bookmark
     _filtered_search(action, search_input, checkbox, bookmark_1.name[:5])
 
-    time.sleep(2)
+    time.sleep(1)
 
     # With the filter on, there should only be one match, plus the empty first suggestion
     suggestion_list = page.search_suggestion_list(modal)

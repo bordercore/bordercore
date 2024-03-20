@@ -18,10 +18,10 @@ def test_todo(todo, login, live_server, browser, settings):
 
     page = TodoPage(browser)
 
-    # Wait for the Vue front-end to load
-    time.sleep(1)
-
     assert page.title_value() == "Bordercore :: Bordercore"
+
+    # Wait for the todo items to load
+    time.sleep(1)
 
     # There should be initially three low priority tasks visible
     assert page.todo_count() == 3

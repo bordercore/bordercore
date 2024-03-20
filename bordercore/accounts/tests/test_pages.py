@@ -1,5 +1,3 @@
-import time
-
 import pytest
 
 from django.urls import reverse
@@ -30,8 +28,6 @@ def test_prefs(collection, login, live_server, browser, settings):
 
     # Choose the 'dark' theme
     page.choose_theme(THEME_NAME)
-
-    time.sleep(1)
 
     # Test that preferences were successfully updated
     page.update()
