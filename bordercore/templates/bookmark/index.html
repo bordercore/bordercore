@@ -22,57 +22,55 @@
             <div>
 
                 <div id="bookmark-search-form" class="d-flex flex-column me-2 p-3">
-
-                    <div class="d-flex">
-                        <form class="form-inline" role="form" method="get" @submit.prevent>
+                    <div v-cloak>
+                        <div class="d-flex">
+                            <form class="form-inline" role="form" method="get" @submit.prevent>
                             {% csrf_token %}
-                            <input :value="pinnedTags && bookmarkStore.selectedTagName" type="hidden" name="tag" />
-                            <div class="position-relative" v-cloak>
-                                <div ref="search">
-                                    <select-value
-                                        id="bookmarkSearch"
-                                        ref="selectValue"
-                                        search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
-                                        place-holder="Search term or tag"
-                                        :search-icon="true"
-                                        @select="selectTag"
-                                        @search="handleSearch"
-                                    >
-                                    </select-value>
+                                <input :value="pinnedTags && bookmarkStore.selectedTagName" type="hidden" name="tag" />
+                                <div class="position-relative" v-cloak>
+                                    <div ref="search">
+                                        <select-value
+                                            id="bookmarkSearch"
+                                            ref="selectValue"
+                                            search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
+                                            place-holder="Search term or tag"
+                                            :search-icon="true"
+                                            @select="selectTag"
+                                            @search="handleSearch"
+                                        >
+                                        </select-value>
+                                    </div>
                                 </div>
+                            </form>
+                            <div class="btn-group ms-3" role="group" aria-label="List View">
+                                <button type="button" class="btn btn-primary" :class="{'active': viewType === 'normal' }" @click="switchViewType('normal')">Normal</button>
+                                <button type="button" class="btn btn-primary" :class="{'active': viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
                             </div>
-                        </form>
-
-                        <div class="btn-group ms-3" role="group" aria-label="List View">
-                            <button type="button" class="btn btn-primary" :class="{'active': viewType === 'normal' }" @click="switchViewType('normal')">Normal</button>
-                            <button type="button" class="btn btn-primary" :class="{'active': viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
+                            <drop-down-menu class="my-auto">
+                                <template #dropdown v-cloak>
+                                    <li>
+                                        <a v-if="tagIsSelected" class="dropdown-item" href="#" @click.prevent="onTogglePinStatus">
+                                            <font-awesome-icon icon="thumbtack" class="text-primary me-3"></font-awesome-icon>
+                                            [[ getPinnedMenuItem() ]]
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'bookmark:create' %}">
+                                            <span v-cloak>
+                                                <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                                Add Bookmark
+                                            </span>
+                                        </a>
+                                        <a class="dropdown-item" href="{% url 'bookmark:import' %}">
+                                            <span v-cloak>
+                                                <font-awesome-icon icon="file-import" class="text-primary me-3"></font-awesome-icon>
+                                                Import
+                                            </span>
+                                        </a>
+                                    </li>
+                                </template>
+                            </drop-down-menu>
                         </div>
-
-                        <drop-down-menu class="my-auto">
-                            <template #dropdown v-cloak>
-                                <li>
-                                    <a v-if="tagIsSelected" class="dropdown-item" href="#" @click.prevent="onTogglePinStatus">
-                                        <font-awesome-icon icon="thumbtack" class="text-primary me-3"></font-awesome-icon>
-                                        [[ getPinnedMenuItem() ]]
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'bookmark:create' %}">
-                                        <span v-cloak>
-                                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                                            Add Bookmark
-                                        </span>
-                                    </a>
-                                    <a class="dropdown-item" href="{% url 'bookmark:import' %}">
-                                        <span v-cloak>
-                                            <font-awesome-icon icon="file-import" class="text-primary me-3"></font-awesome-icon>
-                                            Import
-                                        </span>
-                                    </a>
-                                </li>
-                            </template>
-                        </drop-down-menu>
-
                     </div>
                     <div v-cloak>
                         <div class="d-flex mt-1 ms-3">
@@ -547,7 +545,7 @@
                 };
 
                 const tagIsSelected = computed(() => {
-                    return pinnedTags.value && bookmarkStore.selectedTagName !== "Untagged";
+                    return pinnedTags.value && bookmarkStore.selectedTagName !== null && bookmarkStore.selectedTagName !== "Untagged";
                 });
 
                 return {
