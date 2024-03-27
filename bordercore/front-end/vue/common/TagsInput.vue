@@ -1,5 +1,8 @@
 <template>
-    <div :class="classList">
+    <div :class="[{ 'has-search': searchIcon }, classList]">
+        <div v-if="searchIcon">
+            <font-awesome-icon icon="search" />
+        </div>
         <multiselect
             ref="multiselect"
             v-model="value"
@@ -64,6 +67,10 @@
             optionsLimit: {
                 default: 20,
                 type: Number,
+            },
+            searchIcon: {
+                type: Boolean,
+                default: false,
             },
             searchUrl: {
                 type: String,
