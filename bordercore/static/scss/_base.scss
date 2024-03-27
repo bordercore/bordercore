@@ -1512,6 +1512,12 @@ blockquote > p {
   width: 25rem;
 }
 
+.semantic-search {
+  svg[data-icon="search"] {
+    z-index: 98;
+  }
+}
+
 // Use this for cancel icons inside search input fields
 .search-input-cancel {
   position: absolute;
@@ -2712,6 +2718,7 @@ textarea.sql-input {
 
 // Custom multiselect for tags input
 .multiselect.tags-input {
+  z-index: 99;
   .multiselect__tags {
     display: flex !important;
     padding-top: 0 !important;

@@ -8,7 +8,7 @@
                     </div>
                     <div class="col-auto has-search position-relative px-0">
                         <font-awesome-icon icon="search" />
-                        <input id="search-bar" ref="searchInput" name="term_search" v-model="searchTerm" placeholder="Search" class="default-input form-control">
+                        <input id="search-bar" ref="searchInput" v-model="searchTerm" name="term_search" placeholder="Search" class="default-input form-control">
                     </div>
                 </div>
                 <div class="d-flex w-100">
@@ -70,9 +70,10 @@
                     <tags-input
                         ref="tagsInput"
                         name="tag-search"
-                        class-list="tag-search me-3"
+                        class-list="tag-search me-3 position-relative"
                         place-holder="Tag"
                         :search-url="tagSearchUrl"
+                        :search-icon="true"
                         tags-changed-url="tagSearchUrl"
                         @tags-changed="handleTagSearch"
                     />
@@ -105,9 +106,9 @@
                     <div class="mb-1">
                         Semantic Search
                     </div>
-                    <div class="col-auto has-search position-relative px-0">
+                    <div class="semantic-search col-auto has-search position-relative px-0">
                         <font-awesome-icon icon="search" />
-                        <input name="semantic_search" v-model="searchSemantic" placeholder="Search" class="default-input form-control">
+                        <input v-model="searchSemantic" name="semantic_search" placeholder="Search" class="default-input form-control">
                     </div>
                 </div>
                 <div class="d-flex flex-column w-20 me-3">
