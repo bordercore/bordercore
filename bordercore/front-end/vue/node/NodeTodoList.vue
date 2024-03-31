@@ -51,7 +51,7 @@
                                 <li v-cloak :key="element.uuid" class="hover-target list-group-item pe-0" :data-uuid="element.uuid">
                                     <div class="dropdown-height d-flex align-items-start">
                                         <div>
-                                            <a :href="element.url">{{ element.name }}</a>
+                                            {{ element.name }}
                                             <div v-if="element.url" class="node-url">
                                                 <a :href="element.url">Link</a>
                                             </div>
