@@ -280,7 +280,8 @@ def overview(request):
                       "bookmarks": sorted_bookmarks,
                       "untagged_count": bare_count,
                       "pinned_tags": [x for x in pinned_tags],
-                      "tag": request.GET.get("tag", None)
+                      "tag": request.GET.get("tag", None),
+                      "title": "Bookmarks"
                   })
 
 

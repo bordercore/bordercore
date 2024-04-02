@@ -21,7 +21,7 @@ def test_prefs(collection, login, live_server, browser, settings):
     page = PrefsPage(browser)
     page.load(live_server)
 
-    assert page.title_value() == "Bordercore :: Preferences"
+    assert page.title_value() == "Preferences"
 
     # Choose a default collection
     page.choose_default_collection(COLLECTION_NAME)

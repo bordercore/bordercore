@@ -60,7 +60,7 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     user = node.user
 
-    assert page.title_value() == "Bordercore :: Node List"
+    assert page.title_value() == "Node List"
 
     element = page.node_detail_link()
     element.click()

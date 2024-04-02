@@ -18,7 +18,7 @@ def test_todo(todo, login, live_server, browser, settings):
 
     page = TodoPage(browser)
 
-    assert page.title_value() == "Bordercore :: Bordercore"
+    assert page.title_value() == "Todo"
 
     # Wait for the todo items to load
     time.sleep(1)
@@ -51,7 +51,7 @@ def test_todo_no_fixtures(login, live_server, browser, settings):
     # Wait for the Vue front-end to load
     time.sleep(1)
 
-    assert page.title_value() == "Bordercore :: Bordercore"
+    assert page.title_value() == "Todo"
 
     # There should be no todo tasks, just a "No tasks found" message
     assert page.todo_count() == 1

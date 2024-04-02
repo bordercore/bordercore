@@ -21,7 +21,7 @@ def test_homepage(bookmark, question, todo, login, live_server, browser, setting
 
     page = HomePage(browser)
 
-    assert page.title_value() == "Bordercore :: Homepage"
+    assert page.title_value() == "Bordercore"
 
     # There should be two important todo tasks
     assert page.todo_count() == 2
@@ -43,7 +43,7 @@ def test_homepage_no_fixtures(login, live_server, browser, settings):
 
     page = HomePage(browser)
 
-    assert page.title_value() == "Bordercore :: Homepage"
+    assert page.title_value() == "Bordercore"
 
     # There should be no important todo tasks, just an "All done!" message
     assert page.todo_count() == 1

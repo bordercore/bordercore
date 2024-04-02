@@ -83,7 +83,7 @@ def homepage(request):
                    "default_collection": default_collection,
                    "overdue_exercises": sorted(overdue_exercises, key=lambda x: x.delta_days, reverse=True),
                    "drill_total_progress": Question.objects.total_tag_progress(request.user),
-                   "title": "Homepage"})
+                   "title": "Bordercore"})
 
 
 @login_required

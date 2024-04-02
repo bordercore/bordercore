@@ -49,6 +49,7 @@ class TodoListView(ListView):
             "tags": Todo.get_todo_counts(self.request.user),
             "filter": filter,
             "priority_list": json.dumps(Todo.PRIORITY_CHOICES),
+            "title": "Todo"
         }
 
 
