@@ -2788,12 +2788,15 @@ textarea.sql-input {
 }
 
 // vuejs-datepicker
-.calendar {
-  color: $black;
-}
 
-.v3dp__datepicker .selected {
-  background-color: var(--vdp-bg-color) !important;
+.v3dp__datepicker {
+  .selected {
+    background-color: var(--vdp-bg-color) !important;
+  }
+  .v3dp__popout {
+    // This should be higher than that of .multiselect.tags-input to avoid being obscured
+    z-index: 100 !important;
+  }
 }
 
 // vue-slicksort
