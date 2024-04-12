@@ -83,6 +83,7 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
     # Search for it by typing the first 5 letters of its title
     action.reset_actions()
     action.move_to_element(search_input)
+    page.wait_for_focus(modal, page.SEARCH_INPUT)
     action.send_keys(blob.name[:5]).perform()
     time.sleep(1)
 
