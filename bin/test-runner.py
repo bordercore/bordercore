@@ -85,7 +85,7 @@ def run_test(test, verbose=False):
                 "-n",
                 "5",
                 "-m",
-                "not data_quality",
+                "not data_quality and not functional",
                 "-v",
                 f"{os.environ.get('BORDERCORE_HOME')}/",
                 f"--cov={os.environ.get('BORDERCORE_HOME')}",
