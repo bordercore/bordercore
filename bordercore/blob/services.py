@@ -544,7 +544,7 @@ def chatbot(request, args):
     added_values = []
 
     if "blob_uuid" in args:
-        model = "gpt-3.5-turbo-16k"  # Use the larger-context model
+        model = "gpt-3.5-turbo"  # Use the larger-context model
         blob_content = Blob.objects.get(uuid=args["blob_uuid"]).content
         messages = [
             {
@@ -570,7 +570,7 @@ def chatbot(request, args):
             }
         ]
     elif args["mode"] == "notes":
-        model = "gpt-3.5-turbo-16k"  # Use the larger-context model
+        model = "gpt-3.5-turbo"  # Use the larger-context model
         chat_history = json.loads(args["chat_history"])
         prompt = chat_history[-1]['content']
         results = semantic_search(request, prompt)["hits"]["hits"][0]["_source"]
