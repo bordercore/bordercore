@@ -77,6 +77,7 @@
                     ctx.emit("current-song", getIndex());
                 }
                 setTimeout(markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
+                document.title = currentTitle.value;
             };
 
             function playNextTrack() {

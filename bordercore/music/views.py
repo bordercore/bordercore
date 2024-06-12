@@ -134,6 +134,7 @@ class ArtistDetailView(TemplateView):
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
+            "title": artist
         }
 
 
@@ -220,7 +221,8 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
             **context,
             "song_list": song_list,
             "tags": [x.name for x in self.object.tags.all()],
-            "playtime": playtime
+            "playtime": playtime,
+            "title": self.object
         }
 
     def get_queryset(self):
