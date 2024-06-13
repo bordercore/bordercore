@@ -24,6 +24,7 @@ class Feed(TimeStampedModel):
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
     homepage = models.URLField(null=True)
+    verify_ssl_certificate = models.BooleanField(default=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
@@ -37,7 +38,7 @@ class Feed(TimeStampedModel):
         try:
 
             headers = {"user-agent": USER_AGENT}
-            r = requests.get(self.url, headers=headers)
+            r = requests.get(self.url, headers=headers, verify=self.verify_ssl_certificate)
 
             if r.status_code != 200:
                 r.raise_for_status()
