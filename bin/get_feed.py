@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import datetime
 import json
 import sys
-from datetime import datetime
 
 import boto3
 
 import django
-from django.utils.timezone import utc
 
 django.setup()
 
@@ -47,7 +46,7 @@ def update_feeds(feed_uuid=None):
             )
 
         except Exception as e:
-            t = datetime.utcnow().replace(tzinfo=utc)
+            t = datetime.datetime.now(datetime.timezone.utc)
             log_file = open(LOG_FILE, "a")
             log_file.write(f"{t.strftime('%Y-%m-%d %H:%M:%S')} Exception for {feed.name} (feed_id {feed.id}): {e.args}\n")
             log_file.close()

@@ -1,14 +1,13 @@
+import datetime
 import html
 import logging
 import uuid
-from datetime import datetime
 
 import feedparser
 import requests
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.timezone import utc
 
 from lib.mixins import TimeStampedModel
 
@@ -71,7 +70,7 @@ class Feed(TimeStampedModel):
         finally:
             if r:
                 self.last_response_code = r.status_code
-            self.last_check = datetime.utcnow().replace(tzinfo=utc)
+            self.last_check = datetime.datetime.now(datetime.timezone.utc)
             self.save()
 
         return len(feed_list)

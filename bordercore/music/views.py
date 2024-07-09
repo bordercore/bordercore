@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.forms.models import model_to_dict
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -374,17 +374,23 @@ class SongCreateView(FormRequestMixin, CreateView):
 
 @method_decorator(login_required, name="dispatch")
 class MusicDeleteView(DeleteView):
+
     model = Song
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
     success_url = reverse_lazy("music:list")
 
-    def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
-        messages.add_message(self.request, messages.INFO, "Song successfully deleted")
-        return response
+    def get_queryset(self):
+        # Filter the queryset to only include objects owned by the logged-in user
+        return self.model.objects.filter(user=self.request.user)
 
-    def get_object(self, queryset=None):
-        song = Song.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
-        return song
+    def form_valid(self, form):
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            "Song deleted"
+        )
+        return super().form_valid(form)
 
 
 @login_required
@@ -627,20 +633,19 @@ class PlaylistDeleteView(DeleteView):
     model = Playlist
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
+    success_url = reverse_lazy("music:list")
 
-    # Verify that the user is the owner of the task
-    def get_object(self, queryset=None):
-        obj = super().get_object()
-        if not obj.user == self.request.user:
-            raise Http404
-        return obj
+    def get_queryset(self):
+        # Filter the queryset to only include objects owned by the logged-in user
+        return self.model.objects.filter(user=self.request.user)
 
-    def get_success_url(self):
+    def form_valid(self, form):
         messages.add_message(
             self.request,
-            messages.INFO, f"Playlist <strong>{self.object.name}</strong> deleted",
+            messages.INFO,
+            f"Playlist <strong>{self.object.name}</strong> deleted"
         )
-        return reverse("music:list")
+        return super().form_valid(form)
 
 
 @method_decorator(login_required, name="dispatch")

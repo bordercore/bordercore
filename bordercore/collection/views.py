@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Exists, OuterRef, Q
 from django.forms.models import model_to_dict
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
@@ -148,30 +148,25 @@ class CollectionUpdateView(FormRequestMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class CollectionDeleteView(DeleteView):
 
     model = Collection
-    form_class = CollectionForm
     slug_field = "uuid"
     slug_url_kwarg = "collection_uuid"
     success_url = reverse_lazy("collection:list")
 
-    # Verify that the user is the owner of the task
-    def get_object(self, queryset=None):
-        obj = super().get_object()
-        if not obj.user == self.request.user:
-            raise Http404
-        return obj
+    def get_queryset(self):
+        # Filter the queryset to only include objects owned by the logged-in user
+        return self.model.objects.filter(user=self.request.user)
 
-    def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
+    def form_valid(self, form):
         messages.add_message(
             self.request,
             messages.INFO,
             f"Collection <strong>{self.object.name}</strong> deleted"
         )
-        return response
+        return super().form_valid(form)
 
 
 @login_required

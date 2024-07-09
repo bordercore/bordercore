@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -111,19 +111,22 @@ def handle_related_objects(question, request):
 @method_decorator(login_required, name="dispatch")
 class QuestionDeleteView(DeleteView):
 
-    form_class = QuestionForm
     model = Question
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+    success_url = reverse_lazy("drill:add")
 
-    def delete(self, request, *args, **kwargs):
-        messages.add_message(self.request, messages.INFO, "Question deleted")
-        return super().delete(request, *args, **kwargs)
+    def get_queryset(self):
+        # Filter the queryset to only include objects owned by the logged-in user
+        return self.model.objects.filter(user=self.request.user)
 
-    def get_object(self, queryset=None):
-        question = Question.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
-        return question
-
-    def get_success_url(self):
-        return reverse("drill:add")
+    def form_valid(self, form):
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            "Question deleted"
+        )
+        return super().form_valid(form)
 
 
 @method_decorator(login_required, name="dispatch")

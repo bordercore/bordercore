@@ -5,6 +5,8 @@ import os
 
 from .base import *
 
+CSRF_TRUSTED_ORIGINS = ["https://www.bordercore.com"]
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
