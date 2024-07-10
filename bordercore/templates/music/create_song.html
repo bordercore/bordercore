@@ -38,6 +38,8 @@
                     <template v-slot:content>
                         <ul>
                             <li>Song Length <span class="ms-1 text-primary">[[ songInfo.songLengthPretty ]]</span></li>
+                            <li>Last Played <span class="ms-1 text-primary">[[ songInfo.songLastPlayed ]]</span></li>
+                            <li v-if="songInfo.songTimesPlayed > 0">Times Played <span class="ms-1 text-primary">[[ songInfo.songTimesPlayed ]]</span></li>
                             {% if action == "Create" %}
                                 <li>Song Size <span class="ms-1 text-primary">[[ songInfo.songSize ]]</span></li>
                                 <li>Sample Rate <span class="ms-1 text-primary">[[ songInfo.sampleRate ]]</span></li>
@@ -275,7 +277,6 @@
                 const rating = ref({{ form.rating.value|default:""}});
                 const isCompilation = ref(false);
                 const uuid = "{{ song.uuid }}";
-
                 const songInfo = ref({
                     {% if action == "Create" %}
                     songLength: null,
@@ -284,6 +285,8 @@
                     songUuid: "{{ song.uuid }}",
                     songLength: {{ song.length }},
                     songLengthPretty: "{{ song_length_pretty }}",
+                    songLastPlayed: "{{ last_time_played }}",
+                    songTimesPlayed: "{{ song.times_played }}",
                     {% endif %}
                     songSize: null,
                     sampleRate: null,
@@ -357,6 +360,7 @@
                         });
                         songInfo.value.songLength = response.data.length;
                         songInfo.value.songLengthPretty = response.data.length_pretty;
+                        songInfo.value.songLastPlayed = response.data.last_played;
                         songInfo.value.songSize = response.data.filesize;
                         songInfo.value.sampleRate = response.data.sample_rate;
                         songInfo.value.bitRate = response.data.bit_rate;

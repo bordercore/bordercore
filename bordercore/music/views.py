@@ -302,8 +302,10 @@ class SongUpdateView(FormRequestMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
-        context["artist_name"] = str(self.get_object().artist)
+        context["artist_name"] = str(self.object.artist)
         context["song_length_pretty"] = convert_seconds(self.object.length)
+        context["last_time_played"] = self.object.last_time_played.strftime("%B %d, %Y") \
+            if self.object.last_time_played else "Never"
         context["tags"] = [x.name for x in self.object.tags.all()]
         context["tag_counts"] = Song.get_song_tags(self.request.user)
         return context
