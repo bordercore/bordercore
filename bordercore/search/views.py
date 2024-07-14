@@ -6,6 +6,7 @@ from urllib.parse import unquote, urlparse
 
 import markdown
 from elasticsearch import RequestError
+from rest_framework.decorators import api_view
 
 from django.conf import settings
 from django.contrib import messages
@@ -21,6 +22,7 @@ from lib.embeddings import len_safe_get_embedding
 from lib.time_utils import get_date_from_pattern, get_relative_date
 from lib.util import (favicon_url, get_elasticsearch_connection,
                       get_pagination_range, truncate)
+from music.models import Album
 from tag.models import Tag
 from tag.services import get_tag_aliases, get_tag_link
 
@@ -248,7 +250,7 @@ class SearchListView(ListView):
                 }
             )
 
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT, timeout=40)
         try:
             results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
         except RequestError as e:
@@ -1013,3 +1015,149 @@ def search_names_es(user, search_term, doc_types):
                 matches[-1]["type"] = "bookmark"
 
     return matches
+
+
+@api_view(["GET"])
+def search_music(request):
+
+    LIMIT = 10
+
+    artist = None
+    song = None
+    album = None
+
+    if "artist" in request.query_params:
+        artist = request.query_params["artist"]
+    if "song" in request.query_params:
+        song = request.query_params["song"]
+    if "album" in request.query_params:
+        album = request.query_params["album"]
+
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+
+    search_object = {
+        "query": {
+            "function_score": {
+                "functions": [
+                    {
+                        "field_value_factor": {
+                            "field": "importance",
+                            "missing": 1
+                        }
+                    }
+                ],
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "term": {
+                                    "user_id": request.user.id
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "from": 0,
+        "size": LIMIT,
+        "_source": ["album_uuid",
+                    "album",
+                    "artist",
+                    "artist_uuid",
+                    "author",
+                    "bordercore_id",
+                    "date",
+                    "date_unixtime",
+                    "doctype",
+                    "filename",
+                    "importance",
+                    "name",
+                    "note",
+                    "question",
+                    "sha1sum",
+                    "tags",
+                    "title",
+                    "track",
+                    "url",
+                    "uuid"]
+    }
+
+    constraints = search_object["query"]["function_score"]["query"]["bool"]["must"]
+    if song:
+        constraints.append(
+            {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "title.autocomplete": {
+                                    "query": song,
+                                    "operator": "and"
+                                }
+                            }
+                        },
+                        {
+                            "term": {
+                                "doctype": "song"
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+        search_object["query"]["function_score"]["functions"].append({"random_score": {}})
+    if artist:
+        constraints.append(
+            {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "artist.autocomplete": {
+                                    "query": artist,
+                                    "operator": "and"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+        search_object["query"]["function_score"]["functions"].append({"random_score": {}})
+    if album:
+        album_info = Album.objects.filter(title__icontains=album)
+        if album_info:
+            constraints.append(
+                {
+                    "bool": {
+                        "must": [
+                            {
+                                "match": {
+                                    "album_uuid": {
+                                        "query": album_info[0].uuid,
+                                        "operator": "and"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            )
+            search_object["sort"] = {"track": {"order": "asc"}}
+            search_object["size"] = 1000  # Get all songs from the album
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    return JsonResponse(
+        [
+            {
+                "artist": x["_source"]["artist"],
+                "uuid": x["_source"]["uuid"],
+                "title": x["_source"]["title"],
+                "track": x["_source"].get("track", None)
+            }
+            for x in results["hits"]["hits"]
+        ],
+        safe=False
+    )
