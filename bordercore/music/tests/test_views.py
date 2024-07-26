@@ -186,8 +186,8 @@ def test_mark_song_as_listened_to(auto_login_user, song):
     _, client = auto_login_user()
 
     url = urls.reverse(
-        "music:mark_song_as_listened_to",
-        kwargs={"uuid": song[0].uuid}
+        "mark_song_as_listened_to",
+        kwargs={"song_uuid": song[0].uuid}
     )
     resp = client.get(url)
 

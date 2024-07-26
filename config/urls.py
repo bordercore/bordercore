@@ -15,6 +15,7 @@ from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from collection.views import get_images
 from homepage.views import handler403, handler404, handler500
 from lib.services import site_stats
+from music.views import mark_song_as_listened_to
 from search.views import search_music
 
 admin.autodiscover()
@@ -65,6 +66,7 @@ urlpatterns += [
     re_path(r"^api/", include(router.urls)),
     path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
     path("api/collections/images/<uuid:collection_uuid>/", get_images),
+    path("api/music/mark_song_as_listened_to/<uuid:song_uuid>/", mark_song_as_listened_to, name="mark_song_as_listened_to"),
     path("api/site/stats", site_stats),
     path("api/search/music", search_music),
     path("", include("rest_framework.urls", namespace="rest_framework"))

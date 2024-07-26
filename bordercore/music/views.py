@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import boto3
 import humanize
+from rest_framework.decorators import api_view
 
 from django.conf import settings
 from django.contrib import messages
@@ -449,19 +450,20 @@ class RecentSongsListView(ListView):
         return JsonResponse(response)
 
 
-@login_required
-def mark_song_as_listened_to(request, uuid):
+@api_view(["GET"])
+def mark_song_as_listened_to(request, song_uuid):
     """
     Indicate that this song has been listened to, but only if we're in production
     """
 
+    song = Song.objects.get(user=request.user, uuid=song_uuid)
     if not settings.DEBUG:
-        song = Song.objects.get(user=request.user, uuid=uuid)
         song.listen_to()
 
     return JsonResponse(
         {
-            "status": "OK"
+            "status": "OK",
+            "times_played": song.times_played
         }
     )
 

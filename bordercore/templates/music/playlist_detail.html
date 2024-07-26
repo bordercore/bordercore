@@ -82,7 +82,7 @@
                     class="flex-grow-1 mx-2"
                     :track-list="songList"
                     song-url="{{ MEDIA_URL_MUSIC }}songs/"
-                    mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                    mark-listened-to-url="{% url 'mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
                     @current-song="onCurrentSong"
                     @is-playing="handleIsPlaying"
                 >
