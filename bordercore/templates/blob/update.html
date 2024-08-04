@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/easymde.min.css">
 {% endblock %}
 
-{% block title %} {{ action }} Blob {% endblock %}
+{% block title %} {{ blob }} {% endblock %}
 
 {% block nav %}
 
@@ -14,7 +14,7 @@
             <div class="me-auto align-self-center">
                 <ul class="breadcrumb mb-0 pt-0 pb-0">
                     <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
-                    <li class="breadcrumb-item active">Edit Blob</li>
+                    <li class="breadcrumb-item active">Update Blob</li>
                 </ul>
             </div>
         </div>

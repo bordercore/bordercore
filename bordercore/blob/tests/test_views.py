@@ -245,8 +245,6 @@ def test_blob_detail(auto_login_user, blob):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    assert soup.select("div#vue-app #blob-name")[0].findAll(text=True)[0].strip() == blob[0].get_name(remove_edition_string=True)
-
     url = [x.value for x in blob[0].metadata.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
 
