@@ -10,7 +10,7 @@
                 <input type="hidden" name="workout-data" :value="workoutDataJson">
                 <input type="hidden" name="csrfmiddlewaretoken" :value="csrfToken">
                 <div class="d-flex">
-                    <div>
+                    <div class="w-50">
                         <div v-if="hasWeight" class="d-flex align-items-center my-2">
                             <label class="fitness-col-new-workout-data flex-shrink-0">Weight</label>
                             <input v-model="weight" class="form-control" type="text" name="weight" size="3" autocomplete="off">
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                     <div class="my-2">
-                        <input class="btn btn-secondary ms-5" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onAddWorkoutData">
+                        <input class="btn btn-secondary ms-4" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onAddWorkoutData">
                         <input id="btn-submit" class="btn btn-primary ms-3" :class="{'d-none': submitIsHidden}" type="submit" name="Go" value="Submit">
                     </div>
                 </div>
@@ -135,7 +135,7 @@
             },
         },
         setup(props) {
-            const weight = ref(parseInt(props.initialWeight));
+            const weight = ref(props.initialWeight);
             const reps = ref(props.initialReps);
             const duration = ref(props.initialDuration);
             const items = ref([]);
