@@ -87,7 +87,7 @@
 
         <div class="col-lg-8 h-100">
 
-            <div>
+            <div v-cloak>
                 {% if request.POST.Go and not form.errors %}
                     <div class="alert alert-success offset-lg-3">Post {{ action }}ed</div>
                 {% endif %}
