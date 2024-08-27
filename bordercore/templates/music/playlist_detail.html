@@ -18,65 +18,48 @@
 {% block content %}
 
     <div id="vue-app" class="row g-0 h-100 align-items-start mx-2">
-
         <div class="sticky-top col-lg-3 d-flex flex-column h-100">
-
             <div class="card-body mb-0">
-
-                {% if playlist.type == "tag" %}
-
-                    <div>
-                        Songs matching tag <strong class="text-primary">{{ playlist.parameters.tag }}</strong>
-                    </div>
-
-                {% elif playlist.type == "recent" %}
-
-                    <div>
-                        Songs added recently
-                    </div>
-
-                {% elif playlist.type == "time" %}
-
-                    <div>
-                        Songs between the years <strong class="text-primary">{{ playlist.parameters.start_year }}</strong> and <strong class="text-primary">{{ playlist.parameters.end_year }}</strong>
-                    </div>
-
-                {% elif playlist.type == "manual" %}
-
-                    <div>
+                Songs
+                <ul>
+                {% if playlist.parameters.tag %}
+                    <li>
+                        with tag <strong class="text-primary">{{ playlist.parameters.tag }}</strong>
+                    </li>
+                {% endif %}
+                {% if playlist.parameters.start_year %}
+                    <li>
+                        from the years <strong class="text-primary">{{ playlist.parameters.start_year }}</strong> to <strong class="text-primary">{{ playlist.parameters.end_year }}</strong>
+                    </li>
+                {% endif %}
+                {% if playlist.type == "manual" %}
+                    <li>
                         Manually created playlist
-                    </div>
-
-                {% elif playlist.type == "rating" %}
-
-                    <div>
-                        Songs with a
+                    </li>
+                {% endif %}
+                {% if playlist.parameters.rating %}
+                    <li>
+                        with a
                         <strong class="text-primary">
                             {{ playlist.parameters.rating }} star
                         </strong>
                         rating
-                    </div>
+                    </li>
                 {% endif %}
-
                 {% if playlist.parameters.exclude_recent %}
-
-                    <div>
+                    <li>
                         not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> day{{ playlist.parameters.exclude_recent|pluralize }}
-                    </div>
-
+                    </li>
                 {% endif %}
-
                 {% if playlist.parameters.exclude_albums %}
-
-                    <div>
+                    <li>
                         not on an album
-                    </div>
-
+                    </li>
                 {% endif %}
-
+                </ul>
             </div>
 
-            <div class="sticky-top">
+            <div class="sticky-top mt-3">
                 <audio-player
                     ref="audioPlayer"
                     class="flex-grow-1 mx-2"
@@ -88,7 +71,6 @@
                 >
                 </audio-player>
             </div>
-
         </div>
 
         <div class="col-lg-9 d-flex flex-column flex-grow-last h-100">

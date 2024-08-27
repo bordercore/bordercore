@@ -463,10 +463,7 @@ class Playlist(TimeStampedModel):
 
     class PlaylistType(models.TextChoices):
         MANUAL = "manual", _("Manually Selected")
-        TAG = "tag", _("Tagged")
-        RECENT = "recent", _("Recently Added")
-        TIME = "time", _("Time Period")
-        RATED = "rating", _("Rated")
+        TAG = "smart", _("Smart")
 
     type = models.CharField(
         max_length=100,
@@ -474,49 +471,49 @@ class Playlist(TimeStampedModel):
         default=PlaylistType.MANUAL,
     )
 
-    def populate(this, refresh=False):
-
-        if this.type == "manual":
+    def populate(self, refresh=False):
+        if self.type == "manual":
             raise ValueError("You cannot call populate() on a manual playlist.")
 
         # If refresh is true, then populate the playlist with all new songs
         if refresh:
-            PlaylistItem.objects.filter(playlist=this).delete()
+            PlaylistItem.objects.filter(playlist=self).delete()
 
-        if this.type == "tag":
-            song_list = Song.objects.filter(tags__name=this.parameters["tag"])
-        elif this.type == "time":
-            song_list = Song.objects.annotate(
+        song_list = Song.objects.all()
+
+        if "tag" in self.parameters:
+            song_list = song_list.filter(tags__name=self.parameters["tag"])
+
+        if "rating" in self.parameters:
+            song_list = song_list.filter(rating=int(self.parameters["rating"]))
+
+        if self.parameters.get("start_year", None) and self.parameters.get("end_year", None):
+            song_list = song_list.annotate(
                 year_effective=Coalesce("original_year", "year")). \
                 filter(
-                    year_effective__gte=this.parameters["start_year"],
-                    year_effective__lte=this.parameters["end_year"],
+                    year_effective__gte=self.parameters["start_year"],
+                    year_effective__lte=self.parameters["end_year"],
                 )
-        elif this.type == "recent":
-            song_list = Song.objects.all().order_by("-created")
-        elif this.type == "rating":
-            song_list = Song.objects.filter(rating=int(this.parameters["rating"]))
-        else:
-            raise ValueError(f"Playlist type not supported: {this.type}")
 
-        if "exclude_albums" in this.parameters:
+        if self.parameters.get("exclude_albums", False):
             song_list = song_list.exclude(album__isnull=False)
 
-        if "exclude_recent" in this.parameters:
-
-            song_list = song_list.exclude(last_time_played__gte=timezone.now() - timedelta(days=int(this.parameters["exclude_recent"])))
+        if "exclude_recent" in self.parameters:
+            song_list = song_list.exclude(last_time_played__gte=timezone.now() - timedelta(days=int(self.parameters["exclude_recent"])))
 
         # If we're not returning recently added songs, randomize the final list
-        if this.type != "recent":
+        if self.parameters.get("sort_by") == "recent":
+            song_list = song_list.order_by("-created")
+        elif self.parameters.get("sort_by") == "random":
             song_list = song_list.order_by("?")
 
-        if this.size:
-            song_list = song_list[:this.size]
+        if self.size:
+            song_list = song_list[:self.size]
 
         # This seems like a good candidate for bulk_create(), but that will
         #  result in all new items having sort_order=1
         for song in song_list:
-            playlistitem = PlaylistItem(playlist=this, song=song)
+            playlistitem = PlaylistItem(playlist=self, song=song)
             playlistitem.save()
 
 

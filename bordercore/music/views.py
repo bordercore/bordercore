@@ -565,7 +565,7 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
         playlist.parameters = {
             x: self.request.POST[x]
             for x in
-            ["tag", "start_year", "end_year", "exclude_recent", "rating"]
+            ["tag", "start_year", "end_year", "exclude_recent", "rating", "sort_by"]
             if x in self.request.POST and self.request.POST[x] != ""
         }
         playlist.parameters["exclude_albums"] = self.request.POST.get("exclude_albums", "") == "true"
@@ -588,38 +588,23 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
     def form_valid(self, form):
         playlist = form.save()
 
-        exclude_albums = self.request.POST.get("exclude_albums", "") == "true"
+        params_to_extract = ["end_year", "exclude_albums", "exclude_recent", "rating", "start_year", "tag"]
+        filtered_params = {
+            key: self.request.POST[key]
+            for key in params_to_extract
+            if key in self.request.POST
+            and self.request.POST[key] != ""
+        }
 
-        # Deal with any changed parameters that could possibly
-        #  refresh the song list.
         if playlist.type != "manual" and \
            (
                "size" in form.changed_data
-               or exclude_albums != playlist.parameters.get("exclude_albums", False)
-               or self.request.POST.get("exclude_recent", "") != playlist.parameters.get("exclude_recent", "")
                or self.request.POST.get("refresh_song_list", False)
+               # If any parameters from a smart playlist have changed, refresh the song list.
+               or filtered_params != playlist.parameters
            ):
 
-            parameters = {
-                x: self.request.POST[x]
-                for x in
-                ["start_year", "end_year", "exclude_recent", "rating"]
-                if x in self.request.POST and self.request.POST[x] != ""
-            }
-            parameters["exclude_albums"] = exclude_albums
-
-            # We don't allow changing the tag, so it won't be included in
-            #  the POST args. Add it here.
-            if playlist.type == "tag":
-                parameters["tag"] = playlist.parameters["tag"]
-
-            # We don't allow changing the time period (maybe we should?)
-            #  so it won't be included in the POST args. Add it here.
-            if playlist.type == "time":
-                parameters["start_year"] = playlist.parameters["start_year"]
-                parameters["end_year"] = playlist.parameters["end_year"]
-
-            playlist.parameters = parameters
+            playlist.parameters = filtered_params
             playlist.save()
 
             playlist.populate(refresh=True)

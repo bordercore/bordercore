@@ -16,128 +16,77 @@
                             <input id="id_name" v-model="name" type="text" name="name" autocomplete="off" maxlength="200" required="required" class="form-control">
                         </div>
                     </div>
-
                     <div class="row">
                         <label class="col-lg-4 col-form-label" for="id_note">Note</label>
                         <div class="col-lg-8">
                             <textarea id="id_note" v-model="note" name="note" cols="40" rows="3" class="form-control" />
                         </div>
                     </div>
-
-                    <div v-if="action !== 'Update'">
-                        <hr class="mb-1">
-
-                        <div class="form-section">
-                            Playlist Type
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-lg-12">
+                    <div v-if="action !== 'Update'" class="row mt-3">
+                        <label class="col-lg-4 col-form-label pt-0" for="id_note">Type</label>
+                        <div class="col-lg-8">
+                            <div class="d-flex">
                                 <div class="form-check">
-                                    <input id="id_type_manual" v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="manual">
+                                    <input id="id_type_manual" v-model="playlistType" class="form-check-input mt-2" type="radio" name="type" value="manual">
                                     <label class="form-check-label d-flex" for="id_type_manual">
-                                        Manually Add Songs
+                                        Manual
                                     </label>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-lg-4">
-                                <div class="form-check">
-                                    <input id="id_type_tag" v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="tag">
-                                    <label class="form-check-label d-flex" for="id_type_tag">
-                                        Tag
+                                <div class="form-check ms-5">
+                                    <input id="id_type_smart" v-model="playlistType" class="form-check-input mt-2" type="radio" name="type" value="smart">
+                                    <label class="form-check-label d-flex" for="id_type_smart">
+                                        Smart
                                     </label>
-                                </div>
-                            </div>
-                            <div class="col-lg-8">
-                                <tags-input
-                                    id="smart-list-tag"
-                                    ref="smartListTag"
-                                    :search-url="tagSearchUrl + '&query='"
-                                    name="tag"
-                                    place-holder="Tag name"
-                                    :disabled="smartType !== 'tag'"
-                                    :max-tags="1"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-lg-12">
-                                <div class="form-check">
-                                    <input id="id_type_recent" v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="recent">
-                                    <label class="form-check-label d-flex" for="id_type_recent">
-                                        Recently Added Songs
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-lg-4">
-                                <div class="form-check">
-                                    <input id="id_type_time" v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="time">
-                                    <label class="from-check-label text-nowrap" for="id_type_time">
-                                        Time period
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-lg-8 d-flex">
-                                <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="smartType !== 'time'">
-                                <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="smartType !== 'time'">
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-lg-4">
-                                <div class="form-check">
-                                    <input id="id_type_rating" v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="rating">
-                                    <label class="from-check-label text-nowrap" for="id_type_rating">
-                                        Rating
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-lg-8">
-                                <div class="rating-container d-flex" :class="{'d-none': rating === ''}" @mouseleave="handleRatingMouseLeave">
-                                    <span
-                                        v-for="starCount in Array(5).fill().map((x,i)=>i)"
-                                        :key="starCount"
-                                        class="rating me-1"
-                                        :class="{'rating-star-selected': parseInt(rating, 10) > starCount}"
-                                        :data-rating="starCount"
-                                        @click="handleSetRating($event, starCount)"
-                                        @mouseover="handleRatingMouseOver($event, starCount)"
-                                    >
-                                        <font-awesome-icon icon="star" />
-                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <input v-else type="hidden" name="type" :value="playlist.type">
-                    <input type="hidden" name="rating" :value="rating">
-
                     <transition name="fade">
-                        <div v-if="smartType !== 'manual'">
+                        <div v-if="playlistType === 'smart'">
                             <hr class="mb-1">
-
                             <div class="form-section">
                                 Options
                             </div>
-
                             <div class="row mt-3">
-                                <label class="col-lg-4 col-form-label">Size</label>
+                                <label class="col-lg-4 form-check-label">Tag</label>
                                 <div class="col-lg-8">
-                                    <select v-model="size" class="form-control form-select" name="size">
-                                        <option v-for="option in sizeOptions" :key="option.value" :value="option.value">
-                                            {{ option.display }}
-                                        </option>
-                                    </select>
+                                    <tags-input
+                                        id="smart-list-tag"
+                                        ref="smartListTag"
+                                        :search-url="tagSearchUrl + '&query='"
+                                        name="tag"
+                                        place-holder="Tag name"
+                                        :max-tags="1"
+                                    />
                                 </div>
                             </div>
-
+                            <div class="row mt-3">
+                                <label class="col-lg-4 from-check-label text-nowrap">
+                                    Time Period
+                                </label>
+                                <div class="col-lg-8 d-flex">
+                                    <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start Year" autocomplete="off" :disabled="false">
+                                    <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End Year" autocomplete="off" :disabled="false">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <label class="col-lg-4 from-check-label">Rating</label>
+                                <div class="col-lg-8">
+                                    <div class="rating-container d-flex" :class="{'d-none': rating === ''}" @mouseleave="handleRatingMouseLeave">
+                                        <span
+                                            v-for="starCount in Array(5).fill().map((x,i)=>i)"
+                                            :key="starCount"
+                                            class="rating me-1"
+                                            :class="{'rating-star-selected': parseInt(rating, 10) > starCount}"
+                                            :data-rating="starCount"
+                                            @click="handleSetRating($event, starCount)"
+                                            @mouseover="handleRatingMouseOver($event, starCount)"
+                                        >
+                                            <font-awesome-icon icon="star" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row mt-3">
                                 <label class="col-lg-4 col-form-label">Exclude Recent Listens</label>
                                 <div class="col-lg-8">
@@ -148,28 +97,48 @@
                                     </select>
                                 </div>
                             </div>
-
                             <div class="row mt-3">
-                                <div class="col-lg-12 d-flex align-items-center">
+                                <label class="col-lg-4 col-form-label">Exclude Albums</label>
+                                <div class="col-lg-8 d-flex align-items-center">
                                     <o-switch v-model="excludeAlbums" name="exclude_albums" :native-value="excludeAlbums" />
-                                    <label class="ms-2">
-                                        Exclude albums
-                                    </label>
                                 </div>
                             </div>
-
-                            <div v-if="action === 'Update'" class="row mt-3">
-                                <div class="col-lg-12 d-flex align-items-center">
-                                    <o-switch v-model="refreshSongList" name="refresh_song_list" :native-value="refreshSongList" />
-                                    <label class="ms-2">
-                                        Refresh song list
-                                    </label>
+                            <input v-if="action === 'Update'" type="hidden" name="type" :value="playlist.type">
+                            <input type="hidden" name="rating" :value="rating">
+                            <div v-if="playlistType !== 'manual'">
+                                <div class="row mt-3">
+                                    <label class="col-lg-4 col-form-label">Sort By</label>
+                                    <div class="col-lg-8">
+                                        <select class="form-control form-select" name="sort_by">
+                                            <option value="recent">
+                                                Recently Added
+                                            </option>
+                                            <option value="random">
+                                                Random
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <label class="col-lg-4 col-form-label">Size</label>
+                                    <div class="col-lg-8">
+                                        <select v-model="size" class="form-control form-select" name="size">
+                                            <option v-for="option in sizeOptions" :key="option.value" :value="option.value">
+                                                {{ option.display }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div v-if="action === 'Update'" class="row mt-3">
+                                    <label class="col-lg-4 col-form-label">Refresh Song List</label>
+                                    <div class="col-lg-8 d-flex align-items-center">
+                                        <o-switch v-model="refreshSongList" name="refresh_song_list" :native-value="refreshSongList" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </transition>
                 </div>
-
                 <div class="modal-footer justify-content-end">
                     <input id="btn-action" class="btn btn-primary" type="submit" name="Go" :value="action" :disabled="disabledCreateButton">
                 </div>
@@ -212,22 +181,28 @@
             const note = ref(getAttribute("note", ""));
             const rating = ref(getAttribute("rating", undefined));
             const size = ref(getAttribute("size", 20));
-            const smartType = ref(getAttribute("type", "manual"));
+            const playlistType = ref(getAttribute("type", "manual"));
             const startYear = ref(getAttribute("start_year", undefined));
+            const tag = ref(getAttribute("tag", ""));
             const refreshSongList = ref(false);
 
             const {handleRatingMouseLeave, handleRatingMouseOver, setRating} = mouseRating();
 
+            if (tag.value) {
+                document.getElementById("initial-tags").textContent = `["${tag.value}"]`;
+            } else {
+                document.getElementById("initial-tags").textContent = "\"\"";
+            }
+
+            // The o-switch widget works with JavaScript true and false data types
+            if (excludeAlbums.value == "true") {
+                excludeAlbums.value = true;
+            }
+
             const disabledCreateButton = computed(() => {
-                if (smartType === "tag" &&
-                    (this.$refs.smartListTag && this.$refs.smartListTag.tags.length === 0)) {
-                    return true;
-                } else if (smartType === "time" &&
-                    (!startYear || !endYear) ||
-                    parseInt(endYear) < parseInt(startYear)) {
-                    return true;
-                }
-                return false;
+                return ( (startYear.value && !endYear.value) ||
+                    (!startYear.value && endYear.value) ||
+                    parseInt(endYear.value) < parseInt(startYear.value));
             });
 
             function getAttribute(attribute, defaultValue) {
@@ -270,8 +245,9 @@
                 refreshSongList,
                 setRating,
                 size,
-                smartType,
+                playlistType,
                 startYear,
+                tag,
                 fields: [
                     {
                         key: "year",
