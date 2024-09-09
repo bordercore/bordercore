@@ -14,7 +14,7 @@ from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
 from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from collection.views import get_images
 from homepage.views import handler403, handler404, handler500
-from lib.services import site_stats
+from lib.services import extract_text, site_stats
 from music.views import mark_song_as_listened_to
 from search.views import search_music
 
@@ -69,6 +69,7 @@ urlpatterns += [
     path("api/music/mark_song_as_listened_to/<uuid:song_uuid>/", mark_song_as_listened_to, name="mark_song_as_listened_to"),
     path("api/site/stats", site_stats),
     path("api/search/music", search_music),
+    path("api/extract_text", extract_text),
     path("", include("rest_framework.urls", namespace="rest_framework"))
 ]
 
