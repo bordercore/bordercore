@@ -291,7 +291,7 @@ def browser():
         display = Display(visible=0, size=(1366, 768))
         display.start()
 
-    service = Service(executable_path="/opt/bin/geckodriver", log_path=GECKO_DRIVER_LOGFILE)
+    service = Service(executable_path="/snap/bin/geckodriver", log_path=GECKO_DRIVER_LOGFILE)
     driver = webdriver.Firefox(service=service)
 
     yield driver
