@@ -15,7 +15,7 @@ rich==13.3.1
 notebook==6.4.12
 selenium==4.4.3
 tornado==6.4.1
-Werkzeug==3.0.3
+Werkzeug==3.0.6
 
 # The latest version of this package in PyPi isn't compatible with Django 1.10.
 # However, the master branch on Github is compatible, so use that instead.
