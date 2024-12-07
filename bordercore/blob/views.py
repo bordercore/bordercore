@@ -250,7 +250,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         )
         context["date_format"] = "year" if self.object.date_is_year else "standard"
         context["action"] = "Update"
-        context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
+        context["title"] = self.object.get_name(remove_edition_string=True)
         context["tags"] = [x.name for x in self.object.tags.all()]
 
         return context
