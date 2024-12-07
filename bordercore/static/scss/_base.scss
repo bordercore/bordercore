@@ -1054,6 +1054,20 @@ textarea.form-control {
   background-size: cover;
 }
 
+#login-quote {
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+
+  small {
+    padding: 0px;
+
+    em {
+      color: #8291e5;
+    }
+  }
+}
+
 .jumbotron {
   width: 37.50rem;
   height: 43.75rem;
