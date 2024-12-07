@@ -77,11 +77,11 @@ MAPPINGS=$HOME/dev/django/bordercore_project/config/elasticsearch/mappings.json
 curl -XPUT http://localhost:9201/bordercore_test -H "Content-Type: application/json" -d @$MAPPINGS
 ```
 
-If you need to delete the =bordercore_test= instance and start fresh, run this:
+If you need to delete the `bordercore_test` instance and start fresh, run this:
 
 ```bash
 cd $INSTALL_DIR/bordercore_project/
 make reset_elasticsearch
 ```
 
-Elasticsearch is installed in the ~/usr/share/elasticsearch~ directory in the Docker image.
+Elasticsearch is installed in the `/usr/share/elasticsearch` directory in the Docker image.
