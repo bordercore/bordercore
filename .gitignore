@@ -32,3 +32,5 @@ bordercore/webpack-stats.json
 **.min.js
 **.min.js.map
 **.wasm
+**-bundle.js
+**-bundle.js.map
