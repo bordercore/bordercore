@@ -66,7 +66,7 @@ server {
 
     }
 
-    access_log /var/log/django/access.log;
+    access_log /var/log/django/access.log main;
     error_log /var/log/django/error.log;
 
     # Redirect http to https
