@@ -87,7 +87,7 @@ div.sphere {
 }
 
 .sticky-top {
-  position: sticky;
+  position: sticky !important;
   // Bootstrap defines z-index: 1020 for this class,
   //  but we need it to be less than the v-sidebar-menu
   //  z-index of 100. Otherwise it gets obscured.
@@ -452,6 +452,10 @@ span {
 
 .vh-50 {
   height: 50vh;
+}
+
+.vh-95 {
+  height: 95vh;
 }
 
 .text-emphasis {
