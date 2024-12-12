@@ -75,12 +75,12 @@ class Command(BaseCommand):
         if uuid:
             self.download_from_s3(uuid)
         elif directory:
-            self.sync_directory(directory, album_name)
+            self.sync_directory(directory, artist, album_name)
         elif file_name:
             self.sync_file(file_name, artist, title, album_name, song_uuid)
         else:
             self.stdout.write(f"  {Fore.YELLOW}No file or directory specified. Processing the current directory...{Style.RESET_ALL}")
-            self.sync_directory(".", album_name)
+            self.sync_directory(".", artist, album_name)
 
     def get_artist_dir(self, song, artist, first_letter_dir):
         if song.first().album and song.first().album.compilation:
@@ -143,14 +143,14 @@ class Command(BaseCommand):
         elif required:
             raise CommandError(f"Tag '{tag_name}' not found in file")
 
-    def sync_directory(self, directory, album_name):
+    def sync_directory(self, directory, artist, album_name):
 
         if not Path(directory).is_dir():
             raise CommandError(f"{directory} is not a directory")
 
         pathlist = Path(directory).glob('**/*.mp3')
         for path in pathlist:
-            self.sync_file(filename=str(path), artist=None, title=None, album_name=album_name)
+            self.sync_file(filename=str(path), artist=artist, title=None, album_name=album_name)
 
     def sync_file(self, filename, artist, title, album_name, song_uuid=None):
 
