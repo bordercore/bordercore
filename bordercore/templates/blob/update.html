@@ -225,12 +225,12 @@
 
                             {% for field in form.visible_fields %}
 
-                                {% if field.label != 'File' and field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
+                                {% if field.label != "File" and field.label != "Filename" and field.name != "is_note" and field.name != "math_support" and field.name != "importance" %}
 
                                     <div class="{% if field.errors %}error {% endif %}row mb-3">
                                         <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="id_{{ field.name }}">{{ field.label }}</label>
 
-                                    {% if field.label == 'Date' %}
+                                    {% if field.label == "Date" %}
 
                                         <div class="col-lg-8">
                                             <div class="input-group">
@@ -265,7 +265,7 @@
                                             </div>
                                         </div>
 
-                                    {% elif field.label == 'Content' %}
+                                    {% elif field.label == "Content" %}
 
                                         <div
                                             class="v-md-editor-tall col-lg-10 col-sm-10 align-self-center"
@@ -284,7 +284,7 @@
                                             ></v-md-editor>
                                         </div>
 
-                                    {% elif field.label == 'Tags' %}
+                                    {% elif field.label == "Tags" %}
 
                                         <div class="col-lg-10 col-sm-10">
                                             <tags-input
