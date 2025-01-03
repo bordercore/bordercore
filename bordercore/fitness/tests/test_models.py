@@ -48,7 +48,7 @@ def test_get_plot_data(auto_login_user, fitness):
 
     user, _ = auto_login_user()
 
-    plot_data = fitness[0].get_plot_data(user)
+    plot_data = fitness[0].get_plot_data()
     reps = json.loads(plot_data["plotdata"])["reps"]
     weight = json.loads(plot_data["plotdata"])["weight"]
     paginator = json.loads(plot_data["paginator"])
@@ -63,7 +63,7 @@ def test_get_plot_data(auto_login_user, fitness):
     assert paginator["previous_page_number"] is None
     assert paginator["next_page_number"] is None
 
-    plot_data = fitness[0].get_plot_data(user, count=4)
+    plot_data = fitness[0].get_plot_data(count=4)
     reps = json.loads(plot_data["plotdata"])["reps"]
     weight = json.loads(plot_data["plotdata"])["weight"]
     paginator = json.loads(plot_data["paginator"])
@@ -78,7 +78,7 @@ def test_get_plot_data(auto_login_user, fitness):
     assert paginator["previous_page_number"] == 2
     assert paginator["next_page_number"] is None
 
-    plot_data = fitness[4].get_plot_data(user, count=4, page_number=2)
+    plot_data = fitness[4].get_plot_data(count=4, page_number=2)
     reps = json.loads(plot_data["plotdata"])["reps"]
     duration = json.loads(plot_data["plotdata"])["duration"]
     paginator = json.loads(plot_data["paginator"])

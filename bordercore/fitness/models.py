@@ -78,7 +78,7 @@ class Exercise(models.Model):
 
         return info
 
-    def get_plot_data(self, user, count=12, page_number=1):
+    def get_plot_data(self, count=12, page_number=1):
 
         raw_data = Workout.objects.filter(exercise__id=self.id) \
                                   .annotate(reps=ArrayAgg("data__reps", ordering="-date")) \

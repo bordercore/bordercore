@@ -28,7 +28,7 @@ class ExerciseDetailView(DetailView):
         except IndexError:
             pass
 
-        plot_data = self.object.get_plot_data(self.request.user)
+        plot_data = self.object.get_plot_data()
 
         related_exercises = [
             {
@@ -141,7 +141,6 @@ def get_workout_data(request):
     exercise = Exercise.objects.get(uuid=exercise_uuid)
 
     workout_data = exercise.get_plot_data(
-        request.user,
         page_number=page_number
     )
 
