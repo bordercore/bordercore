@@ -126,6 +126,11 @@
                     <o-table-column field="uuid" label="" :td-attrs="()=> ({ class: 'col-action' })" v-slot="props" v-cloak>
                         <drop-down-menu :show-on-hover="true">
                             <template #dropdown>
+                                <li v-if="isSortable && props.row.sort_order > 1">
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickMoveToTop(props.row)">
+                                        <font-awesome-icon icon="arrow-up" class="text-primary me-3"></font-awesome-icon>Move To Top
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
@@ -242,9 +247,7 @@
                 };
 
                 function onDrop(payload) {
-                    if (filterTime.value !== "" ||
-                        filterPriority.value !== "" ||
-                        filterTag.value === "") {
+                    if (!isSortable.value) {
                         EventBus.$emit(
                             "toast",
                             {
@@ -392,6 +395,22 @@
                     getTodoList();
                 };
 
+                function onClickMoveToTop(todoInfo) {
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("tag", filterTag.value);
+                    bodyFormData.append("todo_uuid", todoInfo.uuid);
+
+                    axios("{% url 'todo:move_to_top' %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    })
+                        .then((response) => {
+                            getTodoList();
+                        }, (error) => {
+                            console.log(error);
+                        });
+                }
+
                 function onClickUpdate(todoInfo) {
                     if (todoInfo.due_date !== null) {
                         todoInfo.due_date = new Date(todoInfo.due_date);
@@ -450,6 +469,12 @@
                     return title.join(", ");
                 });
 
+                const isSortable = computed(() => {
+                    return filterTime.value === "" &&
+                           filterPriority.value === "" &&
+                           filterTag.value !== "";
+                });
+
                 onMounted(() => {
                     getTodoList("{{ uuid }}");
                 });
@@ -467,11 +492,13 @@
                     getTimeClass,
                     getTodoList,
                     handleSort,
+                    isSortable,
                     items,
                     filterPriorityOptions,
                     filterTimeOptions,
                     handleCreateTodo,
                     onClickDelete,
+                    onClickMoveToTop,
                     onClickPriority,
                     onClickTag,
                     onClickTime,

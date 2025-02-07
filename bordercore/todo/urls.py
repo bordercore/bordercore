@@ -6,6 +6,11 @@ app_name = "todo"
 
 urlpatterns = [
     path(
+        route="move_to_top/",
+        view=views.move_to_top,
+        name="move_to_top"
+    ),
+    path(
         route="sort/",
         view=views.sort_todo,
         name="sort"

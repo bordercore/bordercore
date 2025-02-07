@@ -183,6 +183,17 @@ def sort_todo(request):
 
 
 @login_required
+def move_to_top(request):
+    """
+    Move a task to the top of the list.
+    """
+    mutable_post = request.POST.copy()
+    mutable_post["position"] = 1
+    request.POST = mutable_post
+    return sort_todo(request)
+
+
+@login_required
 def reschedule_task(request):
     """
     Set the due date for a task to a day from now.

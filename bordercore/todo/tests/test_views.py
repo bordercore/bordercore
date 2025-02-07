@@ -109,3 +109,16 @@ def test_sort_todo(auto_login_user, todo):
     })
 
     assert resp.status_code == 200
+
+
+def test_move_to_top(auto_login_user, todo):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("todo:move_to_top")
+    resp = client.post(url, {
+        "tag": "tag_0",
+        "todo_uuid": todo.uuid,
+    })
+
+    assert resp.status_code == 200
