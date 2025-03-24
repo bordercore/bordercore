@@ -1,4 +1,4 @@
 # Importing from base.txt
 -r base.txt
 
-gunicorn==22.0.0
+gunicorn==23.0.0
