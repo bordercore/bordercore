@@ -539,12 +539,11 @@ def import_newyorktimes(user, url):
 def chatbot(request, args):
 
     openai.api_key = os.environ.get("OPENAI_API_KEY")
-    model = "gpt-4o"
+    model = "gpt-4.1"
     messages = None
     added_values = []
 
     if "blob_uuid" in args:
-        model = "gpt-3.5-turbo"  # Use the larger-context model
         blob_content = Blob.objects.get(uuid=args["blob_uuid"]).content
         messages = [
             {
@@ -570,7 +569,6 @@ def chatbot(request, args):
             }
         ]
     elif args["mode"] == "notes":
-        model = "gpt-3.5-turbo"  # Use the larger-context model
         chat_history = json.loads(args["chat_history"])
         prompt = chat_history[-1]['content']
         results = semantic_search(request, prompt)["hits"]["hits"][0]["_source"]
