@@ -1485,6 +1485,11 @@ blockquote > p {
   font-family: Courier, sans-serif;
 }
 
+.form-error-bookmarks {
+  color: var(--text-error);
+  font-weight: bold;
+}
+
 // The "has-search" rules provide space for a Font Awesome
 //  search icon inside a search input box
 

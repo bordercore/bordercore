@@ -86,9 +86,6 @@
                                         {% endif %}
                                         autocomplete="off"
                                     />
-                                    {% if field.errors %}
-                                        <div class="form-error">{{ field.errors.0 }}</div>
-                                    {% endif %}
                                 {% elif field.label == "Important" %}
                                     <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
                                 {% elif field.label == "Is pinned" %}
@@ -98,10 +95,12 @@
                                 {% else %}
                                     {{ field }}
                                 {% endif %}
-                                {% for error in field.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
                             </div>
+                        </div>
+                        <div class="row">
+                            {% for error in field.errors %}
+                                <div class="form-error-bookmarks col-lg-7 offset-lg-2 mb-3">{{ error }}</div>
+                            {% endfor %}
                         </div>
 
                     {% endfor %}

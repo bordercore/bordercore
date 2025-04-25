@@ -15,6 +15,14 @@ class DailyCheckboxInput(CheckboxInput):
         """
         return
 
+    def value_from_datadict(self, data, files, name):
+        """
+        Return JavaScript booleans rather than the default Python ones. This is
+        needed to avoid an error when rendering the field value after a form
+        submission that results in validation errors.
+        """
+        return "true" if "daily" in data else "false"
+
 
 class BookmarkForm(ModelForm):
 
