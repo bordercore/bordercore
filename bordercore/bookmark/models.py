@@ -35,10 +35,9 @@ class DailyBookmarkJSONField(JSONField):
     the usual boolean value.
     """
     def to_python(self, value):
-        if value is True:
-            return json.loads('{"viewed": "false"}')
-        else:
-            return None
+        if value:
+            return {"viewed": "false"}
+        return None
 
 
 class Bookmark(TimeStampedModel):

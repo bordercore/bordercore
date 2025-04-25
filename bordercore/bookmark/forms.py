@@ -57,9 +57,14 @@ class BookmarkForm(ModelForm):
 
     def clean_url(self):
         data = self.cleaned_data["url"]
-        # Verify that this url is not a dupe.  Note: exclude current url when searching.
-        b = Bookmark.objects.filter(user=self.request.user, url=data).exclude(id=self.instance.id)
-        if b:
+        # Verify that this url is not a dupe. Exclude current url when searching.
+        found = Bookmark.objects.filter(
+            user=self.request.user,
+            url=data
+        ).exclude(
+            id=self.instance.id
+        )
+        if found:
             raise ValidationError("Error: this bookmark already exists")
         return data
 

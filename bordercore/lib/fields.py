@@ -6,16 +6,16 @@ from tag.models import Tag
 # http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
 class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 
-    widget = TextInput(attrs={'class': 'form-control typeahead', 'autocomplete': 'off'})
+    widget = TextInput(attrs={"class": "form-control typeahead", "autocomplete": "off"})
 
     def __init__(self, *args, **kwargs):
 
         # Allow the user to supply a custom id attribute for the form field
-        id = kwargs.get('id', '')
+        id = kwargs.get("id", "")
         if id:
-            self.widget.attrs['id'] = id
+            self.widget.attrs["id"] = id
             # Remove this arg to avoid an "got an unexpected keyword argument" error
-            kwargs.pop('id', None)
+            kwargs.pop("id", None)
 
         self.request = kwargs.pop("request", None)
 
@@ -44,5 +44,4 @@ class CheckboxIntegerField(IntegerField):
 
         if value is True:
             return 10
-        else:
-            return 1
+        return 1

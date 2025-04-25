@@ -192,7 +192,7 @@ class Blob(TimeStampedModel):
     def date_is_year(self):
         if not self.date:
             return False
-        return True if re.compile(r'^\d\d\d\d$').match(self.date) else False
+        return bool(re.fullmatch(r"\d{4}", self.date))
 
     @staticmethod
     def get_s3_key(uuid, file):
