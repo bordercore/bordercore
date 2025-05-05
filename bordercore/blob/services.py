@@ -477,14 +477,40 @@ def import_artstation(user, parsed_url):
     return blob
 
 
-def get_authors(author_list):
+def get_authors(byline):
+    """
+    Parses a byline string and extracts a list of author names.
 
-    return_list = []
+    The function handles bylines that:
+    - May begin with "By " (case-insensitive), which will be stripped.
+    - Use commas to separate multiple authors.
+    - Use "and" before the final author's name (Oxford comma optional).
 
-    for author in author_list:
-        return_list.append(f"{author['firstname']} {author['lastname']}")
+    Example:
+        parse_authors("By Michael D. Shear, Aaron Boxerman and Adam Rasgon")
+        returns ["Michael D. Shear", "Aaron Boxerman", "Adam Rasgon"]
 
-    return return_list
+    Args:
+        byline (str): A byline string containing one or more author names.
+
+    Returns:
+        list[str]: A list of author names, stripped of extra whitespace.
+    """
+
+    if byline.lower().startswith("by "):
+        byline = byline[3:]  # remove "By "
+
+    # Split on " and " first (last separator)
+    parts = byline.rsplit(" and ", 1)
+
+    # If there was an "and", split the first part by comma
+    if len(parts) == 2:
+        authors = [author.strip() for author in parts[0].split(",")]
+        authors.append(parts[1].strip())
+    else:
+        authors = [author.strip() for author in byline.split(",")]
+
+    return [author for author in authors if author]  # remove any empty strings
 
 
 def import_newyorktimes(user, url):
@@ -496,7 +522,7 @@ def import_newyorktimes(user, url):
     # Remove any extraneous search-args from the url
     url = url.split("?")[0]
 
-    url = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key={api_key}&fq=web_url:(\"{url}\")"
+    url = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key={api_key}&fq=url:(\"{url}\")"
     r = requests.get(url)
     result = r.json()
 
@@ -504,6 +530,9 @@ def import_newyorktimes(user, url):
         raise ValueError(f"There was an error retrieving the article: {result['errors']}")
 
     matches = result["response"]["docs"]
+
+    if not matches:
+        raise ValueError("Error: API returned null")
 
     if len(matches) > 1:
         raise ValueError("Error: found more than one article matching that url")
@@ -527,7 +556,7 @@ def import_newyorktimes(user, url):
     subtitle = matches[0]["abstract"]
     MetaData.objects.create(user=user, name="Subtitle", value=subtitle, blob=blob)
 
-    author_list = get_authors(matches[0]["byline"]["person"])
+    author_list = get_authors(matches[0]["byline"]["original"])
     for author in author_list:
         MetaData.objects.create(user=user, name="Author", value=author, blob=blob)
 

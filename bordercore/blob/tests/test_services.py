@@ -4,6 +4,7 @@ import uuid
 from unittest.mock import MagicMock, Mock, patch
 from urllib.parse import urlparse
 
+import pytest
 from faker import Factory as FakerFactory
 from instaloader.instaloader import Instaloader
 
@@ -174,12 +175,33 @@ def test_import_artstation(mock_get_sha1sum, mock_requests, auto_login_user, mon
         assert blob.metadata.filter(name="Artist")[0].value == artstation_json["user"]["full_name"]
 
 
-def test_get_authors():
+@pytest.mark.parametrize("byline,expected", [
+    ("By Michael D. Shear, Aaron Boxerman and Adam Rasgon",
+     ["Michael D. Shear", "Aaron Boxerman", "Adam Rasgon"]),
 
-    first_name = faker.first_name()
-    last_name = faker.last_name()
+    ("Michael D. Shear, Aaron Boxerman and Adam Rasgon",
+     ["Michael D. Shear", "Aaron Boxerman", "Adam Rasgon"]),
 
-    assert get_authors([{"firstname": first_name, "lastname": last_name}]) == [f"{first_name} {last_name}"]
+    ("By Michael D. Shear and Aaron Boxerman",
+     ["Michael D. Shear", "Aaron Boxerman"]),
+
+    ("By Michael D. Shear",
+     ["Michael D. Shear"]),
+
+    ("By Alice Smith, Bob Jones, and Charlie Day",
+     ["Alice Smith", "Bob Jones", "Charlie Day"]),
+
+    ("Alice Smith",
+     ["Alice Smith"]),
+
+    ("",
+     []),
+
+    ("By  Alice Smith ,  Bob Jones and  Charlie Day ",
+     ["Alice Smith", "Bob Jones", "Charlie Day"])
+])
+def test_get_authors(byline, expected):
+    assert get_authors(byline) == expected
 
 
 @patch("requests.get")
@@ -190,6 +212,7 @@ def test_import_newyorktimes(mock_requests, auto_login_user, monkeypatch):
     url = faker.url()
     title = faker.text()
 
+    author = f"{faker.first_name()} {faker.last_name()}"
     newyorktimes_json = {
         "status": "OK",
         "response": {
@@ -202,12 +225,7 @@ def test_import_newyorktimes(mock_requests, auto_login_user, monkeypatch):
                     "web_url": url,
                     "pub_date": "2022-01-15T14:20:32+0000",
                     "byline": {
-                        "person": [
-                            {
-                                "firstname": faker.first_name(),
-                                "lastname": faker.last_name(),
-                            }
-                        ]
+                        "original": f"By {author}"
                     }
                 }
             ]
@@ -226,8 +244,7 @@ def test_import_newyorktimes(mock_requests, auto_login_user, monkeypatch):
     assert blob.date == "2022-01-15"
     assert blob.name == title
     assert blob.metadata.filter(name="Url")[0].value == newyorktimes_json["response"]["docs"][0]["web_url"]
-    assert blob.metadata.filter(name="Author")[0].value == newyorktimes_json["response"]["docs"][0]["byline"]["person"][0]["firstname"] \
-        + " " + newyorktimes_json["response"]["docs"][0]["byline"]["person"][0]["lastname"]
+    assert blob.metadata.filter(name="Author")[0].value == author
 
 
 def test_parse_shortcode():
