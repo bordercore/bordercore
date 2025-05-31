@@ -32,6 +32,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         context["groups"] = ", ".join([x.name for x in self.request.user.groups.all()])
         context["nav"] = "prefs"
         context["title"] = "Preferences"
+        context["drill_tags_muted"] = [x.name for x in self.object.drill_tags_muted.all()]
         context["tags"] = [x.name for x in self.object.pinned_tags.all()[::-1]]
         if self.request.user.userprofile.instagram_credentials:
             context["instagram_username"] = self.request.user.userprofile.instagram_credentials.get("username", "")
@@ -55,6 +56,9 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
             }
 
         object.save()
+
+        # Save the drill_tags_muted field
+        form.save_m2m()
 
         context = self.get_context_data(form=form)
         context["message"] = "Preferences updated"

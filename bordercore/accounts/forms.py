@@ -3,6 +3,8 @@ from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
 
 from accounts.models import UserProfile
 from collection.models import Collection
+from lib.fields import ModelCommaSeparatedChoiceField
+from tag.models import Tag
 
 
 class UserProfileForm(ModelForm):
@@ -16,6 +18,12 @@ class UserProfileForm(ModelForm):
         self.fields["drill_intervals"].widget.attrs["class"] = "form-control"
         self.fields["nytimes_api_key"].label = "NYTimes API key"
         self.fields["nytimes_api_key"].required = False
+
+        self.fields["drill_tags_muted"] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name="name")
 
         collections_list = Collection.objects.filter(user=self.request.user).exclude(name="")
         if collections_list:
@@ -48,6 +56,7 @@ class UserProfileForm(ModelForm):
             "homepage_default_collection",
             "homepage_image_collection",
             "drill_intervals",
+            "drill_tags_muted",
             "nytimes_api_key",
             "instagram_credentials",
             "google_calendar",

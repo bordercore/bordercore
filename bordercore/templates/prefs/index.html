@@ -64,7 +64,7 @@
                                             <input type="text" name="background_image" :value=background_image_filename class="form-control" id="id_background_image" autocomplete="off" />
                                             <span class="input-group-append">
                                                 <label class="btn btn-primary">Choose image
-                                                    <input type="file" id="customFile" name="background_image_file" hidden accept="image/*" @change="onChangeBackgroundImage" />
+                                                    <input type="file" name="background_image_file" hidden accept="image/*" @change="onChangeBackgroundImage" />
                                                 </label>
                                             </span>
                                         </div>
@@ -89,7 +89,7 @@
                                             <input type="text" name="sidebar_image" :value=filename class="form-control" id="id_sidebar_image" autocomplete="off" />
                                             <span class="input-group-append">
                                                 <label class="btn btn-primary">Choose image
-                                                    <input type="file" id="customFile" name="sidebar_image_file" hidden accept="image/*" @change="onChangeSidebarImage" />
+                                                    <input type="file" name="sidebar_image_file" hidden accept="image/*" @change="onChangeSidebarImage" />
                                                 </label>
                                             </span>
                                         </div>
@@ -99,10 +99,17 @@
                                     <div class="col-lg-3 offset-lg-3">
                                         <div class="form-check ps-0">
                                             <o-switch v-model="deleteSidebar" name="delete_sidebar" :native-value="deleteSidebar" />
-                                            <!-- <input class="form-check-input ms-1" type="checkbox" name="delete_sidebar" /> -->
                                             <label class="form-check-label fw-bold ms-2">Delete</label>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        {% elif field.label == "Drill tags muted" %}
+                            <div class="row mb-3">
+                                <label class="fw-bold col-lg-3 col-form-label text-end">Drill Muted Tags</label>
+                                <div class="col-lg-7 d-flex">
+                                    <tags-input ref="tagsInput" name="drill_tags_muted" search-url="{% url 'tag:search' %}?doctype=drill&query=" @tags-changed="onTagsChanged">
+                                    </tags-input>
                                 </div>
                             </div>
                         {% elif field.label == "Eye candy" %}
@@ -156,11 +163,14 @@
 
     {{ block.super }}
 
+    {{ drill_tags_muted|json_script:"initial-tags"|default:"" }}
+
     <script type="text/javascript">
 
         const app = createApp({
             components: {
                 FontAwesomeIcon,
+                TagsInput,
             },
             setup() {
                 const deleteBackground = ref(false);

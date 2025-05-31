@@ -289,6 +289,9 @@ class Question(TimeStampedModel):
                 | Q(last_reviewed__isnull=True)
             )
 
+        drill_tags_muted = user.userprofile.drill_tags_muted.all()
+        questions = questions.exclude(tags__in=drill_tags_muted)
+
         questions = questions.order_by("?").values("uuid")
 
         if study_type == "random":

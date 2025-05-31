@@ -12,8 +12,10 @@ class DrillManager(models.Manager):
         """
         Return tags which haven't been reviewed in a while
         """
+
         return Tag.objects.only("id", "name") \
                           .filter(user=user, question__isnull=False) \
+                          .exclude(pk__in=user.userprofile.drill_tags_muted.all()) \
                           .annotate(last_reviewed=Max("question__last_reviewed")) \
                           .order_by(F("last_reviewed").asc(nulls_first=True))
 
@@ -26,12 +28,14 @@ class DrillManager(models.Manager):
 
         count = Question.objects.filter(user=user).count()
 
+        muted_tags = user.userprofile.drill_tags_muted.all()
+
         todo = Question.objects.filter(
             Q(user=user),
             Q(interval__lte=timezone.now() - F("last_reviewed"))
             | Q(last_reviewed__isnull=True),
             Q(is_disabled=False)
-        ).count()
+        ).exclude(tags__in=muted_tags).count()
 
         percentage = 100 - (todo / count * 100) if count > 0 else 0
 

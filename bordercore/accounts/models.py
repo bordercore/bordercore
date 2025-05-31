@@ -32,6 +32,7 @@ class UserProfile(models.Model):
     background_image = models.TextField(blank=True, null=True)
     drill_intervals = ArrayField(models.IntegerField(default=INTERVALS_DEFAULT))
     eye_candy = models.BooleanField(default=False)
+    drill_tags_muted = models.ManyToManyField(Tag, related_name="drill_tags_muted")
 
     THEMES = [
         ("light", "light"),
