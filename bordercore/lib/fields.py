@@ -27,10 +27,10 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
         # Check if any of these tags are new.  The ORM won't create them for us, and in
         # fact will complain that the tag 'is not one of the available choices.'
         # These need to be explicitly created.
-        for tag in value:
-            newtag, created = Tag.objects.get_or_create(user=self.request.user, name=tag)
-            if created:
-                newtag.save()
+            for tag in value:
+                newtag, created = Tag.objects.get_or_create(user=self.request.user, name=tag)
+                if created:
+                    newtag.save()
         return super().clean(value)
 
 
