@@ -332,13 +332,13 @@ def parse_shortcode(shortcode):
 
 def get_sha1sum(filename):
 
-    BUF_SIZE = 65536
+    buffer_size = 65536
 
     sha1 = hashlib.sha1()
 
     with open(filename, "rb") as f:
         while True:
-            data = f.read(BUF_SIZE)
+            data = f.read(buffer_size)
             if not data:
                 break
             sha1.update(data)
@@ -366,36 +366,34 @@ def import_instagram(user, parsed_url):
     if not user.userprofile.instagram_credentials:
         raise ValueError("Please provide your Instagram credentials in <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
 
-    L = instaloader.Instaloader(download_videos=True)
+    loader = instaloader.Instaloader(download_videos=True)
 
     try:
-        L.login(
+        loader.login(
             user.userprofile.instagram_credentials["username"],
             user.userprofile.instagram_credentials["password"]
         )
     except Exception as e:
         if str(e).find("Wrong password") != -1:
             raise ValueError("Login error. Please check your Instagram password in <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
-        elif str(e).find("does not exist") != -1:
+        if str(e).find("does not exist") != -1:
             raise ValueError("Login error. Please check your Instagram username in <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
-        else:
-            raise Exception(f"{type(e)}: {e}")
+        raise Exception(f"{type(e)}: {e}")
 
     short_code = parse_shortcode(parsed_url.geturl())
 
     try:
-        post = Post.from_shortcode(L.context, short_code)
+        post = Post.from_shortcode(loader.context, short_code)
     except Exception as e:
         if str(e).find("Fetching Post metadata failed") != -1:
             raise ValueError("Instagram post not found.")
-        else:
-            raise Exception(e)
+        raise Exception(e)
 
     o = urlparse(post.url)
     base_name, ext = os.path.splitext(Path(o.path).name)
     temp_file = NamedTemporaryFile(delete=True)
 
-    L.download_pic(temp_file.name, post.url, post.date_utc)
+    loader.download_pic(temp_file.name, post.url, post.date_utc)
 
     # Instaloader adds a file extension to the file path you give
     #  it, whether you want that or not. So I need to rename the

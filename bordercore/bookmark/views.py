@@ -1,5 +1,4 @@
 import datetime
-import json
 import re
 from urllib.parse import unquote
 
@@ -13,7 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -120,7 +119,7 @@ def delete(request, bookmark_id=None):
     bookmark = Bookmark.objects.get(user=request.user, pk=bookmark_id)
     bookmark.delete()
 
-    return HttpResponse(json.dumps("OK"), content_type="application/json")
+    return JsonResponse("OK", safe=False)
 
 
 @login_required
@@ -203,7 +202,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
             b.snarf_favicon()
             added_count = added_count + 1
 
-    messages.add_message(request, messages.INFO, "Bookmarks added: {}. Duplicates ignored: {}.".format(added_count, dupe_count))
+    messages.add_message(request, messages.INFO, f"Bookmarks added: {added_count}. Duplicates ignored: {dupe_count}.")
 
 
 @login_required
@@ -235,7 +234,7 @@ def do_import(request):
 
             tree = lh.fromstring(xml_string)
 
-            found = tree.xpath("//dt/h3[text()='{}']/following::dl[1]//a".format(start))
+            found = tree.xpath(f"//dt/h3[text()='{start}']/following::dl[1]//a")
 
             if not found:
                 messages.add_message(request, messages.ERROR, "No bookmarks were found")
@@ -279,7 +278,7 @@ def overview(request):
                   {
                       "bookmarks": sorted_bookmarks,
                       "untagged_count": bare_count,
-                      "pinned_tags": [x for x in pinned_tags],
+                      "pinned_tags": list(pinned_tags),
                       "tag": request.GET.get("tag", None),
                       "title": "Bookmarks"
                   })

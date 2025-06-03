@@ -65,7 +65,7 @@ class Feed(TimeStampedModel):
                         link=html.unescape(link)
                     )
                 except AttributeError as e:
-                    log.error(f"feed_uuid={self.uuid} Missing data in feed item: {e}")
+                    log.error("feed_uuid=%s Missing data in feed item: %s", self.uuid, e)
 
         finally:
             if r:
@@ -83,13 +83,13 @@ class Feed(TimeStampedModel):
         if not current_feed_id:
             # If there is not a current feed in the session, then just pick the first feed
             return Feed.get_first_feed(user)["id"]
-        else:
-            try:
-                return Feed.objects.values("id").filter(pk=current_feed_id).first()["id"]
-            except Exception as e:
-                log.warning(f"Feed exception: {e}")
-                # If the session's current feed has been deleted, then just pick the first feed
-                return Feed.get_first_feed(user)["id"]
+
+        try:
+            return Feed.objects.values("id").filter(pk=current_feed_id).first()["id"]
+        except Exception as e:
+            log.warning("Feed exception: %s", e)
+            # If the session's current feed has been deleted, then just pick the first feed
+            return Feed.get_first_feed(user)["id"]
 
     @staticmethod
     def get_first_feed(user):

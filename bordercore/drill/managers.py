@@ -116,7 +116,7 @@ class DrillManager(models.Manager):
 
         return info
 
-    def recent_tags(self, user):
+    def recent_tags(self):
         """
         Get the tags most recently attached to questions
         """

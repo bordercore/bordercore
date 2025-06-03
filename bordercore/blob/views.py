@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import (HttpResponseRedirect, JsonResponse,
+                         StreamingHttpResponse)
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -255,7 +256,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
 
         return context
 
-    def get(self, request, **kwargs):
+    def get(self, request, *arg, **kwargs):
         self.object = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -294,8 +295,7 @@ class BlobImportView(View):
 
         if not messages.get_messages(request):
             return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": blob.uuid}))
-        else:
-            return render(request, self.template_name, {})
+        return render(request, self.template_name, {})
 
 
 # Metadata objects are not handled by the form -- handle them separately
@@ -426,8 +426,7 @@ def get_node_model(node_type):
     """
     if node_type == "blob":
         return apps.get_model("blob", "BlobToObject")
-    else:
-        return apps.get_model("drill", "QuestionToObject")
+    return apps.get_model("drill", "QuestionToObject")
 
 
 @login_required
@@ -592,7 +591,6 @@ def get_template(request):
 def chat(request):
 
     try:
-        from django.http import StreamingHttpResponse
         response = StreamingHttpResponse(chatbot(request, request.POST))
         response["Content-Type"] = "text/plain"
         return response
@@ -613,10 +611,10 @@ class BookshelfListView(ListView):
 
         self.tag_list = [
             {
-                "name": x["tags__name"],
-                "count": x["tag_count"]
+                "name": hit["tags__name"],
+                "count": hit["tag_count"]
             }
-            for x in
+            for hit in
             Blob.objects.filter(
                 metadata__name="is_book"
             ).values(
@@ -630,15 +628,15 @@ class BookshelfListView(ListView):
 
         return [
             {
-                "cover_url": Blob.get_cover_url_static(x["_source"]["uuid"], x["_source"]["filename"], size="small"),
-                "date": x["_source"]["date"],
-                "name": x["_source"]["name"],
-                "tags": [tag for tag in x["_source"]["tags"]],
-                "url": reverse("blob:detail", kwargs={"uuid": x["_source"]["uuid"]}),
-                "uuid": x["_source"]["uuid"]
+                "cover_url": Blob.get_cover_url_static(src["uuid"], src["filename"], size="small"),
+                "date": src["date"],
+                "name": src["name"],
+                "tags": src["tags"],
+                "url": reverse("blob:detail", kwargs={"uuid": src["uuid"]}),
+                "uuid": src["uuid"]
             }
-            for x in
-            book_list["hits"]["hits"]
+            for hit in book_list["hits"]["hits"]
+            for src in [hit["_source"]]
         ]
 
     def get_context_data(self, **kwargs):

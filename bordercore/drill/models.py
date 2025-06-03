@@ -69,12 +69,11 @@ class Question(TimeStampedModel):
                 "interval": new_interval,
                 "interval_index": self.interval_index + 1
             }
-        else:
-            return {
-                "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
-                "interval": self.interval,
-                "interval_index": self.interval_index
-            }
+        return {
+            "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
+            "interval": self.interval,
+            "interval_index": self.interval_index
+        }
 
     def _easy_response(self):
         """
@@ -87,16 +86,16 @@ class Question(TimeStampedModel):
                 "interval": self.interval,
                 "interval_index": self.interval_index
             }
-        else:
-            # Skip two intervals. If that would exceed the interval array, skip one,
-            #  which should take us to the last interval.
-            new_index = min(self.interval_index + 2, len(self.user.userprofile.drill_intervals) - 1)
-            new_interval = timedelta(days=self.user.userprofile.drill_intervals[new_index])
-            return {
-                "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
-                "interval": new_interval,
-                "interval_index": new_index
-            }
+
+        # Skip two intervals. If that would exceed the interval array, skip one,
+        #  which should take us to the last interval.
+        new_index = min(self.interval_index + 2, len(self.user.userprofile.drill_intervals) - 1)
+        new_interval = timedelta(days=self.user.userprofile.drill_intervals[new_index])
+        return {
+            "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
+            "interval": new_interval,
+            "interval_index": new_index
+        }
 
     def _hard_response(self):
         """
@@ -111,12 +110,11 @@ class Question(TimeStampedModel):
                 "interval": new_interval,
                 "interval_index": new_index
             }
-        else:
-            return {
-                "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
-                "interval": timedelta(days=1),
-                "interval_index": 0
-            }
+        return {
+            "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
+            "interval": timedelta(days=1),
+            "interval_index": 0
+        }
 
     def get_intervals(self, description_only=False):
         """
@@ -142,9 +140,7 @@ class Question(TimeStampedModel):
                 }
                 for outer_k, outer_v in intervals.items()
             }
-
-        else:
-            return intervals
+        return intervals
 
     def record_response(self, response):
         """
@@ -196,7 +192,7 @@ class Question(TimeStampedModel):
         if not es:
             es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
-        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+        _, _ = helpers.bulk(es, [self.elasticsearch_document])
 
     def add_related_object(self, object_uuid):
 
@@ -255,8 +251,9 @@ class Question(TimeStampedModel):
         return doc
 
     @staticmethod
-    def start_study_session(user, session, study_type, filter="review", params={}):
+    def start_study_session(user, session, study_type, filter="review", params=None):
 
+        params = params or {}
         questions = []
 
         questions = Question.objects.filter(
@@ -307,11 +304,13 @@ class Question(TimeStampedModel):
                 "search_term": params
             }
             return session["drill_study_session"]["current"]
+        return None
 
     @staticmethod
     def get_study_session_progress(session):
         if "drill_study_session" in session:
             return session["drill_study_session"]["list"].index(session["drill_study_session"]["current"])
+        return 0
 
     @staticmethod
     def get_tag_progress(user, tag):
@@ -381,14 +380,12 @@ class QuestionToObject(SortOrderMixin):
     def __str__(self):
         if self.blob:
             return f"{self.node} -> {self.blob}"
-        elif self.bookmark:
+        if self.bookmark:
             return f"{self.node} -> {self.bookmark}"
-        else:
-            return f"{self.node} -> {self.question}"
+        return f"{self.node} -> {self.question}"
 
 
 class BCObject(TimeStampedModel):
-
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
 

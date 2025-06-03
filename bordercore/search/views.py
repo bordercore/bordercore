@@ -1,6 +1,7 @@
 import datetime
 import json
 import math
+import operator
 import re
 from urllib.parse import unquote, urlparse
 
@@ -134,7 +135,7 @@ class SearchListView(ListView):
                 "term_search",
                 "semantic_search"
         ]) and not self.is_notes_search:
-            return
+            return []
 
         # Store the "sort" field in the user's session
         self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
@@ -517,7 +518,7 @@ class SearchTagDetailView(ListView):
         for buckets in aggregation["buckets"]:
             if buckets["key"] not in tag_list:
                 tag_counts[buckets["key"]] = buckets["doc_count"]
-        import operator
+
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
 
         return tag_counts_sorted
@@ -592,26 +593,27 @@ def sort_results(matches):
 
 
 def get_link(doc_type, match):
+    url = ""
 
     if doc_type == "bookmark":
-        return match["url"]
-    if doc_type == "song":
+        url = match["url"]
+    elif doc_type == "song":
         if "album_uuid" in match:
-            return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
+            url = reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
         else:
-            return reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
-    if doc_type == "album":
-        return reverse("music:album_detail", kwargs={"uuid": match["uuid"]})
-    if doc_type == "artist":
-        return reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
-    if doc_type in ("blob", "book", "document", "note"):
-        return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
-    if doc_type == "drill":
-        return reverse("drill:detail", kwargs={"uuid": match["uuid"]})
-    if doc_type == "todo":
-        return reverse("todo:detail", kwargs={"uuid": match["uuid"]})
+            url = reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
+    elif doc_type == "album":
+        url = reverse("music:album_detail", kwargs={"uuid": match["uuid"]})
+    elif doc_type == "artist":
+        url = reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
+    elif doc_type in ("blob", "book", "document", "note"):
+        url = reverse("blob:detail", kwargs={"uuid": match["uuid"]})
+    elif doc_type == "drill":
+        url = reverse("drill:detail", kwargs={"uuid": match["uuid"]})
+    elif doc_type == "todo":
+        url = reverse("todo:detail", kwargs={"uuid": match["uuid"]})
 
-    return ""
+    return url
 
 
 def get_name(doc_type, match):
@@ -1020,7 +1022,7 @@ def search_names_es(user, search_term, doc_types):
 @api_view(["GET"])
 def search_music(request):
 
-    LIMIT = 10
+    limit = 10
 
     artist = None
     song = None
@@ -1060,7 +1062,7 @@ def search_music(request):
             }
         },
         "from": 0,
-        "size": LIMIT,
+        "size": limit,
         "_source": ["album_uuid",
                     "album",
                     "artist",

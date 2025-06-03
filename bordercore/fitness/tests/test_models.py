@@ -118,7 +118,7 @@ def test_get_overdue_exercises(auto_login_user, fitness):
 
 def test_schedule_days():
 
-    assert ExerciseUser.schedule_days(None) is None
+    assert ExerciseUser.schedule_days(None) == ""
 
     assert ExerciseUser.schedule_days([False, False, True, False, False, False, False, ]) == "Wed"
 

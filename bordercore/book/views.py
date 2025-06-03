@@ -1,17 +1,19 @@
+import string
+
+from book.models import Book
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
-from book.models import Book
 
-
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class BookListView(ListView):
 
     model = Book
-    template_name = 'book/index.html'
-    context_object_name = 'info'
-    selected_letter = 'A'
+    template_name = "book/index.html"
+    context_object_name = "info"
+    selected_letter = "A"
 
     def get_queryset(self):
         if self.args[0]:
@@ -24,12 +26,15 @@ class BookListView(ListView):
 
         info = []
 
-        for myobject in context['object_list']:
-            info.append(dict(title=myobject.title, author=', '.join([author.name for author in myobject.author.all()]), year=myobject.year))
+        for myobject in context["object_list"]:
+            info.append({
+                "title": myobject.title,
+                "author": ", ".join(author.name for author in myobject.author.all()),
+                "year": myobject.year,
+            })
 
-        import string
-        context['alphabet'] = string.ascii_uppercase
-        context['selected_letter'] = self.selected_letter
-        context['cols'] = ['title', 'author', 'year']
-        context['info'] = info
+        context["alphabet"] = string.ascii_uppercase
+        context["selected_letter"] = self.selected_letter
+        context["cols"] = ["title", "author", "year"]
+        context["info"] = info
         return context

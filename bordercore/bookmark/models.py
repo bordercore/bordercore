@@ -147,14 +147,14 @@ class Bookmark(TimeStampedModel):
                     self.data = {"video_duration": duration_secs}
                 self.save()
             except KeyError as e:
-                log.warn(f"Can't parse duration: {e}")
+                log.warning("Can't parse duration: %s", e)
 
             s3_resource = boto3.resource("s3")
             bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
             r = requests.get(video_info["items"][0]["snippet"]["thumbnails"]["medium"]["url"])
-            object = s3_resource.Object(bucket_name, f"bookmarks/{self.uuid}.jpg")
-            object.put(
+            s3_object = s3_resource.Object(bucket_name, f"bookmarks/{self.uuid}.jpg")
+            s3_object.put(
                 Body=r.content,
                 ContentType="image/jpeg",
                 ACL="public-read",
@@ -183,19 +183,18 @@ class Bookmark(TimeStampedModel):
         if not es:
             es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
-        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+        _, _ = helpers.bulk(es, [self.elasticsearch_document])
 
     @property
     def cover_url(self):
         return f"{settings.COVER_URL}bookmarks/{self.uuid}.png"
 
-    def thumbnail_url_static(uuid, url):
+    def thumbnail_url_static(bookmark_uuid, url):
         prefix = f"{settings.COVER_URL}bookmarks"
 
         if url.startswith("https://www.youtube.com/watch"):
-            return f"{prefix}/{uuid}.jpg"
-        else:
-            return f"{prefix}/{uuid}-small.png"
+            return f"{prefix}/{bookmark_uuid}.jpg"
+        return f"{prefix}/{bookmark_uuid}-small.png"
 
     @property
     def thumbnail_url(self):
@@ -206,8 +205,7 @@ class Bookmark(TimeStampedModel):
 
         if self.data and "video_duration" in self.data:
             return convert_seconds(self.data["video_duration"])
-        else:
-            return ""
+        return ""
 
     @property
     def elasticsearch_document(self):
@@ -272,8 +270,7 @@ class Bookmark(TimeStampedModel):
             if len(parts) == 3:
                 domain = ".".join(parts[1:])
             return f"<img src=\"https://www.bordercore.com/favicons/{domain}.ico\" width=\"{size}\" height=\"{size}\" />"
-        else:
-            return ""
+        return ""
 
     def related_nodes(self):
         """

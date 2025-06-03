@@ -197,7 +197,7 @@ def add_collection(request):
     collection_name = request.POST["collection_name"]
     collection_uuid = request.POST.get("collection_uuid", None)
     display = request.POST["display"]
-    random_order = True if request.POST["random_order"] == "true" else False
+    random_order = request.POST.get("random_order") == "true"
     rotate = request.POST.get("rotate", -1)
     limit = request.POST.get("limit", None)
 
@@ -220,7 +220,7 @@ def update_collection(request):
     collection_uuid = request.POST["collection_uuid"]
     name = request.POST["name"]
     display = request.POST["display"]
-    random_order = True if request.POST["random_order"] == "true" else False
+    random_order = request.POST["random_order"] == "true"
     rotate = request.POST["rotate"]
     limit = request.POST["limit"]
 
@@ -357,7 +357,7 @@ def update_quote(request):
     node_uuid = request.POST["node_uuid"]
     uuid = request.POST["uuid"]
     options = json.loads(request.POST["options"])
-    options["favorites_only"] = True if options.get("favorites_only", "false") == "true" else False
+    options["favorites_only"] = options.get("favorites_only", "false") == "true"
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.update_component(uuid, options)
@@ -377,7 +377,7 @@ def get_quote(request):
     favorites_only = request.POST.get("favorites_only", "false")
 
     quote = Quote.objects.all()
-    if (favorites_only == "true"):
+    if favorites_only == "true":
         quote = quote.filter(is_favorite=True)
     quote = quote.order_by("?")[0]
 

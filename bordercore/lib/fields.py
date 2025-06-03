@@ -11,9 +11,9 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
     def __init__(self, *args, **kwargs):
 
         # Allow the user to supply a custom id attribute for the form field
-        id = kwargs.get("id", "")
-        if id:
-            self.widget.attrs["id"] = id
+        tag_id = kwargs.get("id", "")
+        if tag_id:
+            self.widget.attrs["id"] = tag_id
             # Remove this arg to avoid an "got an unexpected keyword argument" error
             kwargs.pop("id", None)
 
@@ -23,7 +23,7 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 
     def clean(self, value):
         if value is not None:
-            value = [item.strip() for item in value.split(",") if item.strip() != '']  # remove padding
+            value = [item.strip() for item in value.split(",") if item.strip() != ""]  # remove padding
         # Check if any of these tags are new.  The ORM won't create them for us, and in
         # fact will complain that the tag 'is not one of the available choices.'
         # These need to be explicitly created.

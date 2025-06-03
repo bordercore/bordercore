@@ -123,7 +123,7 @@ class Collection(TimeStampedModel):
         try:
             content_type = blob.blob.get_elasticsearch_info()["content_type"]
         except Exception:
-            log.warning(f"Can't get content type for uuid={blob.blob.uuid}")
+            log.warning("Can't get content type for uuid=%s", blob.blob.uuid)
 
         return {
             "url": f"{settings.MEDIA_URL}blobs/{blob.blob.get_url()}",
@@ -236,15 +236,11 @@ class CollectionObject(SortOrderMixin):
 
         if self.blob is not None:
             return "blob"
-        elif self.bookmark is not None:
+        if self.bookmark is not None:
             return "bookmark"
-        else:
-            return "unknown"
+        return "unknown"
 
     def get_properties(self):
-        """
-        """
-
         if self.blob is not None:
             return {
                 "so_id": self.id,
@@ -258,7 +254,7 @@ class CollectionObject(SortOrderMixin):
                 "cover_url": self.blob.get_cover_url_small(),
                 "cover_url_large": self.blob.get_cover_url(),
             }
-        elif self.bookmark is not None:
+        if self.bookmark is not None:
             return {
                 "so_id": self.id,
                 "type": self.get_object_type(),
@@ -268,8 +264,7 @@ class CollectionObject(SortOrderMixin):
                 "url": self.bookmark.url,
                 "favicon_url": self.bookmark.get_favicon_url(size=16)
             }
-        else:
-            raise ValueError(f"Unsupported object, uuid: {self.uuid}")
+        raise ValueError(f"Unsupported object, uuid: {self.uuid}")
 
 
 class BCObject(TimeStampedModel):

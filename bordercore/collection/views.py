@@ -134,7 +134,6 @@ class CollectionUpdateView(FormRequestMixin, UpdateView):
         return base_qs.filter(user=self.request.user)
 
     def form_valid(self, form):
-
         collection = form.instance
         collection.tags.set(form.cleaned_data["tags"])
         self.object = form.save()

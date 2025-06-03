@@ -25,7 +25,9 @@ def get_additional_info(doc_types, user, tag_name):
     return {}
 
 
-def get_tag_link(tag, doc_types=[]):
+def get_tag_link(tag, doc_types=None):
+
+    doc_types = doc_types or []
 
     if "note" in doc_types:
         return reverse("search:notes") + f"?tagsearch={tag}"
@@ -33,13 +35,15 @@ def get_tag_link(tag, doc_types=[]):
         return reverse("bookmark:overview") + f"?tag={tag}"
     if "drill" in doc_types:
         return reverse("drill:start_study_session") + f"?study_method=tag&tags={tag}"
-    if "song" in doc_types or "albunm" in doc_types:
+    if "song" in doc_types or "album" in doc_types:
         return reverse("music:search_tag") + f"?tag={tag}"
 
     return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
 
 
-def get_tag_aliases(user, name, doc_types=[]):
+def get_tag_aliases(user, name, doc_types=None):
+
+    doc_types = doc_types or []
 
     tag_aliases = TagAlias.objects.filter(name__contains=name).select_related("tag")
 
@@ -59,11 +63,13 @@ def get_tag_aliases(user, name, doc_types=[]):
     ]
 
 
-def search(user, tag_name, doc_types=[], skip_tag_aliases=False):
+def search(user, tag_name, doc_types=None, skip_tag_aliases=False):
     """
     Search for tags attached to objects based on a substring in Elasticsearch.
     Optionally limit the search to objects of a specific doctype.
     """
+
+    doc_types = doc_types or []
 
     es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
@@ -139,7 +145,7 @@ def search(user, tag_name, doc_types=[], skip_tag_aliases=False):
     return matches
 
 
-def find_related_tags(user, tag_name, doc_type):
+def find_related_tags(tag_name, doc_type):
     """
     For a given tag, find the tag counts of all other documents
     which also have this tag for a given doc type.

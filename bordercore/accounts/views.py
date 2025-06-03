@@ -47,15 +47,15 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         self.handle_sidebar(form)
         self.handle_background_image(form)
 
-        object = form.save(commit=False)
+        instance = form.save(commit=False)
 
         if self.request.POST.get("instagram_username", None) and self.request.POST.get("instagram_password", None):
-            object.instagram_credentials = {
+            instance.instagram_credentials = {
                 "username": self.request.POST["instagram_username"],
                 "password": self.request.POST["instagram_password"]
             }
 
-        object.save()
+        instance.save()
 
         # Save the drill_tags_muted field
         form.save_m2m()
@@ -246,8 +246,7 @@ def bc_login(request):
                     # Remember the username for a month
                     response.set_cookie("bordercore_username", username, max_age=2592000)
                     return response
-                else:
-                    message = "Disabled account"
+                message = "Disabled account"
             else:
                 message = "Invalid login"
 

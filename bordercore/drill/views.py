@@ -62,14 +62,9 @@ class QuestionCreateView(FormRequestMixin, CreateView):
             context["tags"] = context["form"]["tags"].value().split(",")
 
         # Get a list of the most recently used tags
-        context["recent_tags"] = Question.objects.recent_tags(self.request.user)[:10]
+        context["recent_tags"] = Question.objects.recent_tags()[:10]
 
         return context
-
-    def get_initial(self):
-        tag = self.kwargs.get("tag")
-        if tag:
-            return {"tags": tag}
 
     def form_valid(self, form):
 
@@ -174,7 +169,7 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         context["tags"] = [x.name for x in self.object.tags.all()]
 
         # Get a list of the most recently used tags
-        context["recent_tags"] = Question.objects.recent_tags(self.request.user)[:10]
+        context["recent_tags"] = Question.objects.recent_tags()[:10]
 
         return context
 
@@ -201,8 +196,7 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
 
         if "return_url" in self.request.POST:
             return self.request.POST["return_url"]
-        else:
-            return reverse("drill:list")
+        return reverse("drill:list")
 
 
 @login_required
@@ -221,9 +215,7 @@ def get_next_question(request):
         request.session["drill_study_session"]["current"] = next_question
         return redirect("drill:detail", uuid=next_question)
 
-    else:
-
-        return redirect("drill:list")
+    return redirect("drill:list")
 
 
 @login_required
@@ -232,8 +224,7 @@ def get_current_question(request):
     if "drill_study_session" in request.session:
         current_question = request.session["drill_study_session"]["current"]
         return redirect("drill:detail", uuid=current_question)
-    else:
-        return redirect("drill:list")
+    return redirect("drill:list")
 
 
 @login_required
@@ -251,12 +242,12 @@ def start_study_session(request):
 
     if first_question:
         return redirect("drill:detail", uuid=first_question)
-    else:
-        messages.add_message(
-            request,
-            messages.WARNING, "No questions found to study"
-        )
-        return redirect("drill:list")
+
+    messages.add_message(
+        request,
+        messages.WARNING, "No questions found to study"
+    )
+    return redirect("drill:list")
 
 
 @login_required

@@ -200,7 +200,7 @@ class ExerciseUser(models.Model):
     def schedule_days(schedule):
 
         if not schedule:
-            return
+            return ""
 
         days = []
 

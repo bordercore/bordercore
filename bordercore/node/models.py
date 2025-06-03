@@ -128,7 +128,7 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def get_layout(self, populate_names=True):
+    def get_layout(self):
 
         self.populate_names()
         return json.dumps(self.layout)
@@ -169,8 +169,6 @@ class Node(TimeStampedModel):
                         row["count"] = lookup[row["uuid"]]["count"]
 
     def populate_image_info(self):
-        """
-        """
         for column in self.layout:
             for row in column:
                 if row["type"] == "image":
@@ -299,7 +297,9 @@ class Node(TimeStampedModel):
         }
 
     # Add an image, quote or node to a node
-    def add_component(self, component_type, component, options={}):
+    def add_component(self, component_type, component, options=None):
+        options = options or {}
+
         new_uuid = str(uuid.uuid4())
 
         layout = self.layout

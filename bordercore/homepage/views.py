@@ -157,8 +157,7 @@ def get_random_image(request, content_type=None):
 
     if results["hits"]["hits"]:
         return results["hits"]["hits"][0]["_source"]
-    else:
-        return None
+    return None
 
 
 def get_default_collection_blobs(request):
@@ -190,14 +189,14 @@ def sql(request):
     return render(request, "homepage/sql.html", context)
 
 
-def handler404(request, exception):
+def handler404(request, _):
 
     response = render(request, "404.html", {})
     response.status_code = 404
     return response
 
 
-def handler403(request, exception):
+def handler403(request, _):
 
     response = render(request, "403.html", {})
     response.status_code = 403

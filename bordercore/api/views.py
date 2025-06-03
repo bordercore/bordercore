@@ -57,13 +57,12 @@ class BlobViewSet(viewsets.ModelViewSet):
         """
         if self.request.user.username == "service_user":
             return Blob.objects.all()
-        else:
-            return Blob.objects.filter(
-                user=self.request.user
-            ).prefetch_related(
-                "metadata",
-                "tags"
-            )
+        return Blob.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "metadata",
+            "tags"
+        )
 
     def create(self, request, *args, **kwargs):
         """
@@ -77,8 +76,7 @@ class BlobViewSet(viewsets.ModelViewSet):
             serializer.save()
             blob.index_blob()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_destroy(self, instance):
         """
@@ -103,13 +101,13 @@ class BlobSha1sumViewSet(viewsets.ModelViewSet):
         """
         if self.request.user.username == "service_user":
             return Blob.objects.all()
-        else:
-            return Blob.objects.filter(
-                user=self.request.user
-            ).prefetch_related(
-                "metadata",
-                "tags"
-            )
+
+        return Blob.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "metadata",
+            "tags"
+        )
 
     def perform_create(self, serializer):
         instance = serializer.save()

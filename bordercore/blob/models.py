@@ -150,20 +150,18 @@ class Blob(TimeStampedModel):
                 pattern = re.compile(r"(.*) (\d)E$")
                 matches = pattern.match(name)
                 if matches and EDITIONS.get(matches.group(2), None):
-                    return "%s" % (matches.group(1))
+                    return f"{matches.group(1)}"
             return name
-        else:
-            if use_filename_if_present:
-                return PurePath(str(self.file)).name
-            else:
-                return "No name"
+        if use_filename_if_present:
+            return PurePath(str(self.file)).name
+        return "No name"
 
     def get_edition_string(self):
         if self.name:
             pattern = re.compile(r"(.*) (\d)E$")
             matches = pattern.match(self.name)
             if matches and EDITIONS.get(matches.group(2), None):
-                return "%s Edition" % (EDITIONS[matches.group(2)])
+                return f"{EDITIONS[matches.group(2)]} Edition"
 
         return ""
 
@@ -171,16 +169,15 @@ class Blob(TimeStampedModel):
     def doctype(self):
         if self.is_note is True:
             return "note"
-        elif "is_book" in [x.name for x in self.metadata.all()]:
+        if "is_book" in [x.name for x in self.metadata.all()]:
             return "book"
-        elif is_image(self.file):
+        if is_image(self.file):
             return "image"
-        elif is_video(self.file):
+        if is_video(self.file):
             return "video"
-        elif self.sha1sum is not None:
+        if self.sha1sum is not None:
             return "blob"
-        else:
-            return "document"
+        return "document"
 
     @property
     def s3_key(self):
@@ -297,8 +294,8 @@ class Blob(TimeStampedModel):
                 filename_orig = getattr(self, "__original_filename")
 
                 key = f"{self.get_parent_dir()}/{filename_orig}"
-                log.info(f"Blob file changed detected. Deleting old file: {key}")
-                log.info(f"{sha1sum_old} != {self.sha1sum}")
+                log.info("Blob file changed detected. Deleting old file: %s", key)
+                log.info("%s != %s", sha1sum_old, self.sha1sum)
                 s3 = boto3.resource("s3")
                 s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
 
@@ -502,10 +499,10 @@ class Blob(TimeStampedModel):
         file_extension = PurePath(str(filename)).suffix
         return file_extension[1:].lower() in FILE_TYPES_TO_INGEST
 
-    def get_cover_url_static(uuid, filename, size="large"):
+    def get_cover_url_static(blob_uuid, filename, size="large"):
 
-        prefix = settings.COVER_URL + f"blobs/{uuid}"
-        s3_key = Blob.get_s3_key(uuid, quote_plus(filename))
+        prefix = settings.COVER_URL + f"blobs/{blob_uuid}"
+        s3_key = Blob.get_s3_key(blob_uuid, quote_plus(filename))
 
         if size != "large":
             url = f"{prefix}/cover.jpg"
@@ -658,7 +655,7 @@ class Blob(TimeStampedModel):
             )
             s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{self.file.name}").delete()
         except Exception as e:
-            raise ValidationError("Error renaming file: {}".format(e))
+            raise ValidationError(f"Error renaming file: {e}")
 
         self.file.name = filename
         self.save()
@@ -801,18 +798,17 @@ class Blob(TimeStampedModel):
         try:
             es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
         except NotFoundError:
-            log.warning(f"Tried to delete blob, but can't find it in elasticsearch: {self.uuid}")
+            log.warning("Tried to delete blob, but can't find it in elasticsearch: %s", self.uuid)
 
         # Delete from S3
         if self.file:
 
-            dir = f"{settings.MEDIA_ROOT}/{self.uuid}"
+            directory = f"{settings.MEDIA_ROOT}/{self.uuid}"
             s3 = boto3.resource("s3")
             my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
-            # TODO: Add sanity check to prevent unwanted deletes?
-            for fn in my_bucket.objects.filter(Prefix=dir):
-                log.info(f"Deleting blob {fn}")
+            for fn in my_bucket.objects.filter(Prefix=directory):
+                log.info("Deleting blob %s", fn)
                 fn.delete()
 
             # Pass false so FileField doesn't save the model.
@@ -898,10 +894,9 @@ class BlobToObject(SortOrderMixin):
     def __str__(self):
         if self.blob:
             return f"{self.node} -> {self.blob}"
-        elif self.bookmark:
+        if self.bookmark:
             return f"{self.node} -> {self.bookmark}"
-        else:
-            return f"{self.node} -> {self.question}"
+        return f"{self.node} -> {self.question}"
 
 
 class BCObject(TimeStampedModel):

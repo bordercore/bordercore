@@ -79,5 +79,4 @@ def get_overdue_exercises(user, count_only=False):
 
     if count_only:
         return len(overdue_exercises)
-    else:
-        return overdue_exercises
+    return overdue_exercises

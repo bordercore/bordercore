@@ -9,6 +9,7 @@ django-stubs==1.8.0
 django-watchfiles==0.0.1
 moto==3.1.12
 nplusone==1.0.0
+pylint-django==2.5.5
 pytest-django==3.9.0
 PyVirtualDisplay==2.0
 rich==13.3.1
