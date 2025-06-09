@@ -194,28 +194,38 @@ class Question(TimeStampedModel):
 
         _, _ = helpers.bulk(es, [self.elasticsearch_document])
 
-    def add_related_object(self, object_uuid):
+    def add_related_object(self, object_uuid: str) -> dict:
+        """
+        Relates this question to a Blob or Bookmark
 
-        blob = Blob.objects.filter(uuid=object_uuid)
-        if blob.exists():
-            args = {"blob": blob.first()}
+        Args:
+            object_uuid: The UUID of the related object (Blob or Bookmark)
+
+        Returns:
+            dict: A response dictionary with a "status" key indicating success or error,
+                  and a "message" key if an error occurred (e.g., object not found or already related).
+        """
+
+        # Try to find a Blob with that UUID
+        blob_instance = Blob.objects.filter(uuid=object_uuid).first()
+        if blob_instance:
+            related_kwargs = {"blob": blob_instance}
         else:
-            bookmark = Bookmark.objects.filter(uuid=object_uuid)
-            if bookmark.exists():
-                args = {"bookmark": bookmark.first()}
+            # If no Blob, try to find a Bookmark instead
+            bookmark_instance = Bookmark.objects.filter(uuid=object_uuid).first()
+            if bookmark_instance:
+                related_kwargs = {"bookmark": bookmark_instance}
+            else:
+                # Neither Blob nor Bookmark exists with that UUID
+                return {"status": "Error", "message": "Related Blob or Bookmark not found"}
 
-        if QuestionToObject.objects.filter(node=self, **args).exists():
-            response = {
-                "status": "Error",
-                "message": "That object is already related",
-            }
-        else:
-            QuestionToObject.objects.create(node=self, **args)
-            response = {
-                "status": "OK",
-            }
+        # If the relationship already exists, return an error
+        if QuestionToObject.objects.filter(node=self, **related_kwargs).exists():
+            return {"status": "Error", "message": "That object is already related"}
 
-        return response
+        # Otherwise, create it and return success
+        QuestionToObject.objects.create(node=self, **related_kwargs)
+        return {"status": "OK"}
 
     @property
     def sql_db(self):

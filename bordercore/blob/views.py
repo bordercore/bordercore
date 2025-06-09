@@ -1,13 +1,14 @@
 import datetime
 import json
 import logging
+from typing import Dict, Type
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
-from django.http import (HttpResponseRedirect, JsonResponse,
+from django.db.models import Count, Model, Q
+from django.http import (HttpRequest, HttpResponseRedirect, JsonResponse,
                          StreamingHttpResponse)
 from django.shortcuts import render
 from django.urls import reverse
@@ -21,9 +22,7 @@ from blob.forms import BlobForm
 from blob.models import (Blob, BlobTemplate, BlobToObject, MetaData,
                          RecentlyViewedBlob)
 from blob.services import chatbot, get_books, import_blob
-from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
-from drill.models import Question
 from lib.mixins import FormRequestMixin
 from lib.time_utils import parse_date_from_string
 
@@ -420,52 +419,60 @@ def get_related_objects(request, uuid):
     return JsonResponse(response)
 
 
-def get_node_model(node_type):
+RELATION_MODELS: Dict[str, Type[Model]] = {
+    "blob": apps.get_model("blob", "BlobToObject"),
+    "drill": apps.get_model("drill", "QuestionToObject"),
+}
+
+
+def get_node_model(node_type: str) -> type:
     """
-    Return the node model, given its type
+    Return the relation model class for the given node_type, or raise ValueError.
+
+    Args:
+        node_type: A string representing the type of node (e.g., "blob", "drill").
+
+    Returns:
+        type: The Django model class associated with the given node_type.
+
+    Raises:
+        ValueError: If the node_type is not found in the RELATION_MODELS mapping.
     """
-    if node_type == "blob":
-        return apps.get_model("blob", "BlobToObject")
-    return apps.get_model("drill", "QuestionToObject")
+    try:
+        return RELATION_MODELS[node_type]
+    except KeyError as e:
+        raise ValueError(f"Unsupported node_type: {node_type}") from e
 
 
 @login_required
-def add_related_object(request):
+def add_related_object(request: HttpRequest) -> JsonResponse:
     """
-    Add a relationshiop between a node and another object.
+    Link a node (Blob or Question) to a Blob or Bookmark by its UUID.
+    Called during new question creation, not during question update.
+
+    Args:
+        request (HttpRequest): The incoming HTTP request. Expects the following POST parameters:
+            - node_type: Type of the node ("blob" or "drill"). Defaults to "blob".
+            - node_uuid: UUID of the node to which the object should be related.
+            - object_uuid: UUID of the Blob or Bookmark to be related.
+
+    Returns:
+        A response dict with a "status" key (and an optional "message" if there’s an error).
     """
 
-    node_uuid = request.POST["node_uuid"]
-    object_uuid = request.POST["object_uuid"]
     node_type = request.POST.get("node_type", "blob")
+    node_uuid = request.POST.get("node_uuid")
+    object_uuid = request.POST.get("object_uuid")
 
-    node_model = get_node_model(node_type)
+    # Validate inputs
+    if not node_uuid or not object_uuid:
+        return JsonResponse(
+            {"status": "Error", "message": "Missing node_uuid or object_uuid"},
+            status=400,
+        )
 
-    blob = Blob.objects.filter(uuid=object_uuid)
-    if blob.exists():
-        args = {"blob": blob.first()}
-    else:
-        bookmark = Bookmark.objects.filter(uuid=object_uuid)
-        if bookmark.exists():
-            args = {"bookmark": bookmark.first()}
-
-    if node_type == "blob":
-        node = Blob.objects.get(uuid=node_uuid)
-    else:
-        node = Question.objects.get(uuid=node_uuid)
-
-    if node_model.objects.filter(node=node, **args).exists():
-        response = {
-            "status": "Error",
-            "message": "That object is already related",
-        }
-    else:
-        node_model.objects.create(node=node, **args)
-        response = {
-            "status": "OK",
-        }
-
-    return JsonResponse(response)
+    json_data, status_code = Blob.add_related_object(node_type, node_uuid, object_uuid)
+    return JsonResponse(json_data, status=status_code)
 
 
 @login_required

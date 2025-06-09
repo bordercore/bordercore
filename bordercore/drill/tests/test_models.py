@@ -1,9 +1,12 @@
 import datetime
+import uuid
 from datetime import timedelta
 
 import pytest
 
 from django.utils import timezone
+
+from blob.tests.factories import BlobFactory
 
 from .factories import QuestionFactory
 
@@ -131,6 +134,23 @@ def test_sql_db(question, blob_image_factory):
 
     QuestionToObject.objects.create(node=question[0], blob=blob_image_factory[0], note="sql")
     assert question[0].sql_db.blob == blob_image_factory[0]
+
+
+def test_add_related_object(auto_login_user, question):
+
+    user, _ = auto_login_user()
+
+    # question = QuestionFactory.create(user=user)
+    blob = BlobFactory.create(user=user)
+
+    response = question[0].add_related_object(blob.uuid)
+    assert response == {"status": "OK"}
+
+    response = question[0].add_related_object(uuid.uuid4())
+    assert response == {"status": "Error", "message": "Related Blob or Bookmark not found"}
+
+    response = question[0].add_related_object(blob.uuid)
+    assert response == {"status": "Error", "message": "That object is already related"}
 
 
 def test_start_study_session(question, tag):

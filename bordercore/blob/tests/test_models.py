@@ -1,5 +1,6 @@
 import datetime
 import time
+import uuid
 from pathlib import Path
 from urllib.parse import quote_plus, urlparse
 
@@ -17,6 +18,7 @@ django.setup()
 
 from blob.models import Blob, BlobToObject, RecentlyViewedBlob  # isort:skip
 from blob.tests.factories import BlobFactory
+from drill.tests.factories import QuestionFactory
 from node.tests.factories import NodeFactory
 
 faker = FakerFactory.create()
@@ -147,7 +149,35 @@ def test_get_tags(blob_image_factory):
     assert blob_image_factory[0].get_tags() == "django, linux, video"
 
 
-def test_get_nodes(auto_login_user, blob_image_factory, monkeypatch):
+def test_add_related_object(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    question = QuestionFactory.create(user=user)
+    blob = BlobFactory.create(user=user)
+
+    response, status = Blob.add_related_object("drill", question.uuid, blob.uuid)
+    assert status == 200
+    assert response == {"status": "OK"}
+
+    response, status = Blob.add_related_object("drill", uuid.uuid4(), blob.uuid)
+    assert status == 404
+    assert response == {"status": "Error", "message": "Node not found"}
+
+    response, status = Blob.add_related_object("drill", question.uuid, uuid.uuid4())
+    assert status == 400
+    assert response == {"status": "Error", "message": "Related object not found"}
+
+    response, status = Blob.add_related_object("drill", question.uuid, blob.uuid)
+    assert status == 400
+    assert response == {"status": "Error", "message": "That object is already related"}
+
+    response, status = Blob.add_related_object("invalid", question.uuid, blob.uuid)
+    assert status == 400
+    assert response == {"status": "Error", "message": "Unsupported node_type: invalid"}
+
+
+def test_get_nodes(auto_login_user, monkeypatch):
 
     def mock(*args, **kwargs):
         pass

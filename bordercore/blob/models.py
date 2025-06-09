@@ -8,6 +8,7 @@ import uuid
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import PurePath
+from typing import Tuple
 from urllib.parse import quote_plus, urlparse
 
 import boto3
@@ -21,12 +22,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import Count, JSONField, Q
+from django.db.models import Count, JSONField, Model, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
 from django.urls import reverse
 
+from bookmark.models import Bookmark
 from collection.models import CollectionObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
@@ -394,6 +396,74 @@ class Blob(TimeStampedModel):
                 )
 
         return related_objects
+
+    @staticmethod
+    def get_node_model(node_type: str) -> type:
+        """
+        Return the relation model class for the given node_type, or raise ValueError.
+        """
+        from typing import Dict, Type
+        RELATION_MODELS: Dict[str, Type[Model]] = {
+            "blob": apps.get_model("blob", "BlobToObject"),
+            "drill": apps.get_model("drill", "QuestionToObject"),
+        }
+
+        try:
+            return RELATION_MODELS[node_type]
+        except KeyError as e:
+            raise ValueError(f"Unsupported node_type: {node_type}") from e
+
+    @staticmethod
+    def add_related_object(node_type: str, node_uuid: str, object_uuid: str) -> Tuple[dict, int]:
+        """
+        Relates a node to another object
+
+        Args:
+            node_type: Type of the node (e.g., "blob", "drill").
+            node_uuid: UUID of the node.
+            object_uuid: UUID of the related object (Blob or Bookmark).
+
+        Returns:
+            tuple[dict, int]: JSON response and HTTP status code.
+        """
+        Question = apps.get_model("drill", "Question")
+
+        # Resolve models
+        try:
+            relation_model = Blob.get_node_model(node_type)
+        except ValueError as e:
+            return {"status": "Error", "message": str(e)}, 400
+
+        node_models = {
+            "blob": Blob,
+            "drill": Question,
+        }
+
+        node_model = node_models.get(node_type)
+        node = node_model.objects.filter(uuid=node_uuid).first()
+        if not node:
+            return {"status": "Error", "message": "Node not found"}, 404
+
+        # Find the target object (Blob takes precedence)
+        target = (
+            Blob.objects.filter(uuid=object_uuid).first()
+            or Bookmark.objects.filter(uuid=object_uuid).first()
+        )
+        if not target:
+            return {"status": "Error", "message": "Related object not found"}, 400
+
+        # Derive relation field name from the model’s class name
+        model_key = target.__class__.__name__.lower()
+        relation_kwargs = {model_key: target}
+
+        # get_or_create to simplify exists/create
+        _, created = relation_model.objects.get_or_create(
+            node=node, **relation_kwargs
+        )
+        if not created:
+            return {"status": "Error", "message": "That object is already related"}, 400
+
+        return {"status": "OK"}, 200
 
     @staticmethod
     def back_references(uuid):
