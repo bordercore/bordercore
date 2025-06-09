@@ -1,6 +1,7 @@
 import os
 import string
 from pathlib import PurePath
+from typing import Any, Dict, Union
 from urllib.parse import urlparse
 
 import requests
@@ -156,8 +157,7 @@ def parse_title_from_url(url):
     title = doc.xpath(".//title")
     if title:
         return (r.url, title[0].text)
-    else:
-        return (r.url, "No title")
+    return (r.url, "No title")
 
 
 def favicon_url(url, size=32):
@@ -171,3 +171,23 @@ def favicon_url(url, size=32):
     domain = ".".join(t.split(".")[1:])
 
     return f"<img src=\"https://www.bordercore.com/favicons/{domain}.ico\" width=\"{size}\" height=\"{size}\" />"
+
+
+def get_field(obj: Union[Dict[str, Any], Any], field_name: str) -> Any:
+    """
+    Retrieve a field value from an object or dict. Special handling for 'tags'.
+
+    Args:
+        obj: Either a dictionary or a Django-like model instance.
+        field_name: Name of the field to retrieve.
+
+    Returns:
+        The value of the field, or None/empty list for missing values.
+    """
+    if isinstance(obj, dict):
+        return obj.get(field_name, [] if field_name == "tags" else None)
+
+    if field_name == "tags":
+        return [x.name for x in obj.tags.all()]
+
+    return getattr(obj, field_name, None)

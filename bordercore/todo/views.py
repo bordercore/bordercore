@@ -9,6 +9,7 @@ from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
+from lib.util import get_field
 from tag.models import Tag, TagTodo
 from todo.models import Todo
 from todo.services import search as search_service
@@ -112,19 +113,6 @@ class TodoTaskList(ListView):
 
         return queryset
 
-    def get_field(self, object, field_name):
-
-        if type(object) is dict:
-            if field_name in object:
-                return object[field_name]
-            else:
-                return [] if field_name == "tags" else None
-        else:
-            if field_name == "tags":
-                return [x.name for x in object.tags.all()]
-            else:
-                return getattr(object, field_name)
-
     def get(self, request, *args, **kwargs):
 
         search_term = self.request.GET.get("search", None)
@@ -139,15 +127,16 @@ class TodoTaskList(ListView):
             data = {
                 "manual_order": "",
                 "sort_order": sort_order,
-                "name": re.sub("[\n\r\"]", "", self.get_field(todo, "name")),
-                "priority": self.get_field(todo, "priority"),
-                "priority_name": Todo.get_priority_name(self.get_field(todo, "priority")),
-                "created": format(self.get_field(todo, "created"), "Y-m-d"),
-                "note": self.get_field(todo, "note") or "",
-                "url": self.get_field(todo, "url"),
-                "uuid": self.get_field(todo, "uuid"),
-                "due_date": self.get_field(todo, "due_date"),
-                "tags": self.get_field(todo, "tags")
+                "name": re.sub("[\n\r\"]", "", get_field(todo, "name")),
+                "priority": get_field(todo, "priority"),
+                "priority_name": Todo.get_priority_name(get_field(todo, "priority")),
+                "created": format(get_field(todo, "created"), "Y-m-d"),
+                "created_unixtime": format(get_field(todo, "created"), "U"),
+                "note": get_field(todo, "note") or "",
+                "url": get_field(todo, "url"),
+                "uuid": get_field(todo, "uuid"),
+                "due_date": get_field(todo, "due_date"),
+                "tags": get_field(todo, "tags")
             }
 
             info.append(data)

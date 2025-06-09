@@ -1,3 +1,5 @@
+# pylint: disable=missing-function-docstring,missing-class-docstring,missing-module-docstring
+
 import pytest
 
 import django
@@ -10,6 +12,9 @@ django.setup()
 
 from bookmark.models import Bookmark  # isort:skip
 from blob.models import Blob  # isort:skip
+from lib.util import get_field
+from tag.tests.factories import TagFactory
+from todo.tests.factories import TodoFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -242,3 +247,22 @@ def test_get_pagination_range():
 
     x = get_pagination_range(3, 3, 2)
     assert x == [1, 2, 3]
+
+
+def test_get_field(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    tag_1 = TagFactory(name="linux")
+    tag_2 = TagFactory(name="django")
+    todo = TodoFactory(user=user, name="Bob")
+    todo.tags.add(tag_1, tag_2)
+
+    assert get_field(todo, "name") == "Bob"
+    assert set(get_field(todo, "tags")) == {"linux", "django"}
+    assert get_field(todo, "missing") is None
+
+    data = {"name": "Alice", "value": 10}
+    assert get_field(data, "name") == "Alice"
+    assert get_field(data, "tags") == []
+    assert get_field(data, "missing") is None

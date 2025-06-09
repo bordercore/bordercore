@@ -119,7 +119,7 @@
                         header-class="cursor-pointer" v-slot="props" v-cloak>
                         [[ props.row.priority_name ]]
                     </o-table-column>
-                    <o-table-column field="created" label="Date" sortable :td-attrs="()=> ({ class: 'todo-col-date' })"
+                    <o-table-column field="created_unixtime" label="Date" sortable :td-attrs="()=> ({ class: 'todo-col-date' })"
                         cell-class="todo-col-date text-nowrap" header-class="cursor-pointer" v-slot="props" v-cloak>
                         [[ getDate(props.row.created) ]]
                     </o-table-column>
