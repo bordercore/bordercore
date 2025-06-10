@@ -94,8 +94,7 @@ class SongForm(ModelForm):
         #  field in the database is set to "NULL".
         if rating == "":
             return None
-        else:
-            return rating
+        return rating
 
     def clean_year(self):
         year = self.cleaned_data.get("year")

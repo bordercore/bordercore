@@ -7,7 +7,7 @@ admin.site.register(SongSource)
 
 
 def album_and_artist_names(obj):
-    return ("{} by {}".format(obj.title, obj.artist))
+    return f"{obj.title} by {obj.artist}"
 
 
 @admin.register(Album)

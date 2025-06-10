@@ -45,8 +45,7 @@ def extract_text(request):
 
         if extracted_text:
             return JsonResponse({"text": extracted_text})
-        else:
-            return JsonResponse({"error": "No text could be extracted from the given URL"}, status=404)
+        return JsonResponse({"error": "No text could be extracted from the given URL"}, status=404)
 
     except requests.RequestException as e:
         return JsonResponse({"error": f"Error fetching URL: {str(e)}"}, status=500)

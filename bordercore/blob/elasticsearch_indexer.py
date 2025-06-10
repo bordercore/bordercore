@@ -61,11 +61,7 @@ def elasticsearch_merge(data, new_data, raise_on_conflict=False):
         isinstance(data, (AttrDict, collections_abc.Mapping))
         and isinstance(new_data, (AttrDict, collections_abc.Mapping))
     ):
-        raise ValueError(
-            "You can only merge two dicts! Got {!r} and {!r} instead.".format(
-                data, new_data
-            )
-        )
+        raise ValueError(f"You can only merge two dicts! Got {data!r} and {new_data!r} instead.")
 
     if isinstance(new_data, Range):
         return
@@ -79,7 +75,7 @@ def elasticsearch_merge(data, new_data, raise_on_conflict=False):
         ):
             elasticsearch_merge(data[key], value, raise_on_conflict)
         elif key in data and data[key] != value and raise_on_conflict:
-            raise ValueError("Incompatible data for key %r, cannot be merged." % key)
+            raise ValueError(f"Incompatible data for key {key!r}, cannot be merged.")
         else:
             data[key] = value
 
@@ -109,21 +105,16 @@ class ESBlob(Document_ES):
 def get_doctype(blob, metadata):
     if blob["is_note"] is True:
         return "note"
-    elif "is_book" in metadata:
+    if "is_book" in metadata:
         return "book"
-    elif blob["sha1sum"] is not None:
+    if blob["sha1sum"] is not None:
         return "blob"
-    else:
-        return "document"
+    return "document"
 
 
 def is_ingestible_file(filename):
-
-    file_extension = PurePath(str(filename)).suffix
-    if file_extension[1:].lower() in FILE_TYPES_TO_INGEST:
-        return True
-    else:
-        return False
+    extension = PurePath(str(filename)).suffix.lower().lstrip(".")
+    return extension in FILE_TYPES_TO_INGEST
 
 
 def get_blob_info(**kwargs):
@@ -279,33 +270,31 @@ def index_blob(**kwargs):
 
     blob_info = get_blob_info(**kwargs)
 
-    extra_fields = {}
-    if "extra_fields" in kwargs:
-        extra_fields = kwargs["extra_fields"]
+    extra_fields = kwargs.get("extra_fields", {})
 
     # An empty string causes a Python datetime validation error,
     #  so convert to "None" to avoid this.
     if blob_info["date"] == "":
         blob_info["date"] = None
 
-    fields = dict(
-        uuid=blob_info["uuid"],
-        bordercore_id=blob_info["id"],
-        sha1sum=blob_info["sha1sum"],
-        user_id=blob_info["user"]["id"],
-        name=blob_info["name"],
-        contents=blob_info["content"],
-        doctype=get_doctype(blob_info, blob_info["metadata"]),
-        tags=blob_info["tags"],
-        filename=str(blob_info["file"]),
-        note=blob_info["note"],
-        importance=blob_info["importance"],
-        date_unixtime=get_unixtime_from_string(blob_info["date"]),
-        created_date=blob_info["created"],
-        last_modified=blob_info["modified"],
-        metadata=blob_info["metadata"],
-        **extra_fields
-    )
+    fields = {
+        "uuid": blob_info["uuid"],
+        "bordercore_id": blob_info["id"],
+        "sha1sum": blob_info["sha1sum"],
+        "user_id": blob_info["user"]["id"],
+        "name": blob_info["name"],
+        "contents": blob_info["content"],
+        "doctype": get_doctype(blob_info, blob_info["metadata"]),
+        "tags": blob_info["tags"],
+        "filename": str(blob_info["file"]),
+        "note": blob_info["note"],
+        "importance": blob_info["importance"],
+        "date_unixtime": get_unixtime_from_string(blob_info["date"]),
+        "created_date": blob_info["created"],
+        "last_modified": blob_info["modified"],
+        "metadata": blob_info["metadata"],
+        **extra_fields,
+    }
 
     if blob_info["date"] is not None:
         fields["date"] = get_range_from_date(blob_info["date"])
@@ -318,7 +307,7 @@ def index_blob(**kwargs):
     # If only the metadata has changed and not the file itself,
     #  don't bother re-indexing the file. Upsert the metadata.
     file_changed = kwargs.get("file_changed", True)
-    log.info(f"file_changed: {file_changed}")
+    log.info("file_changed: %s", file_changed)
 
     if blob_info["sha1sum"] and file_changed:
 
@@ -328,38 +317,38 @@ def index_blob(**kwargs):
         contents = get_blob_contents_from_s3(blob_info)
 
         article.size = len(contents)
-        log.info(f"Size: {article.size}")
+        log.info("Size: %s", article.size)
 
         # Dump the blob contents to a file. We do this rather than process in
         #  memory because some large blobs are too big to handle this way.
-        EFS_DIR = os.environ.get("EFS_DIR", "/tmp/blobs")
-        filename = f"{EFS_DIR}/{uuid.uuid4()}-{str(blob_info['file'])}"
+        efs_dir = os.environ.get("EFS_DIR", "/tmp/blobs")
+        filename = f"{efs_dir}/{uuid.uuid4()}-{str(blob_info['file'])}"
         with open(filename, "wb") as file:
-            newFileByteArray = bytearray(contents)
-            file.write(newFileByteArray)
+            new_file_byte_array = bytearray(contents)
+            file.write(new_file_byte_array)
 
         article.content_type = magic.from_file(filename, mime=True)
 
         if is_video(blob_info["file"]):
             try:
                 article.duration = get_duration(filename)
-                log.info(f"Video duration: {article.duration}")
+                log.info("Video duration: %s", article.duration)
             except Exception as e:
-                log.error(f"Exception determing video duration: {e}")
+                log.error("Exception determining video duration: %s", e)
 
         os.remove(filename)
 
         if is_pdf(blob_info["file"]):
             try:
                 article.num_pages = get_num_pages(contents)
-                log.info(f"Number of pages: {article.num_pages}")
+                log.info("Number of pages: %s", article.num_pages)
             except (TypeError, ValueError):
                 # A pdf read failure can be caused by many
                 #  things. Ignore any such failures.
                 pass
 
         if is_ingestible_file(blob_info["file"]):
-            pipeline_args = dict(pipeline="attachment")
+            pipeline_args = {"pipeline": "attachment"}
             article.data = base64.b64encode(contents).decode("ascii")
 
         article.save(**pipeline_args)

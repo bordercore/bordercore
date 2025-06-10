@@ -58,7 +58,7 @@ def get_playlist_songs(playlist):
 
 def get_recent_albums(user, page_number=1):
 
-    ALBUMS_PER_PAGE = 12
+    albums_per_page = 12
 
     query = Album.objects.filter(
         user=user
@@ -68,7 +68,7 @@ def get_recent_albums(user, page_number=1):
         "-created"
     )
 
-    paginator = Paginator(query, ALBUMS_PER_PAGE)
+    paginator = Paginator(query, albums_per_page)
     page = paginator.get_page(page_number)
 
     paginator_info = {

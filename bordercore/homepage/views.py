@@ -171,7 +171,7 @@ def get_default_collection_blobs(request):
             "blob_list": blob_info["object_list"]
         }
     except AttributeError:
-        pass
+        return {}
 
 
 @login_required

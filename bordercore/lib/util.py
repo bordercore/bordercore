@@ -46,9 +46,8 @@ def get_missing_bookmark_ids(expected, found):
 
 def get_missing_metadata_ids(expected, found):
 
-    found_ids = [x["_id"] for x in found["hits"]["hits"]]
-
-    missing = set([str(x.blob.uuid) for x in expected if str(x.blob.uuid) not in found_ids])
+    found_ids = {hit["_id"] for hit in found["hits"]["hits"]}
+    missing = {str(item.blob.uuid) for item in expected if str(item.blob.uuid) not in found_ids}
     return ", ".join(missing)
 
 

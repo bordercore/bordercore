@@ -175,7 +175,7 @@ def get_blob(request, collection_uuid):
     direction = request.GET.get("direction", "next")
     blob_position = int(request.GET.get("position", 0))
     tag_name = request.GET.get("tag", None)
-    randomize = True if request.GET.get("randomize", "") == "true" else False
+    randomize = request.GET.get("randomize", "") == "true"
 
     return JsonResponse(collection.get_blob(blob_position, direction, randomize, tag_name))
 

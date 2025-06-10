@@ -78,8 +78,6 @@ def get_recent_objects(request):
 
 
 def get_recent_searches(request):
-    """
-    """
 
     if not request.user.is_authenticated:
         return {}
@@ -140,7 +138,7 @@ def set_constants(request):
 
 def convert_django_to_bootstrap(tags):
 
-    DJANGO_TO_BOOTSTRAP = {
+    django_to_bootstrap = {
         "debug": "info",
         "info": "info",
         "success": "success",
@@ -149,13 +147,13 @@ def convert_django_to_bootstrap(tags):
     }
 
     for tag in tags.split(" "):
-        if tag in DJANGO_TO_BOOTSTRAP:
-            return DJANGO_TO_BOOTSTRAP[tag]
+        if tag in django_to_bootstrap:
+            return django_to_bootstrap[tag]
 
 
 def has_no_autohide_tag(tags):
 
-    return False if "noAutoHide" not in tags.split(" ") else True
+    return "noAutoHide" in tags.split(" ")
 
 
 def json_messages(request):

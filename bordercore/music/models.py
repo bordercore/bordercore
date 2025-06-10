@@ -148,7 +148,7 @@ class Album(TimeStampedModel):
 
         return {
             "album": album,
-            "artist": [x for x in artist],
+            "artist": list(artist),
             "song_info": song_info,
         }
 

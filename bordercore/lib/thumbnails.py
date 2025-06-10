@@ -19,7 +19,7 @@ def create_thumbnail(infile, outdir, page_number=1):
     elif is_video(infile):
         create_thumbnail_from_video(infile, outdir)
     else:
-        log.warn("Can't create thumbnail from this type of file")
+        log.warning("Can't create thumbnail from this type of file")
 
 
 def create_thumbnail_from_image(infile, outdir):
@@ -32,7 +32,7 @@ def create_thumbnail_from_image(infile, outdir):
         im.thumbnail(size)
         im.save(f"{outdir}-cover.jpg")
     except IOError as err:
-        log.error(f"Cannot create thumbnail; error={err}")
+        log.error("Cannot create thumbnail; error=%s", err)
 
 
 def create_thumbnail_from_pdf(infile, outdir, page_number=1):

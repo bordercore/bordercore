@@ -4,10 +4,10 @@ import dateutil.parser
 import httplib2
 from apiclient.discovery import build
 from oauth2client.client import OAuth2Credentials
-
-from accounts.models import UserProfile
 from rfc3339 import datetimetostr
 from rfc3339 import now as now_rfc3339
+
+from accounts.models import UserProfile
 
 api_key = ""
 
@@ -36,19 +36,19 @@ class Calendar():
             self.credentials = credentials
 
     def has_credentials(self):
-        return True if self.credentials else False
+        return bool(self.credentials)
 
     def get_calendar_info(self):
         http = httplib2.Http()
         http = self.credentials.authorize(http)
         service = build(serviceName="calendar", version="v3", http=http, developerKey=api_key, cache_discovery=False)
-        timeMax = datetime.now() + timedelta(days=7)
+        time_max = datetime.now() + timedelta(days=7)
 
         events = service.events().list(calendarId="bordercore@gmail.com",
                                        orderBy="startTime",
                                        singleEvents=True,
                                        timeMin=str(now_rfc3339()).replace(" ", "T"),
-                                       timeMax=datetimetostr(timeMax)).execute()
+                                       timeMax=datetimetostr(time_max)).execute()
         event_list = []
         count = 1
         for e in events["items"]:

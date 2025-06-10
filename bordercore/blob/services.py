@@ -297,12 +297,11 @@ def import_blob(user, url):
 
     if domain == "instagram.com":
         return import_instagram(user, parsed_url)
-    elif domain == "nytimes.com":
+    if domain == "nytimes.com":
         return import_newyorktimes(user, url)
-    elif domain == "artstation.com":
+    if domain == "artstation.com":
         return import_artstation(user, parsed_url)
-    else:
-        raise ValueError(f"Site not supported for importing: <strong>{domain}</strong>")
+    raise ValueError(f"Site not supported for importing: <strong>{domain}</strong>")
 
 
 def parse_shortcode(shortcode):
