@@ -189,7 +189,7 @@
                                     <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="getPage(pagination.previous_page_number)" href="">Previous</a></li>
                                     <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
 
-                                    <template v-if="pagination.page_number - pagination.paginate_by > 1">
+                                    <template v-if="pagination.page_number - pagination.paginate_by > 1 && pagination.num_pages > 4">
                                         <li class="page-item"><a class="page-link" @click.prevent="getPage(1)" href="">1</a></li>
                                         <li v-if="pagination.page_number != pagination.paginate_by + 2" class="disabled page-item"><a class="page-link" href="">...</a></li>
                                     </template>
@@ -209,7 +209,7 @@
 
                                     </template>
 
-                                    <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by">
+                                    <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by && pagination.num_pages > 4">
                                         <li v-if="pagination.num_pages - pagination.page_number != pagination.paginate_by + 1"  class="disabled page-item"><a class="page-link" href="">...</a></li>
                                         <li class="page-item"><a class="page-link" @click.prevent="getPage(pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
                                     </template>
