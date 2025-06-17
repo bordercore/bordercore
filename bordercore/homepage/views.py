@@ -189,6 +189,10 @@ def sql(request):
     return render(request, "homepage/sql.html", context)
 
 
+def robots_txt(request):
+    return render(request, "robots.txt", content_type="text/plain")
+
+
 def handler404(request, _):
 
     response = render(request, "404.html", {})

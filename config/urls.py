@@ -13,7 +13,7 @@ from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        TagNameViewSet, TagViewSet, TodoViewSet)
 from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from collection.views import get_images
-from homepage.views import handler403, handler404, handler500
+from homepage.views import handler403, handler404, handler500, robots_txt
 from lib.services import extract_text, site_stats
 from music.views import mark_song_as_listened_to
 from search.views import search_music
@@ -22,6 +22,7 @@ admin.autodiscover()
 
 urlpatterns = [
 
+    path("robots.txt", robots_txt),
     path("__admin/", admin.site.urls),
     path(r"books/(\w+)?", BookListView.as_view(), name="book_list"),
 
