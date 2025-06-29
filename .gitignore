@@ -11,6 +11,7 @@ secrets.json
 secrets.env
 .projectile
 node_modules/
+.dir-locals.el
 
 packaged.yaml
 **/.aws-sam/*
