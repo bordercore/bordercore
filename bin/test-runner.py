@@ -27,13 +27,14 @@ COVERAGE_REPORT = f"/tmp/coverage-{getpass.getuser()}.xml"
 def parse_test_report(test_type, test_output=None):
 
     root = ET.parse(TEST_REPORT).getroot()
+    testsuite = root.find("testsuite")
 
     test_results = {
-        "test_failures": root.get("failures"),
-        "test_errors": root.get("errors"),
-        "test_skipped": root.get("skipped"),
-        "test_count": root.get("tests"),
-        "test_time_elapsed": convert_seconds(int(float(root.get("time")))),
+        "test_failures": testsuite.get("failures"),
+        "test_errors": testsuite.get("errors"),
+        "test_skipped": testsuite.get("skipped"),
+        "test_count": testsuite.get("tests"),
+        "test_time_elapsed": convert_seconds(int(float(testsuite.get("time")))),
         "test_output": test_output
     }
 

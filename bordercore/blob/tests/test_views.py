@@ -13,6 +13,7 @@ from faker_file.providers.pdf_file import PdfFileProvider
 from faker_file.providers.pdf_file.generators.reportlab_generator import \
     ReportlabPdfGenerator
 from PIL import Image
+from pytest_lazy_fixtures import lf
 
 from django import urls
 from django.conf import settings
@@ -233,7 +234,7 @@ def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory, blob_
     assert f"{key_root}/{filename_new}" in objects
 
 
-@pytest.mark.parametrize("blob", [pytest.lazy_fixture("blob_image_factory"), pytest.lazy_fixture("blob_text_factory")])
+@pytest.mark.parametrize("blob", [lf("blob_image_factory"), lf("blob_text_factory")])
 def test_blob_detail(auto_login_user, blob):
 
     _, client = auto_login_user()

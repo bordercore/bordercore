@@ -1,14 +1,13 @@
-Babel==2.9.1
 backports-abc==0.4
 backports.ssl-match-hostname==3.5.0.1
 beautifulsoup4==4.9.0
 billiard==3.6.0.0
-boto3==1.24.2
+boto3==1.29.7
 Django==4.2.22
 djangorestframework==3.15.2
 django-webpack-loader==1.8.1
 django-storages==1.11.1
-elasticsearch==7.0.5
+elasticsearch==7.17.12
 elasticsearch-dsl==7.4.0
 factory-boy==3.2.1
 faker-file==0.15.1
@@ -18,7 +17,7 @@ httplib2==0.19.0
 humanize==3.7.1
 instaloader==4.9.5
 isodate==0.6.1
-lxml==4.9.1
+lxml==5.3.0
 Markdown==3.4.1
 mutagen==1.45.1
 numpy==1.22
@@ -27,7 +26,7 @@ openai==0.27.8
 pdf2image==0.1.14
 Pillow==10.3.0
 pipdeptree==0.5.0
-psycopg2-binary==2.8.4
+psycopg2-binary==2.9.10
 pyasn1==0.2.3
 pyasn1-modules==0.0.8
 Pygments==2.15.0
@@ -36,7 +35,7 @@ pytest==4.4.1
 pytest-cov==2.8.1
 pytest-lazy-fixture==0.6.3
 pytest-xdist==1.31.0
-python-dateutil==2.7.3
+python-dateutil==2.8.2
 python-dotenv==0.21.0
 python-magic==0.4.15
 python-mimeparse==1.6.0
@@ -49,7 +48,7 @@ simplejson==3.6.5
 singledispatch==3.4.0.3
 six==1.16.0
 sqlparse==0.5.0
-tiktoken==0.4.0
+tiktoken==0.5.2
 trafilatura==1.12.1
 uritemplate==3.0.0
 urllib3<2

@@ -34,7 +34,7 @@ omit =
     #
     # NPM modules
     #
-    *node_modules*
+    */node_modules/*
 
     #
     # AWS files

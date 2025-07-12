@@ -1,4 +1,5 @@
 import datetime
+import html
 import re
 from urllib.parse import unquote
 
@@ -125,11 +126,8 @@ def delete(request, bookmark_id=None):
 @login_required
 def snarf_link(request):
 
-    from html.parser import HTMLParser
-    h = HTMLParser()
-
     url = request.GET["url"]
-    name = h.unescape(request.GET["name"])
+    name = html.unescape(request.GET["name"])
 
     # First verify that this url does not already exist
     try:
