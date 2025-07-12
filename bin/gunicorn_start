@@ -20,14 +20,10 @@ export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
 export PYTHONPATH=$PYTHONPATH
 
 # Read environment variables
-source /home/ubuntu/.env
+source /var/www/.env
 
 # Install Python packages
 pip install -r $PYTHONPATH/requirements/prod.txt
-
-# Run database migrations here
-
-# Collect static content here, if necessary
 
 # Start your Django Unicorn
 # Programs meant to be run under supervisor should not daemonize themselves (do not use --daemon)
