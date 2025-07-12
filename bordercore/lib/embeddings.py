@@ -1,7 +1,7 @@
+import math
 import os
 from itertools import islice
 
-import numpy as np
 import openai
 import tiktoken
 
@@ -34,6 +34,21 @@ def chunked_tokens(text, encoding_name, chunk_length):
     yield from chunks_iterator
 
 
+def normalize(vec: list[float]) -> list[float]:
+    norm = math.sqrt(sum(x * x for x in vec))
+    return [x / norm for x in vec] if norm > 0 else vec
+
+
+def weighted_average(vectors: list[list[float]], weights: list[int]) -> list[float]:
+    total_weight = sum(weights)
+    dim = len(vectors[0])
+    result = [0.0] * dim
+    for vec, weight in zip(vectors, weights):
+        for i in range(dim):
+            result[i] += vec[i] * weight
+    return [x / total_weight for x in result]
+
+
 def len_safe_get_embedding(text, model=EMBEDDING_MODEL, max_tokens=EMBEDDING_CTX_LENGTH, encoding_name=EMBEDDING_ENCODING):
     chunk_embeddings = []
     chunk_lens = []
@@ -41,7 +56,6 @@ def len_safe_get_embedding(text, model=EMBEDDING_MODEL, max_tokens=EMBEDDING_CTX
         chunk_embeddings.append(get_embedding(chunk, model=model))
         chunk_lens.append(len(chunk))
 
-    chunk_embeddings = np.average(chunk_embeddings, axis=0, weights=chunk_lens)
-    chunk_embeddings = chunk_embeddings / np.linalg.norm(chunk_embeddings)  # normalizes length to 1
-    chunk_embeddings = chunk_embeddings.tolist()
-    return chunk_embeddings
+    averaged = weighted_average(chunk_embeddings, chunk_lens)
+    normalized = normalize(averaged)
+    return normalized

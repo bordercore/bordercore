@@ -20,7 +20,6 @@ isodate==0.6.1
 lxml==5.3.0
 Markdown==3.4.1
 mutagen==1.45.1
-numpy==1.22
 oauth2client==4.0.0
 openai==0.27.8
 pdf2image==0.1.14
