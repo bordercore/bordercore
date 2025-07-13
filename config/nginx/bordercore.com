@@ -218,4 +218,3 @@ server {
     ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
 }
-
