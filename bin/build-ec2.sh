@@ -97,5 +97,5 @@ sudo -u www-data git init --bare
 
 sudo -u www-data python3 -m venv $INSTALL_DIR/../env
 
-cp $INSTALL_DIR/config/gunicorn.conf /etc/supervisor/conf.d/
-cp $INSTALL_DIR/config/spawn-fcgi.conf /etc/supervisor/conf.d/
+cp $INSTALL_DIR/config/supervisor/gunicorn.conf /etc/supervisor/conf.d/
+cp $INSTALL_DIR/config/supervisor/spawn-fcgi.conf /etc/supervisor/conf.d/
