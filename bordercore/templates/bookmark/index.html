@@ -362,7 +362,7 @@
                             } else {
                                 bookmarkStore.selectedTagName = "Untagged";
 
-                                if (pagination.value === "" || pagination.value.page_number === 1) {
+                                if (Object.entries(pagination.value).length === 0 || pagination.value.page_number === 1) {
                                     // First clear any existing timeouts, if necessary
                                     clearTimeout(intervalId);
                                     intervalId = window.setTimeout(getBookmarkList, 60000, { pageNumber: pageNumber });
