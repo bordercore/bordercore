@@ -13,8 +13,8 @@ upstream django {
 server {
 
     listen 80;
-    listen 443;
-    listen [::]:443;
+    listen 443 ssl;
+    listen [::]:443 ssl;
 
     server_name www.bordercore.com;
 
@@ -59,7 +59,7 @@ server {
         # redirects, we set the Host: header above already.
         proxy_redirect off;
 
-	# Disable buffering for streaming HTTP responses
+        # Disable buffering for streaming HTTP responses
         proxy_buffering off;
 
         proxy_pass http://django;
@@ -68,11 +68,6 @@ server {
 
     access_log /var/log/django/access.log main;
     error_log /var/log/django/error.log;
-
-    # Redirect http to https
-    # location / {
-    #     return 301 https://$host$request_uri;
-    # }
 
     # git support
     location ~ ^/git(/.*) {
@@ -95,17 +90,16 @@ server {
 
     }
 
-
-    ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.bordercore.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/www.bordercore.com/privkey.pem;
 }
 
 # Proxy cover images. We do this so that we can return a
 #  default image if one is missing from S3.
 server {
 
-    listen 443;
-    listen [::]:443;
+    listen 443 ssl;
+    listen [::]:443 ssl;
 
     server_name blobs.bordercore.com;
 
@@ -166,16 +160,16 @@ server {
 
     }
 
-    ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.bordercore.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/www.bordercore.com/privkey.pem;
 }
 
 # Proxy album artwork images. We do this so that we can return a
 #  default image if one is missing from S3.
 server {
 
-    listen 443;
-    listen [::]:443;
+    listen 443 ssl;
+    listen [::]:443 ssl;
 
     server_name images.bordercore.com;
 
@@ -215,6 +209,6 @@ server {
 
     }
 
-    ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/www.bordercore.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/www.bordercore.com/privkey.pem;
 }
