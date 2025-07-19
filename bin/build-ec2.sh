@@ -1,13 +1,20 @@
 #!/bin/bash
 #
-# build-ec2.sh — Provision and configure a web server on EC2
+# build-ec2.sh — Provision and configure a web server on a new EC2 instance
 #
-#   This script automates the setup of a web server environment on a new EC2 instance:
-#     • Ensures the "www-data" system user exists
-#     • Creates and chowns required web directories
-#     • Enables Nginx site configurations via symlinks
-#     • Removes the default Nginx site if present
-#     • Adds Nginx log rotation configuration
+# This script automates the setup of a Django/Nginx web server environment:
+#   • Ensures the "www-data" system user exists and adds "ubuntu" to its group
+#   • Creates and chowns key directories for logs and the Git bare repo
+#   • Installs necessary packages including Nginx, Certbot, Supervisor, and Python tools
+#   • Clones/pulls the application from GitHub into the www-data-owned directory
+#   • Initializes and configures a bare Git repository for remote pushing
+#   • Sets up post-receive Git hook to deploy code on push
+#   • Configures Nginx by copying site configs and enabling them via symlinks
+#   • Removes default Nginx site and sets up log rotation
+#   • Copies Supervisor configs for Gunicorn and fcgiwrap
+#   • Creates a Python virtual environment for the app
+#
+# Run this script with sudo on a fresh EC2 instance.
 
 if [ "$EUID" -ne 0 ]; then
   echo "Please run via sudo." >&2
@@ -26,14 +33,13 @@ else
     echo "User 'www-data' created."
 fi
 
-
 # Add the user "ubuntu" to the "www-data" group
 adduser ubuntu www-data
 
 # List of directories to check/create
 DIRECTORIES=(
     "/var/log/django"
-    "/home/git"
+    "/home/git/bordercore.git"
 )
 
 # Loop through each directory
@@ -49,14 +55,19 @@ for DIR in "${DIRECTORIES[@]}"; do
     echo "Set ownership of '$DIR' to 'www-data'."
 done
 
+cp -pr $INSTALL_DIR/bordercore/static/html/* /var/www/html/
+chown -R www-data:www-data /var/www/html/*
+
 # apt update
-apt install net-tools
+apt install -y apache2-utils
+apt install -y net-tools
 apt install -y certbot
 apt install -y fcgiwrap
 apt install -y gunicorn
 apt install -y libxml2-dev
 apt install -y libxslt1-dev
 apt install -y nginx
+apt install -y python3-certbot-nginx
 apt install -y python3-pip
 apt install -y python3.12-venv
 apt install -y spawn-fcgi
@@ -92,8 +103,16 @@ fi
 
 cp $INSTALL_DIR/config/nginx/logrotate.d/nginx /etc/logrotate.d/
 
-cd /home/git
+cd /home/git/bordercore.git
 sudo -u www-data git init --bare
+sudo -u www-data git config http.receivepack true
+cd $INSTALL_DIR
+sudo -u www-data git remote add origin /home/git/bordercore.git
+sudo -u www-data git push
+
+GIT_HOOK_DIR=/home/git/bordercore.git/hooks
+cp $INSTALL_DIR/config/git/post-receive "$GIT_HOOK_DIR"
+chown www-data:www-data "$GIT_HOOK_DIR/post-receive"
 
 sudo -u www-data python3 -m venv $INSTALL_DIR/../env
 
