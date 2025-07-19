@@ -21,9 +21,9 @@
                         <div class="mt-1 me-2">
                             <font-awesome-icon icon="copy" class="text-success" />
                         </div>
-                        <div>
+                        <div class="text-truncate">
                             <img :src="node.cover_url" class="mw-100">
-                            <div class="back-reference " @click="handleNodeClick(node.url)" v-html="node.name" />
+                            <div class="text-truncate" @click="handleNodeClick(node.url)" v-html="node.name" />
                             <div class="pt-2">
                                 <span v-for="tag in node.tags" :key="tag" class="tag me-2">
                                     {{ tag }}
