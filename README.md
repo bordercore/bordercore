@@ -32,21 +32,21 @@ export DJANGO_SETTINGS_MODULE=config.settings.prod
 To run all unit tests:
 
 ```bash
-cd $INSTALL_DIR/bordercore_project
+cd $INSTALL_DIR/bordercore
 make test_unit
 ```
 
 To run all functional tests:
 
 ```bash
-cd $INSTALL_DIR/bordercore_project
+cd $INSTALL_DIR/bordercore
 make test_functional
 ```
 
 To run all data quality tests:
 
 ```bash
-cd $INSTALL_DIR/bordercore_project
+cd $INSTALL_DIR/bordercore
 make test_data
 ```
 
@@ -57,7 +57,7 @@ An instance of Elasticsearch running inside Docker is used during testing. All o
 To build the image:
 
 ```bash
-cd $INSTALL_DIR/bordercore_project/config/elasticsearch
+cd $INSTALL_DIR/bordercore/config/elasticsearch
 docker build -t elasticsearch-with-attachment .
 ```
 
@@ -70,17 +70,17 @@ docker run --detach --rm -p 9201:9200 -p 9301:9300 -e "discovery.type=single-nod
 Then add the pipeline attachment and field mappings:
 
 ```bash
-cd $INSTALL_DIR/bordercore_project/config/elasticsearch
+cd $INSTALL_DIR/bordercore/config/elasticsearch
 curl -XPUT http://localhost:9201/_ingest/pipeline/attachment -H 'Content-Type: application/json' -d @ingest_pipeline.json
 
-MAPPINGS=$HOME/dev/django/bordercore_project/config/elasticsearch/mappings.json
+MAPPINGS=$HOME/dev/django/bordercore/config/elasticsearch/mappings.json
 curl -XPUT http://localhost:9201/bordercore_test -H "Content-Type: application/json" -d @$MAPPINGS
 ```
 
 If you need to delete the `bordercore_test` instance and start fresh, run this:
 
 ```bash
-cd $INSTALL_DIR/bordercore_project/
+cd $INSTALL_DIR/bordercore/
 make reset_elasticsearch
 ```
 
