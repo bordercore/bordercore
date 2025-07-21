@@ -14,7 +14,7 @@ faker-file==0.15.1
 feedparser==6.0.2
 google-api-python-client==1.6.2
 httplib2==0.19.0
-humanize==3.7.1
+humanize==4.0.0
 instaloader==4.9.5
 isodate==0.6.1
 lxml==5.3.0
