@@ -1,14 +1,20 @@
-#
-# To run:
-#
-# $ DRF_TOKEN=$DRF_TOKEN_JERRELL python3 ./rich-dashboard.py
-#
+"""Bordercore Rich Dashboard
+
+This script provides a terminal-based dashboard using Rich to display data
+from Bordercore's REST API. It includes panels for bookmarks, todo items,
+and site statistics, all updated at regular intervals.
+
+Run with:
+    $ DRF_TOKEN=$DRF_TOKEN_JERRELL python3 ./rich-dashboard.py
+"""
 
 import os
 import time
 from itertools import cycle
+from typing import Any
 
 import requests
+from requests import Response, Session
 from rich import box
 from rich.color import Color, parse_rgb_hex
 from rich.console import Console
@@ -19,17 +25,26 @@ from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 
+BOOKMARKS_URL = "https://www.bordercore.com/api/bookmarks/?ordering=-created"
+TODOS_URL = "https://www.bordercore.com/api/todos/?priority=1"
+STATS_URL = "https://www.bordercore.com/api/site/stats"
+
 
 class Dashboard():
+    """A live terminal dashboard for displaying data from the Bordercore API."""
 
-    def __init__(self, session):
+    def __init__(self, session: Session) -> None:
+        """Initializes the dashboard layout and configures API token and styling.
 
+        Args:
+            session: A configured requests.Session instance for making HTTP requests.
+        """
         self.color_normal = Color.from_triplet(parse_rgb_hex("00ff00"))
         self.color_error = Color.from_triplet(parse_rgb_hex("ff0000"))
 
         if "DRF_TOKEN" not in os.environ:
             raise Exception("DRF_TOKEN not found in environment")
-        self.DRF_TOKEN = os.environ["DRF_TOKEN"]
+        self.drf_token = os.environ["DRF_TOKEN"]
 
         self.console = Console()
         self.layout = Layout()
@@ -59,8 +74,31 @@ class Dashboard():
 
         self.layout["bookmarks"].update(Panel("Recent bookmarks", title="Bookmarks"))
 
-    def update_status(self, status, error=False):
+    def _get(self, url: str) -> dict[str, Any]:
+        """Make an authenticated GET request to the API.
 
+        Args:
+            url: The full API endpoint to query.
+
+        Returns:
+            The parsed JSON response as a dictionary.
+
+        Raises:
+            Exception: If the response has a non-200 status code.
+        """
+        headers = {"Authorization": f"Token {self.drf_token}"}
+        response: Response = self.session.get(url, headers=headers)
+        if response.status_code != 200:
+            raise Exception(f"API error ({url}): status={response.status_code}")
+        return response.json()
+
+    def update_status(self, status: str, error: bool = False) -> None:
+        """Updates the bottom status bar with a message.
+
+        Args:
+            status: Text to display in the status panel.
+            error: Whether to use the error color style.
+        """
         if error:
             color = self.color_error
         else:
@@ -73,14 +111,13 @@ class Dashboard():
             )
         )
 
-    def update_bookmarks(self):
-        headers = {"Authorization": f"Token {self.DRF_TOKEN}"}
-        r = session.get("https://www.bordercore.com/api/bookmarks/?ordering=-created", headers=headers)
+    def update_bookmarks(self) -> None:
+        """Fetches and displays recent bookmarks from the Bordercore API.
 
-        if r.status_code != 200:
-            raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
-
-        info = r.json()
+        Raises:
+            Exception: If the API request fails.
+        """
+        info = self._get(BOOKMARKS_URL)
         colors = cycle(
             [
                 Color.from_triplet(parse_rgb_hex("11ff00")),
@@ -96,14 +133,13 @@ class Dashboard():
                 title=Text("Bookmarks")
             ))
 
-    def update_todos(self):
-        headers = {"Authorization": f"Token {self.DRF_TOKEN}"}
-        r = session.get("https://www.bordercore.com/api/todos/?priority=1", headers=headers)
+    def update_todos(self) -> None:
+        """Fetches and displays high-priority todos from the Bordercore API.
 
-        if r.status_code != 200:
-            raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
-
-        info = r.json()
+        Raises:
+            Exception: If the API request fails.
+        """
+        info = self._get(TODOS_URL)
         colors = cycle(
             [
                 Color.from_rgb(0, 136, 255),
@@ -119,14 +155,13 @@ class Dashboard():
                 title=Text("Todo Items")
             ))
 
-    def update_stats(self):
-        headers = {"Authorization": f"Token {self.DRF_TOKEN}"}
-        r = session.get("https://www.bordercore.com/api/site/stats", headers=headers)
+    def update_stats(self) -> None:
+        """Fetches and displays site statistics from the Bordercore API.
 
-        if r.status_code != 200:
-            raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
-
-        info = r.json()
+        Raises:
+            Exception: If the API request fails.
+        """
+        info = self._get(STATS_URL)
         colors = cycle(
             [
                 Color.from_rgb(168, 0, 146),
@@ -141,7 +176,7 @@ class Dashboard():
         )
         table.add_column("Name", justify="left", style=Style(color=Color.from_triplet(parse_rgb_hex("ee91e0"))))
         table.add_column("Value", style=Style(color=Color.from_triplet(parse_rgb_hex("9a488e"))))
-        table.add_row("Untagged Bookmarks", f"{info['untagged_bookmarks']}")
+        table.add_row("Unread Bookmarks", f"{info['untagged_bookmarks']}")
         table.add_row("Drill For Review", f"{info['drill_needing_review']['count']}")
 
         self.layout["stats"].update(Panel(
@@ -150,12 +185,14 @@ class Dashboard():
         ))
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run the live Bordercore dashboard loop.
 
-    session = requests.Session()
-
-    # Ignore .netrc files. Useful for local debugging.
-    session.trust_env = False
+    Sets up the session, initializes the Dashboard, and continuously updates
+    all sections of the UI at a fixed interval.
+    """
+    session: Session = requests.Session()
+    session.trust_env = False  # Ignore .netrc, useful for local dev
 
     dash = Dashboard(session=session)
     dash.update_bookmarks()
@@ -170,3 +207,6 @@ if __name__ == "__main__":
             except Exception as e:
                 dash.update_status(str(e), error=True)
             time.sleep(10)
+
+if __name__ == "__main__":
+    main()
