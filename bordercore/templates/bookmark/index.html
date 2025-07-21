@@ -265,6 +265,16 @@
                 const selectValue = ref(null);
 
                 onMounted(() => {
+
+                    document.addEventListener("focusin", (event) => {
+                        // De-select any selected bookmark whenever an element on the
+                        //  page gets focus to prevent unwarranted hotkey actions.
+                        selectedBookmarkUuid.value = null;
+                        document.querySelectorAll("li.bookmark-list").forEach(row => {
+                            row.classList.remove("selected");
+                        });
+                    });
+
                     pinnedTags.value.setTags(
                         JSON.parse(document.getElementById("pinnedTags").textContent),
                         {{ untagged_count }}
@@ -297,17 +307,21 @@
                                 selectBookmark();
                                 break;
                             case "d":
-                                index = bookmarkList.value.findIndex((e) => e.uuid === selectedBookmarkUuid.value);
-                                const nextBookmark = getNextBookmark();
-                                onClickDeleteBookmark(bookmarkList.value[index].uuid);
-                                selectedBookmarkUuid.value = nextBookmark;
-                                selectBookmark();
+                                if (selectedBookmarkUuid.value) {
+                                    index = bookmarkList.value.findIndex((e) => e.uuid === selectedBookmarkUuid.value);
+                                    const nextBookmark = getNextBookmark();
+                                    onClickDeleteBookmark(bookmarkList.value[index].uuid);
+                                    selectedBookmarkUuid.value = nextBookmark;
+                                    selectBookmark();
+                                }
                                 break;
                             case "o":
-                                index = bookmarkList.value.findIndex((e) => e.uuid === selectedBookmarkUuid.value);
-                                window.open(bookmarkList.value[index].url, "_blank");
-                                onClickDeleteBookmark(bookmarkList.value[index].uuid);
-                                selectedBookmarkUuid.value = null;
+                                if (selectedBookmarkUuid.value) {
+                                    index = bookmarkList.value.findIndex((e) => e.uuid === selectedBookmarkUuid.value);
+                                    window.open(bookmarkList.value[index].url, "_blank");
+                                    onClickDeleteBookmark(bookmarkList.value[index].uuid);
+                                    selectedBookmarkUuid.value = null;
+                                }
                                 break;
                             case "escape":
                                 selectedBookmarkUuid.value = null;
