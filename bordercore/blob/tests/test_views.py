@@ -234,22 +234,28 @@ def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory, blob_
     assert f"{key_root}/{filename_new}" in objects
 
 
-@pytest.mark.parametrize("blob", [lf("blob_image_factory"), lf("blob_text_factory")])
-def test_blob_detail(auto_login_user, blob):
+# Dynamically resolve the actual fixture named in the parametrize list (replaces lazy_fixture)
+@pytest.fixture
+def resolved_blob(request):
+    return request.getfixturevalue(request.param)
+
+# Indirect parametrization to inject fixture values by name (e.g., 'blob_image_factory')
+@pytest.mark.parametrize("resolved_blob", ["blob_image_factory", "blob_text_factory"], indirect=["resolved_blob"])
+def test_blob_detail(auto_login_user, resolved_blob):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("blob:detail", args=(blob[0].uuid,))
+    url = urls.reverse("blob:detail", args=(resolved_blob[0].uuid,))
     resp = client.get(url)
 
     assert resp.status_code == 200
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    url = [x.value for x in blob[0].metadata.all() if x.name == "Url"][0]
+    url = [x.value for x in resolved_blob[0].metadata.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
 
-    author = [x.value for x in blob[0].metadata.all() if x.name == "Author"][0]
+    author = [x.value for x in resolved_blob[0].metadata.all() if x.name == "Author"][0]
     assert author in [x for sublist in soup.select("span") for x in sublist]
 
 
