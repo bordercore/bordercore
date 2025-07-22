@@ -28,6 +28,9 @@ class Muscle(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ["name"]
+
 
 class Exercise(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -40,6 +43,9 @@ class Exercise(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ["name"]
 
     def get_targeted_muscles(self):
 
