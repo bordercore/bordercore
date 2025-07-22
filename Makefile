@@ -1,4 +1,5 @@
-EC2=ec2:/var/www/django/static/
+EC2_HOST=ec2
+EC2_PATH=/var/www/django/static/
 MAX_AGE=2592000
 ELASTICSEARCH_INDEX_TEST=bordercore_test
 ELASTICSEARCH_ENDPOINT_TEST=http://localhost:9201
@@ -20,8 +21,9 @@ webpack_build: check-env
 
 webpack_ec2: check-env
 	cd $(BORDERCORE_HOME)
-	rsync -azv --delete --exclude=/rest_framework static/ $(EC2)
-	scp ./webpack-stats.json $(EC2)../bordercore/bordercore
+	rsync -azv --no-times --no-group --delete --exclude=/rest_framework static/ $(EC2_HOST):$(EC2_PATH)
+	ssh $(EC2_HOST) "sudo chown -R www-data:www-data $(EC2_PATH)"
+	scp ./webpack-stats.json $(EC2_HOST):$(EC2_PATH)../bordercore/bordercore
 
 check-env:
 ifndef BORDERCORE_HOME
