@@ -1,5 +1,12 @@
+"""
+Views for tag management, searching, and related tag operations.
+
+This module provides Django views for pinning/unpinning tags, searching tags, managing tag aliases, retrieving todo counts, and finding related tags for a user. It also includes a ListView for tag aliases.
+"""
+
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
@@ -10,8 +17,18 @@ from .services import search as search_service
 
 
 @login_required
-def pin(request):
+def pin(request: HttpRequest) -> HttpResponse:
+    """
+    Pin a tag for the current user.
 
+    Retrieves the tag name from the POST data, pins the tag for the user, and redirects to the bookmark overview page.
+
+    Args:
+        request: The HTTP request object. Expects 'tag' in POST data.
+
+    Returns:
+        HttpResponse: Redirects to the bookmark overview page.
+    """
     tag_name = request.POST["tag"]
 
     tag = Tag.objects.get(name=tag_name, user=request.user)
@@ -21,8 +38,18 @@ def pin(request):
 
 
 @login_required
-def unpin(request):
+def unpin(request: HttpRequest) -> HttpResponse:
+    """
+    Unpin a tag for the current user.
 
+    Retrieves the tag name from the POST data, unpins the tag for the user, and redirects to the bookmark overview page.
+
+    Args:
+        request: The HTTP request object. Expects 'tag' in POST data.
+
+    Returns:
+        HttpResponse: Redirects to the bookmark overview page.
+    """
     tag_name = request.POST["tag"]
 
     tag = Tag.objects.get(name=tag_name, user=request.user)
@@ -32,8 +59,18 @@ def unpin(request):
 
 
 @login_required
-def search(request):
+def search(request: HttpRequest) -> JsonResponse:
+    """
+    Search for tags matching a query for the current user.
 
+    Retrieves the search query and optional document type and skip_tag_aliases flag from GET parameters, performs the search, and returns the results as JSON.
+
+    Args:
+        request: The HTTP request object. Expects 'query' in GET parameters, and optional 'doctype' and 'skip_tag_aliases'.
+
+    Returns:
+        JsonResponse: A JSON response containing the search results.
+    """
     tag_name = request.GET["query"].lower()
     skip_tag_aliases = request.GET.get("skip_tag_aliases", False)
 
@@ -49,17 +86,35 @@ def search(request):
 
 @method_decorator(login_required, name="dispatch")
 class TagListView(ListView):
-
+    """
+    View for displaying a list of tag aliases (currently returns none).
+    """
     model = TagAlias
     template_name = "tag/tag_list.html"
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        Return an empty queryset for tag aliases.
+
+        Returns:
+            QuerySet: An empty queryset.
+        """
         return TagAlias.objects.none()
 
 
 @login_required
-def add_alias(request):
+def add_alias(request: HttpRequest) -> JsonResponse:
+    """
+    Add an alias for a tag for the current user.
 
+    Retrieves the tag name and alias name from POST data, checks for conflicts, creates the alias if valid, and returns a status message as JSON.
+
+    Args:
+        request: The HTTP request object. Expects 'tag_name' and 'alias_name' in POST data.
+
+    Returns:
+        JsonResponse: A JSON response with the status and message.
+    """
     tag_name = request.POST["tag_name"]
     alias_name = request.POST["alias_name"]
 
@@ -88,12 +143,26 @@ def add_alias(request):
 
 
 @login_required
-def get_todo_counts(request):
+def get_todo_counts(request: HttpRequest) -> JsonResponse:
+    """
+    Returns todo count information for a tag associated with the current user.
+
+    If a "tag_name" parameter is present in the GET request, retrieves the tag with that name.
+    Otherwise, selects a random tag belonging to the user.
+
+    Returns:
+        JsonResponse: A JSON response containing:
+            - status: "OK" if a tag is found, or "Error" if no tags exist for the user.
+            - info: A dictionary with annotated counts of related objects for the selected tag.
+    """
 
     if "tag_name" in request.GET:
         tag_name = request.GET["tag_name"]
     else:
-        tag_name = Tag.objects.filter(user=request.user).order_by("?").first().name
+        tag_obj = Tag.objects.filter(user=request.user).order_by("?").first()
+        if tag_obj is None:
+            return JsonResponse({"status": "Error", "message": "No tags found for user."}, status=404)
+        tag_name = tag_obj.name
 
     tag = Tag.objects.get(name=tag_name, user=request.user)
     info = tag.get_todo_counts()[0]
@@ -109,8 +178,18 @@ def get_todo_counts(request):
 
 
 @login_required
-def get_related_tags(request):
+def get_related_tags(request: HttpRequest) -> JsonResponse:
+    """
+    Retrieve tags related to a given tag for a specific document type.
 
+    This view receives a tag name and an optional document type via GET parameters, calls the find_related_tags service to find tags that co-occur with the given tag, and returns the results as a JSON response.
+
+    Args:
+        request: The HTTP request object. Expects 'tag_name' (str) and optional 'doc_type' (str) in GET parameters.
+
+    Returns:
+        JsonResponse: A JSON response containing a status and a list of related tags with their counts.
+    """
     tag_name = request.GET["tag_name"]
     doc_type = request.GET.get("doc_type", None)
 
