@@ -13,7 +13,6 @@ from faker_file.providers.pdf_file import PdfFileProvider
 from faker_file.providers.pdf_file.generators.reportlab_generator import \
     ReportlabPdfGenerator
 from PIL import Image
-from pytest_lazy_fixtures import lf
 
 from django import urls
 from django.conf import settings
