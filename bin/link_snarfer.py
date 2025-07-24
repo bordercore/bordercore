@@ -5,7 +5,6 @@ Typically invoked by Procmail.
 """
 
 import email
-import json
 import logging
 import os
 import quopri
@@ -21,8 +20,6 @@ from dotenv import load_dotenv
 from django.conf import settings
 
 from lib.util import parse_title_from_url
-
-link_dict = {}  # Store links in a dict to avoid duplication
 
 p = re.compile(r"(https?://[^\">\s\n]*)[\">\s\n]")
 ignore = re.compile(
@@ -54,7 +51,7 @@ def get_drf_token() -> str:
     Load DRF token from environment file for API authentication.
 
     Returns:
-        str: The DRF token string.
+        The DRF token string.
     """
     load_dotenv(f"{settings.BASE_DIR}/config/settings/secrets.env")
     return os.environ["DRF_TOKEN_JERRELL"]
@@ -65,12 +62,11 @@ def store_email(title: str, lines: str) -> None:
     Save email contents to a local debug file.
 
     Args:
-        title (str): Filename prefix.
-        lines (str): Content to write.
+        title: Filename prefix.
+        lines: Content to write.
     """
     directory = "/tmp/link_snarfer"
-    if not Path(directory).is_dir():
-        os.makedirs(directory)
+    Path(directory).mkdir(parents=True, exist_ok=True)
 
     filename = f"{title}-{time.time()}"
     with open(f"{directory}/{filename}", "a", encoding="utf-8") as debug_file:
@@ -85,7 +81,7 @@ def find_first_link(lines: list[str]) -> str:
         lines (list): List of strings.
 
     Returns:
-        str: First URL found.
+        First URL found.
     """
     links = [x for x in lines if x.startswith("http")]
     return links[0].rstrip()
@@ -96,10 +92,10 @@ def get_title(lines: list[str]) -> str:
     Retrieve the title associated with the first link.
 
     Args:
-        lines (list): List of strings from the email body.
+        lines: List of strings from the email body.
 
     Returns:
-        str: Title string or fallback message.
+        Title string or fallback message.
     """
     buffer: list[str] = []
     for line in lines:
@@ -115,10 +111,10 @@ def get_youtube_content(msg: email.message.Message) -> Optional[dict[str, str]]:
     Extract metadata from a YouTube-related email.
 
     Args:
-        msg (email.message.Message): Parsed email message object.
+        msg: Parsed email message object.
 
     Returns:
-        dict or None: Dictionary with uploader, title, URL, and subject — or None on error.
+        Dictionary with uploader, title, URL, and subject — or None on error.
     """
     info = {}
 
@@ -139,6 +135,10 @@ def get_youtube_content(msg: email.message.Message) -> Optional[dict[str, str]]:
 
     lines = decoded.split("\n")
 
+    if len(lines) < 4:
+        logger.warning("Unexpected YouTube email format")
+        return None
+
     info["uploader"] = lines[0]
     info["title"] = get_title(lines)
     info["url"] = find_first_link(lines)
@@ -156,13 +156,20 @@ def get_youtube_content(msg: email.message.Message) -> Optional[dict[str, str]]:
     return info
 
 
-def add_to_bordercore(link_info: dict[str, str]) -> None:
+def add_to_bordercore(
+        link_info: dict[str, str],
+        session: requests.Session,
+        token: str
+) -> None:
     """
     Send a link payload to Bordercore's bookmarks API.
 
     Args:
-        link_info (dict): Dictionary with 'url' and 'subject' keys.
+        link_info: Dictionary with 'url' and 'subject' keys.
+        session: A configured `requests.Session` instance for making the API call.
+        token: A DRF authentication token used in the Authorization header.
     """
+
     payload = {
         "url": link_info["url"],
         "name": link_info["subject"],
@@ -171,55 +178,85 @@ def add_to_bordercore(link_info: dict[str, str]) -> None:
 
     url = "https://www.bordercore.com/api/bookmarks/"
 
-    token = get_drf_token()
-
     headers = {
         "Authorization": f"Token {token}",
         "Content-Type": "application/json"
     }
 
-    # We use a session so that we can set trust_env = None (see below)
-    s = requests.Session()
-
-    # Set this so that the ~/.netrc file is ignored for authentication
-    s.trust_env = None
-
-    s.post(url, data=json.dumps(payload), headers=headers)
+    session.post(url, json=payload, headers=headers)
 
 
-def main() -> None:
+def handle_youtube_email(
+    msg: email.message.Message,
+    session: requests.Session,
+    token: str
+) -> None:
     """
-    Entry point for script execution.
-    Reads email from stdin, parses content, and submits relevant links to Bordercore.
-    Handles Blogtrottr YouTube messages specially.
+    Extract and post YouTube link info from the given email message.
+
+    Args:
+        msg: Parsed email message object.
+        session: Configured HTTP session for making API requests.
+        token: DRF authentication token for API authorization.
     """
-    buffer = "".join(sys.stdin)
+    link_info = get_youtube_content(msg)
 
-    msg = email.message_from_string(buffer)
-    if "Blogtrottr" in msg.get("From", ""):
-        link_info = get_youtube_content(msg)
-        if link_info:
-            logger.info("YouTube email: %s", link_info['subject'])
-            add_to_bordercore(link_info)
-        sys.exit(0)
+    if not link_info:
+        return
 
-    # Decode quoted-printable contents
+    if link_info["url"].startswith("https://www.youtube.com/shorts/"):
+        logger.info("Skipping YouTube Short: %s", link_info["subject"])
+        return
+
+    logger.info("YouTube email: %s", link_info["subject"])
+    add_to_bordercore(link_info, session, token)
+
+
+def handle_generic_email(
+    buffer: str,
+    session: requests.Session,
+    token: str
+) -> None:
+    """
+    Extract and post all valid HTTP/HTTPS links from a generic email body.
+
+    Args:
+        buffer: Raw email content as a string.
+        session: Configured HTTP session for making API requests.
+        token: DRF authentication token for API authorization.
+    """
     buffer_bytes = quopri.decodestring(buffer.encode("utf-8"))
     matches = p.findall(buffer_bytes.decode("utf-8", "ignore"))
 
     for link in matches:
         if not ignore.search(link):
             url, label = parse_title_from_url(link)
-            link_dict[label] = url
-
-    if link_dict:
-        for label, url in link_dict.items():
             logger.info("%s - %s", url, label)
             link_info = {
                 "url": url,
                 "subject": label or "No Title"
             }
-            add_to_bordercore(link_info)
+            add_to_bordercore(link_info, session, token)
+
+
+def main() -> None:
+    """
+    Entry point for script execution.
+
+    Reads an email from stdin, determines if it's a YouTube notification or a
+    general link email, and handles each case appropriately.
+    """
+    buffer = "".join(sys.stdin)
+    msg = email.message_from_string(buffer)
+
+    session = requests.Session()
+    session.trust_env = None
+    token = get_drf_token()
+
+    if "Blogtrottr" in msg.get("From", ""):
+        handle_youtube_email(msg, session, token)
+    else:
+        handle_generic_email(buffer, session, token)
 
 
 if __name__ == "__main__":
