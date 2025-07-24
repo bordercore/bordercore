@@ -13,6 +13,7 @@ import re
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 import requests
 from dotenv import load_dotenv
@@ -45,10 +46,10 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger("bordercore.linksnarfer")
 
 # Only let requests log at level WARNING or higher
-requests_log = logging.getLogger("requests").setLevel(logging.WARNING)
+requests_log = logging.getLogger("requests")
+requests_log.setLevel(logging.WARNING)
 
-
-def get_drf_token():
+def get_drf_token() -> str:
     """
     Load DRF token from environment file for API authentication.
 
@@ -59,7 +60,7 @@ def get_drf_token():
     return os.environ["DRF_TOKEN_JERRELL"]
 
 
-def store_email(title, lines):
+def store_email(title: str, lines: str) -> None:
     """
     Save email contents to a local debug file.
 
@@ -76,7 +77,7 @@ def store_email(title, lines):
         debug_file.write(lines)
 
 
-def find_first_link(lines):
+def find_first_link(lines: list[str]) -> str:
     """
     Extract the first HTTP link from a list of lines.
 
@@ -90,7 +91,7 @@ def find_first_link(lines):
     return links[0].rstrip()
 
 
-def get_title(lines):
+def get_title(lines: list[str]) -> str:
     """
     Retrieve the title associated with the first link.
 
@@ -100,7 +101,7 @@ def get_title(lines):
     Returns:
         str: Title string or fallback message.
     """
-    buffer = []
+    buffer: list[str] = []
     for line in lines:
         if line.startswith("http"):
             return buffer[-1]
@@ -109,7 +110,7 @@ def get_title(lines):
     return "No title"
 
 
-def get_youtube_content(msg):
+def get_youtube_content(msg: email.message.Message) -> Optional[dict[str, str]]:
     """
     Extract metadata from a YouTube-related email.
 
@@ -130,15 +131,20 @@ def get_youtube_content(msg):
         logger.error("No text/plain content found in email")
         return None
 
-    content = content.decode("UTF-8", "ignore")
-    lines = content.split("\n")
+    if isinstance(content, bytes):
+        decoded = content.decode("UTF-8", "ignore")
+    else:
+        logger.error("Expected bytes content, got non-bytes type")
+        return None
+
+    lines = decoded.split("\n")
 
     info["uploader"] = lines[0]
     info["title"] = get_title(lines)
     info["url"] = find_first_link(lines)
 
     if logger.level == "DEBUG":
-        store_email(info["title"], content)
+        store_email(info["title"], decoded)
 
     # Sometimes the title takes up two lines
     if not info["url"].startswith("http"):
@@ -150,7 +156,7 @@ def get_youtube_content(msg):
     return info
 
 
-def add_to_bordercore(link_info):
+def add_to_bordercore(link_info: dict[str, str]) -> None:
     """
     Send a link payload to Bordercore's bookmarks API.
 
@@ -181,15 +187,13 @@ def add_to_bordercore(link_info):
     s.post(url, data=json.dumps(payload), headers=headers)
 
 
-def main():
+def main() -> None:
     """
     Entry point for script execution.
     Reads email from stdin, parses content, and submits relevant links to Bordercore.
     Handles Blogtrottr YouTube messages specially.
     """
-    buffer = ""
-    for line in sys.stdin:
-        buffer += line
+    buffer = "".join(sys.stdin)
 
     msg = email.message_from_string(buffer)
     if "Blogtrottr" in msg.get("From", ""):
@@ -200,8 +204,8 @@ def main():
         sys.exit(0)
 
     # Decode quoted-printable contents
-    buffer = quopri.decodestring(buffer)
-    matches = p.findall(buffer.decode("UTF-8", "ignore"))
+    buffer_bytes = quopri.decodestring(buffer.encode("utf-8"))
+    matches = p.findall(buffer_bytes.decode("utf-8", "ignore"))
 
     for link in matches:
         if not ignore.search(link):
