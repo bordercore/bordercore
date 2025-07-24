@@ -598,11 +598,12 @@ def get_template(request):
 def chat(request):
 
     try:
-        response = StreamingHttpResponse(chatbot(request, request.POST))
-        response["Content-Type"] = "text/plain"
-        return response
+        content_iterator = chatbot(request, request.POST)
     except Exception as e:
-        return str(e)
+        log.error("Chat service failed for user %s: %s", request.user.id, e, exc_info=True)
+        content_iterator = iter([f"An error occurred: {e}"])
+
+    return StreamingHttpResponse(content_iterator, content_type="text/plain")
 
 
 @method_decorator(login_required, name="dispatch")
