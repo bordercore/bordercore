@@ -59,6 +59,8 @@ class BlobForm(ModelForm):
         filename = str(self.cleaned_data.get("filename"))
         if filename in ILLEGAL_FILENAMES:
             self.add_error("filename", ValidationError(f"Error: Illegal filename: {filename}"))
+        if len(filename) > 255:
+            self.add_error("filename", ValidationError("Error: Filename must not be longer than 255 characters"))
 
         return filename
 
