@@ -50,10 +50,6 @@ LANGUAGE_CODE = "en-us"
 # to load the internationalization machinery.
 USE_I18N = True
 
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
-USE_L10N = True
-
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
@@ -76,7 +72,9 @@ os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 # Set this to silence S3Boto3Storage warning
 AWS_DEFAULT_ACL = None
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STORAGES = {
+    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+}
 
 # Absolute path to the directory static files should be collected to.
 STATIC_ROOT = ""
