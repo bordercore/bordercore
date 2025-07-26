@@ -34,17 +34,19 @@ ignore = re.compile(
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
-                    datefmt="%m-%d %H:%M:%S",
-                    filename=os.environ["HOME"] + "/logs/link-snarfer.log",
-                    filemode="a")
-
 logger = logging.getLogger("bordercore.linksnarfer")
 
 # Only let requests log at level WARNING or higher
 requests_log = logging.getLogger("requests")
 requests_log.setLevel(logging.WARNING)
+
+def configure_logging() -> None:
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+                        datefmt="%m-%d %H:%M:%S",
+                        filename=os.path.join(os.environ["HOME"], "logs", "link-snarfer.log"),
+                        filemode="a")
+
 
 def get_drf_token() -> str:
     """
@@ -260,4 +262,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    configure_logging()
     main()
