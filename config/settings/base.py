@@ -105,6 +105,8 @@ WEBPACK_LOADER = {
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 MEDIA_ROOT = "blobs"
 
+MUSIC_DIR = "/home/media/music"
+
 # URLs that handle the media served from AWS. Make sure to use a trailing slash.
 MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
 COVER_URL = "https://blobs.bordercore.com/"
