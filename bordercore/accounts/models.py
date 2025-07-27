@@ -1,4 +1,5 @@
 import uuid
+from typing import List
 
 from feed.models import Feed
 
@@ -16,6 +17,20 @@ from lib.mixins import SortOrderMixin
 from tag.models import Tag
 
 
+def drill_intervals_default() -> List[int]:
+    """Return the default list of drill intervals.
+
+    This function is used as a callable default for the ArrayField to avoid
+    using a mutable object (like a list) directly. Using a function ensures
+    that a new list is created for each model instance, preventing unintended
+    shared state between instances.
+
+    Returns:
+        List[int]: A list of default interval values.
+    """
+    return INTERVALS_DEFAULT
+
+
 class UserProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
@@ -30,7 +45,7 @@ class UserProfile(models.Model):
     homepage_image_collection = models.OneToOneField(Collection, related_name="image_collection", null=True, on_delete=models.PROTECT)
     sidebar_image = models.TextField(blank=True, null=True)
     background_image = models.TextField(blank=True, null=True)
-    drill_intervals = ArrayField(models.IntegerField(default=INTERVALS_DEFAULT))
+    drill_intervals = ArrayField(models.IntegerField(), default=drill_intervals_default)
     eye_candy = models.BooleanField(default=False)
     drill_tags_muted = models.ManyToManyField(Tag, related_name="drill_tags_muted")
 
