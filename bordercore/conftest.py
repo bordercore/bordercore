@@ -4,9 +4,11 @@ import hashlib
 import os
 import random
 import tempfile
+from collections.abc import Generator
 from datetime import timedelta
 from io import BytesIO
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import boto3
 import botocore
@@ -78,6 +80,28 @@ os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 
 faker = FakerFactory.create()
 faker.add_provider(PdfFileProvider)
+
+from todo.models import Todo
+
+
+@pytest.fixture(autouse=True)
+def mock_elasticsearch_service() -> Generator[dict[str, MagicMock], None, None]:
+    """Auto-mocked Elasticsearch service functions for all tests.
+
+    This pytest fixture automatically patches out the Elasticsearch service
+    layer functions `index_document` and `delete_document` for the duration
+    of each test. This prevents real Elasticsearch interactions during tests
+    and allows assertions on calls if needed.
+
+    Yields:
+        dict: A dictionary containing the mocked functions:
+            - "index_document" (MagicMock): Mock of the index_document function.
+            - "delete_document" (MagicMock): Mock of the delete_document function.
+    """
+    with patch("search.services._index_document"), \
+         patch("search.services._delete_document"), \
+         patch("blob.tests.factories.index_blob"):
+        yield
 
 
 @pytest.fixture()

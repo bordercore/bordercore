@@ -384,11 +384,15 @@ def test_blob_update_cover_image(s3_resource, s3_bucket, auto_login_user):
     assert payload["status"] == "OK"
 
 
-def test_get_elasticsearch_info(auto_login_user):
+@patch("blob.models.Blob.get_elasticsearch_info")
+def test_get_elasticsearch_info(mock_get_info, auto_login_user):
+    """Test blob:get_elasticsearch_info while mocking the ES query."""
 
     user, client = auto_login_user()
+    blob = BlobFactory.create(user=user, tags=("django", "linux"))
 
-    blob = BlobFactory.create(user=user, tags=("django", "linux"),)
+    # First request: simulate no result
+    mock_get_info.return_value = {}
 
     url = urls.reverse("blob:get_elasticsearch_info", kwargs={"uuid": blob.uuid})
     resp = client.get(url)
@@ -396,10 +400,15 @@ def test_get_elasticsearch_info(auto_login_user):
     assert resp.status_code == 200
     assert resp.json() == {"info": {}, "status": "OK"}
 
-    BlobFactory.index_blob(blob)
-
-    # Pause to allow time for the blob to be indexed
-    time.sleep(1)
+    # Second request: simulate indexed blob
+    mock_get_info.reset_mock()
+    mock_get_info.return_value = {
+        "id": str(blob.uuid),
+        "name": blob.name,
+        "filename": "",
+        "note": blob.note,
+        "doctype": "document"
+    }
 
     url = urls.reverse("blob:get_elasticsearch_info", kwargs={"uuid": blob.uuid})
     resp = client.get(url)

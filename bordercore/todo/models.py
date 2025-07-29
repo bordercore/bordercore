@@ -1,7 +1,5 @@
 import uuid
 
-from elasticsearch import helpers
-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -9,7 +7,7 @@ from django.db.models import Count, JSONField, Max
 from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
-from lib.util import get_elasticsearch_connection
+from search.services import delete_document, index_document
 from tag.models import Tag, TagTodo
 
 from .managers import TodoManager
@@ -81,18 +79,11 @@ class Todo(TimeStampedModel):
             self.index_todo()
 
     def delete(self):
-
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
-
+        delete_document(self.uuid)
         super().delete()
 
-    def index_todo(self, es=None):
-
-        if not es:
-            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+    def index_todo(self):
+        index_document(self.elasticsearch_document)
 
     @property
     def elasticsearch_document(self):

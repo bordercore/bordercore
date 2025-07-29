@@ -6,7 +6,6 @@ from io import BytesIO
 
 import boto3
 import humanize
-from elasticsearch import helpers
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
@@ -24,7 +23,8 @@ from django.utils.translation import gettext_lazy as _
 
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import convert_seconds
-from lib.util import get_elasticsearch_connection, remove_non_ascii_characters
+from lib.util import remove_non_ascii_characters
+from search.services import delete_document, index_document
 from tag.models import Tag
 
 
@@ -78,12 +78,8 @@ class Album(TimeStampedModel):
             format="%.f"
         )
 
-    def index_album(self, es=None):
-
-        if not es:
-            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+    def index_album(self):
+        index_document(self.elasticsearch_document)
 
     @property
     def elasticsearch_document(self):
@@ -121,10 +117,7 @@ class Album(TimeStampedModel):
         self.index_album()
 
     def delete(self):
-
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
-
+        delete_document(self.uuid)
         super().delete()
 
     @staticmethod
@@ -250,8 +243,7 @@ class Song(TimeStampedModel):
         super().delete()
 
         # Delete from Elasticsearch
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
+        delete_document(self.uuid)
 
         # Delete from S3
         s3_client = boto3.client("s3")
@@ -261,12 +253,8 @@ class Song(TimeStampedModel):
             Key=f"songs/{self.uuid}"
         )
 
-    def index_song(self, es=None):
-
-        if not es:
-            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+    def index_song(self):
+        index_document(self.elasticsearch_document)
 
     @property
     def elasticsearch_document(self):

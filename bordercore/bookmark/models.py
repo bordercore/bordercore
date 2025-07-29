@@ -6,7 +6,6 @@ import uuid
 import boto3
 import isodate
 import requests
-from elasticsearch import helpers
 
 from django import urls
 from django.apps import apps
@@ -19,7 +18,7 @@ from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
 from lib.time_utils import convert_seconds
-from lib.util import get_elasticsearch_connection
+from search.services import delete_document, index_document
 from tag.models import Tag, TagBookmark
 
 from .managers import BookmarkManager
@@ -85,8 +84,7 @@ class Bookmark(TimeStampedModel):
         # After every bookmark mutation, invalidate the cache
         cache.delete("recent_bookmarks")
 
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
+        delete_document(self.uuid)
 
         self.delete_cover_image()
 
@@ -179,11 +177,7 @@ class Bookmark(TimeStampedModel):
         s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
 
     def index_bookmark(self, es=None):
-
-        if not es:
-            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        _, _ = helpers.bulk(es, [self.elasticsearch_document])
+        index_document(self.elasticsearch_document)
 
     @property
     def cover_url(self):
