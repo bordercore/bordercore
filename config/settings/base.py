@@ -73,7 +73,12 @@ os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 AWS_DEFAULT_ACL = None
 
 STORAGES = {
-    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage"
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    }
 }
 
 # Absolute path to the directory static files should be collected to.
