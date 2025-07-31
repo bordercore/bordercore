@@ -73,7 +73,7 @@
                                                     </div>
                                                 </Transition>
                                             </div>
-                                            <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
+                                            <drop-down-menu :show-on-hover="true">
                                                 <template #dropdown>
                                                     <li>
                                                         <a class="dropdown-item" href="#" @click.prevent="handleRemoveObject(element)">
