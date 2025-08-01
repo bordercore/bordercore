@@ -114,8 +114,7 @@ def delete_document(doc_id: str) -> None:
     Raises:
         elasticsearch.ElasticsearchException: If the deletion operation fails.
     """
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-    es.delete(index=settings.ELASTICSEARCH_INDEX, id=doc_id)
+    _delete_document(doc_id)
 
 
 def _delete_document(doc_id: str) -> None:

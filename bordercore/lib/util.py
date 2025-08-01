@@ -10,6 +10,10 @@ ELASTICSEARCH_TIMEOUT = 20
 
 
 def get_elasticsearch_connection(host=None, timeout=ELASTICSEARCH_TIMEOUT):
+    return _get_elasticsearch_connection(host, timeout)
+
+
+def _get_elasticsearch_connection(host=None, timeout=ELASTICSEARCH_TIMEOUT):
 
     # Isolate the import here so other functions from this module
     #  can be imported without requiring these dependencies.
