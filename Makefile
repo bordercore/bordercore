@@ -37,7 +37,7 @@ test_data:
 	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test data
 
 test_unit:
-	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
+	MOCK_ELASTICSEARCH=1 \
 	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test unit
 
 test_wumpus:
@@ -49,7 +49,7 @@ test_functional: reset_elasticsearch
 	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test functional
 
 test_coverage:
-	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
+	MOCK_ELASTICSEARCH=1 \
 	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test coverage
 
 

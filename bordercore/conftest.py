@@ -104,6 +104,31 @@ def mock_elasticsearch_service() -> Generator[dict[str, MagicMock], None, None]:
         yield
 
 
+@pytest.fixture(autouse=True)
+def mock_es_client():
+    """
+    Automatically mock the Elasticsearch client if the MOCK_ELASTICSEARCH environment variable is set.
+
+    This fixture patches the `get_elasticsearch_connection` function in the
+    `lib.util` module, replacing it with a `MagicMock` instance. The mock client
+    is yielded for use in tests, allowing you to configure return values as needed.
+
+    If the environment variable `MOCK_ELASTICSEARCH` is not set to "1",
+    the fixture yields without patching, and no mocking is applied.
+
+    Yields:
+        MagicMock: A mock Elasticsearch client, or `None` if mocking is disabled.
+    """
+    if os.getenv("MOCK_ELASTICSEARCH") != "1":
+        yield  # No-op if env var isn't set
+        return
+
+    with patch("lib.util._get_elasticsearch_connection") as mock_get_es:
+        mock_client = MagicMock()
+        mock_get_es.return_value = mock_client
+        yield mock_client
+
+
 @pytest.fixture()
 def temp_blob_directory():
     """

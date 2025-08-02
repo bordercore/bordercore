@@ -1,6 +1,5 @@
 import io
 import json
-import time
 from pathlib import Path
 from unittest.mock import Mock, patch
 from urllib.parse import urlparse
@@ -244,8 +243,11 @@ def test_blob_detail(auto_login_user, resolved_blob):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("blob:detail", args=(resolved_blob[0].uuid,))
-    resp = client.get(url)
+    mock_info = {}
+
+    with patch.object(Blob, "get_elasticsearch_info", return_value=mock_info):
+        url = urls.reverse("blob:detail", args=(resolved_blob[0].uuid,))
+        resp = client.get(url)
 
     assert resp.status_code == 200
 

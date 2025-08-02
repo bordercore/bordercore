@@ -28,9 +28,14 @@ from typing import Any, Dict, Optional
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
-from colorama import Fore, Style
 from mutagen.easyid3 import EasyID3
 from mutagen.id3._util import ID3NoHeaderError
+
+try:
+    from colorama import Fore, Style
+except ModuleNotFoundError:
+    # Don't worry if this import doesn't exist in production:
+    pass
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
