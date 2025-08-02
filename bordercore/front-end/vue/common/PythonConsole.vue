@@ -66,9 +66,32 @@
                 output.value = "";
                 pythonError.value = false;
                 const pyodide = await pyodideReadyPromise;
-                const code = document.querySelector(".code-input textarea");
+                const codeEl = document.querySelector(".code-input textarea");
+                const fullCode = codeEl.value.trim();
+
+                const lines = fullCode.split("\n");
+                const lastLine = lines[lines.length - 1].trim();
+
+                // Detect a print statement on the last line
+                const isPrintStmt = /^[\s]*print\s*\(.*\)/.test(lastLine);
+                // Detect an expression (not a stmt or assignment or print)
+                const isExpression = lastLine &&
+                                     !isPrintStmt &&
+                                     !/^[\s]*(?:def |class |import |from |if |for |while |with |\w+\s*=)/.test(lastLine);
+
+                let toRun = fullCode;
+                // If the last line is a standalone expression, wrap it to assign
+                //  to __repl_result and print it so its value shows up in the REPL
+                if (isExpression) {
+                    const head = lines.slice(0, -1).join("\n");
+                    toRun = `
+${head}
+__repl_result = ${lastLine}
+print(__repl_result)
+                    `.trim();
+                }
                 try {
-                    pyodide.runPython(code.value);
+                    pyodide.runPython(toRun);
                 } catch (err) {
                     pythonError.value = true;
                     output.value = err;
