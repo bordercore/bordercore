@@ -11,6 +11,7 @@ jobs:
 
     env:
       PYTHONPATH: $PYTHONPATH:.:bordercore
+      DJANGO_SETTINGS_MODULE: config.settings.dev
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -27,4 +28,6 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest bin/
+        pytest -m "not data_quality and not functional" \
+        bin/ \
+        bordercore/todo/
