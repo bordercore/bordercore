@@ -1,4 +1,15 @@
+"""
+This module defines the Todo model and related utilities.
+
+The `Todo` model represents a user‐defined task or action item, complete with
+a title, optional notes and URL, JSON data, due date, and priority level.
+It includes methods for tag management, priority mapping, and Elasticsearch
+indexing, as well as a signal handler for keeping `TagTodo` relations in sync
+when a todo’s tags change.
+"""
+
 import uuid
+from typing import Any, Dict, List, Optional, Type, Union
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -14,14 +25,21 @@ from .managers import TodoManager
 
 
 class Todo(TimeStampedModel):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    name = models.TextField()
-    note = models.TextField(null=True, blank=True)
-    url = models.URLField(max_length=1000, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    tags = models.ManyToManyField(Tag)
-    data = JSONField(null=True, blank=True)
-    due_date = models.DateTimeField(null=True, blank=True)
+    """A todo is a user-defined task or action item that can be organized and tracked.
+
+    A todo has a name, optional notes and related URL, and can be assigned one or
+    more tags. It may include arbitrary JSON data, an optional due date, and a
+    priority level (High, Medium, or Low). Todos are timestamped on creation and
+    modification and can be indexed for full‐text search.
+    """
+    uuid: models.UUIDField = models.UUIDField(default=uuid.uuid4, editable=False)
+    name: models.TextField = models.TextField()
+    note: models.TextField = models.TextField(null=True, blank=True)
+    url: models.URLField = models.URLField(max_length=1000, null=True, blank=True)
+    user: models.ForeignKey[User, int] = models.ForeignKey(User, on_delete=models.PROTECT)
+    tags: models.ManyToManyField = models.ManyToManyField(Tag)
+    data: JSONField = JSONField(null=True, blank=True)
+    due_date: models.DateTimeField = models.DateTimeField(null=True, blank=True)
 
     objects = TodoManager()
 
@@ -30,31 +48,59 @@ class Todo(TimeStampedModel):
         (2, "Medium"),
         (3, "Low"),
     ]
-    priority = models.IntegerField(
+    priority: models.IntegerField = models.IntegerField(
         choices=PRIORITY_CHOICES,
         default=3
     )
 
-    def get_tags(self):
+    def get_tags(self) -> str:
+        """Return a comma-separated, alphabetically ordered list of tag names.
+
+        Returns:
+            str: Comma-separated tag names in alphabetical order.
+        """
         return ", ".join([tag.name for tag in self.tags.all().order_by("name")])
 
     @staticmethod
-    def get_priority_name(priority_value):
+    def get_priority_name(priority_value: int) -> Optional[str]:
+        """Map an integer priority value to its display name.
+
+        Args:
+            priority_value: One of the integers from PRIORITY_CHOICES.
+
+        Returns:
+            Corresponding name, or None if not found.
+        """
         for priority in Todo.PRIORITY_CHOICES:
             if priority[0] == priority_value:
                 return priority[1]
         return None
 
     @staticmethod
-    def get_priority_value(priority_name):
+    def get_priority_value(priority_name: str) -> Optional[int]:
+        """Map a priority name back to its integer value.
+
+        Args:
+            priority_name: One of the names from PRIORITY_CHOICES.
+
+        Returns:
+            Corresponding integer, or None if not found.
+        """
         for priority in Todo.PRIORITY_CHOICES:
             if priority[1] == priority_name:
                 return priority[0]
         return None
 
     @staticmethod
-    def get_todo_counts(user):
+    def get_todo_counts(user: User) -> List[Dict[str, Union[str, int]]]:
+        """Count todos per tag for the given user, sorted by most recent.
 
+        Args:
+            user: User instance to filter todos.
+
+        Returns:
+            List of dicts with keys 'name' (tag) and 'count' (number of todos).
+        """
         # Get the list of tags, initially sorted by count per tag
         tags = Tag.objects.values("id", "name") \
                           .annotate(count=Count("todo", distinct=True)) \
@@ -67,8 +113,13 @@ class Todo(TimeStampedModel):
 
         return counts
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        """Save the instance and optionally re-index in Elasticsearch.
 
+        Args:
+            *args: Passed to Django’s Model.save().
+            **kwargs: May include 'index_es' to skip indexing (default True).
+        """
         # Remove any custom parameters before calling the parent class
         index_es = kwargs.pop("index_es", True)
 
@@ -78,19 +129,22 @@ class Todo(TimeStampedModel):
         if index_es:
             self.index_todo()
 
-    def delete(self):
+    def delete(self) -> None:
+        """Delete the instance and remove it from the Elasticsearch index."""
         delete_document(self.uuid)
         super().delete()
 
-    def index_todo(self):
+    def index_todo(self) -> None:
+        """Index this todo item in Elasticsearch."""
         index_document(self.elasticsearch_document)
 
     @property
-    def elasticsearch_document(self):
-        """
-        Return a representation of the todo suitable for indexing in Elasticsearch
-        """
+    def elasticsearch_document(self) -> Dict[str, Any]:
+        """Build the dict representation for Elasticsearch indexing.
 
+        Returns:
+            A dict with '_index', '_id', and '_source' for ES.
+        """
         return {
             "_index": settings.ELASTICSEARCH_INDEX,
             "_id": self.uuid,
@@ -106,14 +160,21 @@ class Todo(TimeStampedModel):
                 "doctype": "todo",
                 "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
                 "date_unixtime": self.created.strftime("%s"),
-                "user_id": self.user.id,
+                "user_id": self.user_id,
                 **settings.ELASTICSEARCH_EXTRA_FIELDS
             }
         }
 
 
-def tags_changed(sender, **kwargs):
+def tags_changed(sender: Type[Todo], **kwargs: Any) -> None:
+    """Handle m2m 'tags' changes by adding/removing TagTodo relations.
 
+    Triggered on post_add and post_remove of Todo.tags.
+
+    Args:
+        sender: The model class sending the signal.
+        **kwargs: Contains 'action', 'instance', and 'pk_set'.
+    """
     if kwargs["action"] == "post_add":
         todo = kwargs["instance"]
 

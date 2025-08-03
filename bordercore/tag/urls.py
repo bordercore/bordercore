@@ -1,5 +1,5 @@
 """
-URL configuration for the tag app.
+URL configuration for the Tag app.
 
 Defines the URL patterns that route HTTP requests to corresponding views
 related to tag functionality, including search, pinning, listing, and alias management.
