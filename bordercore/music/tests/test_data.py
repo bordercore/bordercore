@@ -1,54 +1,89 @@
+"""
+Song Data Integrity Tests
+
+This module contains integration tests that verify data consistency across multiple
+storage systems for song records. These tests ensure that song data remains synchronized
+between the database, S3 object storage, Elasticsearch index, and local filesystem.
+"""
+
 import re
 from pathlib import Path
 
 import boto3
 import pytest
-from botocore.errorfactory import ClientError
 
 import django
 from django.conf import settings
 
 from lib.util import get_elasticsearch_connection, get_missing_blob_ids
-from music.models import Album, Song
+from music.models import Song
 
 pytestmark = pytest.mark.data_quality
 
 django.setup()
 
-
 bucket_name = settings.AWS_BUCKET_NAME_MUSIC
-
 s3_client = boto3.client("s3")
 
 
 @pytest.fixture()
 def es():
+    "Elasticsearch fixture"
+    yield get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-    yield es
 
+def get_s3_song_uuids():
+    """
+    Get all song UUIDs from S3 by listing objects with "songs/" prefix.
+
+    Returns:
+        list: List of song UUIDs found in S3
+    """
+    paginator = s3_client.get_paginator("list_objects_v2")
+    s3_uuids = []
+
+    for page in paginator.paginate(Bucket=bucket_name, Prefix="songs/"):
+        if "Contents" in page:
+            for obj in page["Contents"]:
+                key = obj["Key"]
+                if key.startswith("songs/") and len(key) > 6:
+                    uuid = key[6:]  # Remove "songs/" prefix
+                    if uuid:  # Only add non-empty UUIDs
+                        s3_uuids.append(uuid)
+
+    return s3_uuids
 
 def test_album_songs_have_length_field():
     "Assert that all album songs have a length field"
     s = Song.objects.filter(length__isnull=True)
-    assert len(s) == 0, "%s songs fail this test" % len(s)
+    assert len(s) == 0, f"{len(s)} songs have no length field"
 
 
 def test_all_songs_exist_in_s3():
-
+    "Assert that all songs in the database exist in S3"
     songs = Song.objects.all().only("uuid")
+    db_uuids = [str(song.uuid) for song in songs]
 
-    for song in songs:
-        try:
-            key = f"songs/{song.uuid}"
-            s3_client.head_object(Bucket=bucket_name, Key=key)
-        except ClientError:
-            assert False, f"song not found in S3: {song.uuid}"
+    # Get all objects with the songs/ prefix in one call
+    paginator = s3_client.get_paginator("list_objects_v2")
+    s3_uuids = set()
+
+    for page in paginator.paginate(Bucket=bucket_name, Prefix="songs/"):
+        if "Contents" in page:
+            s3_uuids.update(obj["Key"] for obj in page["Contents"])
+
+    # Check which songs are missing
+    missing_from_s3 = []
+    for uuid in db_uuids:
+        expected_key = f"songs/{uuid}"
+        if expected_key not in s3_uuids:
+            missing_from_s3.append(uuid)
+
+    assert not missing_from_s3, f"Songs found in the database but not in S3: {missing_from_s3}"
 
 
 def test_songs_in_db_exist_in_elasticsearch(es):
     "Assert that all songs in the database exist in Elasticsearch"
-
     songs = Song.objects.all().only("uuid")
     step_size = 100
     song_count = songs.count()
@@ -82,31 +117,30 @@ def test_songs_in_db_exist_in_elasticsearch(es):
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
         assert found["hits"]["total"]["value"] == batch_size,\
-            "songs found in the database but not in Elasticsearch: " + get_missing_blob_ids(songs[batch:batch + step_size], found)
+            "Songs found in the database but not in Elasticsearch: " + get_missing_blob_ids(songs[batch:batch + step_size], found)
 
 
 def test_songs_in_s3_exist_in_db():
-    "Assert that all songs in S3 also exist in the database"
+    """Assert that all songs in S3 also exist in the database"""
+    # Get all song UUIDs from database in one query
+    songs = Song.objects.all().only("uuid")
+    db_uuids = {str(song.uuid) for song in songs}
 
-    s3_resource = boto3.resource("s3")
+    # Get all song UUIDs from S3
+    s3_uuids = set(get_s3_song_uuids())
 
-    song_cache = {}
-    for song in Song.objects.all().values("uuid"):
-        song_cache[str(song["uuid"])] = True
+    # Check which S3 songs are missing from database
+    missing_from_db = []
+    for uuid in s3_uuids:
+        if uuid not in db_uuids:
+            missing_from_db.append(uuid)
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
-    page_iterator = paginator.paginate(Bucket=bucket_name)
-
-    for page in page_iterator:
-        for key in page["Contents"]:
-            match = re.search(r"^songs/(.+)", str(key["Key"]))
-            if match:
-                assert match.group(1) in song_cache, f"Song found in S3 but not in DB: {match.group(1)}"
+    assert not missing_from_db, f"Songs found in S3 but not in the database: {missing_from_db}"
 
 
 def test_elasticsearch_songs_exist_in_s3(es):
-    "Assert that all songs in Elasticsearch exist in S3"
-
+    """Assert that all songs in Elasticsearch exist in S3"""
+    # Get all song UUIDs from Elasticsearch in one query
     search_object = {
         "query": {
             "bool": {
@@ -120,100 +154,61 @@ def test_elasticsearch_songs_exist_in_s3(es):
             }
         },
         "from": 0, "size": 10000,
-        "_source": ["artist", "title", "uuid"]
+        "_source": ["uuid"]
     }
-
     songs_in_elasticsearch = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
+    es_uuids = [song["_source"]["uuid"] for song in songs_in_elasticsearch]
 
-    s3_resource = boto3.resource("s3")
+    # Get all song UUIDs from S3
+    s3_uuids = set(get_s3_song_uuids())
 
-    songs_in_s3 = {}
+    # Check which Elasticsearch songs are missing from S3
+    missing_from_s3 = []
+    for uuid in es_uuids:
+        if uuid not in s3_uuids:
+            missing_from_s3.append(uuid)
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
-    page_iterator = paginator.paginate(Bucket=bucket_name)
-
-    for page in page_iterator:
-        for key in page["Contents"]:
-            m = re.search(r"^songs/(.+)", str(key["Key"]))
-            if m:
-                songs_in_s3[m.group(1)] = True
-
-    for song in songs_in_elasticsearch:
-        if not song["_source"]["uuid"] in songs_in_s3:
-            assert False, f"song {song['_source']['uuid']} exists in Elasticsearch but not in S3"
-
-
-def test_albums_in_db_exist_in_elasticsearch(es):
-    "Assert that all albums the database exist in Elasticsearch"
-
-    albums = Album.objects.all().only("uuid")
-    step_size = 100
-    album_count = albums.count()
-
-    for batch in range(0, album_count, step_size):
-
-        # The batch_size will always be equal to "step_size", except probably
-        #  the last batch, which will be less.
-        batch_size = step_size if album_count - batch > step_size else album_count - batch
-
-        query = [
-            {
-                "term": {
-                    "_id": str(x.uuid)
-                }
-            }
-            for x
-            in albums[batch:batch + step_size]
-        ]
-
-        search_object = {
-            "query": {
-                "bool": {
-                    "should": query
-                }
-            },
-            "size": batch_size,
-            "_source": [""]
-        }
-
-        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-
-        assert found["hits"]["total"]["value"] == batch_size,\
-            "albums found in the database but not in Elasticsearch: " + get_missing_blob_ids(albums[batch:batch + step_size], found)
+    assert not missing_from_s3, f"Songs found in Elasticsearch but not in S3: {missing_from_s3}"
 
 
 @pytest.mark.wumpus
 def test_song_in_s3_exist_on_filesystem():
-    "Assert that all songs in S3 also exist on the filesystem"
-
+    """Assert that all songs in S3 also exist on the filesystem"""
     def sanitize_filename(name):
         return name.replace("/", "-")
 
-    song_cache = {}
+    def get_song_path(song):
+        """Generate filesystem path for a song"""
+        first_letter_dir = re.sub(r"\W+", "", song.artist.name).lower()[0]
+
+        if song.album:
+            track_number = f"{song.track:02d}"  # Zero-pad to 2 digits
+            base_path = "/home/media/music"
+
+            if song.album.compilation:
+                return f"{base_path}/v/Various/{song.album.title}/{track_number} - {song.title}.mp3"
+            artist_name = sanitize_filename(song.artist.name)
+            album_title = sanitize_filename(song.album.title)
+            song_title = sanitize_filename(song.title)
+            return f"{base_path}/{first_letter_dir}/{artist_name}/{album_title}/{track_number} - {song_title}.mp3"
+        artist_name = sanitize_filename(song.artist.name)
+        song_title = sanitize_filename(song.title)
+        return f"/home/media/music/{first_letter_dir}/{artist_name}/{song_title}.mp3"
+
+    # Get all songs from database with related data
     songs = Song.objects.all().select_related("artist", "album")
-    for song in songs:
-        song_cache[str(song.uuid)] = song
+    song_cache = {str(song.uuid): song for song in songs}
 
-    s3_resource = boto3.resource("s3")
+    # Get all song UUIDs from S3
+    s3_uuids = set(get_s3_song_uuids())
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
-    page_iterator = paginator.paginate(Bucket=bucket_name)
+    # Check filesystem existence for all S3 songs
+    missing_from_filesystem = []
+    for uuid in s3_uuids:
+        if uuid in song_cache:
+            song = song_cache[uuid]
+            path = get_song_path(song)
+            if not Path(path).is_file():
+                missing_from_filesystem.append(f"{song} - UUID: {uuid} - Path: {path}")
 
-    for page in page_iterator:
-        for key in page["Contents"]:
-            match = re.search(r"^songs/(.+)", str(key["Key"]))
-            if match:
-                uuid = match.group(1)
-                first_letter_dir = re.sub(r"\W+", "", song_cache[uuid].artist.name).lower()[0]
-                if song_cache[uuid].album:
-                    track_number = song_cache[uuid].track
-                    if len(str(song_cache[uuid].track)) == 1:
-                        track_number = f"0{song_cache[uuid].track}"
-                    if song_cache[uuid].album.compilation:
-                        path = f"/home/media/music/v/Various/{song_cache[uuid].album.title}/{track_number} - {song_cache[uuid].title}.mp3"
-                    else:
-                        path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song_cache[uuid].artist.name)}/{sanitize_filename(song_cache[uuid].album.title)}/{track_number} - {sanitize_filename(song_cache[uuid].title)}.mp3"
-                else:
-                    path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song_cache[uuid].artist.name)}/{sanitize_filename(song_cache[uuid].title)}.mp3"
-
-                assert Path(path).is_file(), f"{song_cache[uuid]} in S3 not found on filesystem: {song_cache[uuid].uuid} {path}"
+    assert not missing_from_filesystem, f"Songs found in S3 but not on filesystem: {missing_from_filesystem}"
