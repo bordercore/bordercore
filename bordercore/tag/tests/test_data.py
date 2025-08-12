@@ -1,7 +1,7 @@
 import pytest
 
 import django
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Q, Subquery
 
 from bookmark.models import Bookmark
 from tag.models import Tag, TagAlias, TagBookmark
@@ -44,8 +44,13 @@ def test_tag_alias():
     """
     There should be no tags that match any tag aliases.
     """
-    tag_aliases = TagAlias.objects.all()
+    # Get all alias (user, name) pairs
+    alias_pairs = TagAlias.objects.values_list("user", "name")
 
-    for alias in tag_aliases:
-        assert not Tag.objects.filter(user=alias.user, name=alias.name), \
-            f"Tag {alias.name} exists as an alias for user {alias.user}."
+    # Check if any tags exist with those combinations
+    conflicting_tags = Tag.objects.filter(
+        Q(*[Q(user=user, name=name) for user, name in alias_pairs], _connector="OR")
+    ).values_list("user", "name")
+
+    assert not conflicting_tags.exists(), \
+        f"Tags exist that conflict with aliases: {list(conflicting_tags)}"
