@@ -1,3 +1,10 @@
+"""
+Bookmark Data Integrity Tests
+
+This module contains integration tests that verify data consistency across multiple
+storage systems for bookmark records. These tests ensure that bookmark data remains synchronized between the database, S3 object storage, Elasticsearch index, and local filesystem.
+"""
+
 import re
 
 import boto3
@@ -7,27 +14,35 @@ import django
 from django.conf import settings
 from django.db.models import Q
 
+from bookmark.models import Bookmark
 from lib.util import get_elasticsearch_connection, get_missing_bookmark_ids
 
 pytestmark = pytest.mark.data_quality
 
 django.setup()
 
-from bookmark.models import Bookmark  # isort:skip
-
-
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
 
 @pytest.fixture()
 def es():
-
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-    yield es
+    "Elasticsearch fixture"
+    yield get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 
 def test_bookmarks_in_db_exist_in_elasticsearch(es):
-    "Assert that all bookmarks in the database also exist in Elasticsearch"
+    """Test that all bookmarks in the database are present in Elasticsearch.
+
+    This test retrieves all bookmark UUIDs from the database in batches and
+    checks whether each batch exists in the configured Elasticsearch index.
+
+    Args:
+        es: Elasticsearch client fixture for querying the search index.
+
+    Raises:
+        AssertionError: If one or more bookmarks exist in the database but
+            are missing from the Elasticsearch index.
+    """
     bookmarks = Bookmark.objects.all().only("uuid")
 
     step = 50
@@ -62,83 +77,149 @@ def test_bookmarks_in_db_exist_in_elasticsearch(es):
 
 
 def test_bookmark_tags_match_elasticsearch(es):
-    "Assert that all bookmarks tags match those found in Elasticsearch"
-    bookmarks = Bookmark.objects.filter(tags__isnull=False).only("uuid", "tags").order_by("uuid").distinct("uuid")
+    """Test that all bookmark tags match those found in Elasticsearch.
 
-    step = 50
-    for batch in range(0, len(bookmarks), step):
-        batch_size = len(bookmarks[batch:batch + step])
+    This test validates data consistency between the database and Elasticsearch
+    by comparing bookmark tags.
 
-        query = [
-            {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "uuid": b.uuid
-                            }
-                        },
-                        {
-                            "bool": {
-                                "must": [
-                                    {
-                                        "term": {
-                                            "tags.keyword": tag.name
+    Args:
+        es: Elasticsearch client fixture for querying the search index.
+
+    Raises:
+        AssertionError: If any bookmark's tags don't match between the database
+            and Elasticsearch. The error message includes missing bookmark IDs.
+    """
+    # Optimize database query with prefetch_related to avoid N+1 queries
+    bookmarks = (
+        Bookmark.objects
+        .filter(tags__isnull=False)
+        .prefetch_related("tags")
+        .only("uuid")
+        .order_by("uuid")
+        .distinct("uuid")
+    )
+
+    # Convert to list once to avoid re-evaluation
+    bookmarks_list = list(bookmarks)
+
+    # Process in batches for better performance
+    step = 200
+
+    for batch_start in range(0, len(bookmarks_list), step):
+        batch_bookmarks = bookmarks_list[batch_start:batch_start + step]
+
+        should_queries = []
+        bookmarks_with_tags = []  # Track which bookmarks actually have tags
+
+        for bookmark in batch_bookmarks:
+            # Get tag names without additional DB queries (thanks to prefetch_related)
+            tag_names = [tag.name for tag in bookmark.tags.all()]
+
+            if tag_names:  # Only query if bookmark has tags
+                bookmarks_with_tags.append(bookmark)
+                bookmark_query = {
+                    "bool": {
+                        "must": [
+                            {
+                                "term": {
+                                    "uuid": str(bookmark.uuid)
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "tags.keyword": tag_name
+                                            }
                                         }
-                                    }
-                                    for tag in b.tags.all()
-                                ]
+                                        for tag_name in tag_names
+                                    ]
+                                }
                             }
-                        }
-                    ]
+                        ]
+                    }
                 }
-            }
-            for b
-            in bookmarks[batch:batch + step]
-        ]
+                should_queries.append(bookmark_query)
+
+        if not should_queries:
+            continue  # Skip if no bookmarks with tags in this batch
 
         search_object = {
             "query": {
                 "bool": {
-                    "should": query
+                    "should": should_queries,
                 }
             },
-            "size": batch_size,
-            "_source": ["uuid"]
+            "size": len(should_queries),
+            "_source": ["uuid"],
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-        assert found["hits"]["total"]["value"] == batch_size, \
-            "bookmark's tags don't match those found in Elasticsearch: " + get_missing_bookmark_ids(bookmarks[batch:batch + step], found)
+        expected_count = len(should_queries)
+        actual_count = found["hits"]["total"]["value"]
+
+        assert actual_count == expected_count, \
+            f"Bookmark's tags don't match those found in Elasticsearch: {get_missing_bookmark_ids(bookmarks_with_tags, found)}"
 
 
 def test_elasticsearch_bookmarks_exist_in_db(es):
-    "Assert that all bookmarks in Elasticsearch exist in the database"
+    """Test that all bookmarks in Elasticsearch exist in the database.
 
+    This test performs a bulk validation to ensure data consistency between
+    Elasticsearch and the database by fetching all bookmark-type documents from
+    Elasticsearch and verifying each UUID exists in the Bookmark model.
+
+    Args:
+        es: Elasticsearch client fixture for querying the search index.
+
+    Raises:
+        AssertionError: If any bookmark IDs found in Elasticsearch are missing
+            from the database.
+    """
     search_object = {
         "query": {
             "term": {
                 "doctype": "bookmark"
             }
         },
-        "from": 0, "size": 10000,
+        "from": 0,
+        "size": 10000,
         "_source": ["uuid"]
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
-    missing_uuids = []
-    for bookmark in found:
-        if Bookmark.objects.filter(uuid=bookmark["_source"]["uuid"]).count() != 1:
-            missing_uuids.append(bookmark["_source"]["uuid"])
-    if missing_uuids:
-        uuid_list = "\nuuid:".join(x for x in missing_uuids)
-        assert False, f"bookmarks exist in Elasticsearch but not in database, uuid:{uuid_list}"
+    if not found:
+        return  # No bookmarks in ES to test
+
+    # Extract ES UUIDs
+    es_uuids = [bookmark["_source"]["uuid"] for bookmark in found]
+
+    # Single database query to get all existing UUIDs
+    existing_uuids = set(
+        str(uuid) for uuid in Bookmark.objects.filter(uuid__in=es_uuids)
+        .values_list('uuid', flat=True)
+    )
+
+    # Find missing UUIDs
+    missing_from_db = [uuid for uuid in es_uuids if uuid not in existing_uuids]
+
+    if missing_from_db:
+        assert False, f"Bookmarks found in Elasticsearch but not in database: {missing_from_db}"
 
 
 def test_bookmark_fields_are_trimmed():
-    "Assert that bookmark fields have no leading or trailing whitespace"
+    """Test that bookmark fields do not contain leading or trailing whitespace.
 
+    This test queries the ``Bookmark`` model for any records where the
+    ``url``, ``name``, or ``note`` fields start or end with whitespace
+    characters.
+
+    Raises:
+        AssertionError: If one or more bookmarks contain leading or
+            trailing whitespace in any of the tested fields.
+    """
     bookmarks = Bookmark.objects.filter(
         Q(url__iregex=r"\s$")
         | Q(url__iregex=r"^\s")
@@ -151,26 +232,46 @@ def test_bookmark_fields_are_trimmed():
 
 
 def test_bookmark_thumbnails_in_s3_exist_in_db():
-    "Assert that all bookmark thumbanils in S3 also exist in the database"
+    """Test that all bookmark thumbnails in S3 also exist in the database.
 
+    This test validates data consistency between S3 storage and the database
+    by extracting bookmark UUIDs from S3 object keys and verifying each UUID
+    exists in the Bookmark model using a single bulk database query.
+
+    Raises:
+        AssertionError: If any bookmark UUIDs found in S3 are missing from the
+            database. The error message includes the list of missing UUIDs.
+    """
     s3_resource = boto3.resource("s3")
-
     unique_uuids = set()
 
+    # Compile regex once for better performance
+    uuid_pattern = re.compile(r"^bookmarks/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)")
+
+    # Extract all UUIDs from S3 (unchanged - this part was already efficient)
     paginator = s3_resource.meta.client.get_paginator("list_objects")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
-        for key in page["Contents"]:
-            m = re.search(r"^bookmarks/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)", str(key["Key"]))
-            if m:
-                unique_uuids.add(m.group(1))
+        # Skip pages with no contents
+        if "Contents" not in page:
+            continue
 
-    missing_uuids = []
-    for key in unique_uuids:
-        if not Bookmark.objects.filter(uuid=key).exists():
-            missing_uuids.append(key)
+        for obj in page["Contents"]:
+            match = uuid_pattern.search(obj["Key"])
+            if match:
+                unique_uuids.add(match.group(1))
 
-    if missing_uuids:
-        uuid_list = "\nuuid:".join(x for x in missing_uuids)
-        assert False, f"bookmark thumbnails found in S3 but not in DB, uuid:{uuid_list}"
+    if not unique_uuids:
+        return  # No bookmark thumbnails found in S3
+
+    existing_uuids = set(
+        str(uuid) for uuid in Bookmark.objects.filter(uuid__in=unique_uuids)
+        .values_list('uuid', flat=True)
+    )
+
+    # Find missing UUIDs using set difference
+    missing_from_db = unique_uuids - existing_uuids
+
+    if missing_from_db:
+        assert False, f"Bookmark thumbnails found in S3 but not in DB: {missing_from_db}"
