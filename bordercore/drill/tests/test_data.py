@@ -1,3 +1,11 @@
+"""
+Question Data Integrity Tests
+
+This module contains integration tests that verify data consistency across multiple
+storage systems for question records. These tests ensure that question data remains synchronized
+between the database and the Elasticsearch index.
+"""
+
 import pytest
 
 import django
@@ -13,9 +21,8 @@ django.setup()
 
 @pytest.fixture()
 def es():
-
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-    yield es
+    "Elasticsearch fixture"
+    yield get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 
 def test_questions_in_db_exist_in_elasticsearch(es):
@@ -57,7 +64,7 @@ def test_questions_in_db_exist_in_elasticsearch(es):
 
 
 def test_elasticsearch_questions_exist_in_db(es):
-    "Assert that all questions in Elasticsearch exist in the database"
+    """Assert that all questions in Elasticsearch exist in the database"""
 
     search_object = {
         "query": {
@@ -66,11 +73,20 @@ def test_elasticsearch_questions_exist_in_db(es):
             }
         },
         "from": 0, "size": 10000,
-        "_source": ["_id", "bordercore_id"]
+        "_source": ["uuid"]
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
+    es_uuids = [question["_source"]["uuid"] for question in found]
 
-    for question in found:
-        assert Question.objects.filter(uuid=question["_id"]).count() == 1, \
-            f"question exists in Elasticsearch but not in database, id={question['_id']}"
+    # Single database query to get all existing UUIDs
+    db_uuids = set(
+        str(uuid) for uuid in Question.objects.filter(uuid__in=es_uuids)
+        .values_list("uuid", flat=True)
+    )
+
+    # Find missing UUIDs
+    missing_from_db = set(es_uuids) - db_uuids
+
+    assert not missing_from_db, \
+        f"Questions found in Elasticsearch but not in the database: {missing_from_db}"
