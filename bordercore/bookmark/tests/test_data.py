@@ -248,7 +248,7 @@ def test_bookmark_thumbnails_in_s3_exist_in_db():
     uuid_pattern = re.compile(r"^bookmarks/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)")
 
     # Extract all UUIDs from S3
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:

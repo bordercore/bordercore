@@ -861,7 +861,7 @@ def missing_artist_images(request):
 
     unique_uuids = {}
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket="bordercore-music")
 
     for page in page_iterator:

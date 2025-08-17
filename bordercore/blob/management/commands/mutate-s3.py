@@ -54,7 +54,7 @@ class Command(BaseCommand):
         self.s3_client = client("s3")
         self.s3_resource = boto3.resource("s3")
 
-        paginator = self.s3_client.get_paginator("list_objects")
+        paginator = self.s3_client.get_paginator("list_objects_v2")
         page_iterator = paginator.paginate(Bucket=self.bucket_name)
 
         for page in page_iterator:

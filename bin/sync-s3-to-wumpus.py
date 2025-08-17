@@ -29,7 +29,7 @@ s3_client = boto3.client("s3")
 def get_blobs_from_s3():
     s3_uuids = {}
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
