@@ -15,7 +15,7 @@ export function doGet(url, callback, errorMsg = "", responseType = "json") {
                         title: "Error!",
                         body: errorMsg,
                         variant: "danger",
-                        autoHide: false,
+                        autoHide: true,
                     },
                 );
                 console.log(errorMsg);
@@ -30,7 +30,7 @@ export function doGet(url, callback, errorMsg = "", responseType = "json") {
                     title: "Error!",
                     body: `${errorMsg}: ${error.message}`,
                     variant: "danger",
-                    autoHide: false,
+                    autoHide: true,
                 },
             );
             console.error(error);
@@ -63,7 +63,7 @@ export function doPost(url, params, callback, successMsg = "", errorMsg = "") {
                     title: "Error",
                     body: response.data.message,
                     variant: "warning",
-                    autoHide: false,
+                    autoHide: true,
                 },
             );
             console.log("Warning: ", response.data.message);
@@ -74,7 +74,7 @@ export function doPost(url, params, callback, successMsg = "", errorMsg = "") {
                     title: "Error",
                     body: response.data.message,
                     variant: "danger",
-                    autoHide: false,
+                    autoHide: true,
                 },
             );
             console.log("Error: ", response.data.message);
@@ -100,7 +100,7 @@ export function doPost(url, params, callback, successMsg = "", errorMsg = "") {
                     title: "Error",
                     body: error.message,
                     variant: "danger",
-                    autoHide: false,
+                    autoHide: true,
                 },
             );
             console.error(error);
@@ -133,7 +133,7 @@ export function doPut(url, params, callback, successMsg = "", errorMsg = "") {
                     title: "Error",
                     body: response.data.message,
                     variant: "danger",
-                    autoHide: false,
+                    autoHide: true,
                 },
             );
             console.log("Error: ", response.statusText);
@@ -159,7 +159,7 @@ export function doPut(url, params, callback, successMsg = "", errorMsg = "") {
                     title: "Error",
                     body: error.message,
                     variant: "danger",
-                    autoHide: false,
+                    autoHide: true,
                 },
             );
             console.error(error);
