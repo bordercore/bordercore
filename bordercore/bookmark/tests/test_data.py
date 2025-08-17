@@ -89,7 +89,7 @@ def test_bookmark_tags_match_elasticsearch(es):
         AssertionError: If any bookmark's tags don't match between the database
             and Elasticsearch. The error message includes missing bookmark IDs.
     """
-    # Optimize database query with prefetch_related to avoid N+1 queries
+
     bookmarks = (
         Bookmark.objects
         .filter(tags__isnull=False)
@@ -112,10 +112,9 @@ def test_bookmark_tags_match_elasticsearch(es):
         bookmarks_with_tags = []  # Track which bookmarks actually have tags
 
         for bookmark in batch_bookmarks:
-            # Get tag names without additional DB queries (thanks to prefetch_related)
             tag_names = [tag.name for tag in bookmark.tags.all()]
 
-            if tag_names:  # Only query if bookmark has tags
+            if tag_names:
                 bookmarks_with_tags.append(bookmark)
                 bookmark_query = {
                     "bool": {
@@ -143,7 +142,7 @@ def test_bookmark_tags_match_elasticsearch(es):
                 should_queries.append(bookmark_query)
 
         if not should_queries:
-            continue  # Skip if no bookmarks with tags in this batch
+            continue
 
         search_object = {
             "query": {
@@ -191,7 +190,7 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
     if not found:
-        return  # No bookmarks in ES to test
+        return
 
     # Extract ES UUIDs
     es_uuids = [bookmark["_source"]["uuid"] for bookmark in found]
@@ -199,7 +198,7 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
     # Single database query to get all existing UUIDs
     existing_uuids = set(
         str(uuid) for uuid in Bookmark.objects.filter(uuid__in=es_uuids)
-        .values_list('uuid', flat=True)
+        .values_list("uuid", flat=True)
     )
 
     # Find missing UUIDs
@@ -248,12 +247,11 @@ def test_bookmark_thumbnails_in_s3_exist_in_db():
     # Compile regex once for better performance
     uuid_pattern = re.compile(r"^bookmarks/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)")
 
-    # Extract all UUIDs from S3 (unchanged - this part was already efficient)
+    # Extract all UUIDs from S3
     paginator = s3_resource.meta.client.get_paginator("list_objects")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
-        # Skip pages with no contents
         if "Contents" not in page:
             continue
 
@@ -263,14 +261,14 @@ def test_bookmark_thumbnails_in_s3_exist_in_db():
                 unique_uuids.add(match.group(1))
 
     if not unique_uuids:
-        return  # No bookmark thumbnails found in S3
+        return
 
     existing_uuids = set(
         str(uuid) for uuid in Bookmark.objects.filter(uuid__in=unique_uuids)
-        .values_list('uuid', flat=True)
+        .values_list("uuid", flat=True)
     )
 
-    # Find missing UUIDs using set difference
+    # Find missing UUIDs
     missing_from_db = unique_uuids - existing_uuids
 
     if missing_from_db:

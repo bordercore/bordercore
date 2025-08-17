@@ -16,10 +16,8 @@ from tag.models import TagTodo  # isort:skip
 
 @pytest.fixture()
 def es():
-
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-    yield es
-
+    "Elasticsearch fixture"
+    yield get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 def test_todo_tasks_in_db_exist_in_elasticsearch(es):
     """Assert that all todo tasks in the database exist in Elasticsearch"""

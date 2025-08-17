@@ -1,18 +1,26 @@
+"""
+Blob Data Integrity Tests
+
+This module contains integration tests that verify data consistency across multiple
+storage systems for blob records. These tests ensure that blob data remains synchronized between the database, S3 object storage, Elasticsearch index, and local filesystem.
+"""
+
 import logging
 import re
+from collections import defaultdict
+from os import stat
 from pathlib import Path
+from pwd import getpwuid
 
 import boto3
 import pytest
-from botocore.errorfactory import ClientError
 
 import django
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from lib.util import (get_elasticsearch_connection, get_missing_blob_ids,
-                      get_missing_metadata_ids, is_image)
+                      is_image)
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
@@ -30,15 +38,13 @@ ELASTICSEARCH_TIMEOUT = 30
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
-
 @pytest.fixture()
 def es():
-
-    es = get_elasticsearch_connection(
+    "Elasticsearch fixture"
+    yield get_elasticsearch_connection(
         host=settings.ELASTICSEARCH_ENDPOINT,
         timeout=ELASTICSEARCH_TIMEOUT
     )
-    yield es
 
 
 def test_books_with_tags(es):
@@ -319,85 +325,149 @@ def test_tags_all_lowercase():
 
 
 def test_blobs_in_db_exist_in_elasticsearch(es):
-    "Assert that all blobs in the database exist in Elasticsearch"
+    """Assert that all blobs in the database exist in Elasticsearch"""
+    blob_uuids = list(
+        Blob.objects.filter(is_indexed=True)
+        .values_list("uuid", flat=True)
+        .iterator(chunk_size=1000)  # Use iterator for memory efficiency
+    )
 
-    blobs = Blob.objects.filter(is_indexed=True).only("uuid")
-    step_size = 100
-    blob_count = blobs.count()
+    if not blob_uuids:
+        return
 
-    for batch in range(0, blob_count, step_size):
+    step_size = 500
+    total_count = len(blob_uuids)
 
-        # The batch_size will always be equal to "step_size", except probably
-        #  the last batch, which will be less.
-        batch_size = step_size if blob_count - batch > step_size else blob_count - batch
-
-        query = [
-            {
-                "term": {
-                    "_id": str(x.uuid)
-                }
-            }
-            for x
-            in blobs[batch:batch + step_size]
-        ]
+    for batch_start in range(0, total_count, step_size):
+        batch_end = min(batch_start + step_size, total_count)
+        batch_uuids = blob_uuids[batch_start:batch_end]
+        batch_size = len(batch_uuids)
 
         search_object = {
             "query": {
-                "bool": {
-                    "should": query
+                "terms": {
+                    "_id": [str(uuid) for uuid in batch_uuids]
                 }
             },
             "size": batch_size,
-            "_source": [""]
+            "_source": False,
+            "track_total_hits": True  # Ensure accurate total count
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        found_count = found["hits"]["total"]["value"]
 
-        assert found["hits"]["total"]["value"] == batch_size,\
-            "blobs found in the database but not in Elasticsearch: " + get_missing_blob_ids(blobs[batch:batch + step_size], found)
+        assert found_count == batch_size, (
+            f"Expected {batch_size} blobs in Elasticsearch, found {found_count}. "
+            f"Missing blobs: {get_missing_blob_ids_optimized(batch_uuids, found)}"
+        )
+
+
+def get_missing_blob_ids_optimized(expected_uuids, es_response):
+    """Helper function to identify missing blob IDs efficiently"""
+    found_ids = {hit["_id"] for hit in es_response["hits"]["hits"]}
+    expected_ids = {str(uuid) for uuid in expected_uuids}
+    missing_ids = expected_ids - found_ids
+    return list(missing_ids)
 
 
 def test_blobs_in_s3_exist_in_db():
-    "Assert that all blobs in S3 also exist in the database"
-
+    """Assert that all blobs in S3 also exist in the database - Optimized Version"""
     s3_resource = boto3.resource("s3")
 
-    unique_uuids = {}
-
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    # Step 1: Extract all UUIDs from S3
+    s3_uuids = set()
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
-    for page in page_iterator:
-        for key in page["Contents"]:
-            m = re.search(r"^blobs/(.*?)/", str(key["Key"]))
-            if m:
-                unique_uuids[m.group(1)] = True
+    # Compile regex once for better performance
+    uuid_pattern = re.compile(r"^blobs/(.*?)/")
 
-    for key in unique_uuids.keys():
-        try:
-            Blob.objects.get(uuid=key)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist(f"Blob found in S3 but not in DB: {key}")
+    for page in page_iterator:
+        if "Contents" not in page:
+            continue
+
+        for obj in page["Contents"]:
+            match = uuid_pattern.search(obj["Key"])
+            if match:
+                s3_uuids.add(match.group(1))
+
+    if not s3_uuids:
+        return
+
+    batch_size = 1000
+    missing_uuids = []
+
+    s3_uuid_list = list(s3_uuids)
+    for i in range(0, len(s3_uuid_list), batch_size):
+        batch_uuids = s3_uuid_list[i:i + batch_size]
+
+        # Single query to check which UUIDs exist in this batch
+        existing_uuids = set(
+            str(uuid) for uuid in Blob.objects.filter(uuid__in=batch_uuids)
+            .values_list("uuid", flat=True)
+        )
+
+        # Find missing UUIDs in this batch
+        batch_missing = [uuid for uuid in batch_uuids if uuid not in existing_uuids]
+        missing_uuids.extend(batch_missing)
+
+    if missing_uuids:
+        raise AssertionError(
+            f"Found {len(missing_uuids)} blobs in S3 but not in database: "
+            f"{missing_uuids[:10]}{'...' if len(missing_uuids) > 10 else ''}"
+        )
 
 
 def test_images_have_thumbnails():
-    "Assert that every image blob has a thumbnail"
-
-    # Create the client here rather than at the top of the module
-    #  to avoid interfering with moto mocks in other tests.
+    """Assert that every image blob has a thumbnail - Optimized Version"""
     s3_client = boto3.client("s3")
 
-    for blob in Blob.objects.filter(~Q(file="")):
-
+    # Step 1: Get all image blobs at once
+    image_blobs = []
+    for blob in Blob.objects.filter(~Q(file="")).select_related().iterator(chunk_size=1000):
         if is_image(blob.file):
-            key = "{}/{}/cover.jpg".format(
-                settings.MEDIA_ROOT,
-                blob.uuid,
-            )
-            try:
-                s3_client.head_object(Bucket=bucket_name, Key=key)
-            except ClientError:
-                assert False, f"image blob {blob.uuid} does not have a thumbnail"
+            image_blobs.append(blob)
+
+    if not image_blobs:
+        return
+
+    # Step 2: Build all expected thumbnail keys
+    expected_thumbnails = {}
+    for blob in image_blobs:
+        key = f"{settings.MEDIA_ROOT}/{blob.uuid}/cover.jpg"
+        expected_thumbnails[key] = blob.uuid
+
+    # Step 3: Use S3 list_objects_v2 to check existence in batches
+    existing_keys = set()
+    paginator = s3_client.get_paginator("list_objects_v2")
+
+    # List all objects with the MEDIA_ROOT prefix
+    page_iterator = paginator.paginate(
+        Bucket=bucket_name,
+        Prefix=f"{settings.MEDIA_ROOT}/"
+    )
+
+    for page in page_iterator:
+        if "Contents" not in page:
+            continue
+
+        for obj in page["Contents"]:
+            key = obj["Key"]
+            if key in expected_thumbnails:
+                existing_keys.add(key)
+
+    # Step 4: Find missing thumbnails
+    missing_thumbnails = []
+    for expected_key, blob_uuid in expected_thumbnails.items():
+        if expected_key not in existing_keys:
+            missing_thumbnails.append(blob_uuid)
+
+    if missing_thumbnails:
+        assert False, (
+            f"Found {len(missing_thumbnails)} image blobs without thumbnails: "
+            f"{missing_thumbnails[:10]}{'...' if len(missing_thumbnails) > 10 else ''}"
+        )
 
 
 def test_elasticsearch_blobs_exist_in_s3(es):
@@ -430,7 +500,7 @@ def test_elasticsearch_blobs_exist_in_s3(es):
 
     unique_uuids = {}
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
@@ -443,14 +513,13 @@ def test_elasticsearch_blobs_exist_in_s3(es):
         if not blob["_source"]["uuid"] in unique_uuids:
             assert False, f"blob {blob['_source']['uuid']} exists in Elasticsearch but not in S3"
 
-
 @pytest.mark.wumpus
 def test_blobs_in_s3_exist_on_filesystem():
     "Assert that all blobs in S3 exist on the filesystem"
 
     s3_resource = boto3.resource("s3")
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
@@ -469,7 +538,7 @@ def test_blobs_on_filesystem_exist_in_s3():
 
     s3_resource = boto3.resource("s3")
 
-    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     blobs = {}
@@ -488,44 +557,42 @@ def test_blobs_on_filesystem_exist_in_s3():
 
 
 def test_elasticsearch_blobs_exist_in_db(es):
-    "Assert that all blobs in Elasticsearch exist in the database"
+    """Assert that all blobs in Elasticsearch exist in the database - Optimized Version"""
+
     search_object = {
         "query": {
-            "bool": {
-                "should": [
-                    {
-                        "term": {
-                            "doctype": "book"
-                        }
-                    },
-                    {
-                        "term": {
-                            "doctype": "blob"
-                        }
-                    },
-                    {
-                        "term": {
-                            "doctype": "document"
-                        }
-                    }
-                ]
+            "terms": {
+                "doctype": ["book", "blob", "document"]
             }
         },
-        "from": 0, "size": 10000,
+        "size": 10000,
         "_source": ["uuid"]
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
-    for blob in found:
-        assert Blob.objects.filter(uuid=blob["_source"]["uuid"]).count() == 1, f"blob {blob['_source']['uuid']} exists in Elasticsearch but not in database"
+    if not found:
+        return
+
+    # Extract all UUIDs from ES
+    es_uuids = [blob["_source"]["uuid"] for blob in found]
+
+    # Single database query to get all existing UUIDs
+    existing_uuids = set(
+        str(uuid) for uuid in Blob.objects.filter(uuid__in=es_uuids)
+        .values_list('uuid', flat=True)
+    )
+
+    # Find missing UUIDs
+    missing_from_db = set(es_uuids) - existing_uuids
+
+    if missing_from_db:
+        assert False, f"Blobs found in Elasticsearch but not in the database: {missing_from_db}"
 
 
 @pytest.mark.wumpus
 def test_blob_permissions():
     "Assert that all blobs are owned by jerrell and all directories have permissions 775"
-    from os import stat
-    from pwd import getpwuid
 
     owner = "jerrell"
     walk_dir = "/home/media/blobs/"
@@ -539,62 +606,72 @@ def test_blob_permissions():
 
 
 def test_blob_metadata_exists_in_elasticsearch(es):
-    "Assert that blob metadata exists in Elasticsearch"
+    """Optimized version using prefetch_related and simplified ES queries"""
 
-    metadata = MetaData.objects.exclude(Q(blob__is_indexed=False)
-                                        | Q(name="is_book")
-                                        | Q(name=""))
-    step_size = 100
-    metadata_count = metadata.count()
+    metadata_qs = MetaData.objects.exclude(
+        Q(blob__is_indexed=False) | Q(name="is_book") | Q(name="")
+    ).select_related("blob").values(
+        "name", "value", "blob__uuid"
+    )
 
-    for batch in range(0, metadata_count, step_size):
+    if not metadata_qs.exists():
+        return
 
-        # The batch_size will always be equal to "step_size", except probably
-        #  the last batch, which will be less.
-        batch_size = step_size if metadata_count - batch > step_size else metadata_count - batch
+    # Group metadata by blob UUID to reduce ES queries
+    blob_metadata = defaultdict(list)
+    for item in metadata_qs:
+        blob_metadata[str(item["blob__uuid"])].append({
+            "name": item["name"].lower(),
+            "value": item["value"]
+        })
 
-        query = [
-            {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "uuid": str(x.blob.uuid)
-                            }
-                        },
-                        {
-                            "match": {
-                                f"metadata.{x.name.lower()}": {
-                                    "query": x.value,
-                                    "operator": "and"
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-            for x
-            in metadata[batch:batch + step_size]
-        ]
+    # Test in smaller, more manageable batches
+    blob_uuids = list(blob_metadata.keys())
+    batch_size = 200
+    errors = []
 
-        # A list of unique metadata names used in this batch
-        names = set([x.name.lower() for x in metadata[batch:batch + step_size]])
-        names.add("uuid")
+    for i in range(0, len(blob_uuids), batch_size):
+        batch_uuids = blob_uuids[i:i + batch_size]
 
-        unique_uuids = set([x.blob.uuid for x in metadata[batch:batch + step_size]])
-
-        search_object = {
+        # Single ES query to get all blobs in this batch
+        search_body = {
             "query": {
-                "bool": {
-                    "should": query
+                "terms": {
+                    "uuid": batch_uuids
                 }
             },
-            "from": 0, "size": batch_size,
-            "_source": list(names)
+            "size": len(batch_uuids),
+            "_source": ["uuid", "metadata"]
         }
-        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-        assert found["hits"]["total"]["value"] == len(unique_uuids), \
-            "metadata for blobs found in the database but not in Elasticsearch: " + get_missing_metadata_ids(metadata[batch:batch + step_size], found)
+
+        try:
+            result = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_body)
+            found_blobs = {hit["_source"]["uuid"]: hit["_source"] for hit in result["hits"]["hits"]}
+
+            # Verify each blob's metadata
+            for uuid in batch_uuids:
+                if uuid not in found_blobs:
+                    errors.append(f"Blob {uuid} not found in Elasticsearch")
+                    continue
+
+                es_metadata = found_blobs[uuid].get("metadata", {})
+                expected_metadata = blob_metadata[uuid]
+
+                for meta_item in expected_metadata:
+                    field_name = meta_item["name"]
+                    expected_value = meta_item["value"]
+                    es_value = es_metadata[field_name]
+                    if expected_value not in es_value:
+                        errors.append(
+                            f"Blob {uuid} metadata mismatch for '{field_name}': "
+                            f"expected '{expected_value}' not found in {es_value}"
+                        )
+
+        except Exception as e:
+            errors.append(f"Elasticsearch error for batch {i}-{i+batch_size}: {str(e)}")
+
+    if errors:
+        assert False, "Metadata validation errors:" + "\n".join(errors)
 
 
 def test_elasticsearch_search(es):
@@ -617,54 +694,79 @@ def test_elasticsearch_search(es):
 def test_blob_tags_match_elasticsearch(es):
     "Assert that all blob tags match those found in Elasticsearch"
 
-    blobs = Blob.objects.filter(tags__isnull=False).exclude(is_indexed=False).distinct("uuid").order_by("uuid")
-    step_size = 100
-    blob_count = blobs.count()
+    # Be sure to include "file" in the "only" method to avoid an N+1
+    #  problem. See the Blob model's __init__() method.
+    blobs = (
+        Blob.objects
+        .filter(tags__isnull=False)
+        .prefetch_related("tags")
+        .only("uuid", "file")
+        .exclude(is_indexed=False)
+        .order_by("uuid")
+        .distinct("uuid")
+    )
 
-    for batch in range(0, blob_count, step_size):
+    # Convert to list once to avoid re-evaluation
+    blobs_list = list(blobs)
 
-        # The batch_size will always be equal to "step_size", except probably
-        #  the last batch, which will be less.
-        batch_size = step_size if blob_count - batch > step_size else blob_count - batch
+    # Process in batches for better performance
+    step = 200
 
-        query = [
-            {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "uuid": str(b.uuid)
-                            }
-                        },
-                        *[
+    for batch_start in range(0, len(blobs_list), step):
+        batch_blobs = blobs_list[batch_start:batch_start + step]
+
+        should_queries = []
+        blobs_with_tags = []  # Track which bookmarks actually have tags
+
+        for blob in batch_blobs:
+            tag_names = [tag.name for tag in blob.tags.all()]
+
+            if tag_names:
+                blobs_with_tags.append(blob)
+                blob_query = {
+                    "bool": {
+                        "must": [
                             {
                                 "term": {
-                                    "tags.keyword": x.name
+                                    "uuid": str(blob.uuid)
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "tags.keyword": tag_name
+                                            }
+                                        }
+                                        for tag_name in tag_names
+                                    ]
                                 }
                             }
-                            for x in b.tags.all()
                         ]
-                    ]
+                    }
                 }
-            }
-            for b
-            in blobs[batch:batch + step_size]
-        ]
+                should_queries.append(blob_query)
+
+        if not should_queries:
+            continue
 
         search_object = {
             "query": {
                 "bool": {
-                    "should": query
+                    "should": should_queries,
                 }
             },
-            "from": 0, "size": batch_size,
-            "_source": ["uuid"]
+            "size": len(should_queries),
+            "_source": ["uuid"],
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        expected_count = len(should_queries)
+        actual_count = found["hits"]["total"]["value"]
 
-        assert found["hits"]["total"]["value"] == batch_size, \
-            "blobs found in the database with tags which don't match those found in Elasticsearch: " + get_missing_blob_ids(blobs[batch:batch + step_size], found)
+        assert actual_count == expected_count, \
+            f"Blob's tags don't match those found in Elasticsearch: {get_missing_blob_ids(blobs_with_tags, found)}"
 
 
 def test_blobs_have_proper_metadata():
@@ -680,7 +782,7 @@ def test_blobs_have_proper_metadata():
         except KeyError:
             assert False, f"blob uuid={blob.uuid} has no 'file-modified' S3 metadata"
 
-        assert obj.metadata["file-modified"] != "None", f"blob uuid={blob.uuid} has 'file-modified' = 'None"
+        assert obj.metadata["file-modified"] != "None", f"blob uuid={blob.uuid} has 'file-modified' = 'None'"
 
         if obj.content_type == "binary/octet-stream":
             assert False, f"blob uuid={blob.uuid} has no proper 'Content-Type' metadata"
