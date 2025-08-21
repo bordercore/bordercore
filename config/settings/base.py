@@ -28,7 +28,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "bordercore",
         "USER": "bordercore",
-        "PASSWORD": os.environ["DATABASE_PASSWORD"],
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD", ""),
         "HOST": "bordercore.cvkm90zuldto.us-east-1.rds.amazonaws.com",
         "PORT": "",
     }
@@ -56,7 +56,7 @@ USE_TZ = True
 FILE_UPLOAD_PERMISSIONS = 0o664
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = os.environ["SECRET_KEY"]
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 
