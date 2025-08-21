@@ -4,7 +4,10 @@ Views for tag management, searching, and related tag operations.
 This module provides Django views for pinning/unpinning tags, searching tags, managing tag aliases, retrieving todo counts, and finding related tags for a user. It also includes a ListView for tag aliases.
 """
 
+from typing import cast
+
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
@@ -29,9 +32,10 @@ def pin(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Redirects to the bookmark overview page.
     """
+    user = cast(User, request.user)
     tag_name = request.POST["tag"]
 
-    tag = Tag.objects.get(name=tag_name, user=request.user)
+    tag = Tag.objects.get(name=tag_name, user=user)
     tag.pin()
 
     return redirect("bookmark:overview")
@@ -50,9 +54,10 @@ def unpin(request: HttpRequest) -> HttpResponse:
     Returns:
         HttpResponse: Redirects to the bookmark overview page.
     """
+    user = cast(User, request.user)
     tag_name = request.POST["tag"]
 
-    tag = Tag.objects.get(name=tag_name, user=request.user)
+    tag = Tag.objects.get(name=tag_name, user=user)
     tag.unpin()
 
     return redirect("bookmark:overview")
@@ -71,15 +76,16 @@ def search(request: HttpRequest) -> JsonResponse:
     Returns:
         JsonResponse: A JSON response containing the search results.
     """
+    user = cast(User, request.user)
     tag_name = request.GET["query"].lower()
-    skip_tag_aliases = request.GET.get("skip_tag_aliases", False)
+    skip_tag_aliases = request.GET.get("skip_tag_aliases", "false").lower() in {"1", "true", "yes", "on"}
 
     if "doctype" in request.GET:
         doctype = [request.GET["doctype"]]
     else:
         doctype = []
 
-    matches = search_service(request.user, tag_name, doctype, skip_tag_aliases)
+    matches = search_service(user, tag_name, doctype, skip_tag_aliases)
 
     return JsonResponse(matches, safe=False)
 
@@ -130,9 +136,9 @@ def add_alias(request: HttpRequest) -> JsonResponse:
             "message": f"A tag with the name '{alias_name}' already exists"
         }
     else:
-
-        tag = Tag.objects.get(name=tag_name, user=request.user)
-        tag_alias = TagAlias(name=alias_name, tag=tag, user=request.user)
+        user = cast(User, request.user)
+        tag = Tag.objects.get(name=tag_name, user=user)
+        tag_alias = TagAlias(name=alias_name, tag=tag, user=user)
         tag_alias.save()
         response = {
             "status": "OK",
@@ -156,16 +162,17 @@ def get_todo_counts(request: HttpRequest) -> JsonResponse:
             - info: A dictionary with annotated counts of related objects for the selected tag.
     """
 
+    user = cast(User, request.user)
     if "tag_name" in request.GET:
         tag_name = request.GET["tag_name"]
     else:
-        tag_obj = Tag.objects.filter(user=request.user).order_by("?").first()
+        tag_obj = Tag.objects.filter(user=user).order_by("?").first()
         if tag_obj is None:
             return JsonResponse({"status": "Error", "message": "No tags found for user."}, status=404)
         tag_name = tag_obj.name
 
-    tag = Tag.objects.get(name=tag_name, user=request.user)
-    info = tag.get_todo_counts()[0]
+    tag = Tag.objects.get(name=tag_name, user=user)
+    info = tag.get_todo_counts().first() or {}
 
     response = {
         "status": "OK",
@@ -190,10 +197,11 @@ def get_related_tags(request: HttpRequest) -> JsonResponse:
     Returns:
         JsonResponse: A JSON response containing a status and a list of related tags with their counts.
     """
+    user = cast(User, request.user)
     tag_name = request.GET["tag_name"]
     doc_type = request.GET.get("doc_type", None)
 
-    info = find_related_tags(tag_name, request.user, doc_type)
+    info = find_related_tags(tag_name, user, doc_type)
 
     response = {
         "status": "OK",

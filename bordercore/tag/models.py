@@ -11,7 +11,7 @@ It includes logic for ensuring lowercase names, preventing name collisions, and 
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List
+from typing import TYPE_CHECKING, Any, List, Mapping
 
 from django.apps import apps
 from django.contrib.auth.models import User
@@ -21,6 +21,7 @@ from django.db import models
 from django.db.models import Count, Model, Q
 from django.db.models.fields.related import ForeignKey as ForeignKeyField
 from django.db.models.functions import Lower
+from django.db.models.query import QuerySet
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -37,15 +38,15 @@ class Tag(models.Model):
     and other items. Tags can be pinned, marked as meta, and must be lowercase
     and comma-free.
     """
-    name: models.TextField = models.TextField()
-    is_meta: models.BooleanField = models.BooleanField(default=False)
-    user: ForeignKeyField[User, Any] = models.ForeignKey(User, on_delete=models.PROTECT)
-    created: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    name = models.TextField()
+    is_meta = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    created = models.DateTimeField(auto_now_add=True)
 
-    bookmarks: models.ManyToManyField[Bookmark, int] = models.ManyToManyField(
+    bookmarks: models.ManyToManyField["Bookmark", "TagBookmark"] = models.ManyToManyField(
         "bookmark.Bookmark", through="TagBookmark"
     )
-    todos: models.ManyToManyField[Todo, int] = models.ManyToManyField(
+    todos: models.ManyToManyField["Todo", "TagTodo"] = models.ManyToManyField(
         "todo.Todo", through="TagTodo"
     )
 
@@ -75,7 +76,7 @@ class Tag(models.Model):
             raise ValidationError(f"An alias with this same name already exists: {self}")
         super().save(*args, **kwargs)
 
-    def get_todo_counts(self) -> Iterable[Dict[str, Any]]:
+    def get_todo_counts(self) -> QuerySet["Tag", Mapping[str, Any]]:
         """
         Returns a QuerySet with annotation counts of all related models for this tag.
 
@@ -131,8 +132,8 @@ class TagTodo(SortOrderMixin):
     """
     Intermediate model linking Tags and Todos with sortable ordering.
     """
-    tag: models.ForeignKey[Tag, Tag] = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    todo: models.ForeignKey[Todo, Todo] = models.ForeignKey("todo.Todo", on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    todo = models.ForeignKey("todo.Todo", on_delete=models.CASCADE)
 
     field_name = "tag"
 
@@ -158,8 +159,8 @@ class TagBookmark(SortOrderMixin):
     """
     Intermediate model linking Tags and Bookmarks with sortable ordering.
     """
-    tag: models.ForeignKey[Tag, Tag] = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    bookmark: models.ForeignKey[Bookmark, Bookmark] = models.ForeignKey("bookmark.Bookmark", on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey("bookmark.Bookmark", on_delete=models.CASCADE)
 
     field_name = "tag"
 
@@ -185,10 +186,10 @@ class TagAlias(models.Model):
     """
     Represents an alternate name (alias) for a Tag. Names must be globally unique.
     """
-    uuid: models.UUIDField = models.UUIDField(default=uuid.uuid4, editable=False)
-    name: models.TextField = models.TextField(unique=True)
-    tag: models.OneToOneField[Tag, int] = models.OneToOneField(Tag, on_delete=models.PROTECT)
-    user: models.ForeignKey[User, int] = models.ForeignKey(User, on_delete=models.PROTECT)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.TextField(unique=True)
+    tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
         return self.name
