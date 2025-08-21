@@ -27,6 +27,8 @@ jobs:
         pip install pytest
 
     - name: Run tests
+      env:
+        DJANGO_LOG_DIR: ${{ runner.temp }}
       run: |
         pytest -m "not data_quality and not functional" \
         bin/ \
