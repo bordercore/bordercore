@@ -97,6 +97,44 @@ def test_todo_update(auto_login_user, todo):
     assert "django" in [x.name for x in todo.tags.all()]
 
 
+def test_sort_todo_success():
+    """Test successful todo reordering."""
+    import json
+    import uuid
+    from unittest.mock import MagicMock, Mock, patch
+
+    from django.http import JsonResponse
+    from django.test import RequestFactory
+
+    from todo.views import sort_todo
+    factory = RequestFactory()
+    user = Mock()
+    user.id = 1
+    request = factory.post("/sort/", {
+        "tag": "work",
+        "todo_uuid": str(uuid.uuid4()),
+        "position": "2"
+    })
+    request.user = user
+
+    mock_tag_todo = Mock()
+
+    with patch("todo.views.TagTodo.objects.select_for_update") as mock_select:
+        mock_select.return_value.get.return_value = mock_tag_todo
+
+        with patch("todo.views.TagTodo.reorder") as mock_reorder:
+            with patch("todo.views.TagTodo.objects.filter") as mock_filter:
+                mock_filter.return_value.count.return_value = 5
+
+                response = sort_todo(request)
+
+                assert isinstance(response, JsonResponse)
+                data = json.loads(response.content)
+                assert data["status"] == "OK"
+                assert data["new_position"] == 2
+                mock_reorder.assert_called_once_with(mock_tag_todo, 2)
+
+
 def test_sort_todo(auto_login_user, todo):
 
     _, client = auto_login_user()

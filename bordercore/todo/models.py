@@ -36,7 +36,7 @@ class Todo(TimeStampedModel):
     name: models.TextField = models.TextField()
     note: models.TextField = models.TextField(null=True, blank=True)
     url: models.URLField = models.URLField(max_length=1000, null=True, blank=True)
-    user: models.ForeignKey[User, int] = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     tags: models.ManyToManyField = models.ManyToManyField(Tag)
     data: JSONField = JSONField(null=True, blank=True)
     due_date: models.DateTimeField = models.DateTimeField(null=True, blank=True)
@@ -129,10 +129,14 @@ class Todo(TimeStampedModel):
         if index_es:
             self.index_todo()
 
-    def delete(self) -> None:
+    def delete(
+            self,
+            using: Any | None = None,
+            keep_parents: bool = False,
+    ) -> tuple[int, dict[str, int]]:
         """Delete the instance and remove it from the Elasticsearch index."""
         delete_document(self.uuid)
-        super().delete()
+        return super().delete(using=using, keep_parents=keep_parents)
 
     def index_todo(self) -> None:
         """Index this todo item in Elasticsearch."""
@@ -145,6 +149,8 @@ class Todo(TimeStampedModel):
         Returns:
             A dict with '_index', '_id', and '_source' for ES.
         """
+        tags = list(self.tags.values_list('name', flat=True))
+
         return {
             "_index": settings.ELASTICSEARCH_INDEX,
             "_id": self.uuid,
@@ -152,7 +158,7 @@ class Todo(TimeStampedModel):
                 "bordercore_id": self.id,
                 "uuid": self.uuid,
                 "name": self.name,
-                "tags": [tag.name for tag in self.tags.all()],
+                "tags": tags,
                 "url": self.url,
                 "note": self.note,
                 "last_modified": self.modified,
