@@ -8,7 +8,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bordercore
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
     env:
       PYTHONPATH: $PYTHONPATH:.:bordercore
       DJANGO_SETTINGS_MODULE: config.settings.dev
@@ -28,7 +40,11 @@ jobs:
 
     - name: Run tests
       env:
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         DJANGO_LOG_DIR: ${{ runner.temp }}
+        DATABASE_HOST: localhost
+        DATABASE_USER: postgres
+        DATABASE_PASSWORD: postgres
       run: |
         pytest -m "not data_quality and not functional" \
         bin/ \

@@ -27,9 +27,10 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "bordercore",
-        "USER": "bordercore",
+#        "USER": "bordercore",
+        "USER": os.environ.get("DATABASE_USER", "bordercore"),
+        "HOST": os.environ.get("DATABASE_HOST", "localhost"),
         "PASSWORD": os.environ.get("DATABASE_PASSWORD", ""),
-        "HOST": "bordercore.cvkm90zuldto.us-east-1.rds.amazonaws.com",
         "PORT": "",
     }
 }
