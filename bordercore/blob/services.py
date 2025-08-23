@@ -110,8 +110,6 @@ def get_recent_media(user, limit=10):
         "-created"
     )[:limit]
 
-    blob_sizes = get_blob_sizes(image_list)
-
     returned_image_list = []
 
     for blob in image_list:
@@ -127,8 +125,6 @@ def get_recent_media(user, limit=10):
             "cover_url": blob.get_cover_url(size="large"),
             "cover_url_small": blob.get_cover_url(size="small")
         }
-
-        get_blob_naturalsize(blob_sizes, blob_dict)
 
         returned_image_list.append(blob_dict)
 
