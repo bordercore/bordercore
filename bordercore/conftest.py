@@ -81,7 +81,28 @@ os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 faker = FakerFactory.create()
 faker.add_provider(PdfFileProvider)
 
-from todo.models import Todo
+BLOCKED_CONTEXT_PROCESSORS = {
+    "context_processors.get_recent_objects"
+}
+
+
+@pytest.fixture(autouse=True)
+def no_es_context_processors() -> None:
+    """Remove context processors that hit Elasticsearch for every test.
+
+    This fixture filters out any blocked context processors from all configured
+    Django template backends.
+
+    Args:
+        settings: The pytest-django settings fixture.
+    """
+    for tmpl in settings.TEMPLATES:
+        opts = tmpl.setdefault("OPTIONS", {})
+        cps = opts.setdefault("context_processors", [])
+        # Reassign (don’t mutate in-place with remove)
+        opts["context_processors"] = [
+            cp for cp in cps if cp not in BLOCKED_CONTEXT_PROCESSORS
+        ]
 
 
 @pytest.fixture(autouse=True)
