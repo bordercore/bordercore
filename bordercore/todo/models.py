@@ -29,17 +29,16 @@ class Todo(TimeStampedModel):
 
     A todo has a name, optional notes and related URL, and can be assigned one or
     more tags. It may include arbitrary JSON data, an optional due date, and a
-    priority level (High, Medium, or Low). Todos are timestamped on creation and
-    modification and can be indexed for full‐text search.
+    priority level (High, Medium, or Low). Todos can be indexed for full‐text search.
     """
     uuid: models.UUIDField = models.UUIDField(default=uuid.uuid4, editable=False)
-    name: models.TextField = models.TextField()
-    note: models.TextField = models.TextField(null=True, blank=True)
-    url: models.URLField = models.URLField(max_length=1000, null=True, blank=True)
+    name = models.TextField()
+    note = models.TextField(null=True, blank=True)
+    url = models.URLField(max_length=1000, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    tags: models.ManyToManyField = models.ManyToManyField(Tag)
-    data: JSONField = JSONField(null=True, blank=True)
-    due_date: models.DateTimeField = models.DateTimeField(null=True, blank=True)
+    tags = models.ManyToManyField(Tag)
+    data = JSONField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
 
     objects = TodoManager()
 
@@ -114,10 +113,10 @@ class Todo(TimeStampedModel):
         return counts
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        """Save the instance and optionally re-index in Elasticsearch.
+        """Save the todo and optionally re-index in Elasticsearch.
 
         Args:
-            *args: Passed to Django’s Model.save().
+            *args: Variable length argument list.
             **kwargs: May include 'index_es' to skip indexing (default True).
         """
         # Remove any custom parameters before calling the parent class
@@ -134,7 +133,7 @@ class Todo(TimeStampedModel):
             using: Any | None = None,
             keep_parents: bool = False,
     ) -> tuple[int, dict[str, int]]:
-        """Delete the instance and remove it from the Elasticsearch index."""
+        """Delete the todo and remove it from Elasticsearch."""
         delete_document(self.uuid)
         return super().delete(using=using, keep_parents=keep_parents)
 
@@ -147,7 +146,7 @@ class Todo(TimeStampedModel):
         """Build the dict representation for Elasticsearch indexing.
 
         Returns:
-            A dict with '_index', '_id', and '_source' for ES.
+            Dictionary containing the album data formatted for Elasticsearch indexing.
         """
         tags = list(self.tags.values_list('name', flat=True))
 

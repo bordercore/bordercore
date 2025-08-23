@@ -19,7 +19,6 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count, Model, Q
-from django.db.models.fields.related import ForeignKey as ForeignKeyField
 from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.db.models.signals import pre_delete
@@ -35,8 +34,7 @@ if TYPE_CHECKING:
 class Tag(models.Model):
     """
     A tag is a user-defined label that can be assigned to bookmarks, todos,
-    and other items. Tags can be pinned, marked as meta, and must be lowercase
-    and comma-free.
+    and other items. Tags can be pinned, marked as meta.
     """
     name = models.TextField()
     is_meta = models.BooleanField(default=False)
@@ -184,7 +182,7 @@ def remove_bookmark(sender: type[Model], instance: TagBookmark, **kwargs: Any) -
 
 class TagAlias(models.Model):
     """
-    Represents an alternate name (alias) for a Tag. Names must be globally unique.
+    Represents an alternate name (alias) for a Tag.
     """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField(unique=True)
