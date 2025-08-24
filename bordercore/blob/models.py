@@ -13,7 +13,6 @@ from urllib.parse import quote_plus, urlparse
 
 import boto3
 import humanize
-from elasticsearch import NotFoundError
 from PIL import Image
 from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -35,6 +34,7 @@ from lib.time_utils import get_date_from_pattern
 from lib.util import (get_elasticsearch_connection, is_audio, is_image, is_pdf,
                       is_video)
 from node.services import delete_note_from_nodes
+from search.services import delete_document
 from tag.models import Tag
 
 EDITIONS = {"1": "First",
@@ -860,15 +860,9 @@ class Blob(TimeStampedModel):
 
     def delete(self):
 
-        super().delete()
-
         # Delete from Elasticsearch
-        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        try:
-            es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
-        except NotFoundError:
-            log.warning("Tried to delete blob, but can't find it in elasticsearch: %s", self.uuid)
+        delete_document(str(self.uuid))
+        super().delete()
 
         # Delete from S3
         if self.file:
