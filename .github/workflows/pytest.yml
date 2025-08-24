@@ -48,4 +48,8 @@ jobs:
       run: |
         pytest -m "not data_quality and not functional" \
         bin/ \
+        bordercore/collection/ \
+        bordercore/drill/ \
+        bordercore/node/ \
+        bordercore/tag/ \
         bordercore/todo/
