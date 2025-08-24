@@ -46,10 +46,4 @@ jobs:
         DATABASE_USER: postgres
         DATABASE_PASSWORD: postgres
       run: |
-        pytest -m "not data_quality and not functional" \
-        bin/ \
-        bordercore/collection/ \
-        bordercore/drill/ \
-        bordercore/node/ \
-        bordercore/tag/ \
-        bordercore/todo/
+        pytest -m "not data_quality and not functional" ./bordercore/ -v
