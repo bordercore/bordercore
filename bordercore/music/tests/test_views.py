@@ -254,11 +254,11 @@ def test_music_get_playlist(auto_login_user, playlist):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:get_playlist", kwargs={"uuid": playlist[0].uuid})
+    url = urls.reverse("music:get_playlist", kwargs={"playlist_uuid": playlist[0].uuid})
     resp = client.get(url)
     assert resp.status_code == 200
 
-    url = urls.reverse("music:get_playlist", kwargs={"uuid": playlist[1].uuid})
+    url = urls.reverse("music:get_playlist", kwargs={"playlist_uuid": playlist[1].uuid})
     resp = client.get(url)
     assert resp.status_code == 200
 

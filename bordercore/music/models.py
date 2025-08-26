@@ -1,8 +1,17 @@
+"""
+Models for music management application.
+
+This module contains models for managing artists, albums, songs, playlists, and listening history
+with support for Elasticsearch indexing and AWS S3 storage.
+"""
+
 import io
 import uuid
 import zipfile
 from datetime import datetime, timedelta
 from io import BytesIO
+from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 import boto3
 import humanize
@@ -13,7 +22,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Count, JSONField, Sum
+from django.db.models import Count, JSONField, Model, Sum
 from django.db.models.functions import Coalesce
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -29,6 +38,9 @@ from tag.models import Tag
 
 
 class Artist(TimeStampedModel):
+    """An artist is a musical performer or group that creates songs and albums.
+    """
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -36,11 +48,19 @@ class Artist(TimeStampedModel):
     class Meta:
         unique_together = ("name", "user")
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the artist.
+
+        Returns:
+            The artist's name.
+        """
         return self.name
 
 
 class Album(TimeStampedModel):
+    """An album is a collection of songs released together by an artist that can be tagged and tracked.
+    """
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.TextField()
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
@@ -54,16 +74,28 @@ class Album(TimeStampedModel):
     class Meta:
         unique_together = ("title", "artist")
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the album.
+
+        Returns:
+            The album title.
+        """
         return self.title
 
-    def get_tags(self):
+    def get_tags(self) -> str:
+        """Get all tags associated with this album as a comma-separated string.
+
+        Returns:
+            Comma-separated string of tag names.
+        """
         return ", ".join([tag.name for tag in self.tags.all()])
 
     @property
-    def playtime(self):
-        """
-        Get the total album playtime in a humanized format
+    def playtime(self) -> str:
+        """Get the total album playtime in a humanized format.
+
+        Returns:
+            Humanized string representation of the total album duration.
         """
 
         total_time_seconds = Song.objects.filter(
@@ -78,13 +110,16 @@ class Album(TimeStampedModel):
             format="%.f"
         )
 
-    def index_album(self):
+    def index_album(self) -> None:
+        """Index this album in Elasticsearch."""
         index_document(self.elasticsearch_document)
 
     @property
-    def elasticsearch_document(self):
-        """
-        Return a representation of the album suitable for indexing in Elasticsearch
+    def elasticsearch_document(self) -> Dict[str, Any]:
+        """Return a representation of the album suitable for indexing in Elasticsearch.
+
+        Returns:
+            Dictionary containing the album data formatted for Elasticsearch indexing.
         """
 
         return {
@@ -110,19 +145,38 @@ class Album(TimeStampedModel):
             }
         }
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        """Save the album and index it in Elasticsearch.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         super().save(*args, **kwargs)
 
         # Index the album in Elasticsearch
         self.index_album()
 
-    def delete(self):
-        delete_document(self.uuid)
-        super().delete()
+    def delete(
+            self,
+            using: Any | None = None,
+            keep_parents: bool = False,
+    ) -> tuple[int, dict[str, int]]:
+        """Delete the album and remove it from Elasticsearch."""
+        delete_document(str(self.uuid))
+        return super().delete(using=using, keep_parents=keep_parents)
 
     @staticmethod
-    def scan_zipfile(zipfile_obj, include_song_data=False):
+    def scan_zipfile(zipfile_obj: bytes, include_song_data: bool = False) -> Dict[str, Any]:
+        """Scan a ZIP file containing MP3 files and extract metadata.
 
+        Args:
+            zipfile_obj: ZIP file content as bytes.
+            include_song_data: Whether to include the actual song data in the result.
+
+        Returns:
+            Dictionary containing album, artist, and song information from the ZIP file.
+        """
         song_info = []
         artist = set()
         album = None
@@ -146,8 +200,27 @@ class Album(TimeStampedModel):
         }
 
     @staticmethod
-    def create_album_from_zipfile(zipfile_obj, artist_name, song_source, tags, user, changes):
+    def create_album_from_zipfile(
+        zipfile_obj: bytes,
+        artist_name: str,
+        song_source: "SongSource",
+        tags: Optional[str],
+        user: User,
+        changes: Dict[str, Dict[str, Any]]
+    ) -> UUID:
+        """Create an album from a ZIP file containing MP3 files.
 
+        Args:
+            zipfile_obj: ZIP file content as bytes.
+            artist_name: Name of the artist.
+            song_source: The source where the songs came from.
+            tags: Comma-separated string of tags to apply to songs.
+            user: The user creating the album.
+            changes: Dictionary of changes to apply to specific tracks.
+
+        Returns:
+            UUID of the created album.
+        """
         info = Album.scan_zipfile(zipfile_obj, include_song_data=True)
 
         artist, _ = Artist.objects.get_or_create(name=artist_name, user=user)
@@ -167,7 +240,7 @@ class Album(TimeStampedModel):
                 artist=artist,
                 album=album,
                 length=song_info["length"],
-                source_id=song_source,
+                source=song_source,
                 title=song_info["title"],
                 track=song_info["track"],
                 user=user,
@@ -195,20 +268,31 @@ class Album(TimeStampedModel):
             # Upload the song and its artwork to S3
             Song.handle_s3(song, song_info["data"])
 
-        return album.uuid
+        if album is not None:
+            return album.uuid
+        raise ValueError("Album creation failed unexpectedly")
 
 
 class SongSource(TimeStampedModel):
+    """A song source is a platform or service where songs can be acquired or imported from.
+    """
     name = models.TextField()
     description = models.TextField()
 
     DEFAULT = "Amazon"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the song source.
+
+        Returns:
+            The source name.
+        """
         return self.name
 
 
 class Song(TimeStampedModel):
+    """A song is an individual musical track that can be played, rated, tagged, and organized within albums.
+    """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.TextField()
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
@@ -226,24 +310,44 @@ class Song(TimeStampedModel):
     tags = models.ManyToManyField(Tag)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the song.
+
+        Returns:
+            The song title.
+        """
         return self.title
 
-    def get_tags(self):
+    def get_tags(self) -> str:
+        """Get all tags associated with this song as a comma-separated string.
+
+        Returns:
+            Comma-separated string of tag names.
+        """
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        """Save the song and index it in Elasticsearch.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         super().save(*args, **kwargs)
 
         # Index the song in Elasticsearch
         self.index_song()
 
-    def delete(self):
-
-        super().delete()
+    def delete(
+            self,
+            using: Any | None = None,
+            keep_parents: bool = False,
+    ) -> tuple[int, dict[str, int]]:
+        """Delete the song, remove it from Elasticsearch, and delete from S3."""
+        result = super().delete()
 
         # Delete from Elasticsearch
-        delete_document(self.uuid)
+        delete_document(str(self.uuid))
 
         # Delete from S3
         s3_client = boto3.client("s3")
@@ -253,13 +357,18 @@ class Song(TimeStampedModel):
             Key=f"songs/{self.uuid}"
         )
 
-    def index_song(self):
+        return result
+
+    def index_song(self) -> None:
+        """Index this song in Elasticsearch."""
         index_document(self.elasticsearch_document)
 
     @property
-    def elasticsearch_document(self):
-        """
-        Return a representation of the song suitable for indexing in Elasticsearch
+    def elasticsearch_document(self) -> Dict[str, Any]:
+        """Return a representation of the song suitable for indexing in Elasticsearch.
+
+        Returns:
+            Dictionary containing the song data formatted for Elasticsearch indexing.
         """
 
         doc = {
@@ -294,13 +403,15 @@ class Song(TimeStampedModel):
         return doc
 
     @property
-    def url(self):
-        """
-        Get the appropriate page url for a song.
+    def url(self) -> str:
+        """Get the appropriate page URL for a song.
+
         If the song is part of an album, return the album detail page.
         Otherwise return the artist detail page.
-        """
 
+        Returns:
+            URL string for the song's detail page.
+        """
         if self.album:
             url = reverse("music:album_detail", args=[self.album.uuid])
         else:
@@ -308,22 +419,27 @@ class Song(TimeStampedModel):
 
         return url
 
-    def listen_to(self):
-        """
-        Increment a song's 'times played' counter and update
-        its 'last time played' timestamp.
-        """
+    def listen_to(self) -> None:
+        """Increment a song's 'times played' counter and update its 'last time played' timestamp.
 
-        self.times_played = self.times_played + 1
+        Also creates a Listen record for tracking purposes.
+        """
+        current_plays = self.times_played or 0
+        self.times_played = current_plays + 1
         self.last_time_played = datetime.now()
         self.save()
 
         Listen(song=self, user=self.user).save()
 
     @staticmethod
-    def get_id3_info(song):
-        """
-        Read a song's ID3 information
+    def get_id3_info(song: bytes) -> Dict[str, Any]:
+        """Read a song's ID3 information.
+
+        Args:
+            song: Song data as bytes.
+
+        Returns:
+            Dictionary containing the song's metadata.
         """
 
         info = MP3(fileobj=BytesIO(song), ID3=EasyID3)
@@ -351,8 +467,16 @@ class Song(TimeStampedModel):
         return data
 
     @staticmethod
-    def get_or_create_album(user, song_info):
+    def get_or_create_album(user: User, song_info: Dict[str, Any]) -> Optional[Album]:
+        """Get or create an album based on song information.
 
+        Args:
+            user: The user creating/owning the album.
+            song_info: Dictionary containing song metadata including album information.
+
+        Returns:
+            Album instance if album information is available, None otherwise.
+        """
         # If an album was specified, check if we have the album
         if song_info["album_name"]:
             album_artist = song_info["album_artist"] if song_info["compilation"] else song_info["artist"]
@@ -380,9 +504,14 @@ class Song(TimeStampedModel):
         return album_info
 
     @staticmethod
-    def get_song_tags(user):
-        """
-        Get a count of all song tags, grouped by tag
+    def get_song_tags(user: User) -> List[Dict[str, Union[str, int]]]:
+        """Get a count of all song tags, grouped by tag.
+
+        Args:
+            user: The user whose song tags to retrieve.
+
+        Returns:
+            List of dictionaries containing tag names and their counts, sorted by count descending.
         """
         return sorted(
             Tag.objects.values("name").
@@ -396,7 +525,13 @@ class Song(TimeStampedModel):
         )
 
     @staticmethod
-    def handle_s3(song, song_bytes):
+    def handle_s3(song: "Song", song_bytes: bytes) -> None:
+        """Handle uploading song and album artwork to S3.
+
+        Args:
+            song: The song instance to upload.
+            song_bytes: The song data as bytes.
+        """
 
         s3_client = boto3.client("s3")
 
@@ -435,6 +570,8 @@ class Song(TimeStampedModel):
 
 
 class Playlist(TimeStampedModel):
+    """A playlist is a curated collection of songs that can be manually created or automatically generated based on criteria.
+    """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField()
     note = models.TextField(null=True, blank=True)
@@ -443,13 +580,24 @@ class Playlist(TimeStampedModel):
     size = models.IntegerField(null=True, blank=True)
     parameters = JSONField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the playlist.
+
+        Returns:
+            The playlist name.
+        """
         return self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
+        """Get the absolute URL for this playlist.
+
+        Returns:
+            URL string for the playlist detail page.
+        """
         return reverse("music:playlist_detail", kwargs={"uuid": self.uuid})
 
     class PlaylistType(models.TextChoices):
+        """Enumeration of playlist types."""
         MANUAL = "manual", _("Manually Selected")
         TAG = "smart", _("Smart")
 
@@ -459,9 +607,20 @@ class Playlist(TimeStampedModel):
         default=PlaylistType.MANUAL,
     )
 
-    def populate(self, refresh=False):
+    def populate(self, refresh: bool = False) -> None:
+        """Populate a smart playlist based on its parameters.
+
+        Args:
+            refresh: If True, clear existing playlist items before populating.
+
+        Raises:
+            ValueError: If called on a manual playlist.
+        """
         if self.type == "manual":
             raise ValueError("You cannot call populate() on a manual playlist.")
+
+        if not self.parameters:
+            return
 
         # If refresh is true, then populate the playlist with all new songs
         if refresh:
@@ -506,13 +665,20 @@ class Playlist(TimeStampedModel):
 
 
 class PlaylistItem(TimeStampedModel, SortOrderMixin):
+    """A playlist item is an individual song entry within a playlist that maintains sort order and relationships.
+    """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
 
     field_name = "playlist"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the playlist item.
+
+        Returns:
+            String showing the playlist and song relationship.
+        """
         return f"{self.playlist} - {self.song}"
 
     class Meta:
@@ -522,13 +688,23 @@ class PlaylistItem(TimeStampedModel, SortOrderMixin):
 
 
 @receiver(pre_delete, sender=PlaylistItem)
-def remove_playlistitem(sender, instance, **kwargs):
+def remove_playlistitem(sender: type[Model], instance: PlaylistItem, **kwargs: Any) -> None:
+    """
+    Signal handler to clean up when a PlaylistItem is deleted.
+    """
     instance.handle_delete()
 
 
 class Listen(TimeStampedModel):
+    """A listen is a recorded event that tracks when a user plays a specific song for analytics and history purposes.
+    """
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the listen event.
+
+        Returns:
+            String describing the listen event.
+        """
         return str(f"Listened to song '{self.song}'")

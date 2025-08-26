@@ -90,7 +90,7 @@ def test_music_scan_zipfile():
 
 def test_create_album_from_zipfile(s3_resource, s3_bucket, auto_login_user, song_source):
 
-    user, client = auto_login_user()
+    user, _ = auto_login_user()
 
     album_zip = Path(__file__).parent / "resources/test-album.zip"
     in_file = open(album_zip, "rb")
@@ -104,7 +104,7 @@ def test_create_album_from_zipfile(s3_resource, s3_bucket, auto_login_user, song
     album_uuid = Album.create_album_from_zipfile(
         zipfile_obj,
         artist_name,
-        song_source.id,
+        song_source,
         tags=tags,
         user=user,
         changes={}
@@ -118,25 +118,25 @@ def test_create_album_from_zipfile(s3_resource, s3_bucket, auto_login_user, song
     assert album.song_set.count() == 2
     song_1 = album.song_set.get(title="Running to Stand Still")
     song_2 = album.song_set.get(title="With or Without You")
-    song_1.tags.first().name == "rock"
-    song_1.artist.name == "U2"
-    song_1.album == album
-    song_1.track == 5
-    song_1.year == 1987
-    song_1.source == song_source
-    song_1.length == 3
-    song_2.tags.first().name == "rock"
-    song_2.artist.name == "U2"
-    song_2.album == album
-    song_1.track == 3
-    song_2.year == 1987
-    song_2.source == song_source
-    song_2.length == 1
+    assert song_1.tags.first().name == "rock"
+    assert song_1.artist.name == "U2"
+    assert song_1.album == album
+    assert song_1.track == 5
+    assert song_1.year == 1987
+    assert song_1.source == song_source
+    assert song_1.length == 3
+    assert song_2.tags.first().name == "rock"
+    assert song_2.artist.name == "U2"
+    assert song_2.album == album
+    assert song_2.track == 3
+    assert song_2.year == 1987
+    assert song_2.source == song_source
+    assert song_2.length == 3
 
 
 def test_create_album_from_zipfile_with_changes(s3_resource, s3_bucket, auto_login_user, song_source):
 
-    user, client = auto_login_user()
+    user, _ = auto_login_user()
 
     album_zip = Path(__file__).parent / "resources/test-album.zip"
     in_file = open(album_zip, "rb")
@@ -150,7 +150,7 @@ def test_create_album_from_zipfile_with_changes(s3_resource, s3_bucket, auto_log
     album_uuid = Album.create_album_from_zipfile(
         zipfile_obj,
         artist_name,
-        song_source.id,
+        song_source,
         tags=tags,
         user=user,
         changes={

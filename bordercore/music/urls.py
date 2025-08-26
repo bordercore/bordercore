@@ -86,7 +86,7 @@ urlpatterns = [
         name="playlist_update"
     ),
     path(
-        route="get_playlist/<uuid:uuid>",
+        route="get_playlist/<uuid:playlist_uuid>",
         view=views.get_playlist,
         name="get_playlist"
     ),
