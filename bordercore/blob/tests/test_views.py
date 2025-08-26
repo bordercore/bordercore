@@ -1,12 +1,14 @@
 import io
 import json
+import uuid
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from urllib.parse import urlparse
 
 import boto3
 import factory
 import pytest
+from factory.fuzzy import FuzzyInteger
 from faker import Factory as FakerFactory
 from faker_file.providers.pdf_file import PdfFileProvider
 from faker_file.providers.pdf_file.generators.reportlab_generator import \
@@ -568,9 +570,39 @@ def test_blob_get_template(auto_login_user):
     assert payload["template"]["tags"] == tags
 
 
-def test_bookshelf_list(auto_login_user):
+@patch("blob.services.get_elasticsearch_connection")
+def test_bookshelf_list(mock_get_es, auto_login_user):
 
     user, client = auto_login_user()
+
+    mock_es = MagicMock()
+    mock_es.search.return_value = {
+        "hits": {
+            "total": {"value": 1},
+            "hits": [
+                {
+                    "_score": 1.0,
+                    "_source": {
+                        "date": {
+                            "gte": faker.pyint(min_value=1970, max_value=2020),
+                            "lte": faker.pyint(min_value=1970, max_value=2020)
+                        },
+                        "filename": faker.file_name(extension="pdf"),
+                        "name": faker.text(max_nb_chars=20),
+                        "tags": [
+                            "django"
+                        ],
+                        "uuid": str(uuid.uuid4()),
+                        "size": 1234,
+                        "last_modified": "2025-08-01T17:04:23.788834-04:00"
+                    },
+                    "_id": str(uuid.uuid4()),
+                },
+            ]
+        },
+        "aggregations": {"Doctype Filter": {"buckets": []}}
+    }
+    mock_get_es.return_value = mock_es
 
     book = BlobFactory.create(user=user)
     _ = MetaData.objects.create(blob=book, user=user, name="is_book", value="true")

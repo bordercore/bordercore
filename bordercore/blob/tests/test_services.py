@@ -17,9 +17,21 @@ from blob.services import (get_authors, get_blob_naturalsize, get_recent_blobs,
 faker = FakerFactory.create()
 
 
-def test_get_recent_blobs(auto_login_user, blob_image_factory, blob_text_factory):
+@patch("blob.services.get_blob_sizes")
+def test_get_recent_blobs(mock_get_blob_sizes, auto_login_user, blob_image_factory, blob_text_factory):
 
     user, _ = auto_login_user()
+
+    mock_get_blob_sizes.return_value = {
+        blob_image_factory[0].uuid: {
+            "size": faker.random_int(min=1024, max=(1024 * 1024 - 1)),
+            "uuid": blob_image_factory[0].uuid
+        },
+        blob_text_factory[0].uuid: {
+            "size": faker.random_int(min=1024, max=(1024 * 1024 - 1)),
+            "uuid": blob_text_factory[0].uuid
+        }
+    }
 
     blob_list, doctypes = get_recent_blobs(user)
 
