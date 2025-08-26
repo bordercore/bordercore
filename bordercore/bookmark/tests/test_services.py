@@ -3,7 +3,7 @@ from bookmark.services import get_recent_bookmarks
 
 def test_get_recent_bookmarks(auto_login_user, bookmark):
 
-    user, client = auto_login_user()
+    user, _ = auto_login_user()
 
     results = get_recent_bookmarks(user)
 
