@@ -44,7 +44,7 @@
                                                 <img width="120" height="67" :src="props.option.thumbnail_url">
                                             </div>
                                             <div class="name d-flex flex-column">
-                                                <div class="ms-2" v-html="boldenOption(props.option.name, props.search)" />
+                                                <div class="text-truncate ms-2" v-html="boldenOption(props.option.name, props.search)" />
                                                 <div class="date ms-2 my-2">
                                                     {{ props.option.date }}
                                                     <span v-if="props.option.important === 10" class="ms-2">

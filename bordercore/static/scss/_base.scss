@@ -2689,6 +2689,11 @@ textarea.sql-input {
   overflow-x: hidden !important;
 }
 
+.multiselect__content {
+  // This works with .text-truncate to help truncate long item names
+  width: 100%;
+}
+
 // This class is added on focus
 .multiselect--active {
   // These selectors mimic Bootstrap's form-control class
