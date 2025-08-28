@@ -37,8 +37,12 @@ def get_recent_blobs(user, limit=10, skip_content=False):
     along with counts of their doctypes.
     """
 
-    if "recent_blobs" in cache:
-        return cache.get("recent_blobs")
+    # Create user-specific cache key
+    cache_key = f"recent_blobs_{user.id}"
+
+    cached_bookmarks = cache.get(cache_key)
+    if cached_bookmarks is not None:
+        return cached_bookmarks
 
     blob_list = Blob.objects.filter(
         user=user
@@ -82,7 +86,7 @@ def get_recent_blobs(user, limit=10, skip_content=False):
 
         doctypes[blob.doctype] += 1
 
-    cache.set("recent_blobs", (returned_blob_list, doctypes))
+    cache.set(cache_key, (returned_blob_list, doctypes))
 
     return returned_blob_list, doctypes
 
@@ -92,8 +96,12 @@ def get_recent_media(user, limit=10):
     Return a list of the most recently created images and video.
     """
 
-    if "recent_media" in cache:
-        return cache.get("recent_media")
+    # Create user-specific cache key
+    cache_key = f"recent_media_{user.id}"
+
+    cached_bookmarks = cache.get(cache_key)
+    if cached_bookmarks is not None:
+        return cached_bookmarks
 
     image_list = Blob.objects.filter(
         Q(user=user) & (
@@ -128,7 +136,7 @@ def get_recent_media(user, limit=10):
 
         returned_image_list.append(blob_dict)
 
-    cache.set("recent_media", returned_image_list)
+    cache.set(cache_key, returned_image_list)
 
     return returned_image_list
 

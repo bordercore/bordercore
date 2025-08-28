@@ -31,8 +31,12 @@ def get_recent_bookmarks(user: User, limit: int = 10) -> List[Dict[str, Any]]:
         List of bookmark dictionaries with name, url, uuid, doctype, thumbnail_url, and type
     """
 
-    if "recent_bookmarks" in cache:
-        return cache.get("recent_bookmarks")
+    # Create user-specific cache key
+    cache_key = f"recent_bookmarks_{user.id}"
+
+    cached_bookmarks = cache.get(cache_key)
+    if cached_bookmarks is not None:
+        return cached_bookmarks
 
     bookmark_list = Bookmark.objects.filter(
         user=user
@@ -55,6 +59,6 @@ def get_recent_bookmarks(user: User, limit: int = 10) -> List[Dict[str, Any]]:
 
         returned_bookmark_list.append(bookmark_dict)
 
-    cache.set("recent_bookmarks", returned_bookmark_list)
+    cache.set(cache_key, returned_bookmark_list)
 
     return returned_bookmark_list

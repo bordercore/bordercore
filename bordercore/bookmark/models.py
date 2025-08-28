@@ -75,14 +75,14 @@ class Bookmark(TimeStampedModel):
             self.generate_cover_image()
 
         # After every bookmark mutation, invalidate the cache
-        cache.delete("recent_bookmarks")
+        cache.delete(f"recent_bookmarks_{self.user.id}")
 
     def delete(self):
 
         super().delete()
 
         # After every bookmark mutation, invalidate the cache
-        cache.delete("recent_bookmarks")
+        cache.delete(f"recent_bookmarks_{self.user.id}")
 
         delete_document(self.uuid)
 

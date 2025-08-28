@@ -313,8 +313,8 @@ class Blob(TimeStampedModel):
             self.set_s3_metadata_file_modified()
 
         # After every blob mutation, invalidate the cache
-        cache.delete("recent_blobs")
-        cache.delete("recent_images")
+        cache.delete(f"recent_blobs_{self.user.id}")
+        cache.delete(f"recent_media_{self.user.id}")
 
     def set_s3_metadata_file_modified(self):
         """
@@ -880,9 +880,9 @@ class Blob(TimeStampedModel):
 
         delete_note_from_nodes(self.user, self.uuid)
 
-        # After every blob mutation, invalidate the  cache
-        cache.delete("recent_blobs")
-        cache.delete("recent_images")
+        # After every blob mutation, invalidate the cache
+        cache.delete(f"recent_blobs_{self.user.id}")
+        cache.delete(f"recent_media_{self.user.id}")
 
 
 class MetaData(TimeStampedModel):

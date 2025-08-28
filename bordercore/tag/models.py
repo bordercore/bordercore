@@ -119,10 +119,11 @@ class Tag(models.Model):
         Returns:
             A list of tag names marked as meta.
         """
-        tags = cache.get("meta_tags")
+        cache_key = f"meta_tags_{user.id}"
+        tags = cache.get(cache_key)
         if not tags:
             tags = Tag.objects.filter(user=user, blob__user=user, is_meta=True).distinct("name")
-            cache.set("meta_tags", tags)
+            cache.set(cache_key, tags)
         return [x.name for x in tags]
 
 
