@@ -37,7 +37,7 @@ python-dotenv==0.21.0
 python-magic==0.4.15
 python-mimeparse==1.6.0
 pytz==2025.2
-reportlab==4.0.4
+reportlab==4.4.3
 requests==2.32.0
 responses==0.21.0
 rsa==4.7
