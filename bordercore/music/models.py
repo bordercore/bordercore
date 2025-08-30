@@ -23,6 +23,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Count, JSONField, Model, Sum
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.functions import Coalesce
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -72,7 +73,7 @@ class Album(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     class Meta:
-        unique_together = ("title", "artist")
+        unique_together = ("title", "artist", "user")
 
     def __str__(self) -> str:
         """Return string representation of the album.
@@ -297,14 +298,18 @@ class Song(TimeStampedModel):
     title = models.TextField()
     artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
     album = models.ForeignKey(Album, null=True, on_delete=models.PROTECT)
-    track = models.IntegerField(null=True)
+    track = models.PositiveIntegerField(null=True)
     year = models.IntegerField(null=True)
     length = models.IntegerField(blank=True, null=True)
     note = models.TextField(null=True)
     source = models.ForeignKey(SongSource, on_delete=models.PROTECT)
-    rating = models.IntegerField(blank=True, null=True)
+    rating = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     last_time_played = models.DateTimeField(null=True)
-    times_played = models.IntegerField(default=0, blank=True, null=True)
+    times_played = models.PositiveIntegerField(default=0)
     original_album = models.TextField(null=True)
     original_year = models.IntegerField(null=True)
     tags = models.ManyToManyField(Tag)
