@@ -8,7 +8,7 @@ with support for Elasticsearch indexing and AWS S3 storage.
 import io
 import uuid
 import zipfile
-from datetime import datetime, timedelta
+from datetime import timedelta
 from io import BytesIO
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
@@ -21,9 +21,9 @@ from mutagen.mp3 import MP3
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
-from django.db.models import Count, JSONField, Model, Sum
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
+from django.db.models import Count, F, JSONField, Model, Sum
 from django.db.models.functions import Coalesce
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -139,7 +139,10 @@ class Album(TimeStampedModel):
                 "note": self.note,
                 "last_modified": self.modified,
                 "doctype": "album",
-                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date": {
+                    "gte": self.created.strftime("%Y-%m-%d %H:%M:%S"),
+                    "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")
+                },
                 "date_unixtime": self.created.strftime("%s"),
                 "user_id": self.user.id,
                 **settings.ELASTICSEARCH_EXTRA_FIELDS
@@ -184,7 +187,7 @@ class Album(TimeStampedModel):
 
         with zipfile.ZipFile(BytesIO(zipfile_obj), mode="r") as archive:
             for file in archive.infolist():
-                if file.filename.endswith("mp3"):
+                if file.filename.lower().endswith("mp3"):
                     with archive.open(file.filename) as myfile:
                         song_data = myfile.read()
                         id3_info = Song.get_id3_info(song_data)
@@ -248,23 +251,21 @@ class Album(TimeStampedModel):
                 year=song_info["year"],
             )
             # Edit the title and add a note if the user made any changes
-            if changes.keys():
-                note = changes[str(song_info["track"])].get("note", None)
-                if note:
-                    song.note = note
-                title_edited = changes[str(song_info["track"])].get("title", None)
-                if title_edited:
-                    song.title = title_edited
+            change = (changes or {}).get(str(song_info.get("track")), {})
+            note = change.get("note")
+            if note:
+                song.note = note
+            title_edited = change.get("title")
+            if title_edited:
+                song.title = title_edited
             song.save()
 
             if tags:
-                song.tags.set(
-                    [
-                        Tag.objects.get_or_create(name=tag, user=user)[0]
-                        for tag in
-                        tags.split(",")
-                    ]
-                )
+                tag_objs = [
+                    Tag.objects.get_or_create(name=t.strip(), user=user)[0]
+                    for t in tags.split(",") if t.strip()
+                ]
+                song.tags.set(tag_objs)
 
             # Upload the song and its artwork to S3
             Song.handle_s3(song, song_info["data"])
@@ -329,7 +330,7 @@ class Song(TimeStampedModel):
         Returns:
             Comma-separated string of tag names.
         """
-        return ", ".join([tag.name for tag in self.tags.all()])
+        return ", ".join(self.tags.values_list("name", flat=True))
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Save the song and index it in Elasticsearch.
@@ -349,19 +350,17 @@ class Song(TimeStampedModel):
             keep_parents: bool = False,
     ) -> tuple[int, dict[str, int]]:
         """Delete the song, remove it from Elasticsearch, and delete from S3."""
-        result = super().delete()
+        result = super().delete(using=using, keep_parents=keep_parents)
 
-        # Delete from Elasticsearch
-        delete_document(str(self.uuid))
+        def cleanups() -> None:
+            # Delete from Elasticsearch
+            delete_document(str(self.uuid))
+            # Delete from S3
+            boto3.client("s3").delete_object(
+                Bucket=settings.AWS_BUCKET_NAME_MUSIC, Key=f"songs/{self.uuid}"
+            )
 
-        # Delete from S3
-        s3_client = boto3.client("s3")
-
-        s3_client.delete_object(
-            Bucket=settings.AWS_BUCKET_NAME_MUSIC,
-            Key=f"songs/{self.uuid}"
-        )
-
+        transaction.on_commit(cleanups)
         return result
 
     def index_song(self) -> None:
@@ -429,12 +428,11 @@ class Song(TimeStampedModel):
 
         Also creates a Listen record for tracking purposes.
         """
-        current_plays = self.times_played or 0
-        self.times_played = current_plays + 1
-        self.last_time_played = datetime.now()
-        self.save()
-
-        Listen(song=self, user=self.user).save()
+        Song.objects.filter(pk=self.pk).update(
+            times_played=F("times_played") + 1,
+            last_time_played=timezone.now(),
+        )
+        Listen.objects.create(song=self, user=self.user)
 
     @staticmethod
     def get_id3_info(song: bytes) -> Dict[str, Any]:
@@ -518,16 +516,14 @@ class Song(TimeStampedModel):
         Returns:
             List of dictionaries containing tag names and their counts, sorted by count descending.
         """
-        return sorted(
-            Tag.objects.values("name").
-            filter(
-                song__isnull=False,
-                song__user=user
-            ).
-            annotate(count=Count("song")),
-            key=lambda s: s["count"],
-            reverse=True
+        tags_query = (
+            Tag.objects.filter(song__user=user)
+            .annotate(count=Count("song", distinct=True))
+            .order_by("-count")
+            .values("name", "count")
         )
+
+        return cast(Iterable[TagCount], tags_query)
 
     @staticmethod
     def handle_s3(song: "Song", song_bytes: bytes) -> None:
@@ -561,16 +557,14 @@ class Song(TimeStampedModel):
 
         fo = io.BytesIO(song_bytes)
         audio = MP3(fileobj=fo)
-
-        if audio:
-            artwork = audio.tags.getall("APIC")
-            if artwork:
-                key = f"album_artwork/{song.album.uuid}"
+        if getattr(audio, "tags", None):
+            apics = audio.tags.getall("APIC") or []
+            if apics:
                 s3_client.upload_fileobj(
-                    io.BytesIO(artwork[0].data),
+                    io.BytesIO(apics[0].data),
                     settings.AWS_BUCKET_NAME_MUSIC,
-                    key,
-                    ExtraArgs={"ContentType": "image/jpeg"}
+                    f"album_artwork/{song.album.uuid}",
+                    ExtraArgs={"ContentType": "image/jpeg"},
                 )
 
 
@@ -621,7 +615,7 @@ class Playlist(TimeStampedModel):
         Raises:
             ValueError: If called on a manual playlist.
         """
-        if self.type == "manual":
+        if self.type == self.PlaylistType.MANUAL:
             raise ValueError("You cannot call populate() on a manual playlist.")
 
         if not self.parameters:
@@ -631,7 +625,7 @@ class Playlist(TimeStampedModel):
         if refresh:
             PlaylistItem.objects.filter(playlist=self).delete()
 
-        song_list = Song.objects.all()
+        song_list = Song.objects.filter(user=self.user)
 
         if "tag" in self.parameters:
             song_list = song_list.filter(tags__name=self.parameters["tag"])

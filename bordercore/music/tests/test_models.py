@@ -11,7 +11,7 @@ pytestmark = pytest.mark.django_db
 def test_listen_to(auto_login_user, song):
 
     song[0].listen_to()
-
+    song[0].refresh_from_db()
     assert song[0].times_played == 1
     assert Listen.objects.all().count() == 2
     assert Listen.objects.first().song == song[0]
