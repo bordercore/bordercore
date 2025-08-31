@@ -10,7 +10,7 @@ from bookmark.models import Bookmark
 from bookmark.tests.factories import BookmarkFactory
 from tag.tests.factories import TagFactory
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 faker = FakerFactory.create()
 

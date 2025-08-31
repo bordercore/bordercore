@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 import boto3
 import factory
 import pytest
-from factory.fuzzy import FuzzyInteger
 from faker import Factory as FakerFactory
 from faker_file.providers.pdf_file import PdfFileProvider
 from faker_file.providers.pdf_file.generators.reportlab_generator import \
@@ -32,7 +31,7 @@ try:
 except ModuleNotFoundError:
     pass
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 faker = FakerFactory.create()
 faker.add_provider(PdfFileProvider)

@@ -2,7 +2,7 @@ import pytest
 
 from django import urls
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 def test_accounts_prefs(auto_login_user):

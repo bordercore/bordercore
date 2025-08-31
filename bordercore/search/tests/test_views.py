@@ -10,7 +10,7 @@ from django.test import RequestFactory
 from search.views import (SearchTagDetailView, get_doc_types_from_request,
                           get_doctype, get_name, is_cached, sort_results)
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 django.setup()
 

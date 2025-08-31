@@ -10,7 +10,7 @@ from django.db.models import signals
 from music.models import Album, Playlist, Song
 from music.tests.factories import AlbumFactory, ArtistFactory
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture

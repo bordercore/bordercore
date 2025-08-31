@@ -4,7 +4,7 @@ from django import urls
 
 from tag.models import TagAlias
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 def test_tag_pin(auto_login_user, tag):

@@ -5,7 +5,7 @@ import requests
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture

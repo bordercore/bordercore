@@ -7,7 +7,7 @@ from django.db.models import signals
 
 from todo.views import Todo
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture

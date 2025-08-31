@@ -8,7 +8,7 @@ from blob.tests.factories import BlobFactory
 from collection.tests.factories import CollectionFactory
 from homepage import views
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture

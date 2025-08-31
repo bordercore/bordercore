@@ -1,10 +1,9 @@
 import pytest
+from feed.models import Feed
 
 from django import urls
 
-from feed.models import Feed
-
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 def test_feed_list(auto_login_user, feed):

@@ -10,7 +10,7 @@ from collection.models import Collection
 from node.models import Node
 from node.tests.factories import NodeFactory
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 faker = FakerFactory.create()

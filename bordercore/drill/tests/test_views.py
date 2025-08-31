@@ -11,7 +11,7 @@ from drill.models import Question, QuestionToObject
 from drill.tests.factories import QuestionFactory
 from drill.views import handle_related_objects
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture

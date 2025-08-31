@@ -7,7 +7,7 @@ from django import urls
 
 from fitness.models import Exercise, ExerciseUser
 
-pytestmark = [pytest.mark.django_db, pytest.mark.views]
+pytestmark = [pytest.mark.django_db]
 
 faker = FakerFactory.create()
 
