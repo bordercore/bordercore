@@ -10,7 +10,7 @@ import uuid
 import zipfile
 from datetime import timedelta
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Iterable, Optional, TypedDict, cast
 from uuid import UUID
 
 import boto3
@@ -116,7 +116,7 @@ class Album(TimeStampedModel):
         index_document(self.elasticsearch_document)
 
     @property
-    def elasticsearch_document(self) -> Dict[str, Any]:
+    def elasticsearch_document(self) -> dict[str, Any]:
         """Return a representation of the album suitable for indexing in Elasticsearch.
 
         Returns:
@@ -171,7 +171,7 @@ class Album(TimeStampedModel):
         return super().delete(using=using, keep_parents=keep_parents)
 
     @staticmethod
-    def scan_zipfile(zipfile_obj: bytes, include_song_data: bool = False) -> Dict[str, Any]:
+    def scan_zipfile(zipfile_obj: bytes, include_song_data: bool = False) -> dict[str, Any]:
         """Scan a ZIP file containing MP3 files and extract metadata.
 
         Args:
@@ -210,7 +210,7 @@ class Album(TimeStampedModel):
         song_source: "SongSource",
         tags: Optional[str],
         user: User,
-        changes: Dict[str, Dict[str, Any]]
+        changes: dict[str, dict[str, Any]]
     ) -> UUID:
         """Create an album from a ZIP file containing MP3 files.
 
@@ -292,6 +292,20 @@ class SongSource(TimeStampedModel):
         return self.name
 
 
+class TagCount(TypedDict):
+    """A TypedDict for representing a tag and its associated count.
+
+    This is typically used as a return type for database queries that
+    aggregate tag data.
+
+    Attributes:
+        name: The name of the tag.
+        count: The number of times the tag has been used.
+    """
+    name: str
+    count: int
+
+
 class Song(TimeStampedModel):
     """A song is an individual musical track that can be played, rated, tagged, and organized within albums.
     """
@@ -368,7 +382,7 @@ class Song(TimeStampedModel):
         index_document(self.elasticsearch_document)
 
     @property
-    def elasticsearch_document(self) -> Dict[str, Any]:
+    def elasticsearch_document(self) -> dict[str, Any]:
         """Return a representation of the song suitable for indexing in Elasticsearch.
 
         Returns:
@@ -435,7 +449,7 @@ class Song(TimeStampedModel):
         Listen.objects.create(song=self, user=self.user)
 
     @staticmethod
-    def get_id3_info(song: bytes) -> Dict[str, Any]:
+    def get_id3_info(song: bytes) -> dict[str, Any]:
         """Read a song's ID3 information.
 
         Args:
@@ -444,7 +458,6 @@ class Song(TimeStampedModel):
         Returns:
             Dictionary containing the song's metadata.
         """
-
         info = MP3(fileobj=BytesIO(song), ID3=EasyID3)
 
         data = {
@@ -470,7 +483,7 @@ class Song(TimeStampedModel):
         return data
 
     @staticmethod
-    def get_or_create_album(user: User, song_info: Dict[str, Any]) -> Optional[Album]:
+    def get_or_create_album(user: User, song_info: dict[str, Any]) -> Optional[Album]:
         """Get or create an album based on song information.
 
         Args:
@@ -507,7 +520,7 @@ class Song(TimeStampedModel):
         return album_info
 
     @staticmethod
-    def get_song_tags(user: User) -> List[Dict[str, Union[str, int]]]:
+    def get_song_tags(user: User) -> Iterable[TagCount]:
         """Get a count of all song tags, grouped by tag.
 
         Args:
