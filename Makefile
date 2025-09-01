@@ -34,23 +34,23 @@ test:
 	python -m pytest -vv --cov=lib --cov=cli tests/*.py
 
 test_data:
-	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test data
+	python3 $(BORDERCORE_HOME)/../bin/test_runner.py --test data
 
 test_unit:
 	MOCK_ELASTICSEARCH=1 \
-	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test unit
+	python3 $(BORDERCORE_HOME)/../bin/test_runner.py --test unit
 
 test_wumpus:
-	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test wumpus
+	python3 $(BORDERCORE_HOME)/../bin/test_runner.py --test wumpus
 
 test_functional: reset_elasticsearch
 # Configure functional tests to use a test instance of Elasticsearch. Don't use production.
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
-	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test functional
+	python3 $(BORDERCORE_HOME)/../bin/test_runner.py --test functional
 
 test_coverage:
 	MOCK_ELASTICSEARCH=1 \
-	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test coverage
+	python3 $(BORDERCORE_HOME)/../bin/test_runner.py --test coverage
 
 
 reset_elasticsearch:
