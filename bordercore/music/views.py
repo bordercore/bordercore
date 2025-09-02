@@ -4,13 +4,12 @@ This module contains all the views for handling music-related functionality incl
 songs, albums, artists, playlists, and related operations.
 """
 
-import io
 import json
 import re
 import string
 import uuid
 from datetime import timedelta
-from typing import Any, Dict, Union, cast
+from typing import Any, Union, cast
 
 import boto3
 import humanize
@@ -22,6 +21,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
+from django.db import transaction
 from django.db.models import F, Q
 from django.db.models.query import QuerySet as QuerySetType
 from django.forms.models import model_to_dict
@@ -30,6 +30,7 @@ from django.http import (HttpRequest, HttpResponse, HttpResponseRedirect,
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (CreateView, DeleteView, ModelFormMixin,
@@ -38,6 +39,8 @@ from django.views.generic.list import ListView
 
 from lib.mixins import FormRequestMixin
 from lib.time_utils import convert_seconds
+from music.services import (create_album_from_zipfile, get_id3_info,
+                            get_song_tags, scan_zipfile)
 from music.services import search as search_service
 
 from .forms import AlbumForm, PlaylistForm, SongForm
@@ -46,6 +49,8 @@ from .services import (get_artist_counts, get_playlist_counts,
                        get_playlist_songs)
 from .services import get_recent_albums as get_recent_albums_service
 from .services import get_unique_artist_letters
+
+SEARCH_RESULTS_LIMIT = 20
 
 
 @login_required
@@ -73,7 +78,12 @@ def music_list(request: HttpRequest) -> HttpResponse:
     # Get all playlists and their song counts
     playlists = get_playlist_counts(user)
 
-    page_number = request.GET.get("page_number", None)
+    page_number_raw = request.GET.get("page_number")
+    try:
+        page_number = int(page_number_raw) if page_number_raw is not None else 1
+    except (TypeError, ValueError):
+        page_number = 1
+    # page_number = request.GET.get("page_number", None)
     # Get a list of recently added albums
     recent_albums_list, paginator_info = get_recent_albums_service(user, page_number)
 
@@ -94,12 +104,23 @@ def music_list(request: HttpRequest) -> HttpResponse:
 
 
 @method_decorator(login_required, name="dispatch")
-class ArtistDetailView(TemplateView):
+class ArtistDetailView(DetailView):
     """Display detailed information about a specific artist."""
 
-    template_name = "music/artist_detail.html"
+    model = Artist
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_queryset(self) -> QuerySetType[Artist]:
+        """Scope artists to the current user.
+
+        Returns:
+            QuerySet of Artist objects for this user.
+        """
+        user = cast(User, self.request.user)
+        return Artist.objects.filter(user=user)
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the artist detail view.
 
         Args:
@@ -110,16 +131,12 @@ class ArtistDetailView(TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
-        artist_uuid = self.kwargs.get("artist_uuid")
-
-        artist = get_object_or_404(Artist, uuid=artist_uuid)
-
         user = cast(User, self.request.user)
 
         # Get all albums by this artist
         albums = Album.objects.filter(
             user=user,
-            artist=artist
+            artist=self.object
         ).order_by(
             "-original_release_year"
         )
@@ -127,8 +144,7 @@ class ArtistDetailView(TemplateView):
         # Get all songs by this artist that do not appear on an album
         songs = Song.objects.filter(
             user=user,
-            artist=artist
-        ).filter(
+            artist=self.object,
             album__isnull=True
         ).select_related(
             "artist"
@@ -140,8 +156,8 @@ class ArtistDetailView(TemplateView):
         # Get all songs by this artist that do appear on compilation album
         compilation_songs = Album.objects.filter(
             Q(user=user)
-            & Q(song__artist=artist)
-            & ~Q(artist=artist)
+            & Q(song__artist=self.object)
+            & ~Q(artist=self.object)
         ).distinct("song__album")
 
         song_list = []
@@ -162,11 +178,11 @@ class ArtistDetailView(TemplateView):
         return {
             **context,
             "artist_image": True,
-            "artist": artist,
+            "artist": self.object,
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
-            "title": artist
+            "title": self.object
         }
 
 
@@ -204,7 +220,7 @@ class AlbumListView(ListView):
 
         return queryset
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the album list view.
 
         Args:
@@ -215,19 +231,22 @@ class AlbumListView(ListView):
         """
         context = super().get_context_data(**kwargs)
 
+        user = cast(User, self.request.user)
         selected_letter = self.request.GET.get("letter", "a")
-        artist_counts = get_artist_counts(self.request.user, selected_letter)
+        artist_counts = get_artist_counts(user, selected_letter)
 
         for artist in self.object_list:
             artist.album_counts = artist_counts["album_counts"][str(artist.uuid)]
             artist.song_counts = artist_counts["song_counts"][str(artist.uuid)]
+
+        user = cast(User, self.request.user)
 
         return {
             **context,
             "nav": list(string.ascii_lowercase) + ["other"],
             "title": "Album List",
             "selected_letter": selected_letter,
-            "unique_artist_letters": get_unique_artist_letters(self.request.user)
+            "unique_artist_letters": get_unique_artist_letters(user)
         }
 
 
@@ -240,7 +259,7 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
     slug_url_kwarg = "uuid"
     form_class = AlbumForm
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the album detail view.
 
         Args:
@@ -289,7 +308,7 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
             QuerySet of Album objects filtered by user.
         """
         user = cast(User, self.request.user)
-        return Album.objects.filter(user=user)
+        return Album.objects.filter(user=user).prefetch_related("tags")
 
 
 @method_decorator(login_required, name="dispatch")
@@ -299,7 +318,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
     model = Album
     form_class = AlbumForm
     slug_field = "uuid"
-    slug_url_kwarg = "album_uuid"
+    slug_url_kwarg = "uuid"
     template_name = "music/album_detail.html"
 
     def form_valid(self, form: AlbumForm) -> HttpResponseRedirect:
@@ -312,7 +331,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
             HTTP redirect to the success URL.
         """
         if "cover_image" in self.request.FILES:
-            self.handle_cover_image()
+            self.upload_cover_image_to_s3()
 
         album = form.instance
         album.tags.set(form.cleaned_data["tags"])
@@ -342,14 +361,14 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
         # If we've uploaded a cover image, add a random UUID to the
         #  url to force the browser to evict the old image from cache
         #  so the new one is immediately visible.
-        if "cover_image" in self.get_form_kwargs()["files"]:
+        if "cover_image" in self.request.FILES:
             url = url + f"?cache_buster={uuid.uuid4()}"
 
         return url
 
-    def handle_cover_image(self) -> None:
+    def upload_cover_image_to_s3(self) -> None:
         """Upload the album's cover image to S3.
-_image
+
         Raises:
             Exception: If S3 upload fails.
         """
@@ -357,9 +376,8 @@ _image
 
         key = f"album_artwork/{self.object.uuid}"
         cover_image = cast(UploadedFile, self.request.FILES["cover_image"])
-        fo = io.BytesIO(cover_image.read())
         s3_client.upload_fileobj(
-            fo,
+            cover_image.file,
             settings.AWS_BUCKET_NAME_MUSIC,
             key,
             ExtraArgs={"ContentType": "image/jpeg"}
@@ -377,7 +395,16 @@ class SongUpdateView(FormRequestMixin, UpdateView):
     slug_field = "uuid"
     slug_url_kwarg = "song_uuid"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_queryset(self) -> QuerySetType[Song]:
+        """Limit updates to the current user's songs.
+
+        Returns:
+            QuerySet of Song objects for this user.
+        """
+        user = cast(User, self.request.user)
+        return Song.objects.filter(user=user).prefetch_related("tags")
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the song update view.
 
         Args:
@@ -394,7 +421,7 @@ class SongUpdateView(FormRequestMixin, UpdateView):
         context["last_time_played"] = self.object.last_time_played.strftime("%B %d, %Y") \
             if self.object.last_time_played else "Never"
         context["tags"] = [x.name for x in self.object.tags.all()]
-        context["tag_counts"] = Song.get_song_tags(user)
+        context["tag_counts"] = get_song_tags(user)
         return context
 
     def form_valid(self, form: SongForm) -> HttpResponseRedirect:
@@ -432,7 +459,7 @@ class SongCreateView(FormRequestMixin, CreateView):
     form_class = SongForm
     success_url = reverse_lazy("music:create")
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the song creation view.
 
         Args:
@@ -444,7 +471,7 @@ class SongCreateView(FormRequestMixin, CreateView):
         user = cast(User, self.request.user)
         context = super().get_context_data(**kwargs)
         context["action"] = "Create"
-        context["tag_counts"] = Song.get_song_tags(user)
+        context["tag_counts"] = get_song_tags(user)
         return context
 
     def form_valid(self, form: SongForm) -> HttpResponse:
@@ -474,7 +501,7 @@ class SongCreateView(FormRequestMixin, CreateView):
 
         # Upload the song and its artwork to S3
         song_file = cast(UploadedFile, self.request.FILES["song"])
-        Song.handle_s3(song, song_file.read())
+        song.upload_song_media_to_s3(song_file.read())
 
         # Save the song source in the session
         self.request.session["song_source"] = form.cleaned_data["source"].name
@@ -534,9 +561,15 @@ def search_artists(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with matching artists.
     """
-    artist = request.GET["term"].lower()
+    artist = request.GET.get("term", "").strip().lower()
+    if not artist:
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing artist parameter"
+        }, status=400)
 
-    matches = search_service(request.user, artist)
+    user = cast(User, request.user)
+    matches = search_service(user, artist)
 
     return JsonResponse(matches, safe=False)
 
@@ -551,20 +584,19 @@ class RecentSongsListView(ListView):
         Returns:
             QuerySet of Song objects ordered by creation date.
         """
-        search_term = self.request.GET.get("tag", None)
-
+        search_term = self.request.GET.get("tag", "").strip()
         user = cast(User, self.request.user)
-        queryset = Song.objects.filter(user=user) \
-                               .filter(album__isnull=True) \
+
+        queryset = Song.objects.filter(user=user, album__isnull=True) \
                                .select_related("artist")
 
         if search_term:
             queryset = queryset.filter(
                 Q(title__icontains=search_term)
-                | Q(artist__icontains=search_term)
+                | Q(artist__name__icontains=search_term)
             )
 
-        return queryset.order_by("-created", "artist", "title")[:20]
+        return queryset.order_by("-created", "artist__name", "title")[:SEARCH_RESULTS_LIMIT]
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> JsonResponse:
         """Handle GET requests for recent songs.
@@ -581,15 +613,15 @@ class RecentSongsListView(ListView):
 
         song_list = []
 
-        for match in queryset:
+        for song in queryset:
             song_list.append(
                 {
-                    "uuid": match.uuid,
-                    "title": match.title,
-                    "artist": match.artist.name,
-                    "year": match.year,
-                    "length": convert_seconds(match.length),
-                    "artist_url": reverse("music:artist_detail", kwargs={"artist_uuid": match.artist.uuid})
+                    "uuid": song.uuid,
+                    "title": song.title,
+                    "artist": song.artist.name,
+                    "year": song.year,
+                    "length": convert_seconds(song.length),
+                    "artist_url": reverse("music:artist_detail", kwargs={"uuid": song.artist.uuid})
                 }
             )
 
@@ -636,7 +668,7 @@ def get_song_id3_info(request: HttpRequest) -> JsonResponse:
     """
     song_file = cast(UploadedFile, request.FILES["song"])
     song = song_file.read()
-    id3_info = Song.get_id3_info(song)
+    id3_info = get_id3_info(song)
     return JsonResponse({**id3_info})
 
 
@@ -665,7 +697,7 @@ class SearchTagListView(ListView):
             "title"
         )
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the tag search view.
 
         Args:
@@ -715,7 +747,7 @@ class PlaylistDetailView(DetailView):
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the playlist detail view.
 
         Args:
@@ -742,7 +774,7 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
     model = Playlist
     form_class = PlaylistForm
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the playlist creation view.
 
         Args:
@@ -872,7 +904,7 @@ class CreateAlbumView(TemplateView):
 
     template_name = "music/create_album.html"
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Get context data for the album creation view.
 
         Args:
@@ -908,9 +940,15 @@ def scan_album_from_zipfile(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with scanned album information and status.
     """
+    if "zipfile" not in request.FILES:
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "No ZIP file provided"
+        }, status=400)
+
     zipfile_upload = cast(UploadedFile, request.FILES["zipfile"])
     zipfile_obj = zipfile_upload.read()
-    info = Album.scan_zipfile(zipfile_obj)
+    info = scan_zipfile(zipfile_obj)
 
     response = {
         **info,
@@ -921,6 +959,7 @@ def scan_album_from_zipfile(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
 def add_album_from_zipfile(request: HttpRequest) -> JsonResponse:
     """Create an album from a ZIP file containing audio tracks.
 
@@ -930,15 +969,30 @@ def add_album_from_zipfile(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with creation status and album URL or error message.
     """
+    artist = request.POST.get("artist", "").strip()
+    source_id = request.POST.get("source", "").strip()
+
+    if not all([artist, source_id]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: artist and source are required"
+        }, status=400)
+
+    if "zipfile" not in request.FILES:
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "No ZIP file provided"
+        }, status=400)
+
     zipfile_upload = cast(UploadedFile, request.FILES["zipfile"])
     zipfile_obj = zipfile_upload.read()
 
     try:
         user = cast(User, request.user)
-        source = SongSource.objects.get(id=request.POST["source"])
-        album_uuid = Album.create_album_from_zipfile(
+        source = SongSource.objects.get(id=source_id)
+        album_uuid = create_album_from_zipfile(
             zipfile_obj,
-            request.POST["artist"],
+            artist,
             source,
             request.POST.get("tags", None),
             user,
@@ -971,10 +1025,11 @@ def get_playlist(request: HttpRequest, playlist_uuid: str) -> JsonResponse:
     """
     playlist = Playlist.objects.get(uuid=playlist_uuid)
 
-    song_list = get_playlist_songs(playlist)
+    playlist_data = get_playlist_songs(playlist)
+    playtime_seconds: float = float(cast(int, playlist_data["playtime"]))
 
     total_time = humanize.precisedelta(
-        timedelta(seconds=song_list["playtime"]),
+        timedelta(seconds=playtime_seconds),
         minimum_unit="minutes",
         format="%.f"
     )
@@ -982,7 +1037,7 @@ def get_playlist(request: HttpRequest, playlist_uuid: str) -> JsonResponse:
     response = {
         "status": "OK",
         "totalTime": total_time,
-        "playlistitems": song_list["song_list"]
+        "playlistitems": playlist_data["song_list"]
     }
 
     return JsonResponse(response)
@@ -998,13 +1053,19 @@ def sort_playlist(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    playlistitem_uuid = request.POST["playlistitem_uuid"]
-    new_position = int(request.POST["position"])
+    playlistitem_uuid = request.POST.get("playlistitem_uuid", "").strip()
+    new_position = int(request.POST.get("position", "").strip())
+
+    if not all([playlistitem_uuid, new_position]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: playlistitem_uuid and new_position are required"
+        }, status=400)
 
     playlistitem = PlaylistItem.objects.get(uuid=playlistitem_uuid)
     playlistitem.reorder(new_position)
 
-    return JsonResponse({"status": "OK"}, safe=False)
+    return JsonResponse({"status": "OK"})
 
 
 @login_required
@@ -1037,11 +1098,17 @@ def add_to_playlist(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status and optional warning message.
     """
-    playlist_uuid = request.POST["playlist_uuid"]
-    song_uuid = request.POST["song_uuid"]
+    playlist_uuid = request.POST.get("playlist_uuid", "").strip()
+    song_uuid = request.POST.get("song_uuid", "").strip()
 
-    playlist = Playlist.objects.get(uuid=playlist_uuid)
-    song = Song.objects.get(uuid=song_uuid)
+    if not all([playlist_uuid, song_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: playlist_uuid and song_uuid are required"
+        }, status=400)
+
+    playlist = get_object_or_404(Playlist, uuid=playlist_uuid, user=request.user)
+    song = get_object_or_404(Song, uuid=song_uuid, user=request.user)
 
     if PlaylistItem.objects.filter(playlist=playlist, song=song).exists():
 
@@ -1079,15 +1146,22 @@ def update_artist_image(request: HttpRequest) -> JsonResponse:
     Raises:
         Exception: If S3 upload fails.
     """
-    artist_uuid = request.POST["artist_uuid"]
+    artist_uuid = request.POST.get("artist_uuid", "").strip()
+
+    if not artist_uuid:
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing artist_uuid parameter"
+        }, status=400)
+
+    get_object_or_404(Artist, uuid=artist_uuid, user=request.user)
     image = cast(UploadedFile, request.FILES["image"])
 
     s3_client = boto3.client("s3")
 
     key = f"artist_images/{artist_uuid}"
-    fo = io.BytesIO(image.read())
     s3_client.upload_fileobj(
-        fo,
+        image.file,
         settings.AWS_BUCKET_NAME_MUSIC,
         key,
         ExtraArgs={"ContentType": "image/jpeg"}
@@ -1110,9 +1184,15 @@ def dupe_song_checker(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with list of potential duplicate songs.
     """
-    artist = request.GET["artist"]
-    title = request.GET["title"]
+    artist = request.GET.get("artist", "").strip()
+    title = request.GET.get("title", "").strip()
     user = cast(User, request.user)
+
+    if not all([artist, title]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: artist and title are required"
+        }, status=400)
 
     song = Song.objects.filter(
         user=user,
@@ -1156,10 +1236,10 @@ def missing_artist_images(request: HttpRequest) -> HttpResponse:
     unique_uuids = {}
 
     paginator = s3_resource.meta.client.get_paginator("list_objects_v2")
-    page_iterator = paginator.paginate(Bucket="bordercore-music")
+    page_iterator = paginator.paginate(Bucket=settings.AWS_BUCKET_NAME_MUSIC)
 
     for page in page_iterator:
-        for key in page["Contents"]:
+        for key in page.get("Contents", []):
             m = re.search(r"^artist_images/(.*)", str(key["Key"]))
             if m:
                 unique_uuids[m.group(1)] = True
@@ -1173,10 +1253,7 @@ def missing_artist_images(request: HttpRequest) -> HttpResponse:
 
     for artist in artists:
         if str(artist.uuid) not in unique_uuids:
-            return redirect(reverse(
-                "music:artist_detail",
-                kwargs={"artist_uuid": artist.uuid}
-            ))
+            return redirect("music:artist_detail", uuid=artist.uuid)
 
     return render(request, "music/index.html")
 
@@ -1192,7 +1269,13 @@ def recent_albums(request: HttpRequest, page_number: Union[str, int]) -> JsonRes
     Returns:
         JSON response with album list, pagination info, and status.
     """
-    recent_albums_list, paginator = get_recent_albums_service(request.user, page_number)
+    user = cast(User, request.user)
+    try:
+        page_num = int(page_number)
+    except (TypeError, ValueError):
+        page_num = 1
+
+    recent_albums_list, paginator = get_recent_albums_service(user, page_num)
     response = {
         "status": "OK",
         "album_list": recent_albums_list,
@@ -1203,6 +1286,7 @@ def recent_albums(request: HttpRequest, page_number: Union[str, int]) -> JsonRes
 
 
 @login_required
+@require_POST
 def set_song_rating(request: HttpRequest) -> JsonResponse:
     """Update the rating for a specific song.
 
@@ -1214,12 +1298,18 @@ def set_song_rating(request: HttpRequest) -> JsonResponse:
     """
     song_uuid = request.POST["song_uuid"]
 
+    if not song_uuid:
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing song_uuid parameter"
+        }, status=400)
+
     if request.POST["rating"] == "":
         rating = None
     else:
         rating = int(request.POST["rating"])
 
-    song = Song.objects.get(uuid=song_uuid)
+    song = get_object_or_404(Song, uuid=song_uuid, user=request.user)
     song.rating = rating
     song.save()
 

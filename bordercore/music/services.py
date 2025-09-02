@@ -180,7 +180,7 @@ def get_recent_albums(user: User, page_number: int = 1) -> Tuple[List[Dict[str, 
             "created": x.created.strftime("%B %Y"),
             "album_url": reverse("music:album_detail", kwargs={"uuid": x.uuid}),
             "artwork_url": f"{settings.IMAGES_URL}album_artwork/{x.uuid}",
-            "artist_url": reverse("music:artist_detail", kwargs={"artist_uuid": x.artist.uuid}),
+            "artist_url": reverse("music:artist_detail", kwargs={"uuid": x.artist.uuid}),
         } for x in page.object_list
     ]
 

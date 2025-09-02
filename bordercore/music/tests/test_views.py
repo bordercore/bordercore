@@ -86,7 +86,7 @@ def test_music_album_update(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:album_update", kwargs={"album_uuid": song[1].album.uuid})
+    url = urls.reverse("music:album_update", kwargs={"uuid": song[1].album.uuid})
     resp = client.post(url, {
         "title": "New Album Title",
         "artist": "New Artist",
@@ -109,7 +109,7 @@ def test_music_artist_detail(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:artist_detail", kwargs={"artist_uuid": song[1].artist.uuid})
+    url = urls.reverse("music:artist_detail", kwargs={"uuid": song[1].artist.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200

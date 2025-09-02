@@ -601,11 +601,11 @@ def get_link(doc_type, match):
         if "album_uuid" in match:
             url = reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
         else:
-            url = reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
+            url = reverse("music:artist_detail", kwargs={"uuid": match["artist_uuid"]})
     elif doc_type == "album":
         url = reverse("music:album_detail", kwargs={"uuid": match["uuid"]})
     elif doc_type == "artist":
-        url = reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
+        url = reverse("music:artist_detail", kwargs={"uuid": match["artist_uuid"]})
     elif doc_type in ("blob", "book", "document", "note"):
         url = reverse("blob:detail", kwargs={"uuid": match["uuid"]})
     elif doc_type == "drill":

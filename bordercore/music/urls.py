@@ -31,12 +31,12 @@ urlpatterns = [
         name="album_detail"
     ),
     path(
-        route="album_update/<uuid:album_uuid>/",
+        route="album_update/<uuid:uuid>/",
         view=views.AlbumUpdateView.as_view(),
         name="album_update"
     ),
     path(
-        route="artist/<uuid:artist_uuid>/",
+        route="artist/<uuid:uuid>/",
         view=views.ArtistDetailView.as_view(),
         name="artist_detail"
     ),
