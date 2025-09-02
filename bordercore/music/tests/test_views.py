@@ -189,7 +189,7 @@ def test_mark_song_as_listened_to(auto_login_user, song):
         "mark_song_as_listened_to",
         kwargs={"song_uuid": song[0].uuid}
     )
-    resp = client.get(url)
+    resp = client.post(url)
 
     assert resp.status_code == 200
 

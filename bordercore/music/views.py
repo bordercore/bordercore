@@ -13,7 +13,8 @@ from typing import Any, Union, cast
 
 import boto3
 import humanize
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
 from django.conf import settings
@@ -633,7 +634,8 @@ class RecentSongsListView(ListView):
         return JsonResponse(response)
 
 
-@api_view(["GET"])
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def mark_song_as_listened_to(request: Request, song_uuid: str) -> JsonResponse:
     """Mark a song as having been listened to (production only).
 
