@@ -42,7 +42,7 @@ def test_music_song_update(auto_login_user, song, song_source):
     _, client = auto_login_user()
 
     # The submitted form
-    url = urls.reverse("music:update", kwargs={"song_uuid": song[1].uuid})
+    url = urls.reverse("music:update", kwargs={"uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Update",
         "artist": "Artist Changed",
@@ -53,7 +53,7 @@ def test_music_song_update(auto_login_user, song, song_source):
 
     assert resp.status_code == 302
 
-    url = urls.reverse("music:update", kwargs={"song_uuid": song[1].uuid})
+    url = urls.reverse("music:update", kwargs={"uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Delete",
         "tags": ""
@@ -223,7 +223,7 @@ def test_music_playlist_update(auto_login_user, playlist):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:playlist_update", kwargs={"playlist_uuid": playlist[0].uuid})
+    url = urls.reverse("music:playlist_update", kwargs={"uuid": playlist[0].uuid})
     resp = client.post(url, {
         "name": "Test Playlist New Name",
         "note": "New Note",

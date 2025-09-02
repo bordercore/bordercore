@@ -17,7 +17,7 @@ class ExerciseDetailView(DetailView):
 
     model = Exercise
     slug_field = "uuid"
-    slug_url_kwarg = "exercise_uuid"
+    slug_url_kwarg = "uuid"
 
     def get_context_data(self, **kwargs):
 

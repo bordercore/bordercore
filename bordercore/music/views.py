@@ -394,7 +394,7 @@ class SongUpdateView(FormRequestMixin, UpdateView):
     form_class = SongForm
     success_url = reverse_lazy("music:list")
     slug_field = "uuid"
-    slug_url_kwarg = "song_uuid"
+    slug_url_kwarg = "uuid"
 
     def get_queryset(self) -> QuerySetType[Song]:
         """Limit updates to the current user's songs.
@@ -822,7 +822,7 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
     model = Playlist
     form_class = PlaylistForm
     slug_field = "uuid"
-    slug_url_kwarg = "playlist_uuid"
+    slug_url_kwarg = "uuid"
 
     def form_valid(self, form: PlaylistForm) -> HttpResponseRedirect:
         """Process valid form submission for playlist update.

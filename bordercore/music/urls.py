@@ -16,7 +16,7 @@ urlpatterns = [
         name="search_artists"
     ),
     path(
-        route="update/<uuid:song_uuid>/",
+        route="update/<uuid:uuid>/",
         view=views.SongUpdateView.as_view(),
         name="update"
     ),
@@ -81,7 +81,7 @@ urlpatterns = [
         name="playlist_create"
     ),
     path(
-        route="playlist_update/<uuid:playlist_uuid>/",
+        route="playlist_update/<uuid:uuid>/",
         view=views.UpdatePlaylistView.as_view(),
         name="playlist_update"
     ),

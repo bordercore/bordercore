@@ -16,14 +16,14 @@ def test_fitness_exercise_detail(auto_login_user, fitness):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("fitness:exercise_detail", kwargs={"exercise_uuid": fitness[0].uuid})
+    url = urls.reverse("fitness:exercise_detail", kwargs={"uuid": fitness[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
 
     # Test an inactive exercise
 
-    url = urls.reverse("fitness:exercise_detail", kwargs={"exercise_uuid": fitness[1].uuid})
+    url = urls.reverse("fitness:exercise_detail", kwargs={"uuid": fitness[1].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200

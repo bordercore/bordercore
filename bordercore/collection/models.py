@@ -43,7 +43,7 @@ class Collection(TimeStampedModel):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("collection:detail", kwargs={"collection_uuid": self.uuid})
+        return reverse("collection:detail", kwargs={"uuid": self.uuid})
 
     @property
     def cover_url(self):

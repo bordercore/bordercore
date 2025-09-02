@@ -42,7 +42,7 @@ def test_collection_detail(auto_login_user, collection):
 
     user, client = auto_login_user()
 
-    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
+    url = urls.reverse("collection:detail", kwargs={"uuid": collection[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -50,7 +50,7 @@ def test_collection_detail(auto_login_user, collection):
     for so in CollectionObject.objects.filter(collection=collection[0]):
         so.blob.delete()
 
-    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
+    url = urls.reverse("collection:detail", kwargs={"uuid": collection[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -59,7 +59,7 @@ def test_collection_detail(auto_login_user, collection):
     blob = BlobFactory(user=user, name=None)
     collection[0].add_object(blob)
 
-    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
+    url = urls.reverse("collection:detail", kwargs={"uuid": collection[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -112,7 +112,7 @@ def test_update_collection(auto_login_user, collection):
 
     name = faker.text()
 
-    url = urls.reverse("collection:update", kwargs={"collection_uuid": collection[0].uuid})
+    url = urls.reverse("collection:update", kwargs={"uuid": collection[0].uuid})
     resp = client.post(url, {
         "name": name,
         "tags": "django"

@@ -56,7 +56,7 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
             {
                 "uuid": c.uuid,
                 "name": c.name,
-                "url": reverse("collection:detail", kwargs={"collection_uuid": c.uuid}),
+                "url": reverse("collection:detail", kwargs={"uuid": c.uuid}),
                 "num_blobs": c.num_blobs,
                 "cover_url": c.cover_url,
             } for c in self.object_list
@@ -73,7 +73,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
 
     model = Collection
     slug_field = "uuid"
-    slug_url_kwarg = "collection_uuid"
+    slug_url_kwarg = "uuid"
     form_class = CollectionForm
 
     def get_context_data(self, **kwargs):
@@ -127,7 +127,7 @@ class CollectionUpdateView(FormRequestMixin, UpdateView):
     model = Collection
     form_class = CollectionForm
     slug_field = "uuid"
-    slug_url_kwarg = "collection_uuid"
+    slug_url_kwarg = "uuid"
 
     def get_queryset(self):
         base_qs = super().get_queryset()
@@ -152,7 +152,7 @@ class CollectionDeleteView(DeleteView):
 
     model = Collection
     slug_field = "uuid"
-    slug_url_kwarg = "collection_uuid"
+    slug_url_kwarg = "uuid"
     success_url = reverse_lazy("collection:list")
 
     def get_queryset(self):
@@ -226,7 +226,7 @@ def search(request):
                 "name": x.name,
                 "uuid": x.uuid,
                 "num_objects": x.num_objects,
-                "url": reverse("collection:detail", kwargs={"collection_uuid": x.uuid}),
+                "url": reverse("collection:detail", kwargs={"uuid": x.uuid}),
                 "cover_url": f"{settings.COVER_URL}collections/{x.uuid}.jpg",
                 "contains_blob": getattr(x, "contains_blob", None)
             }

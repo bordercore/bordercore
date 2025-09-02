@@ -16,17 +16,17 @@ urlpatterns = [
         name="create"
     ),
     path(
-        route="update/<uuid:collection_uuid>/",
+        route="update/<uuid:uuid>/",
         view=views.CollectionUpdateView.as_view(),
         name="update"
     ),
     path(
-        route="<uuid:collection_uuid>/",
+        route="<uuid:uuid>/",
         view=views.CollectionDetailView.as_view(),
         name="detail"
     ),
     path(
-        route="delete/<uuid:collection_uuid>/",
+        route="delete/<uuid:uuid>/",
         view=views.CollectionDeleteView.as_view(),
         name="delete"
     ),

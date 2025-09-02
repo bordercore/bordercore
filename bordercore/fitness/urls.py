@@ -16,7 +16,7 @@ urlpatterns = [
         name="change_active_status"
     ),
     path(
-        route="<uuid:exercise_uuid>/",
+        route="<uuid:uuid>/",
         view=views.ExerciseDetailView.as_view(),
         name="exercise_detail"
     ),
