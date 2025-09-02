@@ -5,10 +5,17 @@ and search functionality using Django ORM and Elasticsearch.
 """
 
 import string
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+import zipfile
+from io import BytesIO
+from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple, TypedDict,
+                    Union, cast)
 from urllib.parse import unquote
+from uuid import UUID
 
+import humanize
 from elasticsearch import Elasticsearch
+from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import MP3
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -19,10 +26,25 @@ from django.urls import reverse
 
 from lib.time_utils import convert_seconds
 from lib.util import get_elasticsearch_connection
+from tag.models import Tag
 
-from .models import Album, Artist, Playlist, PlaylistItem
+from .models import Album, Artist, Playlist, PlaylistItem, Song, SongSource
 
 SEARCH_LIMIT: int = 1000
+
+
+class TagCount(TypedDict):
+    """A TypedDict for representing a tag and its associated count.
+
+    This is typically used as a return type for database queries that
+    aggregate tag data.
+
+    Attributes:
+        name: The name of the tag.
+        count: The number of times the tag has been used.
+    """
+    name: str
+    count: int
 
 
 def get_playlist_counts(user: User) -> QuerySet[Playlist]:
@@ -163,6 +185,25 @@ def get_recent_albums(user: User, page_number: int = 1) -> Tuple[List[Dict[str, 
     ]
 
     return recent_albums, paginator_info
+
+
+def get_song_tags(user: User) -> Iterable[TagCount]:
+    """Get a count of all song tags, grouped by tag.
+
+    Args:
+        user: The user whose song tags to retrieve.
+
+    Returns:
+        List of dictionaries containing tag names and their counts, sorted by count descending.
+    """
+    tags_query = (
+        Tag.objects.filter(song__user=user)
+        .annotate(count=Count("song", distinct=True))
+        .order_by("-count")
+        .values("name", "count")
+    )
+
+    return cast(Iterable[TagCount], tags_query)
 
 
 def search(user: User, artist_name: str) -> List[Dict[str, str]]:
@@ -314,3 +355,141 @@ def get_artist_counts(user: User, letter: str) -> Dict[str, Dict[str, int]]:
         "album_counts": album_counts_dict,
         "song_counts": song_counts_dict
     }
+
+
+def scan_zipfile(zipfile_obj: bytes, include_song_data: bool = False) -> dict[str, Any]:
+    """Scan a ZIP file containing MP3 files and extract metadata.
+
+    Args:
+        zipfile_obj: ZIP file content as bytes.
+        include_song_data: Whether to include the actual song data in the result.
+
+    Returns:
+        Dictionary containing album, artist, and song information from the ZIP file.
+    """
+    song_info = []
+    artist = set()
+    album = None
+
+    with zipfile.ZipFile(BytesIO(zipfile_obj), mode="r") as archive:
+        for file in archive.infolist():
+            if file.filename.lower().endswith("mp3"):
+                with archive.open(file.filename) as myfile:
+                    song_data = myfile.read()
+                    id3_info = get_id3_info(song_data)
+                    if include_song_data:
+                        id3_info["data"] = song_data
+                    song_info.append(id3_info)
+                    artist.add(id3_info["artist"])
+                    album = id3_info["album_name"]
+
+    return {
+        "album": album,
+        "artist": list(artist),
+        "song_info": song_info,
+    }
+
+
+def create_album_from_zipfile(
+    zipfile_obj: bytes,
+    artist_name: str,
+    song_source: "SongSource",
+    tags: Optional[str],
+    user: User,
+    changes: dict[str, dict[str, Any]]
+) -> UUID:
+    """Create an album from a ZIP file containing MP3 files.
+
+    Args:
+        zipfile_obj: ZIP file content as bytes.
+        artist_name: Name of the artist.
+        song_source: The source where the songs came from.
+        tags: Comma-separated string of tags to apply to songs.
+        user: The user creating the album.
+        changes: Dictionary of changes to apply to specific tracks.
+
+    Returns:
+        UUID of the created album.
+    """
+    info = scan_zipfile(zipfile_obj, include_song_data=True)
+
+    artist, _ = Artist.objects.get_or_create(name=artist_name, user=user)
+
+    album = Song.get_or_create_album(
+        user,
+        {
+            "album_name": info["song_info"][0]["album_name"],
+            "artist": artist,
+            "compilation": False,
+            "year": info["song_info"][0]["year"],
+        }
+    )
+
+    for song_info in info["song_info"]:
+        song = Song(
+            artist=artist,
+            album=album,
+            length=song_info["length"],
+            source=song_source,
+            title=song_info["title"],
+            track=song_info["track"],
+            user=user,
+            year=song_info["year"],
+        )
+        # Edit the title and add a note if the user made any changes
+        change = (changes or {}).get(str(song_info.get("track")), {})
+        note = change.get("note")
+        if note:
+            song.note = note
+        title_edited = change.get("title")
+        if title_edited:
+            song.title = title_edited
+        song.save()
+
+        if tags:
+            tag_objs = [
+                Tag.objects.get_or_create(name=t.strip(), user=user)[0]
+                for t in tags.split(",") if t.strip()
+            ]
+            song.tags.set(tag_objs)
+
+        # Upload the song and its artwork to S3
+        song.upload_song_media_to_s3(song_info["data"])
+
+    if album is not None:
+        return album.uuid
+    raise ValueError("Album creation failed unexpectedly")
+
+
+def get_id3_info(song: bytes) -> dict[str, Any]:
+    """Read a song's ID3 information.
+
+    Args:
+        song: Song data as bytes.
+
+    Returns:
+        Dictionary containing the song's metadata.
+    """
+    info = MP3(fileobj=BytesIO(song), ID3=EasyID3)
+
+    data = {
+        "filesize": humanize.naturalsize(len(song)),
+        "bit_rate": info.info.bitrate,
+        "sample_rate": info.info.sample_rate
+    }
+
+    for field in ("artist", "title"):
+        data[field] = info[field][0] if info.get(field) else None
+    if info.get("date"):
+        data["year"] = info["date"][0]
+    if info.get("album"):
+        data["album_name"] = info["album"][0]
+    data["length"] = int(info.info.length)
+    data["length_pretty"] = convert_seconds(info.info.length)
+
+    if info.get("tracknumber"):
+        track_info = info["tracknumber"][0].split("/")
+        track_number = track_info[0]
+        data["track"] = track_number
+
+    return data

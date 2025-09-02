@@ -2,7 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from music.models import Album, Listen, Song, SongSource
+from music.models import Album, Listen, SongSource
+from music.services import (create_album_from_zipfile, get_id3_info,
+                            scan_zipfile)
 from music.tests.factories import AlbumFactory, SongFactory
 
 pytestmark = pytest.mark.django_db
@@ -24,7 +26,7 @@ def test_get_id3_info(auto_login_user, song):
     with open(song_path, "rb") as f:
         song_file = f.read()
 
-    song_info = Song.get_id3_info(song_file)
+    song_info = get_id3_info(song_file)
 
     # A song with an album
     assert song_info["artist"] == "Bryan Teoh"
@@ -64,7 +66,7 @@ def test_music_scan_zipfile():
     zipfile_obj = in_file.read()
     in_file.close()
 
-    info = Album.scan_zipfile(zipfile_obj)
+    info = scan_zipfile(zipfile_obj)
     songs = info["song_info"]
 
     assert info["album"] == "The Joshua Tree"
@@ -101,7 +103,7 @@ def test_create_album_from_zipfile(s3_resource, s3_bucket, auto_login_user, song
     artist_name = "U2"
     tags = "rock"
 
-    album_uuid = Album.create_album_from_zipfile(
+    album_uuid = create_album_from_zipfile(
         zipfile_obj,
         artist_name,
         song_source,
@@ -147,7 +149,7 @@ def test_create_album_from_zipfile_with_changes(s3_resource, s3_bucket, auto_log
     artist_name = "U2"
     tags = "rock"
 
-    album_uuid = Album.create_album_from_zipfile(
+    album_uuid = create_album_from_zipfile(
         zipfile_obj,
         artist_name,
         song_source,
