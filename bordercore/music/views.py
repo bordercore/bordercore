@@ -1064,8 +1064,13 @@ def sort_playlist(request: HttpRequest) -> JsonResponse:
             "message": "Missing required parameters: playlistitem_uuid and new_position are required"
         }, status=400)
 
-    playlistitem = PlaylistItem.objects.get(uuid=playlistitem_uuid)
-    playlistitem.reorder(new_position)
+    with transaction.atomic():
+        playlistitem = get_object_or_404(
+            PlaylistItem.objects.select_related("playlist"),
+            uuid=playlistitem_uuid,
+            playlist__user=request.user
+        )
+        playlistitem.reorder(new_position)
 
     return JsonResponse({"status": "OK"})
 

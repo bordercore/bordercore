@@ -275,7 +275,6 @@
                 const songList = ref([]);
                 const selectedSong = ref({});
                 const draggingRow = ref("");
-                const draggingRowIndex = ref("");
                 const menuValue = ref("");
                 const totalTime = ref(0);
 
@@ -336,7 +335,6 @@
                 function onDragStart(payload) {
                     payload.event.currentTarget.classList.add("dragging");
                     draggingRow.value = payload.row;
-                    draggingRowIndex.value = payload.index;
                     payload.event.dataTransfer.effectAllowed = "move";
                 }
 
@@ -345,7 +343,7 @@
                 }
 
                 function onDrop(payload) {
-                    const playlistItemUuid = draggingRow.playlistitem_uuid;
+                    const playlistItemUuid = draggingRow.value.playlistitem_uuid;
                     const newIndex = payload.index;
 
                     const bodyFormData = new URLSearchParams();
@@ -419,7 +417,6 @@
                     songList,
                     selectedSong,
                     draggingRow,
-                    draggingRowIndex,
                     menuValue,
                     totalTime,
                     playlistMenuItems: [
