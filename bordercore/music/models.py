@@ -192,7 +192,7 @@ class Song(TimeStampedModel):
     album = models.ForeignKey(Album, null=True, on_delete=models.PROTECT)
     track = models.PositiveIntegerField(null=True)
     year = models.IntegerField(null=True)
-    length = models.IntegerField(blank=True, null=True)
+    length = models.PositiveIntegerField(blank=True, null=True)
     note = models.TextField(null=True)
     source = models.ForeignKey(SongSource, on_delete=models.PROTECT)
     rating = models.PositiveSmallIntegerField(
@@ -410,7 +410,7 @@ class Playlist(TimeStampedModel):
     note = models.TextField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
-    size = models.IntegerField(null=True, blank=True)
+    size = models.PositiveIntegerField(null=True, blank=True)
     parameters = JSONField(null=True, blank=True)
 
     def __str__(self) -> str:

@@ -173,8 +173,8 @@ class Data(models.Model):
     workout = models.ForeignKey(Workout, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
     weight = models.FloatField(blank=True, null=True)
-    reps = models.IntegerField()
-    duration = models.IntegerField(blank=True, null=True)
+    reps = models.PositiveIntegerField()
+    duration = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Data"
