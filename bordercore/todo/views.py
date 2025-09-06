@@ -114,7 +114,8 @@ class TodoListView(ListView):
         if "uuid" in self.kwargs:
             context["uuid"] = self.kwargs["uuid"]
             todo = Todo.objects.get(uuid=self.kwargs["uuid"])
-            current_filter["todo_filter_tag"] = todo.tags.first()
+            tag = todo.tags.first()
+            current_filter["todo_filter_tag"] = tag.name if tag else None
             current_filter["todo_filter_priority"] = None
             current_filter["todo_filter_time"] = None
 
@@ -143,7 +144,7 @@ class TodoTaskList(ListView):
         and filters the base Todo queryset accordingly.
 
         Returns:
-            A Django QuerySet of filtered and ordered Todo instances.
+            QuerySet of filtered and ordered Todo instances.
         """
         priority = self.request.GET.get("priority", None)
         if priority is not None:

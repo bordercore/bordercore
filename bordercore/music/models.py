@@ -266,7 +266,7 @@ class Song(TimeStampedModel):
             Dictionary containing the song data formatted for Elasticsearch indexing.
         """
 
-        doc = {
+        doc: dict[str, Any] = {
             "_index": settings.ELASTICSEARCH_INDEX,
             "_id": self.uuid,
             "_source": {
