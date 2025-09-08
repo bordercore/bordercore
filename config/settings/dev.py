@@ -16,8 +16,9 @@ INTERNAL_IPS = ("127.0.0.1", "10.3.2.2")
 
 STATIC_URL = "/static/"
 
-MIDDLEWARE += (
+MIDDLEWARE = (
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    *MIDDLEWARE,
     "nplusone.ext.django.NPlusOneMiddleware"
 )
 
