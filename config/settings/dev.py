@@ -25,6 +25,8 @@ MIDDLEWARE = (
 # Suppress a DeprecationWarning
 os.environ["JUPYTER_PLATFORM_DIRS"] = "1"
 
+DATABASES["default"]["OPTIONS"]["application_name"] = "Django Dev"
+
 INSTALLED_APPS += (
     "debug_toolbar",
     "django_extensions",

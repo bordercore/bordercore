@@ -31,6 +31,14 @@ DATABASES = {
         "HOST": os.environ.get("DATABASE_HOST", "localhost"),
         "PASSWORD": os.environ.get("DATABASE_PASSWORD", ""),
         "PORT": "",
+        "OPTIONS": {
+            "application_name": "Django Prod",
+            "pool": {
+                "min_size": 2,
+                "max_size": 4,
+                "timeout": 10,
+            }
+        },
     }
 }
 
