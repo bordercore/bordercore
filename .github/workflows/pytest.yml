@@ -38,6 +38,13 @@ jobs:
         pip install -r requirements/dev.txt
         pip install pytest
 
+    - name: Run mypy
+      run: |
+        mypy --config-file mypy.ini \
+          bordercore/todo/ \
+          bordercore/tag/ \
+          bordercore/music/ \
+          bordercore/node/
     - name: Run tests
       env:
         SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
