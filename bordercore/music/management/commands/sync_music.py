@@ -661,5 +661,9 @@ class Command(BaseCommand):
             )
 
         song_obj = song_qs.first()
+        if song_obj is None:
+            # Shouldn't happen because we just checked count()==1, but guard for races.
+            raise MusicSyncError("Song vanished during verification; re-run sync.")
+
         self.stdout.write(f"{Fore.GREEN}Song found in database, uuid={song_obj.uuid}{Style.RESET_ALL}")
         return song_qs
