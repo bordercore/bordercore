@@ -1,6 +1,15 @@
+"""
+Models for managing nodes and their associated components.
+
+This module defines the Node and NodeTodo models for organizing collections,
+notes, todos, and other components in a flexible layout system.
+"""
+
 import json
 import random
 import uuid
+from typing import Any, Dict, List, Union
+from uuid import UUID
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -13,32 +22,60 @@ from django.utils import timezone
 from blob.models import Blob
 from collection.models import Collection
 from lib.mixins import SortOrderMixin, TimeStampedModel
+from quote.models import Quote
 from todo.models import Todo
 
 
-def default_layout():
-    """
-    Django JSONField default must be a callable
+def default_layout() -> List[List[Dict[str, Any]]]:
+    """Return the default layout structure for a new node.
+
+    Django JSONField default must be a callable.
+
+    Returns:
+        A 3-column layout with a todo component in the first column.
     """
     return [[{"type": "todo"}], [], []]
 
 
 class Node(TimeStampedModel):
-    """
-    A collection of blobs, bookmarks, and notes around a certain topic.
+    """A collection of blobs, bookmarks, and notes around a certain topic.
+
+    Nodes organize various components (collections, notes, todos, images, quotes)
+    in a customizable grid layout stored as JSON.
     """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(blank=True, null=True)
-    todos = models.ManyToManyField(Todo, through="NodeTodo")
+    todos: models.ManyToManyField = models.ManyToManyField(Todo, through="NodeTodo")
     layout = JSONField(default=default_layout, null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return string representation of the node."""
         return self.name
 
-    def add_collection(self, name="New Collection", uuid=None, display="list", rotate=-1, random_order=False, limit=None):
+    def add_collection(
+        self,
+        name: str = "New Collection",
+        uuid: str | None = None,
+        display: str = "list",
+        rotate: int = -1,
+        random_order: bool = False,
+        limit: int | None = None
+    ) -> Collection:
+        """Add a collection to the node's layout.
 
+        Args:
+            name: Name for new collection (ignored if uuid provided).
+            uuid: UUID of existing collection to add.
+            display: Display mode for the collection.
+            rotate: Rotation setting for collection display.
+            random_order: Whether to randomize collection order.
+            limit: Maximum number of items to display.
+
+        Returns:
+            The collection that was added to the layout.
+        """
         if uuid and uuid != "":
             # If a uuid is given, use an existing collection
             collection = Collection.objects.get(uuid=uuid)
@@ -47,7 +84,7 @@ class Node(TimeStampedModel):
             collection = Collection.objects.create(name=name, user=self.user)
             collection_type = "ad-hoc"
 
-        layout = self.layout
+        layout = self.layout or []
         layout[0].insert(0, {
             "type": "collection",
             "uuid": str(collection.uuid),
@@ -62,25 +99,46 @@ class Node(TimeStampedModel):
 
         return collection
 
-    def update_collection(self, collection_uuid, display, random_order, rotate, limit):
+    def update_collection(
+        self,
+        collection_uuid: str,
+        display: str,
+        random_order: bool,
+        rotate: int,
+        limit: int | None
+    ) -> None:
+        """Update display settings for a collection in the layout.
 
-        for column in self.layout:
-            for row in column:
-                if "uuid" in row and row["uuid"] == collection_uuid:
-                    row["display"] = display
-                    row["rotate"] = rotate
-                    row["random_order"] = random_order
-                    row["limit"] = limit
+        Args:
+            collection_uuid: UUID of the collection to update.
+            display: New display mode.
+            random_order: Whether to randomize collection order.
+            rotate: New rotation setting.
+            limit: Maximum number of items to display.
+        """
+        if self.layout:
+            for column in self.layout:
+                for row in column:
+                    if "uuid" in row and row["uuid"] == collection_uuid:
+                        row["display"] = display
+                        row["rotate"] = rotate
+                        row["random_order"] = random_order
+                        row["limit"] = limit
 
         self.save()
 
-    def delete_collection(self, collection_uuid, collection_type):
+    def delete_collection(self, collection_uuid: str, collection_type: str) -> None:
+        """Remove a collection from the layout and optionally delete it.
 
+        Args:
+            collection_uuid: UUID of the collection to remove.
+            collection_type: Type of collection ("ad-hoc" collections are deleted).
+        """
         if collection_type == "ad-hoc":
             collection = Collection.objects.get(uuid=collection_uuid)
             collection.delete()
 
-        layout = self.layout
+        layout = self.layout or []
         for i, col in enumerate(layout):
             layout[i] = [
                 x
@@ -92,8 +150,15 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def add_note(self, name="New Note"):
+    def add_note(self, name: str = "New Note") -> Blob:
+        """Add a new note to the node's layout.
 
+        Args:
+            name: Name for the new note.
+
+        Returns:
+            The newly created note blob.
+        """
         note = Blob.objects.create(
             user=self.user,
             date=timezone.now().strftime("%Y-%m-%d"),
@@ -102,7 +167,7 @@ class Node(TimeStampedModel):
         )
         note.index_blob()
 
-        layout = self.layout
+        layout = self.layout or []
         layout[0].insert(
             0,
             {
@@ -116,28 +181,39 @@ class Node(TimeStampedModel):
 
         return note
 
-    def delete_note(self, note_uuid):
+    def delete_note(self, note_uuid: str) -> None:
+        """Remove a note from the layout and delete it.
 
+        Args:
+            note_uuid: UUID of the note to delete.
+        """
         note = Blob.objects.get(uuid=note_uuid)
         note.delete()
 
-        layout = self.layout
+        layout = self.layout or []
         for i, col in enumerate(layout):
             layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(note_uuid)]
 
         self.layout = layout
         self.save()
 
-    def get_layout(self):
+    def get_layout(self) -> str:
+        """Get the node's layout with populated names as JSON string.
 
+        Returns:
+            JSON string representation of the layout with names populated.
+        """
         self.populate_names()
         return json.dumps(self.layout)
 
-    def populate_names(self):
+    def populate_names(self) -> None:
+        """Populate collection and note names in the layout.
+
+        Efficiently fetches names for all collections and notes in the layout
+        using bulk queries rather than individual lookups.
         """
-        Get all collection and note names for this node in two queries
-        rather than one for each.
-        """
+        if not self.layout:
+            return
 
         # Get a list of all uuids for all collections and notes in this node.
         uuids = [
@@ -149,15 +225,15 @@ class Node(TimeStampedModel):
         ]
 
         # Populate a lookup dictionary with the collection and note names, uuid => name
-        lookup = {}
-        for x in Collection.objects.filter(uuid__in=uuids):
-            lookup[str(x.uuid)] = {
-                "name": x.name,
-                "count": x.collectionobject_set.all().count()
+        lookup: Dict[str, Dict[str, str | int | None]] = {}
+        for c in Collection.objects.filter(uuid__in=uuids):
+            lookup[str(c.uuid)] = {
+                "name": c.name,
+                "count": c.collectionobject_set.all().count()
             }
-        for x in Blob.objects.filter(uuid__in=uuids):
-            lookup[str(x.uuid)] = {
-                "name": x.name
+        for b in Blob.objects.filter(uuid__in=uuids):
+            lookup[str(b.uuid)] = {
+                "name": b.name
             }
 
         # Finally, add the collection and note names to the node's layout object
@@ -168,7 +244,11 @@ class Node(TimeStampedModel):
                     if "count" in lookup[row["uuid"]]:
                         row["count"] = lookup[row["uuid"]]["count"]
 
-    def populate_image_info(self):
+    def populate_image_info(self) -> None:
+        """Populate image information for image components in the layout."""
+        if not self.layout:
+            return
+
         for column in self.layout:
             for row in column:
                 if row["type"] == "image":
@@ -176,7 +256,15 @@ class Node(TimeStampedModel):
                     row["image_url"] = blob.get_cover_url()
                     row["image_title"] = blob.name
 
-    def set_note_color(self, note_uuid, color):
+    def set_note_color(self, note_uuid: str, color: int) -> None:
+        """Set the color for a note component in the layout.
+
+        Args:
+            note_uuid: UUID of the note to update.
+            color: Color value to set for the note.
+        """
+        if not self.layout:
+            return
 
         for column in self.layout:
             for row in column:
@@ -185,7 +273,14 @@ class Node(TimeStampedModel):
 
         self.save()
 
-    def set_quote(self, quote_uuid):
+    def set_quote(self, quote_uuid: Union[str, UUID]) -> None:
+        """Set the quote UUID for quote components in the layout.
+
+        Args:
+            quote_uuid: UUID of the quote to set.
+        """
+        if not self.layout:
+            return
 
         for column in self.layout:
             for row in column:
@@ -194,9 +289,9 @@ class Node(TimeStampedModel):
 
         self.save()
 
-    def add_todo_list(self):
-
-        layout = self.layout
+    def add_todo_list(self) -> None:
+        """Add a todo list component to the layout."""
+        layout = self.layout or []
         layout[0].insert(
             0,
             {
@@ -206,9 +301,9 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def delete_todo_list(self):
-
-        layout = self.layout
+    def delete_todo_list(self) -> None:
+        """Remove all todo list components and associated todos from the node."""
+        layout = self.layout or []
         for i, col in enumerate(layout):
             layout[i] = [x for x in col if x["type"] != "todo"]
         self.layout = layout
@@ -217,7 +312,12 @@ class Node(TimeStampedModel):
         for so in NodeTodo.objects.filter(node=self):
             so.todo.delete()
 
-    def get_todo_list(self):
+    def get_todo_list(self) -> List[Dict[str, Any]]:
+        """Get all todos associated with this node.
+
+        Returns:
+            List of dictionaries containing todo information.
+        """
         todo_list = self.todos.all().only("name", "note", "priority", "url", "uuid").order_by("nodetodo__sort_order")
 
         return [
@@ -232,8 +332,20 @@ class Node(TimeStampedModel):
             in todo_list
         ]
 
-    def get_preview(self):
-        images = []
+    def get_preview(self) -> Dict[str, Any]:
+        """Generate a preview of the node's contents.
+
+        Returns:
+            Dictionary containing preview images, notes, and todos.
+        """
+        images: List[Dict[str, Any]] = []
+
+        if not self.layout:
+            return {
+                "images": images,
+                "notes": [],
+                "todos": self.get_todo_list()
+            }
 
         # Get a list of all uuids for all images in this node.
         image_uuids = [
@@ -296,13 +408,27 @@ class Node(TimeStampedModel):
             "todos": todos
         }
 
-    # Add an image, quote or node to a node
-    def add_component(self, component_type, component, options=None):
+    def add_component(
+        self,
+        component_type: str,
+        component: Union[Blob, "Node", Quote],
+        options: Dict[str, Any] | None = None
+    ) -> str:
+        """Add an image, quote or node component to the layout.
+
+        Args:
+            component_type: Type of component to add.
+            component: The component object to add.
+            options: Additional options for the component.
+
+        Returns:
+            UUID string of the new component.
+        """
         options = options or {}
 
         new_uuid = str(uuid.uuid4())
 
-        layout = self.layout
+        layout = self.layout or []
         layout[0].insert(
             0,
             {
@@ -317,8 +443,16 @@ class Node(TimeStampedModel):
 
         return new_uuid
 
-    # Update the options for a quote or node
-    def update_component(self, uuid, options):
+    def update_component(self, uuid: str, options: Dict[str, Any]) -> None:
+        """Update the options for a quote or node component.
+
+        Args:
+            uuid: UUID of the component to update.
+            options: New options dictionary for the component.
+        """
+        if not self.layout:
+            return
+
         for column in self.layout:
             for row in column:
                 if row.get("uuid", None) == uuid:
@@ -326,9 +460,13 @@ class Node(TimeStampedModel):
 
         self.save()
 
-    # Remove an image, quote, or node from a node
-    def remove_component(self, uuid):
-        layout = self.layout
+    def remove_component(self, uuid: str) -> None:
+        """Remove an image, quote, or node component from the layout.
+
+        Args:
+            uuid: UUID of the component to remove.
+        """
+        layout = self.layout or []
         for i, col in enumerate(layout):
             layout[i] = [
                 x
@@ -340,14 +478,21 @@ class Node(TimeStampedModel):
         self.save()
 
 
-class NodeTodo(SortOrderMixin):
+class NodeTodo(SortOrderMixin, models.Model):
+    """Through model for Node-Todo many-to-many relationship with sort ordering.
 
+    Provides a sorted relationship between nodes and todos, allowing todos
+    to be ordered within each node.
+    """
     node = models.ForeignKey(Node, on_delete=models.CASCADE)
     todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
-
     field_name = "node"
 
-    def __str__(self):
+    # make the manager visible to mypy
+    objects: models.Manager["NodeTodo"] = models.Manager()
+
+    def __str__(self) -> str:
+        """Return string representation of the NodeTodo relationship."""
         return f"SortOrder: {self.node}, {self.todo}"
 
     class Meta:
@@ -358,5 +503,12 @@ class NodeTodo(SortOrderMixin):
 
 
 @receiver(pre_delete, sender=NodeTodo)
-def remove_todo(sender, instance, **kwargs):
+def remove_todo(sender: type, instance: NodeTodo, **kwargs: Any) -> None:
+    """Handle cleanup when a NodeTodo is deleted.
+
+    Args:
+        sender: The model class that sent the signal.
+        instance: The NodeTodo instance being deleted.
+        **kwargs: Additional keyword arguments from the signal.
+    """
     instance.handle_delete()

@@ -1,4 +1,4 @@
-"""Django views module for music application.
+"""Views for music application.
 
 This module contains all the views for handling music-related functionality including
 songs, albums, artists, playlists, and related operations.
@@ -326,7 +326,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
         """Process valid form submission for album update.
 
         Args:
-            form: The validated album form.
+            form: The validated ``AlbumForm``.
 
         Returns:
             HTTP redirect to the success URL.
@@ -347,7 +347,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self) -> str:
-        """Get the URL to redirect to after successful form submission.
+        """Return the URL to redirect to after successful creation.
 
         Returns:
             URL string for the album detail page.
