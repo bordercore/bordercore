@@ -11,9 +11,9 @@ import uuid
 from typing import Any, Dict, List, Union
 from uuid import UUID
 
-from django.contrib.auth.models import User
-from django.db import models
-from django.db.models import JSONField
+from django.conf import settings
+from django.db import models, transaction
+from django.db.models import Count, JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
@@ -45,7 +45,7 @@ class Node(TimeStampedModel):
     """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField()
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     note = models.TextField(blank=True, null=True)
     todos: models.ManyToManyField = models.ManyToManyField(Todo, through="NodeTodo")
     layout = JSONField(default=default_layout, null=True, blank=True)
@@ -54,6 +54,7 @@ class Node(TimeStampedModel):
         """Return string representation of the node."""
         return self.name
 
+    @transaction.atomic
     def add_collection(
         self,
         name: str = "New Collection",
@@ -221,16 +222,17 @@ class Node(TimeStampedModel):
             for sublist in self.layout
             for val in sublist
             if "uuid" in val
-            and val["type"] in ["collection", "note"]
+            and val.get("type") in ["collection", "note"]
         ]
 
         # Populate a lookup dictionary with the collection and note names, uuid => name
         lookup: Dict[str, Dict[str, str | int | None]] = {}
-        for c in Collection.objects.filter(uuid__in=uuids):
-            lookup[str(c.uuid)] = {
-                "name": c.name,
-                "count": c.collectionobject_set.all().count()
-            }
+
+        collections = Collection.objects.filter(uuid__in=uuids).annotate(
+            item_count=Count("collectionobject")
+        )
+        lookup = {str(c.uuid): {"name": c.name, "count": c.item_count} for c in collections}
+
         for b in Blob.objects.filter(uuid__in=uuids):
             lookup[str(b.uuid)] = {
                 "name": b.name
@@ -239,7 +241,7 @@ class Node(TimeStampedModel):
         # Finally, add the collection and note names to the node's layout object
         for column in self.layout:
             for row in column:
-                if row["type"] in ["collection", "note"]:
+                if row.get("type") in ["collection", "note"]:
                     row["name"] = lookup[row["uuid"]]["name"]
                     if "count" in lookup[row["uuid"]]:
                         row["count"] = lookup[row["uuid"]]["count"]
@@ -251,7 +253,7 @@ class Node(TimeStampedModel):
 
         for column in self.layout:
             for row in column:
-                if row["type"] == "image":
+                if row.get("type") == "image":
                     blob = Blob.objects.get(uuid=row["image_uuid"])
                     row["image_url"] = blob.get_cover_url()
                     row["image_title"] = blob.name
@@ -284,7 +286,7 @@ class Node(TimeStampedModel):
 
         for column in self.layout:
             for row in column:
-                if row["type"] == "quote":
+                if row.get("type") == "quote":
                     row["quote_uuid"] = str(quote_uuid)
 
         self.save()
@@ -305,7 +307,7 @@ class Node(TimeStampedModel):
         """Remove all todo list components and associated todos from the node."""
         layout = self.layout or []
         for i, col in enumerate(layout):
-            layout[i] = [x for x in col if x["type"] != "todo"]
+            layout[i] = [x for x in col if x.get("type") != "todo"]
         self.layout = layout
         self.save()
 
@@ -353,7 +355,7 @@ class Node(TimeStampedModel):
             for sublist in self.layout
             for val in sublist
             if "uuid" in val
-            and val["type"] in ["image"]
+            and val.get("type") in ["image"]
         ]
         if image_uuids:
             random_uuid = random.choice(image_uuids)
@@ -370,15 +372,19 @@ class Node(TimeStampedModel):
             for sublist in self.layout
             for val in sublist
             if "uuid" in val
-            and val["type"] in ["collection"]
+            and val.get("type") in ["collection"]
         ]
-        all_objects = []
-        for collection_uuid in collection_uuids:
-            collection = Collection.objects.get(uuid=collection_uuid)
-            all_objects.extend(collection.get_object_list()["object_list"])
 
-        blobs = [x for x in all_objects if x["type"] == "blob"]
-        blob_count = len([x for x in all_objects if x["type"] == "blob"])
+        collections = {str(c.uuid): c for c in Collection.objects.filter(uuid__in=collection_uuids)}
+        all_objects = []
+        for cu in collection_uuids:
+            c = collections.get(cu)
+            if not c:
+                continue
+            all_objects.extend(c.get_object_list()["object_list"])
+
+        blobs = [x for x in all_objects if x.get("type") == "blob"]
+        blob_count = len([x for x in all_objects if x.get("type") == "blob"])
 
         # We ultimately want two images. If we already found one image, then
         #  we only need one more from a collection. If not, we need two.
@@ -397,7 +403,7 @@ class Node(TimeStampedModel):
             for sublist in self.layout
             for val in sublist
             if "uuid" in val
-            and val["type"] in ["note"]
+            and val.get("type") in ["note"]
         ]
 
         todos = self.get_todo_list()
@@ -497,9 +503,9 @@ class NodeTodo(SortOrderMixin, models.Model):
 
     class Meta:
         ordering = ("sort_order",)
-        unique_together = (
-            ("node", "todo")
-        )
+        constraints = [
+            models.UniqueConstraint(fields=["node", "todo"], name="uniq_node_todo")
+        ]
 
 
 @receiver(pre_delete, sender=NodeTodo)

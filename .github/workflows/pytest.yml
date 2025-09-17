@@ -45,6 +45,7 @@ jobs:
           bordercore/tag/ \
           bordercore/music/ \
           bordercore/node/
+
     - name: Run tests
       env:
         SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
