@@ -240,8 +240,6 @@ class AlbumListView(ListView):
             artist.album_counts = artist_counts["album_counts"][str(artist.uuid)]
             artist.song_counts = artist_counts["song_counts"][str(artist.uuid)]
 
-        user = cast(User, self.request.user)
-
         return {
             **context,
             "nav": list(string.ascii_lowercase) + ["other"],
@@ -977,7 +975,7 @@ def add_album_from_zipfile(request: HttpRequest) -> JsonResponse:
     if not all([artist, source_id]):
         return JsonResponse({
             "status": "ERROR",
-            "message": "Missing required parameters: artist and source are required"
+            "message": "Missing required parameters: artist, source"
         }, status=400)
 
     if "zipfile" not in request.FILES:
@@ -1061,7 +1059,7 @@ def sort_playlist(request: HttpRequest) -> JsonResponse:
     if not all([playlistitem_uuid, new_position]):
         return JsonResponse({
             "status": "ERROR",
-            "message": "Missing required parameters: playlistitem_uuid and new_position are required"
+            "message": "Missing required parameters: playlistitem_uuid, new_position"
         }, status=400)
 
     with transaction.atomic():
@@ -1111,7 +1109,7 @@ def add_to_playlist(request: HttpRequest) -> JsonResponse:
     if not all([playlist_uuid, song_uuid]):
         return JsonResponse({
             "status": "ERROR",
-            "message": "Missing required parameters: playlist_uuid and song_uuid are required"
+            "message": "Missing required parameters: playlist_uuid, song_uuid"
         }, status=400)
 
     playlist = get_object_or_404(Playlist, uuid=playlist_uuid, user=request.user)
@@ -1198,7 +1196,7 @@ def dupe_song_checker(request: HttpRequest) -> JsonResponse:
     if not all([artist, title]):
         return JsonResponse({
             "status": "ERROR",
-            "message": "Missing required parameters: artist and title are required"
+            "message": "Missing required parameters: artist, title"
         }, status=400)
 
     song = Song.objects.filter(
@@ -1303,7 +1301,7 @@ def set_song_rating(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    song_uuid = request.POST["song_uuid"]
+    song_uuid = request.POST.get("song_uuid", "").strip()
 
     if not song_uuid:
         return JsonResponse({
@@ -1311,10 +1309,10 @@ def set_song_rating(request: HttpRequest) -> JsonResponse:
             "message": "Missing song_uuid parameter"
         }, status=400)
 
-    if request.POST["rating"] == "":
+    if request.POST.get("rating", "").strip() == "":
         rating = None
     else:
-        rating = int(request.POST["rating"])
+        rating = int(request.POST.get("rating", "").strip())
 
     song = get_object_or_404(Song, uuid=song_uuid, user=request.user)
     song.rating = rating
