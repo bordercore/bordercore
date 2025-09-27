@@ -15,11 +15,14 @@ from typing import Any, Dict, cast
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.db.models.query import QuerySet as QuerySetType
 from django.http import (HttpRequest, HttpResponse, HttpResponseRedirect,
                          JsonResponse)
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin
 from django.views.generic.list import ListView
@@ -74,6 +77,15 @@ class NodeDetailView(DetailView):
     model = Node
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
+
+    def get_queryset(self) -> QuerySetType[Node]:
+        """Scope nodes to the current user.
+
+        Returns:
+            QuerySet of Node objects for this user.
+        """
+        user = cast(User, self.request.user)
+        return Node.objects.filter(user=user)
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         """Get context data for the node detail view.
@@ -138,6 +150,7 @@ class NodeCreateView(FormRequestMixin, CreateView):
 
 
 @login_required
+@require_POST
 def edit_note(request: HttpRequest) -> JsonResponse:
     """Update a node's freeform note.
 
@@ -147,13 +160,14 @@ def edit_note(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid = request.POST["uuid"]
-    note = request.POST["note"]
+    node_uuid = request.POST.get("uuid", "").strip()
+    note = request.POST.get("note", "").strip()
     user = cast(User, request.user)
 
-    node = Node.objects.get(uuid=node_uuid, user=user)
-    node.note = note
-    node.save()
+    with transaction.atomic():
+        node = Node.objects.get(uuid=node_uuid, user=user)
+        node.note = note
+        node.save(update_fields=["note"])
 
     response = {
         "status": "OK"
@@ -177,11 +191,12 @@ def get_todo_list(request: HttpRequest, uuid: str) -> JsonResponse:
     node = Node.objects.get(uuid=uuid, user=user)
     todo_list = node.get_todo_list()
 
-    response: Dict[str, Any] = {"status": "OK", "todo_list": todo_list}
+    response = {"status": "OK", "todo_list": todo_list}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def add_todo(request: HttpRequest) -> JsonResponse:
     """Attach a ``Todo`` to a node.
 
@@ -191,24 +206,36 @@ def add_todo(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    todo_uuid: str = request.POST["todo_uuid"]
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    todo_uuid = request.POST.get("todo_uuid", "").strip()
+
+    if not all([node_uuid, todo_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, todo_uuid"
+        }, status=400)
+
     user = cast(User, request.user)
 
-    node = Node.objects.get(uuid=node_uuid, user=user)
-    todo = Todo.objects.get(uuid=todo_uuid)
+    with transaction.atomic():
+        node = Node.objects.select_for_update().get(
+            uuid=node_uuid,
+            user=user
+        )
+        todo = Todo.objects.get(uuid=todo_uuid, user=user)
 
-    so = NodeTodo(node=node, todo=todo)
-    so.save()
+        so = NodeTodo(node=node, todo=todo)
+        so.save()
 
-    so.node.modified = timezone.now()
-    so.node.save()
+        so.node.modified = timezone.now()
+        so.node.save()
 
-    response: Dict[str, str] = {"status": "OK"}
+    response = {"status": "OK"}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def remove_todo(request: HttpRequest) -> JsonResponse:
     """Detach a ``Todo`` from a node.
 
@@ -218,20 +245,35 @@ def remove_todo(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    todo_uuid: str = request.POST["todo_uuid"]
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    todo_uuid = request.POST.get("todo_uuid", "").strip()
 
-    so = NodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
-    so.delete()
+    if not all([node_uuid, todo_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, todo_uuid"
+        }, status=400)
 
-    so.node.modified = timezone.now()
-    so.node.save()
+    user = cast(User, request.user)
 
-    response: Dict[str, str] = {"status": "OK"}
+    with transaction.atomic():
+        so = NodeTodo.objects.select_related("node").get(
+            node__user=user,
+            node__uuid=node_uuid,
+            todo__uuid=todo_uuid
+        )
+        node = so.node  # capture before delete
+        so.delete()
+
+        node.modified = timezone.now()
+        node.save()
+
+    response = {"status": "OK"}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def sort_todos(request: HttpRequest) -> JsonResponse:
     """Reorder a node's todo item to a new position.
 
@@ -241,21 +283,34 @@ def sort_todos(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    todo_uuid: str = request.POST["todo_uuid"]
-    new_position: int = int(request.POST["new_position"])
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    todo_uuid = request.POST.get("todo_uuid", "").strip()
+    new_position = int(request.POST["new_position"])
 
-    so = NodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
-    NodeTodo.reorder(so, new_position)
+    if not all([node_uuid, todo_uuid, new_position]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, todo_uuid, new_position"
+        }, status=400)
 
-    so.node.modified = timezone.now()
-    so.node.save()
+    user = cast(User, request.user)
+    with transaction.atomic():
+        so = NodeTodo.objects.get(
+            node__user=user,
+            node__uuid=node_uuid,
+            todo__uuid=todo_uuid
+        )
+        NodeTodo.reorder(so, new_position)
 
-    response: Dict[str, str] = {"status": "OK"}
+        so.node.modified = timezone.now()
+        so.node.save()
+
+    response = {"status": "OK"}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def change_layout(request: HttpRequest) -> JsonResponse:
     """Replace a node's layout JSON.
 
@@ -265,19 +320,26 @@ def change_layout(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    layout: str = request.POST["layout"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    layout = request.POST.get("layout", "").strip()
 
+    if not all([node_uuid, layout]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, layout"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.layout = json.loads(layout)
     node.save()
 
-    response: Dict[str, str] = {"status": "OK"}
+    response = {"status": "OK"}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def add_collection(request: HttpRequest) -> JsonResponse:
     """Add a collection component to a node.
 
@@ -287,22 +349,35 @@ def add_collection(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with new ``collection_uuid``, refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    collection_name: str = request.POST["collection_name"]
-    collection_uuid: str | None = request.POST.get("collection_uuid", None)
-    display: str = request.POST["display"]
-    random_order: bool = request.POST.get("random_order") == "true"
-    rotate: Any = request.POST.get("rotate", -1)
-    limit_raw: str = request.POST.get("limit", "")
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    collection_name = request.POST.get("collection_name", "").strip()
+    collection_uuid = request.POST.get("collection_uuid", "").strip()
+    display = request.POST.get("display", "").strip()
+    random_order = request.POST.get("random_order", "").strip() == "true"
+    rotate_raw = (request.POST.get("rotate") or "-1").strip()
+    try:
+        rotate = int(rotate_raw)
+    except ValueError:
+        return JsonResponse(
+            {"status": "ERROR", "message": "Rotate must be an integer"},
+            status=400,
+        )
+    limit_raw = request.POST.get("limit", "")
     limit: int | None = None if limit_raw.strip().lower() in ("", "null") else int(limit_raw)
-    user = cast(User, request.user)
 
+    if not all([node_uuid, collection_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, collection_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     collection = node.add_collection(
         collection_name, collection_uuid, display, rotate, random_order, limit
     )
 
-    response: Dict[str, Any] = {
+    response = {
         "status": "OK",
         "collection_uuid": collection.uuid,
         "layout": node.get_layout(),
@@ -311,6 +386,7 @@ def add_collection(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
 def update_collection(request: HttpRequest) -> JsonResponse:
     """Update collection metadata and node options.
 
@@ -320,27 +396,44 @@ def update_collection(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    collection_uuid: str = request.POST["collection_uuid"]
-    name: str = request.POST["name"]
-    display: str = request.POST["display"]
-    random_order: bool = request.POST["random_order"] == "true"
-    rotate: Any = request.POST["rotate"]
-    limit: Any = request.POST["limit"]
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    collection_uuid = request.POST.get("collection_uuid", "").strip()
+    name = request.POST.get("name", "").strip()
+    display = request.POST.get("display", "").strip()
+    random_order = request.POST.get("random_order", "").strip() == "true"
+    rotate_raw = (request.POST.get("rotate") or "-1").strip()
+    try:
+        rotate = int(rotate_raw)
+    except ValueError:
+        return JsonResponse(
+            {"status": "ERROR", "message": "Rotate must be an integer"},
+            status=400,
+        )
+    limit_raw = request.POST.get("limit", "")
+    limit: int | None = None if limit_raw.strip().lower() in ("", "null") else int(limit_raw)
+
+    if not all([node_uuid, collection_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, collection_uuid"
+        }, status=400)
+
     user = cast(User, request.user)
 
-    collection = Collection.objects.get(uuid=collection_uuid)
-    collection.name = name
-    collection.save()
+    with transaction.atomic():
+        collection = Collection.objects.get(uuid=collection_uuid, user=user)
+        collection.name = name
+        collection.save(update_fields=["name"])
 
-    node = Node.objects.get(uuid=node_uuid, user=user)
-    node.update_collection(collection_uuid, display, random_order, rotate, limit)
+        node = Node.objects.get(uuid=node_uuid, user=user)
+        node.update_collection(collection_uuid, display, random_order, rotate, limit)
 
-    response: Dict[str, str] = {"status": "OK"}
+    response = {"status": "OK"}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def delete_collection(request: HttpRequest) -> JsonResponse:
     """Remove a collection component from a node.
 
@@ -350,19 +443,26 @@ def delete_collection(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    collection_uuid: str = request.POST["collection_uuid"]
-    collection_type: str = request.POST["collection_type"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    collection_uuid = request.POST.get("collection_uuid", "").strip()
+    collection_type = request.POST.get("collection_type", "").strip()
 
+    if not all([node_uuid, collection_uuid, collection_type]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, collection_uuid, collection_type"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.delete_collection(collection_uuid, collection_type)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def add_note(request: HttpRequest) -> JsonResponse:
     """Create a note component and set its color.
 
@@ -372,17 +472,23 @@ def add_note(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with new ``note_uuid``, refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    note_name: str = request.POST["note_name"]
-    color: int = int(request.POST["color"])
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    note_name = request.POST.get("note_name", "").strip()
+    color = int(request.POST.get("color", "").strip())
 
+    if not all([node_uuid, note_name, color]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, note_name, color"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     note = node.add_note(note_name)
 
     node.set_note_color(str(note.uuid), color)
 
-    response: Dict[str, Any] = {
+    response = {
         "status": "OK",
         "note_uuid": note.uuid,
         "layout": node.get_layout(),
@@ -391,6 +497,7 @@ def add_note(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
 def delete_note(request: HttpRequest) -> JsonResponse:
     """Delete a note component from a node.
 
@@ -400,18 +507,25 @@ def delete_note(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    note_uuid: str = request.POST["note_uuid"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    note_uuid = request.POST.get("note_uuid", "").strip()
 
+    if not all([node_uuid, note_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, note_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.delete_note(note_uuid)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def set_note_color(request: HttpRequest) -> JsonResponse:
     """Set the color index for a note on a node.
 
@@ -421,19 +535,26 @@ def set_note_color(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with operation status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    note_uuid: str = request.POST["note_uuid"]
-    color: int = int(request.POST["color"])
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    note_uuid = request.POST.get("note_uuid", "").strip()
+    color = int(request.POST.get("color", "").strip())
 
+    if not all([node_uuid, note_uuid, color]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, note_uuid, color"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.set_note_color(note_uuid, color)
 
-    response: Dict[str, str] = {"status": "OK"}
+    response = {"status": "OK"}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def add_image(request: HttpRequest) -> JsonResponse:
     """Add an image component to a node.
 
@@ -443,21 +564,28 @@ def add_image(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    image_uuid: str = request.POST["image_uuid"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    image_uuid = request.POST.get("image_uuid", "").strip()
 
+    if not all([node_uuid, image_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, image_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     image = Blob.objects.get(uuid=image_uuid, user=user)
     node.add_component("image", image)
 
     node.populate_image_info()
 
-    response: Dict[str, Any] = {"status": "OK", "layout": json.dumps(node.layout)}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def add_quote(request: HttpRequest) -> JsonResponse:
     """Add a quote component to a node.
 
@@ -467,24 +595,31 @@ def add_quote(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    options: Dict[str, Any] = json.loads(request.POST.get("options", "{}"))
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    options = json.loads(request.POST.get("options", "{}").strip())
 
+    if not all([node_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameter: node_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
 
     # Choose a random quote
-    quote = Quote.objects.all().order_by("?").first()
-    if quote is None:
+    quote = Quote.objects.filter(user=user).order_by("?").first()
+    if not quote:
         return JsonResponse({"status": "error", "message": "No quotes available."}, status=404)
 
     node.add_component("quote", quote, options)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def update_quote(request: HttpRequest) -> JsonResponse:
     """Update options for an existing quote component.
 
@@ -494,20 +629,28 @@ def update_quote(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    uuid: str = request.POST["uuid"]
-    options: Dict[str, Any] = json.loads(request.POST["options"])
-    options["favorites_only"] = options.get("favorites_only", "false") == "true"
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    uuid = request.POST.get("uuid", "").strip()
+    options = json.loads(request.POST.get("options", "").strip())
+    options["favorites_only"] = options.get("favorites_only", "false").strip() == "true"
 
+    if not all([node_uuid, uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, uuid"
+        }, status=400)
+
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.update_component(uuid, options)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def get_quote(request: HttpRequest) -> JsonResponse:
     """Fetch a (possibly favorite-only) random quote and set it on the node.
 
@@ -517,19 +660,27 @@ def get_quote(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with selected quote payload and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    favorites_only: str = request.POST.get("favorites_only", "false")
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    favorites_only = request.POST.get("favorites_only", "false").strip()
 
-    quote_qs = Quote.objects.all()
+    if not all([node_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
+    quote_qs = Quote.objects.filter(user=user)
     if favorites_only == "true":
         quote_qs = quote_qs.filter(is_favorite=True)
-    quote = quote_qs.order_by("?")[0]
+    quote = quote_qs.order_by("?").first()
+    if not quote:
+        return JsonResponse({"status": "error", "message": "No quotes available."}, status=404)
 
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.set_quote(quote.uuid)
 
-    response: Dict[str, Any] = {
+    response = {
         "status": "OK",
         "quote": {
             "uuid": quote.uuid,
@@ -542,6 +693,7 @@ def get_quote(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
 def add_todo_list(request: HttpRequest) -> JsonResponse:
     """Create a todo list component for the node.
 
@@ -551,17 +703,24 @@ def add_todo_list(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
 
+    if not all([node_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.add_todo_list()
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def delete_todo_list(request: HttpRequest) -> JsonResponse:
     """Delete the todo list component from the node.
 
@@ -571,17 +730,24 @@ def delete_todo_list(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
 
+    if not all([node_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.delete_todo_list()
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def add_node(request: HttpRequest) -> JsonResponse:
     """Nest an existing node as a component of another node.
 
@@ -591,20 +757,27 @@ def add_node(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    parent_node_uuid: str = request.POST["parent_node_uuid"]
-    node_uuid: str = request.POST["node_uuid"]
-    options: Dict[str, Any] = json.loads(request.POST.get("options", "{}"))
-    user = cast(User, request.user)
+    parent_node_uuid = request.POST.get("parent_node_uuid", "").strip()
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    options = json.loads(request.POST.get("options", "{}").strip())
 
+    if not all([parent_node_uuid, node_uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: parent_node_uuid, node_uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     parent_node = Node.objects.get(uuid=parent_node_uuid, user=user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     parent_node.add_component("node", node, options)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": parent_node.get_layout()}
+    response = {"status": "OK", "layout": parent_node.get_layout()}
     return JsonResponse(response)
 
 
 @login_required
+@require_POST
 def update_node(request: HttpRequest) -> JsonResponse:
     """Update options for a nested node component.
 
@@ -614,15 +787,21 @@ def update_node(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    parent_node_uuid: str = request.POST["parent_node_uuid"]
-    uuid: str = request.POST["uuid"]
-    options: Dict[str, Any] = json.loads(request.POST["options"])
-    user = cast(User, request.user)
+    parent_node_uuid = request.POST.get("parent_node_uuid", "").strip()
+    uuid = request.POST.get("uuid", "").strip()
+    options = json.loads(request.POST.get("options", "").strip())
 
+    if not all([parent_node_uuid, uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: parent_node_uuid, uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=parent_node_uuid, user=user)
     node.update_component(uuid, options)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
 
 
@@ -636,7 +815,17 @@ def search(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with a list of objects with ``uuid`` and ``name``.
     """
-    node_list = Node.objects.filter(name__icontains=request.GET["query"])
+
+    query = request.GET.get("query", "").strip()
+
+    if not all([query]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: query"
+        }, status=400)
+
+    user = cast(User, request.user)
+    node_list = Node.objects.filter(user=user, name__icontains=query)
 
     response = [{"uuid": x.uuid, "name": x.name} for x in node_list]
     return JsonResponse(response, safe=False)
@@ -646,8 +835,7 @@ def search(request: HttpRequest) -> JsonResponse:
 def node_preview(request: HttpRequest, uuid: str) -> JsonResponse:
     """Return a lightweight preview payload for a node.
 
-    Includes image UUIDs, counts, and random selections (when available) for
-    notes and todos.
+    Includes image UUIDs, counts, and random selections (when available) for notes and todos.
 
     Args:
         request: The HTTP request object.
@@ -670,7 +858,7 @@ def node_preview(request: HttpRequest, uuid: str) -> JsonResponse:
     except IndexError:
         random_todo = []
 
-    response: Dict[str, Any] = {
+    response = {
         "status": "OK",
         "info": {
             "uuid": uuid,
@@ -686,6 +874,7 @@ def node_preview(request: HttpRequest, uuid: str) -> JsonResponse:
 
 
 @login_required
+@require_POST
 def remove_component(request: HttpRequest) -> JsonResponse:
     """Remove a component (by its component UUID) from a node.
 
@@ -695,12 +884,18 @@ def remove_component(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with refreshed ``layout`` and status.
     """
-    node_uuid: str = request.POST["node_uuid"]
-    uuid: str = request.POST["uuid"]
-    user = cast(User, request.user)
+    node_uuid = request.POST.get("node_uuid", "").strip()
+    uuid = request.POST.get("uuid", "").strip()
 
+    if not all([node_uuid, uuid]):
+        return JsonResponse({
+            "status": "ERROR",
+            "message": "Missing required parameters: node_uuid, uuid"
+        }, status=400)
+
+    user = cast(User, request.user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.remove_component(uuid)
 
-    response: Dict[str, Any] = {"status": "OK", "layout": node.get_layout()}
+    response = {"status": "OK", "layout": node.get_layout()}
     return JsonResponse(response)
