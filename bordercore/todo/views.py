@@ -265,7 +265,7 @@ def sort_todo(request: HttpRequest) -> JsonResponse:
     if not all([tag_name, todo_uuid, position_str]):
         return JsonResponse({
             "status": "ERROR",
-            "message": "Missing required parameters: tag, todo_uuid, and position are required"
+            "message": "Missing required parameters: tag, todo_uuid, position"
         }, status=400)
 
     try:
@@ -313,7 +313,7 @@ def move_to_top(request: HttpRequest) -> JsonResponse:
     if not all([tag_name, todo_uuid]):
         return JsonResponse({
             "status": "ERROR",
-            "message": "Missing required parameters: tag and todo_uuid are required"
+            "message": "Missing required parameters: tag, todo_uuid"
         }, status=400)
 
     # Create a new HttpRequest with the modified POST data
