@@ -98,7 +98,7 @@ export function doPost(url, params, callback, successMsg = "", errorMsg = "") {
                 "toast",
                 {
                     title: "Error",
-                    body: error.message,
+                    body: error.response.data.message,
                     variant: "danger",
                     autoHide: true,
                 },
