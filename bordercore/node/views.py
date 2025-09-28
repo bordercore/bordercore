@@ -29,6 +29,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob, RecentlyViewedBlob
 from collection.models import Collection
+from lib.decorators import validate_post_data
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
 from quote.models import Quote
@@ -197,6 +198,7 @@ def get_todo_list(request: HttpRequest, uuid: str) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "todo_uuid")
 def add_todo(request: HttpRequest) -> JsonResponse:
     """Attach a ``Todo`` to a node.
 
@@ -208,13 +210,6 @@ def add_todo(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     todo_uuid = request.POST.get("todo_uuid", "").strip()
-
-    if not all([node_uuid, todo_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, todo_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
 
     with transaction.atomic():
@@ -236,6 +231,7 @@ def add_todo(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "todo_uuid")
 def remove_todo(request: HttpRequest) -> JsonResponse:
     """Detach a ``Todo`` from a node.
 
@@ -247,13 +243,6 @@ def remove_todo(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     todo_uuid = request.POST.get("todo_uuid", "").strip()
-
-    if not all([node_uuid, todo_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, todo_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
 
     with transaction.atomic():
@@ -274,6 +263,7 @@ def remove_todo(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "todo_uuid", "new_position")
 def sort_todos(request: HttpRequest) -> JsonResponse:
     """Reorder a node's todo item to a new position.
 
@@ -286,14 +276,8 @@ def sort_todos(request: HttpRequest) -> JsonResponse:
     node_uuid = request.POST.get("node_uuid", "").strip()
     todo_uuid = request.POST.get("todo_uuid", "").strip()
     new_position = int(request.POST["new_position"])
-
-    if not all([node_uuid, todo_uuid, new_position]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, todo_uuid, new_position"
-        }, status=400)
-
     user = cast(User, request.user)
+
     with transaction.atomic():
         so = NodeTodo.objects.get(
             node__user=user,
@@ -311,6 +295,7 @@ def sort_todos(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "layout")
 def change_layout(request: HttpRequest) -> JsonResponse:
     """Replace a node's layout JSON.
 
@@ -322,14 +307,8 @@ def change_layout(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     layout = request.POST.get("layout", "").strip()
-
-    if not all([node_uuid, layout]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, layout"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.layout = json.loads(layout)
     node.save()
@@ -340,6 +319,7 @@ def change_layout(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid")
 def add_collection(request: HttpRequest) -> JsonResponse:
     """Add a collection component to a node.
 
@@ -363,15 +343,9 @@ def add_collection(request: HttpRequest) -> JsonResponse:
             status=400,
         )
     limit_raw = request.POST.get("limit", "")
-    limit: int | None = None if limit_raw.strip().lower() in ("", "null") else int(limit_raw)
-
-    if not all([node_uuid, collection_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, collection_uuid"
-        }, status=400)
-
+    limit = None if limit_raw.strip().lower() in ("", "null") else int(limit_raw)
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     collection = node.add_collection(
         collection_name, collection_uuid, display, rotate, random_order, limit
@@ -387,6 +361,7 @@ def add_collection(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "collection_uuid")
 def update_collection(request: HttpRequest) -> JsonResponse:
     """Update collection metadata and node options.
 
@@ -410,14 +385,7 @@ def update_collection(request: HttpRequest) -> JsonResponse:
             status=400,
         )
     limit_raw = request.POST.get("limit", "")
-    limit: int | None = None if limit_raw.strip().lower() in ("", "null") else int(limit_raw)
-
-    if not all([node_uuid, collection_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, collection_uuid"
-        }, status=400)
-
+    limit = None if limit_raw.strip().lower() in ("", "null") else int(limit_raw)
     user = cast(User, request.user)
 
     with transaction.atomic():
@@ -434,6 +402,7 @@ def update_collection(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "collection_uuid", "collection_type")
 def delete_collection(request: HttpRequest) -> JsonResponse:
     """Remove a collection component from a node.
 
@@ -446,14 +415,8 @@ def delete_collection(request: HttpRequest) -> JsonResponse:
     node_uuid = request.POST.get("node_uuid", "").strip()
     collection_uuid = request.POST.get("collection_uuid", "").strip()
     collection_type = request.POST.get("collection_type", "").strip()
-
-    if not all([node_uuid, collection_uuid, collection_type]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, collection_uuid, collection_type"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.delete_collection(collection_uuid, collection_type)
 
@@ -463,6 +426,7 @@ def delete_collection(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "note_name", "color")
 def add_note(request: HttpRequest) -> JsonResponse:
     """Create a note component and set its color.
 
@@ -475,14 +439,8 @@ def add_note(request: HttpRequest) -> JsonResponse:
     node_uuid = request.POST.get("node_uuid", "").strip()
     note_name = request.POST.get("note_name", "").strip()
     color = int(request.POST.get("color", "").strip())
-
-    if not all([node_uuid, note_name, color]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, note_name, color"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     note = node.add_note(note_name)
 
@@ -498,6 +456,7 @@ def add_note(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "note_uuid")
 def delete_note(request: HttpRequest) -> JsonResponse:
     """Delete a note component from a node.
 
@@ -509,14 +468,8 @@ def delete_note(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     note_uuid = request.POST.get("note_uuid", "").strip()
-
-    if not all([node_uuid, note_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, note_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.delete_note(note_uuid)
 
@@ -526,6 +479,7 @@ def delete_note(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "note_uuid", "color")
 def set_note_color(request: HttpRequest) -> JsonResponse:
     """Set the color index for a note on a node.
 
@@ -538,14 +492,8 @@ def set_note_color(request: HttpRequest) -> JsonResponse:
     node_uuid = request.POST.get("node_uuid", "").strip()
     note_uuid = request.POST.get("note_uuid", "").strip()
     color = int(request.POST.get("color", "").strip())
-
-    if not all([node_uuid, note_uuid, color]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, note_uuid, color"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.set_note_color(note_uuid, color)
 
@@ -555,6 +503,7 @@ def set_note_color(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "image_uuid")
 def add_image(request: HttpRequest) -> JsonResponse:
     """Add an image component to a node.
 
@@ -566,14 +515,8 @@ def add_image(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     image_uuid = request.POST.get("image_uuid", "").strip()
-
-    if not all([node_uuid, image_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, image_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     image = Blob.objects.get(uuid=image_uuid, user=user)
     node.add_component("image", image)
@@ -586,6 +529,7 @@ def add_image(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid")
 def add_quote(request: HttpRequest) -> JsonResponse:
     """Add a quote component to a node.
 
@@ -597,14 +541,8 @@ def add_quote(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     options = json.loads(request.POST.get("options", "{}").strip())
-
-    if not all([node_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameter: node_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
 
     # Choose a random quote
@@ -620,6 +558,7 @@ def add_quote(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "uuid")
 def update_quote(request: HttpRequest) -> JsonResponse:
     """Update options for an existing quote component.
 
@@ -633,15 +572,8 @@ def update_quote(request: HttpRequest) -> JsonResponse:
     uuid = request.POST.get("uuid", "").strip()
     options = json.loads(request.POST.get("options", "").strip())
     options["favorites_only"] = options.get("favorites_only", "false").strip() == "true"
-
-    if not all([node_uuid, uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, uuid"
-        }, status=400)
-
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.update_component(uuid, options)
 
@@ -651,6 +583,7 @@ def update_quote(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid")
 def get_quote(request: HttpRequest) -> JsonResponse:
     """Fetch a (possibly favorite-only) random quote and set it on the node.
 
@@ -662,14 +595,8 @@ def get_quote(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     favorites_only = request.POST.get("favorites_only", "false").strip()
-
-    if not all([node_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     quote_qs = Quote.objects.filter(user=user)
     if favorites_only == "true":
         quote_qs = quote_qs.filter(is_favorite=True)
@@ -694,6 +621,7 @@ def get_quote(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid")
 def add_todo_list(request: HttpRequest) -> JsonResponse:
     """Create a todo list component for the node.
 
@@ -704,14 +632,8 @@ def add_todo_list(request: HttpRequest) -> JsonResponse:
         JSON response with refreshed ``layout`` and status.
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
-
-    if not all([node_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.add_todo_list()
 
@@ -721,6 +643,7 @@ def add_todo_list(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid")
 def delete_todo_list(request: HttpRequest) -> JsonResponse:
     """Delete the todo list component from the node.
 
@@ -731,14 +654,8 @@ def delete_todo_list(request: HttpRequest) -> JsonResponse:
         JSON response with refreshed ``layout`` and status.
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
-
-    if not all([node_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.delete_todo_list()
 
@@ -748,6 +665,7 @@ def delete_todo_list(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("parent_node_uuid", "node_uuid")
 def add_node(request: HttpRequest) -> JsonResponse:
     """Nest an existing node as a component of another node.
 
@@ -760,14 +678,8 @@ def add_node(request: HttpRequest) -> JsonResponse:
     parent_node_uuid = request.POST.get("parent_node_uuid", "").strip()
     node_uuid = request.POST.get("node_uuid", "").strip()
     options = json.loads(request.POST.get("options", "{}").strip())
-
-    if not all([parent_node_uuid, node_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: parent_node_uuid, node_uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     parent_node = Node.objects.get(uuid=parent_node_uuid, user=user)
     node = Node.objects.get(uuid=node_uuid, user=user)
     parent_node.add_component("node", node, options)
@@ -778,6 +690,7 @@ def add_node(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("parent_node_uuid", "uuid")
 def update_node(request: HttpRequest) -> JsonResponse:
     """Update options for a nested node component.
 
@@ -790,14 +703,8 @@ def update_node(request: HttpRequest) -> JsonResponse:
     parent_node_uuid = request.POST.get("parent_node_uuid", "").strip()
     uuid = request.POST.get("uuid", "").strip()
     options = json.loads(request.POST.get("options", "").strip())
-
-    if not all([parent_node_uuid, uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: parent_node_uuid, uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=parent_node_uuid, user=user)
     node.update_component(uuid, options)
 
@@ -817,14 +724,8 @@ def search(request: HttpRequest) -> JsonResponse:
     """
 
     query = request.GET.get("query", "").strip()
-
-    if not all([query]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: query"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node_list = Node.objects.filter(user=user, name__icontains=query)
 
     response = [{"uuid": x.uuid, "name": x.name} for x in node_list]
@@ -875,6 +776,7 @@ def node_preview(request: HttpRequest, uuid: str) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("node_uuid", "uuid")
 def remove_component(request: HttpRequest) -> JsonResponse:
     """Remove a component (by its component UUID) from a node.
 
@@ -886,14 +788,8 @@ def remove_component(request: HttpRequest) -> JsonResponse:
     """
     node_uuid = request.POST.get("node_uuid", "").strip()
     uuid = request.POST.get("uuid", "").strip()
-
-    if not all([node_uuid, uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: node_uuid, uuid"
-        }, status=400)
-
     user = cast(User, request.user)
+
     node = Node.objects.get(uuid=node_uuid, user=user)
     node.remove_component(uuid)
 
