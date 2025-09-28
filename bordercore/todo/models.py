@@ -8,8 +8,11 @@ indexing, as well as a signal handler for keeping `TagTodo` relations in sync
 when a todo’s tags change.
 """
 
+import logging
 import uuid
 from typing import Any, Dict, List, Optional, Type, Union
+
+from elasticsearch.exceptions import NotFoundError
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -22,6 +25,8 @@ from search.services import delete_document, index_document
 from tag.models import Tag, TagTodo
 
 from .managers import TodoManager
+
+log = logging.getLogger(f"bordercore.{__name__}")
 
 
 class Todo(TimeStampedModel):
@@ -134,7 +139,10 @@ class Todo(TimeStampedModel):
             keep_parents: bool = False,
     ) -> tuple[int, dict[str, int]]:
         """Delete the todo and remove it from Elasticsearch."""
-        delete_document(self.uuid)
+        try:
+            delete_document(self.uuid)
+        except NotFoundError:
+            log.error("Error: todo item not found in Elasticsearch; uuid=%s", self.uuid)
         return super().delete(using=using, keep_parents=keep_parents)
 
     def index_todo(self) -> None:
