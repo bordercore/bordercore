@@ -38,6 +38,7 @@ from django.views.generic.edit import (CreateView, DeleteView, ModelFormMixin,
                                        UpdateView)
 from django.views.generic.list import ListView
 
+from lib.decorators import validate_post_data
 from lib.mixins import FormRequestMixin
 from lib.time_utils import convert_seconds
 from music.services import (create_album_from_zipfile, get_id3_info,
@@ -561,13 +562,8 @@ def search_artists(request: HttpRequest) -> JsonResponse:
         JSON response with matching artists.
     """
     artist = request.GET.get("term", "").strip().lower()
-    if not artist:
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing artist parameter"
-        }, status=400)
-
     user = cast(User, request.user)
+
     matches = search_service(user, artist)
 
     return JsonResponse(matches, safe=False)
@@ -960,6 +956,7 @@ def scan_album_from_zipfile(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_POST
+@validate_post_data("artist", "source")
 def add_album_from_zipfile(request: HttpRequest) -> JsonResponse:
     """Create an album from a ZIP file containing audio tracks.
 
@@ -971,12 +968,6 @@ def add_album_from_zipfile(request: HttpRequest) -> JsonResponse:
     """
     artist = request.POST.get("artist", "").strip()
     source_id = request.POST.get("source", "").strip()
-
-    if not all([artist, source_id]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: artist, source"
-        }, status=400)
 
     if "zipfile" not in request.FILES:
         return JsonResponse({
@@ -1044,6 +1035,8 @@ def get_playlist(request: HttpRequest, playlist_uuid: str) -> JsonResponse:
 
 
 @login_required
+@require_POST
+@validate_post_data("playlistitem_uuid", "position")
 def sort_playlist(request: HttpRequest) -> JsonResponse:
     """Move a song to a new position within a playlist.
 
@@ -1055,12 +1048,6 @@ def sort_playlist(request: HttpRequest) -> JsonResponse:
     """
     playlistitem_uuid = request.POST.get("playlistitem_uuid", "").strip()
     new_position = int(request.POST.get("position", "").strip())
-
-    if not all([playlistitem_uuid, new_position]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: playlistitem_uuid, new_position"
-        }, status=400)
 
     with transaction.atomic():
         playlistitem = get_object_or_404(
@@ -1094,6 +1081,8 @@ def search_playlists(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
+@validate_post_data("playlist_uuid", "song_uuid")
 def add_to_playlist(request: HttpRequest) -> JsonResponse:
     """Add a song to a playlist.
 
@@ -1105,12 +1094,6 @@ def add_to_playlist(request: HttpRequest) -> JsonResponse:
     """
     playlist_uuid = request.POST.get("playlist_uuid", "").strip()
     song_uuid = request.POST.get("song_uuid", "").strip()
-
-    if not all([playlist_uuid, song_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: playlist_uuid, song_uuid"
-        }, status=400)
 
     playlist = get_object_or_404(Playlist, uuid=playlist_uuid, user=request.user)
     song = get_object_or_404(Song, uuid=song_uuid, user=request.user)
@@ -1139,6 +1122,8 @@ def add_to_playlist(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
+@validate_post_data("artist_uuid")
 def update_artist_image(request: HttpRequest) -> JsonResponse:
     """Update the image displayed on the artist detail page.
 
@@ -1152,12 +1137,6 @@ def update_artist_image(request: HttpRequest) -> JsonResponse:
         Exception: If S3 upload fails.
     """
     artist_uuid = request.POST.get("artist_uuid", "").strip()
-
-    if not artist_uuid:
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing artist_uuid parameter"
-        }, status=400)
 
     get_object_or_404(Artist, uuid=artist_uuid, user=request.user)
     image = cast(UploadedFile, request.FILES["image"])
@@ -1192,12 +1171,6 @@ def dupe_song_checker(request: HttpRequest) -> JsonResponse:
     artist = request.GET.get("artist", "").strip()
     title = request.GET.get("title", "").strip()
     user = cast(User, request.user)
-
-    if not all([artist, title]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: artist, title"
-        }, status=400)
 
     song = Song.objects.filter(
         user=user,
@@ -1292,6 +1265,7 @@ def recent_albums(request: HttpRequest, page_number: Union[str, int]) -> JsonRes
 
 @login_required
 @require_POST
+@validate_post_data("song_uuid")
 def set_song_rating(request: HttpRequest) -> JsonResponse:
     """Update the rating for a specific song.
 
@@ -1302,12 +1276,6 @@ def set_song_rating(request: HttpRequest) -> JsonResponse:
         JSON response with operation status.
     """
     song_uuid = request.POST.get("song_uuid", "").strip()
-
-    if not song_uuid:
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing song_uuid parameter"
-        }, status=400)
 
     if request.POST.get("rating", "").strip() == "":
         rating = None

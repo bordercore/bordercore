@@ -12,7 +12,10 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 from django.views.generic.list import ListView
+
+from lib.decorators import validate_post_data
 
 from .models import Tag, TagAlias
 from .services import find_related_tags
@@ -20,6 +23,8 @@ from .services import search as search_service
 
 
 @login_required
+@require_POST
+@validate_post_data("tag")
 def pin(request: HttpRequest) -> HttpResponse:
     """
     Pin a tag for the current user.
@@ -42,6 +47,8 @@ def pin(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+@require_POST
+@validate_post_data("tag")
 def unpin(request: HttpRequest) -> HttpResponse:
     """
     Unpin a tag for the current user.
@@ -109,6 +116,7 @@ class TagListView(ListView):
 
 
 @login_required
+@require_POST
 def add_alias(request: HttpRequest) -> JsonResponse:
     """
     Add an alias for a tag for the current user.

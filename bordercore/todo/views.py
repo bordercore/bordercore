@@ -17,12 +17,14 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, JsonResponse
+from django.http.response import HttpResponseBase
 from django.test import RequestFactory
 from django.utils import dateformat, timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
 from django.views.generic.list import ListView
 
+from lib.decorators import validate_post_data
 from lib.util import get_field
 from tag.models import Tag, TagTodo
 from todo.models import Todo
@@ -243,7 +245,8 @@ class TodoTaskList(ListView):
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
+@validate_post_data("tag", "todo_uuid", "position")
 def sort_todo(request: HttpRequest) -> JsonResponse:
     """Reorder a Todo within its tag-specific list and return status.
 
@@ -261,12 +264,6 @@ def sort_todo(request: HttpRequest) -> JsonResponse:
     tag_name = request.POST.get("tag", "").strip()
     todo_uuid = request.POST.get("todo_uuid", "").strip()
     position_str = request.POST.get("position", "").strip()
-
-    if not all([tag_name, todo_uuid, position_str]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: tag, todo_uuid, position"
-        }, status=400)
 
     try:
         new_position = int(position_str)
@@ -296,7 +293,9 @@ def sort_todo(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
-def move_to_top(request: HttpRequest) -> JsonResponse:
+@require_POST
+@validate_post_data("tag", "todo_uuid")
+def move_to_top(request: HttpRequest) -> HttpResponseBase:
     """Move a Todo to the top position in its tag list.
 
     Modifies request.POST to set 'position' to 1 and delegates to `sort_todo`.
@@ -309,12 +308,6 @@ def move_to_top(request: HttpRequest) -> JsonResponse:
     """
     tag_name = request.POST.get("tag", "").strip()
     todo_uuid = request.POST.get("todo_uuid", "").strip()
-
-    if not all([tag_name, todo_uuid]):
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing required parameters: tag, todo_uuid"
-        }, status=400)
 
     # Create a new HttpRequest with the modified POST data
     factory = RequestFactory()
@@ -329,6 +322,8 @@ def move_to_top(request: HttpRequest) -> JsonResponse:
 
 
 @login_required
+@require_POST
+@validate_post_data("todo_uuid")
 def reschedule_task(request: HttpRequest) -> JsonResponse:
     """Set a Todo's due date to one day from now and save.
 
@@ -342,12 +337,6 @@ def reschedule_task(request: HttpRequest) -> JsonResponse:
         JsonResponse with {"status": "OK"}.
     """
     todo_uuid = request.POST.get("todo_uuid", "").strip()
-
-    if not todo_uuid:
-        return JsonResponse({
-            "status": "ERROR",
-            "message": "Missing todo_uuid parameter"
-        }, status=400)
 
     user = cast(User, request.user)
     todo = Todo.objects.get(uuid=todo_uuid, user=user)
