@@ -116,7 +116,7 @@ def test_update_collection(auto_login_user, node, quote):
     name = faker.text(max_nb_chars=32)
     display = "individual"
     random_order = "true"
-    rotate = "rotate"
+    rotate = 30
     limit = 5
 
     url = urls.reverse("node:update_collection")
