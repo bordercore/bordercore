@@ -28,9 +28,9 @@ class TodoManager(models.Manager):
             List of tuples `(priority_value, priority_label, count)`
             in the fixed order: High (1), Medium (2), Low (3).
         """
-        todo_model = apps.get_model("todo", "Todo")
+        Todo = apps.get_model("todo", "Todo")
 
-        priority_counts = todo_model.objects.values("priority") \
+        priority_counts = Todo.objects.values("priority") \
                                       .annotate(count=Count("priority")) \
                                       .filter(user=user) \
                                       .order_by("-count")
@@ -61,10 +61,10 @@ class TodoManager(models.Manager):
               - ("7", "Last Week")
               - ("30", "Last Month")
         """
-        todo_model = apps.get_model("todo", "Todo")
+        Todo = apps.get_model("todo", "Todo")
         now = timezone.now()
 
-        created_counts = todo_model.objects.aggregate(
+        created_counts = Todo.objects.aggregate(
             last_day=Count(
                 "pk",
                 filter=Q(created__gt=now - timedelta(days=1)) & Q(user=user),
