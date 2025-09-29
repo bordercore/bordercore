@@ -96,16 +96,16 @@ class Tag(models.Model):
         """
         Pin this tag to the current user's user profile using the UserTag model.
         """
-        user_tag_model = apps.get_model("accounts", "UserTag")
-        c = user_tag_model(userprofile=self.user.userprofile, tag=self)
+        UserTag = apps.get_model("accounts", "UserTag")
+        c = UserTag(userprofile=self.user.userprofile, tag=self)
         c.save()
 
     def unpin(self) -> None:
         """
         Unpin this tag from the current user's user profile.
         """
-        user_tag_model = apps.get_model("accounts", "UserTag")
-        sort_order_user_tag = user_tag_model.objects.get(userprofile=self.user.userprofile, tag=self)
+        UserTag = apps.get_model("accounts", "UserTag")
+        sort_order_user_tag = UserTag.objects.get(userprofile=self.user.userprofile, tag=self)
         sort_order_user_tag.delete()
 
     @staticmethod
