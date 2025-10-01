@@ -14,6 +14,7 @@ import instaloader
 import openai
 import requests
 from instaloader import Post
+from openai import OpenAI
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -625,12 +626,14 @@ def chatbot(request, args):
         chat_history = json.loads(args["chat_history"])
         messages = [{k: v for k, v in d.items() if k != "id"} for d in chat_history]
 
-    response = openai.ChatCompletion.create(
+    client = OpenAI()
+
+    response = client.chat.completions.create(
         model=model,
         messages=messages,
         stream=True
     )
 
     for chunk in itertools.chain(response, added_values):
-        if "content" in chunk["choices"][0]["delta"]:
-            yield chunk["choices"][0]["delta"]["content"]
+        if chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
