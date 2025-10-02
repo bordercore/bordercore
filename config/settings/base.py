@@ -44,6 +44,11 @@ DATABASES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
+# Opt-in to Django 6.0's default HTTPS scheme for URL fields now so that forms
+# that rely on the default URLField configuration do not emit transitional
+# warnings during tests.
+FORMS_URLFIELD_ASSUME_HTTPS = True
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
