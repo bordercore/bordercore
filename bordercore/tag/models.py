@@ -52,18 +52,19 @@ class Tag(models.Model):
         return self.name
 
     class Meta:
-        unique_together = (
-            ("name", "user")
-        )
         constraints = [
+            models.UniqueConstraint(
+                fields=["name", "user"],
+                name="uniq_tag_name_user"
+            ),
             models.CheckConstraint(
                 name="check_no_commas",
-                check=~Q(name__contains=",")
+                condition=~Q(name__contains=",")
             ),
             models.CheckConstraint(
                 name="check_name_is_lowercase",
-                check=Q(name=Lower("name"))
-            )
+                condition=Q(name=Lower("name"))
+            ),
         ]
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -141,9 +142,12 @@ class TagTodo(SortOrderMixin):
 
     class Meta:
         ordering = ("sort_order",)
-        unique_together = (
-            ("tag", "todo")
-        )
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tag", "todo"],
+                name="uniq_tag_todo"
+            ),
+        ]
 
 
 @receiver(pre_delete, sender=TagTodo)
@@ -168,9 +172,12 @@ class TagBookmark(SortOrderMixin):
 
     class Meta:
         ordering = ("sort_order",)
-        unique_together = (
-            ("tag", "bookmark")
-        )
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tag", "bookmark"],
+                name="uniq_tag_bookmark"
+            ),
+        ]
 
 
 @receiver(pre_delete, sender=TagBookmark)
