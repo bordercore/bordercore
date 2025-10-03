@@ -57,7 +57,7 @@ from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory  # isort:skip
 
 try:
-    from moto import mock_s3
+    from moto import mock_aws
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
@@ -617,7 +617,7 @@ def quote():
 def s3_resource(aws_credentials):
     """Mocked S3 Fixture."""
 
-    with mock_s3():
+    with mock_aws():
         yield boto3.resource(service_name="s3")
 
 

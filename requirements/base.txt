@@ -2,7 +2,7 @@ backports-abc==0.4
 backports.ssl-match-hostname==3.5.0.1
 beautifulsoup4==4.9.0
 billiard==3.6.0.0
-boto3==1.29.7
+boto3==1.40.44
 Django==5.2.7
 djangorestframework==3.15.2
 django-webpack-loader==3.2.1
@@ -12,7 +12,7 @@ elasticsearch-dsl==7.4.0
 factory-boy==3.2.1
 faker-file==0.15.1
 feedparser==6.0.11
-google-api-python-client==1.6.2
+google-api-python-client==2.184.0
 httplib2==0.21.0
 humanize==4.0.0
 instaloader==4.9.5
@@ -26,8 +26,6 @@ pdf2image==0.1.14
 Pillow==11.0.0
 pipdeptree==0.5.0
 psycopg[binary,pool]==3.2.9
-pyasn1==0.2.3
-pyasn1-modules==0.0.8
 Pygments==2.15.0
 pytest==8.4.1
 pytest-cov==6.2.1

@@ -58,11 +58,11 @@ class Tag(models.Model):
         constraints = [
             models.CheckConstraint(
                 name="check_no_commas",
-                check=~Q(name__contains=",")
+                condition=~Q(name__contains=",")
             ),
             models.CheckConstraint(
                 name="check_name_is_lowercase",
-                check=Q(name=Lower("name"))
+                condition=Q(name=Lower("name"))
             )
         ]
 

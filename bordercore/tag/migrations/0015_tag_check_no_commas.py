@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name='tag',
-            constraint=models.CheckConstraint(check=models.Q(('name__contains', ','), _negated=True), name='check_no_commas'),
+            constraint=models.CheckConstraint(condition=models.Q(('name__contains', ','), _negated=True), name='check_no_commas'),
         ),
     ]
