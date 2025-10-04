@@ -8,7 +8,7 @@ metadata into a simplified list of dictionaries.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, TypedDict, cast
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 import dateutil.parser
 import httplib2
@@ -63,6 +63,7 @@ class Calendar():
         """
         if not isinstance(user_profile, UserProfile):
             raise ValueError("Calendar must be passed a UserProfile instance")
+        self.calendar_email: Optional[str] = user_profile.google_calendar_email
         cal_info = user_profile.google_calendar
         if cal_info:
             self.credentials = OAuth2Credentials(
@@ -113,12 +114,16 @@ class Calendar():
             logger.warning("No credentials available for calendar access.")
             return []
 
+        if not self.calendar_email:
+            logger.warning("No Google Calendar email configured for user profile.")
+            return []
+
         http = httplib2.Http()
         http = self.credentials.authorize(http)
         service = build(serviceName="calendar", version="v3", http=http, cache_discovery=False)
         time_max = datetime.now() + timedelta(days=7)
 
-        events = service.events().list(calendarId="bordercore@gmail.com",
+        events = service.events().list(calendarId=self.calendar_email,
                                        orderBy="startTime",
                                        singleEvents=True,
                                        timeMin=str(now_rfc3339()).replace(" ", "T"),
