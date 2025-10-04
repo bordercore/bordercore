@@ -39,6 +39,7 @@ class UserProfile(models.Model):
     feeds = models.ManyToManyField(Feed, through="UserFeed")
     pinned_drill_tags = models.ManyToManyField(Tag, through="DrillTag", related_name="pinned_drill_tags")
     google_calendar = JSONField(blank=True, null=True)
+    google_calendar_email = models.EmailField(blank=True, null=True)
     instagram_credentials = JSONField(blank=True, null=True)
     nytimes_api_key = models.TextField(null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name="default_collection", null=True, on_delete=models.PROTECT)

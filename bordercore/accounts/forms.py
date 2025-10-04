@@ -60,10 +60,12 @@ class UserProfileForm(ModelForm):
             "nytimes_api_key",
             "instagram_credentials",
             "google_calendar",
+            "google_calendar_email",
             "eye_candy"
         )
         widgets = {
             "google_calendar": Textarea(attrs={"class": "form-control"}),
+            "google_calendar_email": TextInput(attrs={"class": "form-control"}),
             "nytimes_api_key": TextInput(attrs={"class": "form-control"}),
             "theme": Select(attrs={"class": "form-control form-select"})
         }
